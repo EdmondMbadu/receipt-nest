@@ -1,0 +1,12 @@
+/* Smooth transitions for theme switching */
+* {
+  transition-property: color, background-color, border-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Override for elements that should transition faster */
+button, a {
+  transition-duration: 150ms;
+}
+
