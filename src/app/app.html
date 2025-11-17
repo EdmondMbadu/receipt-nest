@@ -25,12 +25,9 @@
               <div class="absolute inset-1 rounded-lg border border-emerald-300/40"></div>
             </div>
           </div>
-          <div class="flex flex-col leading-tight">
-            <span class="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">
-              ReceiptNest
-            </span>
-            <span class="text-xs text-slate-600 dark:text-slate-400">Receipts that actually make sense.</span>
-          </div>
+          <span class="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">
+            ReceiptNest
+          </span>
         </a>
 
         <nav class="hidden items-center gap-8 text-sm text-slate-700 dark:text-slate-300 md:flex">
@@ -48,11 +45,11 @@
             <span class="text-base">{{ isDarkMode() ? '☀️' : '🌙' }}</span>
           </button>
           <button
-            class="hidden text-sm text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors md:inline-flex">
+            class="inline-flex items-center justify-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:border-emerald-500 dark:hover:border-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-300 transition-all duration-200">
             Sign in
           </button>
           <button
-            class="rounded-full bg-emerald-500 px-4 py-2 text-sm font-medium text-white dark:text-slate-950 shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all duration-200">
+            class="inline-flex items-center justify-center rounded-full bg-emerald-500 px-4 py-2 text-sm font-medium text-white dark:text-slate-950 shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all duration-200">
             Get started
           </button>
         </div>
@@ -150,62 +147,57 @@
 
             <!-- Cards grid -->
             <div class="grid gap-4 md:grid-cols-2">
-              <!-- Monthly total -->
+              <!-- Total spend with line chart (Robinhood style) -->
               <div
-                class="rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-950 p-4 transition-colors">
-                <p class="text-xs font-medium text-slate-600 dark:text-slate-400">Total spend</p>
-                <p class="mt-1 text-2xl font-semibold text-emerald-600 dark:text-emerald-300">$2,437.19</p>
-                <p class="mt-1 text-[11px] text-emerald-600/80 dark:text-emerald-300/80">↓ 18% vs last month</p>
+                class="md:col-span-2 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-950 p-5 transition-colors">
+                <!-- Amount section -->
+                <div class="mb-4">
+                  <p class="text-xs font-medium text-slate-600 dark:text-slate-400">Total spend</p>
+                  <div class="mt-2 flex items-baseline gap-3">
+                    <p class="text-4xl font-semibold text-emerald-600 dark:text-emerald-300">$2,437.19</p>
+                    <p class="text-sm font-medium text-emerald-600/80 dark:text-emerald-300/80">↓ 18%</p>
+                  </div>
+                  <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">vs last month</p>
+                </div>
 
-                <div
-                  class="mt-4 flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 transition-colors">
-                  <div>
-                    <p>Receipts</p>
-                    <p class="text-emerald-600 dark:text-emerald-200 font-medium">96</p>
+                <!-- Line chart container -->
+                <div class="relative h-40 w-full flex items-end">
+                  <!-- Grid lines -->
+                  <div class="absolute inset-0 flex flex-col justify-between">
+                    <div class="border-t border-slate-200/50 dark:border-slate-700/50"></div>
+                    <div class="border-t border-slate-200/50 dark:border-slate-700/50"></div>
+                    <div class="border-t border-slate-200/50 dark:border-slate-700/50"></div>
+                    <div class="border-t border-slate-200/50 dark:border-slate-700/50"></div>
                   </div>
-                  <div>
-                    <p>Categories</p>
-                    <p class="text-emerald-600 dark:text-emerald-200 font-medium">12</p>
-                  </div>
-                  <div>
-                    <p>Auto-tagged</p>
-                    <p class="text-emerald-600 dark:text-emerald-200 font-medium">89%</p>
-                  </div>
+                  <!-- Line chart SVG -->
+                  <svg class="absolute inset-0 w-full h-full" viewBox="0 0 200 100" preserveAspectRatio="none">
+                    <!-- Gradient for area under line -->
+                    <defs>
+                      <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:rgb(16, 185, 129);stop-opacity:0.2" />
+                        <stop offset="100%" style="stop-color:rgb(16, 185, 129);stop-opacity:0" />
+                      </linearGradient>
+                    </defs>
+                    <!-- Area under line -->
+                    <path d="M 0,80 Q 25,75 50,60 T 100,40 T 150,35 T 200,30 L 200,100 L 0,100 Z"
+                      fill="url(#chartGradient)" />
+                    <!-- Main line -->
+                    <path d="M 0,80 Q 25,75 50,60 T 100,40 T 150,35 T 200,30" stroke="rgb(16, 185, 129)"
+                      stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+                    <!-- Data points -->
+                    <circle cx="0" cy="80" r="2.5" fill="rgb(16, 185, 129)" />
+                    <circle cx="50" cy="60" r="2.5" fill="rgb(16, 185, 129)" />
+                    <circle cx="100" cy="40" r="2.5" fill="rgb(16, 185, 129)" />
+                    <circle cx="150" cy="35" r="2.5" fill="rgb(16, 185, 129)" />
+                    <circle cx="200" cy="30" r="3" fill="rgb(16, 185, 129)" />
+                  </svg>
                 </div>
-              </div>
-
-              <!-- Categories chart (fake) -->
-              <div
-                class="flex flex-col justify-between rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-900/90 p-4 transition-colors">
-                <div class="flex items-center justify-between text-xs">
-                  <span class="font-medium text-slate-700 dark:text-slate-200">Where it went</span>
-                  <span class="text-slate-500">This month</span>
-                </div>
-                <div class="mt-3 grid grid-cols-5 items-end gap-1">
-                  <div class="rounded-full bg-emerald-500/70" style="height: 36px;"></div>
-                  <div class="rounded-full bg-emerald-400/70" style="height: 60px;"></div>
-                  <div class="rounded-full bg-emerald-300/70" style="height: 84px;"></div>
-                  <div class="rounded-full bg-emerald-500/50" style="height: 52px;"></div>
-                  <div class="rounded-full bg-emerald-200/60" style="height: 28px;"></div>
-                </div>
-                <div class="mt-4 space-y-1 text-[11px] text-slate-700 dark:text-slate-300 transition-colors">
-                  <div class="flex items-center justify-between">
-                    <span class="inline-flex items-center gap-1">
-                      <span class="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400"></span> Groceries
-                    </span>
-                    <span>$642</span>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <span class="inline-flex items-center gap-1">
-                      <span class="h-2 w-2 rounded-full bg-emerald-400 dark:bg-emerald-300"></span> Subscriptions
-                    </span>
-                    <span>$289</span>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <span class="inline-flex items-center gap-1">
-                      <span class="h-2 w-2 rounded-full bg-emerald-600 dark:bg-emerald-500"></span> Eating out
-                    </span>
-                    <span>$413</span>
+                <!-- Chart footer -->
+                <div class="mt-3 flex items-center justify-between text-xs">
+                  <span class="text-slate-500 dark:text-slate-400">30 days</span>
+                  <div class="flex items-center gap-2">
+                    <span class="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
+                    <span class="text-slate-600 dark:text-slate-400">This month</span>
                   </div>
                 </div>
               </div>
