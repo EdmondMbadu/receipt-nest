@@ -48,7 +48,7 @@ export class App implements OnInit {
     const currentMode = this.isDarkMode();
     const newMode = !currentMode;
 
-    // Update signal first
+    // Update signal - this will trigger the effect to update the DOM
     this.isDarkMode.set(newMode);
 
     // Save to localStorage
@@ -56,25 +56,14 @@ export class App implements OnInit {
       localStorage.setItem('theme', newMode ? 'dark' : 'light');
     }
 
-    // Force apply the class to html element
+    // Also manually update to ensure immediate effect (effect should handle this, but this ensures it works)
     const htmlElement = document.documentElement;
-
-    // Remove any existing theme classes first
-    htmlElement.classList.remove('dark', 'light');
-
-    // Add the new class
     if (newMode) {
       htmlElement.classList.add('dark');
-      // Force a style recalculation
-      htmlElement.style.colorScheme = 'dark';
+      htmlElement.setAttribute('data-theme', 'dark');
     } else {
       htmlElement.classList.remove('dark');
-      htmlElement.style.colorScheme = 'light';
+      htmlElement.setAttribute('data-theme', 'light');
     }
-
-    // Log for debugging
-    console.log('Theme toggled to:', newMode ? 'dark' : 'light');
-    console.log('HTML classes:', htmlElement.classList.toString());
-    console.log('HTML element:', htmlElement);
   }
 }
