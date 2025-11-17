@@ -179,17 +179,24 @@
                       </linearGradient>
                     </defs>
                     <!-- Area under line -->
-                    <path d="M 0,80 Q 25,75 50,60 T 100,40 T 150,35 T 200,30 L 200,100 L 0,100 Z"
-                      fill="url(#chartGradient)" />
-                    <!-- Main line -->
-                    <path d="M 0,80 Q 25,75 50,60 T 100,40 T 150,35 T 200,30" stroke="rgb(16, 185, 129)"
-                      stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-                    <!-- Data points -->
-                    <circle cx="0" cy="80" r="2.5" fill="rgb(16, 185, 129)" />
-                    <circle cx="50" cy="60" r="2.5" fill="rgb(16, 185, 129)" />
-                    <circle cx="100" cy="40" r="2.5" fill="rgb(16, 185, 129)" />
-                    <circle cx="150" cy="35" r="2.5" fill="rgb(16, 185, 129)" />
-                    <circle cx="200" cy="30" r="3" fill="rgb(16, 185, 129)" />
+                    <path d="M 0,80 
+                             C 15,79 30,75 45,72
+                             C 60,68 75,63 90,58
+                             C 105,52 120,46 135,40
+                             C 150,34 165,28 180,24
+                             C 190,21 195,23 200,20
+                             L 200,100 L 0,100 Z" fill="url(#chartGradient)" />
+                    <!-- Main line with smooth stock-like curve and subtle fluctuations -->
+                    <path d="M 0,80 
+                             C 15,79 30,75 45,72
+                             C 60,68 75,63 90,58
+                             C 105,52 120,46 135,40
+                             C 150,34 165,28 180,24
+                             C 190,21 195,23 200,20" stroke="rgb(16, 185, 129)" stroke-width="2.2" fill="none"
+                      stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
+                    <!-- Highlight point at the end -->
+                    <circle cx="200" cy="20" r="3.5" fill="rgb(16, 185, 129)" />
+                    <circle cx="200" cy="20" r="2" fill="white" />
                   </svg>
                 </div>
                 <!-- Chart footer -->
