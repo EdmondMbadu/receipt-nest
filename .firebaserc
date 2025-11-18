@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "rocket-prompt"
+  },
+  "targets": {},
+  "etags": {
+    "rocket-prompt": {
+      "extensionInstances": {}
+    },
+    "receipt-nest": {
+      "extensionInstances": {}
+    }
   }
 }
