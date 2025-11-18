@@ -8,6 +8,7 @@
 /* Override for elements that should transition faster */
 button, a {
   transition-duration: 150ms;
+  cursor: pointer;
 }
 
 
