@@ -2,8 +2,8 @@
   "firestore": {
     "database": "(default)",
     "location": "us-central1",
-    "rules": "y",
-    "indexes": "y"
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   },
   "functions": [
     {
@@ -36,7 +36,7 @@
     ]
   },
   "storage": {
-    "rules": "y"
+    "rules": "storage.rules"
   },
   "extensions": {}
 }
