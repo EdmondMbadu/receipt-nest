@@ -16,10 +16,29 @@
           aria-label="Toggle theme">
           {{ isDarkMode() ? '☀️' : '🌙' }}
         </button>
-        <button type="button" (click)="logout()"
-          class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-emerald-500 hover:text-emerald-600 dark:border-slate-700 dark:text-slate-100 dark:hover:border-emerald-400 dark:hover:text-emerald-300">
-          Log out
-        </button>
+        <div class="relative">
+          <button type="button" (click)="toggleMenu()"
+            class="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-2 py-1 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-emerald-500 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-emerald-400"
+            aria-haspopup="menu" [attr.aria-expanded]="menuOpen()">
+            <span
+              class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-sm font-semibold uppercase text-white">
+              {{ userInitials() }}
+            </span>
+            <span class="text-xs text-slate-500 dark:text-slate-300">▾</span>
+          </button>
+
+          <div *ngIf="menuOpen()"
+            class="absolute right-0 z-10 mt-2 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-emerald-500/10 dark:border-slate-800 dark:bg-slate-900">
+            <div class="border-b border-slate-100 px-4 py-3 dark:border-slate-800">
+              <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">{{ displayName() || 'Account' }}</p>
+              <p class="truncate text-xs text-slate-500 dark:text-slate-300">{{ user()?.email }}</p>
+            </div>
+            <button type="button" (click)="logout()"
+              class="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-100 dark:hover:bg-slate-800/80">
+              <span>Log out</span>
+            </button>
+          </div>
+        </div>
       </div>
     </header>
 
