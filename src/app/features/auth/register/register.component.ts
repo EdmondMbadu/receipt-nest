@@ -44,7 +44,7 @@ export class RegisterComponent {
         email: email ?? '',
         password: password ?? ''
       });
-      await this.router.navigateByUrl('/app');
+      await this.router.navigateByUrl('/verify', { state: { email: email ?? '' } });
     } catch (error: any) {
       this.errorMessage = error?.message ?? 'Could not create your account right now.';
     } finally {

@@ -1,0 +1,30 @@
+<div
+  class="min-h-screen bg-gradient-to-b from-emerald-50/50 to-white px-4 py-10 dark:from-slate-950 dark:to-slate-950/80">
+  <div
+    class="mx-auto max-w-lg space-y-6 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-lg shadow-emerald-500/10 dark:border-slate-800 dark:bg-slate-950">
+    <img src="assets/receipt-nest.png" alt="ReceiptNest Logo" class="mx-auto h-14 w-14 object-contain" />
+    <div class="space-y-2">
+      <h1 class="text-2xl font-semibold text-slate-900 dark:text-slate-50">Verify your email</h1>
+      <p class="text-sm text-slate-600 dark:text-slate-300">
+        We sent a verification link to <span class="font-medium text-emerald-600 dark:text-emerald-300">{{ email ||
+          'your email' }}</span>.
+        Open it to activate your account.
+      </p>
+    </div>
+
+    <div class="space-y-3">
+      <button type="button" (click)="resend()"
+        class="w-full rounded-full bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-950"
+        [disabled]="isSending">
+        {{ isSending ? 'Sending…' : 'Resend verification email' }}
+      </button>
+      <a routerLink="/login"
+        class="block text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">
+        Back to sign in
+      </a>
+    </div>
+
+    <p *ngIf="message" class="text-sm text-emerald-600 dark:text-emerald-300">{{ message }}</p>
+    <p *ngIf="error" class="text-sm text-rose-500">{{ error }}</p>
+  </div>
+</div>

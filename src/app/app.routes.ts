@@ -21,6 +21,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/register/register.component').then((m) => m.RegisterComponent)
   },
   {
+    path: 'verify',
+    loadComponent: () => import('./features/auth/verify/verify-email.component').then((m) => m.VerifyEmailComponent)
+  },
+  {
     path: '**',
     redirectTo: ''
   }

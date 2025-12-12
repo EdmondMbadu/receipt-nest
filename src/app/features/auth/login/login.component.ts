@@ -39,7 +39,12 @@ export class LoginComponent {
       await this.authService.login(email ?? '', password ?? '');
       await this.router.navigateByUrl('/app');
     } catch (error: any) {
-      this.errorMessage = error?.message ?? 'Unable to sign you in right now.';
+      if (error?.code === 'auth/email-not-verified') {
+        this.errorMessage = 'Please verify your email to sign in.';
+        await this.router.navigateByUrl('/verify', { state: { email: this.form.get('email')?.value ?? '' } });
+      } else {
+        this.errorMessage = error?.message ?? 'Unable to sign you in right now.';
+      }
     } finally {
       this.isSubmitting = false;
     }

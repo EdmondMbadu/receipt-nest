@@ -6,7 +6,8 @@ import {
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  signOut
+  signOut,
+  sendEmailVerification
 } from 'firebase/auth';
 import {
   Firestore,
@@ -39,6 +40,11 @@ export class AuthService {
       onAuthStateChanged(this.auth, async (firebaseUser) => {
         try {
           if (!firebaseUser) {
+            this.user.set(null);
+            return;
+          }
+
+          if (!firebaseUser.emailVerified) {
             this.user.set(null);
             return;
           }
@@ -102,13 +108,33 @@ export class AuthService {
     };
 
     await setDoc(doc(this.db, 'users', credential.user.uid), profile);
-    this.user.set(profile);
+    await sendEmailVerification(credential.user);
+    this.user.set(null);
 
     return credential;
   }
 
   async login(email: string, password: string) {
-    await signInWithEmailAndPassword(this.auth, email, password);
+    const credential = await signInWithEmailAndPassword(this.auth, email, password);
+    const user = credential.user;
+
+    if (!user.emailVerified) {
+      await sendEmailVerification(user);
+      this.user.set(null);
+      const error: any = new Error('Email not verified');
+      error.code = 'auth/email-not-verified';
+      throw error;
+    }
+  }
+
+  async sendVerificationEmail(): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user) {
+      const error: any = new Error('No signed-in user to verify');
+      error.code = 'auth/no-current-user';
+      throw error;
+    }
+    await sendEmailVerification(user);
   }
 
   async logout() {
