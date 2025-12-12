@@ -44,7 +44,7 @@ export class RegisterComponent {
         email: email ?? '',
         password: password ?? ''
       });
-      await this.router.navigateByUrl('/');
+      await this.router.navigateByUrl('/app');
     } catch (error: any) {
       this.errorMessage = error?.message ?? 'Could not create your account right now.';
     } finally {

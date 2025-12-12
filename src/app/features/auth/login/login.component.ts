@@ -37,7 +37,7 @@ export class LoginComponent {
     try {
       const { email, password } = this.form.getRawValue();
       await this.authService.login(email ?? '', password ?? '');
-      await this.router.navigateByUrl('/');
+      await this.router.navigateByUrl('/app');
     } catch (error: any) {
       this.errorMessage = error?.message ?? 'Unable to sign you in right now.';
     } finally {

@@ -1,49 +1,69 @@
-<section
-  class="mx-auto max-w-md space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-emerald-500/10 dark:border-slate-800 dark:bg-slate-950">
-  <header class="space-y-1 text-center">
-    <p class="text-xs uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">Welcome back</p>
-    <h1 class="text-2xl font-semibold text-slate-900 dark:text-slate-50">Sign in</h1>
-    <p class="text-sm text-slate-600 dark:text-slate-300">Use the email and password you signed up with.</p>
-  </header>
+<div
+  class="min-h-screen bg-gradient-to-b from-emerald-50/50 to-white px-4 py-8 dark:from-slate-950 dark:to-slate-950/80">
+  <div class="mx-auto max-w-4xl space-y-6">
+    <header class="flex items-center justify-between">
+      <a routerLink="/" class="inline-flex items-center gap-3">
+        <img src="assets/receipt-nest.png" alt="ReceiptNest Logo" class="h-10 w-10 object-contain" />
+        <span class="text-base font-bold uppercase tracking-[0.18em]">
+          <span class="text-slate-900 dark:text-white">Receipt</span><span
+            class="text-emerald-600 dark:text-emerald-300">Nest</span>
+        </span>
+      </a>
+      <a routerLink="/register"
+        class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">
+        Create account
+      </a>
+    </header>
 
-  <form class="space-y-4" [formGroup]="form" (ngSubmit)="submit()">
-    <label class="block space-y-1 text-sm">
-      <span class="text-slate-700 dark:text-slate-200">Email</span>
-      <input
-        class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-emerald-500/30 transition focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50"
-        type="email" formControlName="email" autocomplete="email" />
-      <span class="text-xs text-rose-500" *ngIf="form.get('email')?.touched && form.get('email')?.invalid">
-        Enter a valid email
-      </span>
-    </label>
+    <section
+      class="mx-auto max-w-md space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-emerald-500/10 dark:border-slate-800 dark:bg-slate-950">
+      <header class="space-y-1 text-center">
+        <p class="text-xs uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">Welcome back</p>
+        <h1 class="text-2xl font-semibold text-slate-900 dark:text-slate-50">Sign in</h1>
+        <p class="text-sm text-slate-600 dark:text-slate-300">Use the email and password you signed up with.</p>
+      </header>
 
-    <label class="block space-y-1 text-sm">
-      <span class="text-slate-700 dark:text-slate-200">Password</span>
-      <input
-        class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-emerald-500/30 transition focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50"
-        type="password" formControlName="password" minlength="6" autocomplete="current-password" />
-      <span class="text-xs text-rose-500" *ngIf="form.get('password')?.touched && form.get('password')?.invalid">
-        Password must be at least 6 characters
-      </span>
-    </label>
+      <form class="space-y-4" [formGroup]="form" (ngSubmit)="submit()">
+        <label class="block space-y-1 text-sm">
+          <span class="text-slate-700 dark:text-slate-200">Email</span>
+          <input
+            class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-emerald-500/30 transition focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50"
+            type="email" formControlName="email" autocomplete="email" />
+          <span class="text-xs text-rose-500" *ngIf="form.get('email')?.touched && form.get('email')?.invalid">
+            Enter a valid email
+          </span>
+        </label>
 
-    <div class="space-y-3">
-      <button type="submit"
-        class="flex w-full items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-950"
-        [disabled]="isSubmitting">
-        {{ isSubmitting ? 'Signing in…' : 'Sign in' }}
-      </button>
+        <label class="block space-y-1 text-sm">
+          <span class="text-slate-700 dark:text-slate-200">Password</span>
+          <input
+            class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-emerald-500/30 transition focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50"
+            type="password" formControlName="password" minlength="6" autocomplete="current-password" />
+          <span class="text-xs text-rose-500" *ngIf="form.get('password')?.touched && form.get('password')?.invalid">
+            Password must be at least 6 characters
+          </span>
+        </label>
 
-      <p class="text-center text-xs text-slate-600 dark:text-slate-400">
-        New to ReceiptNest?
-        <a routerLink="/register" class="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-300">
-          Create an account
-        </a>
-      </p>
-    </div>
+        <div class="space-y-3">
+          <button type="submit"
+            class="flex w-full items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-950"
+            [disabled]="isSubmitting">
+            {{ isSubmitting ? 'Signing in…' : 'Sign in' }}
+          </button>
 
-    <p class="text-sm text-rose-500" *ngIf="errorMessage">
-      {{ errorMessage }}
-    </p>
-  </form>
-</section>
+          <p class="text-center text-xs text-slate-600 dark:text-slate-400">
+            New to ReceiptNest?
+            <a routerLink="/register"
+              class="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-300">
+              Create an account
+            </a>
+          </p>
+        </div>
+
+        <p class="text-sm text-rose-500" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </p>
+      </form>
+    </section>
+  </div>
+</div>
