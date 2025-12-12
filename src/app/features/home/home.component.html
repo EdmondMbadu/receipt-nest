@@ -1,29 +1,78 @@
-<section
-  class="mx-auto max-w-2xl space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-emerald-500/10 dark:border-slate-800 dark:bg-slate-950">
-  <header class="space-y-2">
-    <p class="text-xs uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">Home</p>
-    <h1 class="text-2xl font-semibold text-slate-900 dark:text-slate-50">Welcome, {{ displayName() }} 👋</h1>
-    <p class="text-sm text-slate-600 dark:text-slate-300">
-      This is your starting point. We'll add receipts, collections, and more soon.
-    </p>
-  </header>
+<div class="min-h-screen bg-gradient-to-b from-slate-50 to-white px-4 py-8 dark:from-slate-950 dark:to-slate-950/80">
+  <div class="mx-auto max-w-5xl space-y-8">
+    <header class="flex items-center justify-between gap-3">
+      <div class="space-y-1">
+        <p class="text-xs uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">Receipt dashboard</p>
+        <h1 class="text-2xl font-semibold text-slate-900 dark:text-slate-50">Welcome, {{ displayName() }} 👋</h1>
+        <p class="text-sm text-slate-600 dark:text-slate-300">
+          Quick snapshot of your receipts. Uploads, totals, and recent activity.
+        </p>
+      </div>
+      <button type="button" (click)="logout()"
+        class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-emerald-500 hover:text-emerald-600 dark:border-slate-700 dark:text-slate-100 dark:hover:border-emerald-400 dark:hover:text-emerald-300">
+        Log out
+      </button>
+    </header>
 
-  <div
-    class="space-y-3 rounded-xl border border-dashed border-emerald-200 bg-emerald-50/40 p-4 text-sm text-slate-700 dark:border-emerald-900 dark:bg-emerald-500/5 dark:text-slate-200">
-    <p class="font-semibold text-emerald-700 dark:text-emerald-300">You're signed in with:</p>
-    <p class="font-mono text-sm text-slate-800 dark:text-slate-100">{{ user()?.email }}</p>
-    <p class="text-xs text-slate-600 dark:text-slate-400">User ID is stored on your user document for later use.</p>
-  </div>
+    <section class="grid gap-4 md:grid-cols-3">
+      <div
+        class="rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm dark:border-emerald-900/40 dark:bg-slate-950">
+        <p class="text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">This month</p>
+        <p class="mt-2 text-3xl font-semibold text-emerald-600 dark:text-emerald-300">$0.00</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Total spend (demo data coming soon)</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+        <p class="text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Receipts</p>
+        <p class="mt-2 text-3xl font-semibold text-slate-900 dark:text-slate-50">0</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Uploaded this month</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+        <p class="text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Status</p>
+        <p class="mt-2 text-sm font-semibold text-emerald-600 dark:text-emerald-300">Signed in as</p>
+        <p class="mt-1 font-mono text-xs text-slate-700 dark:text-slate-200 break-all">{{ user()?.email }}</p>
+      </div>
+    </section>
 
-  <div class="flex flex-wrap items-center gap-3">
-    <button type="button"
-      class="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 transition hover:bg-emerald-600 dark:text-slate-950">
-      Coming soon
-    </button>
-    <button type="button"
-      class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-emerald-500 hover:text-emerald-600 dark:border-slate-700 dark:text-slate-100 dark:hover:border-emerald-400 dark:hover:text-emerald-300"
-      (click)="logout()">
-      Log out
-    </button>
+    <section class="grid gap-6 lg:grid-cols-3">
+      <div
+        class="lg:col-span-2 space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300">Recent receipts</p>
+            <p class="text-sm text-slate-600 dark:text-slate-300">You have no receipts yet. Add one to get started.</p>
+          </div>
+          <button type="button"
+            class="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 transition hover:bg-emerald-600 dark:text-slate-950">
+            Upload receipt (coming soon)
+          </button>
+        </div>
+        <div
+          class="space-y-2 rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300">
+          <p class="font-semibold text-slate-800 dark:text-slate-100">No receipts yet</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            When you upload, you'll see merchant, total, category, and date here.
+          </p>
+        </div>
+      </div>
+
+      <div
+        class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+        <p class="text-xs uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300">Quick actions</p>
+        <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-200">
+          <li class="flex items-center gap-2">
+            <span class="text-emerald-500">⬆</span>
+            <span>Upload a PDF or photo receipt</span>
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="text-emerald-500">🏷️</span>
+            <span>Auto-tag merchant, category, and tax</span>
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="text-emerald-500">📊</span>
+            <span>See monthly totals and trends</span>
+          </li>
+        </ul>
+      </div>
+    </section>
   </div>
-</section>
+</div>
