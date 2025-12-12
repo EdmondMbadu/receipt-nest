@@ -52,4 +52,19 @@ export class RegisterComponent {
       this.isSubmitting = false;
     }
   }
+
+  async signInWithGoogle() {
+    this.errorMessage = '';
+    this.isSubmitting = true;
+
+    try {
+      await this.authService.loginWithGoogle();
+      await this.authService.waitForAuthState();
+      await this.router.navigateByUrl('/app');
+    } catch (error: any) {
+      this.errorMessage = error?.message ?? 'Unable to continue with Google right now.';
+    } finally {
+      this.isSubmitting = false;
+    }
+  }
 }
