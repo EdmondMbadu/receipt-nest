@@ -2,10 +2,12 @@ import { Injectable, computed, signal } from '@angular/core';
 import {
   Auth,
   UserCredential,
+  GoogleAuthProvider,
   createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut,
   sendEmailVerification
 } from 'firebase/auth';
@@ -141,6 +143,13 @@ export class AuthService {
       error.code = 'auth/email-not-verified';
       throw error;
     }
+  }
+
+  async loginWithGoogle() {
+    this.resetAuthStateReady();
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    await signInWithPopup(this.auth, provider);
   }
 
   async sendVerificationEmail(): Promise<void> {
