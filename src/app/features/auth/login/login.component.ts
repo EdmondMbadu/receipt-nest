@@ -37,6 +37,7 @@ export class LoginComponent {
     try {
       const { email, password } = this.form.getRawValue();
       await this.authService.login(email ?? '', password ?? '');
+      await this.authService.waitForAuthState();
       await this.router.navigateByUrl('/app');
     } catch (error: any) {
       if (error?.code === 'auth/email-not-verified') {

@@ -30,6 +30,8 @@ export class AuthService {
 
   private initialized = false;
   private readonly initPromise: Promise<void>;
+  private authStateReady: Promise<void> = Promise.resolve();
+  private resolveAuthStateReady: (() => void) | null = null;
 
   readonly user = signal<UserProfile | null>(null);
   readonly isLoading = signal<boolean>(true);
@@ -45,6 +47,7 @@ export class AuthService {
           }
 
           if (!firebaseUser.emailVerified) {
+            await signOut(this.auth);
             this.user.set(null);
             return;
           }
@@ -56,8 +59,16 @@ export class AuthService {
           this.user.set(null);
         } finally {
           this.finishInit(resolve);
+          this.resolveAuthStateReady?.();
+          this.resolveAuthStateReady = null;
         }
       });
+    });
+  }
+
+  private resetAuthStateReady() {
+    this.authStateReady = new Promise((resolve) => {
+      this.resolveAuthStateReady = resolve;
     });
   }
 
@@ -109,17 +120,20 @@ export class AuthService {
 
     await setDoc(doc(this.db, 'users', credential.user.uid), profile);
     await sendEmailVerification(credential.user);
+    await signOut(this.auth);
     this.user.set(null);
 
     return credential;
   }
 
   async login(email: string, password: string) {
+    this.resetAuthStateReady();
     const credential = await signInWithEmailAndPassword(this.auth, email, password);
     const user = credential.user;
 
     if (!user.emailVerified) {
       await sendEmailVerification(user);
+      await signOut(this.auth);
       this.user.set(null);
       const error: any = new Error('Email not verified');
       error.code = 'auth/email-not-verified';
@@ -144,5 +158,9 @@ export class AuthService {
 
   async waitForInitialization(): Promise<void> {
     return this.initPromise;
+  }
+
+  async waitForAuthState(): Promise<void> {
+    return this.authStateReady;
   }
 }
