@@ -1,16 +1,32 @@
-import { Component, signal, effect, OnInit } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { NgIf } from '@angular/common';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
+
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
-  imports: [],
+  imports: [RouterOutlet, RouterLink, NgIf],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App implements OnInit {
+export class App {
   protected readonly title = signal('receipt-nest');
   currentYear = new Date().getFullYear();
 
   public isDarkMode = signal<boolean>(true);
+  protected readonly auth = inject(AuthService);
+  protected readonly user = this.auth.user;
+  private readonly router = inject(Router);
+  protected readonly displayName = computed(() => {
+    const profile = this.user();
+    if (!profile) {
+      return '';
+    }
+
+    const name = `${profile.firstName} ${profile.lastName}`.trim();
+    return name || profile.email;
+  });
 
   private applyTheme(isDark: boolean) {
     if (typeof document === 'undefined') {
@@ -45,10 +61,6 @@ export class App implements OnInit {
     });
   }
 
-  ngOnInit() {
-    // Theme is already loaded in constructor, but keep this for consistency
-  }
-
   toggleTheme() {
     const currentMode = this.isDarkMode();
     const newMode = !currentMode;
@@ -63,5 +75,10 @@ export class App implements OnInit {
 
     // Also manually update to ensure immediate effect (effect should handle this, but this ensures it works)
     this.applyTheme(newMode);
+  }
+
+  async logout() {
+    await this.auth.logout();
+    await this.router.navigateByUrl('/login');
   }
 }

@@ -1,0 +1,122 @@
+import { Injectable, computed, signal } from '@angular/core';
+import {
+  Auth,
+  UserCredential,
+  createUserWithEmailAndPassword,
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut
+} from 'firebase/auth';
+import {
+  Firestore,
+  doc,
+  getDoc,
+  getFirestore,
+  serverTimestamp,
+  setDoc
+} from 'firebase/firestore';
+
+import { app } from '../../../environments/environments';
+import { UserProfile } from '../models/user.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  private readonly auth: Auth = getAuth(app);
+  private readonly db: Firestore = getFirestore(app);
+
+  private initialized = false;
+  private readonly initPromise: Promise<void>;
+
+  readonly user = signal<UserProfile | null>(null);
+  readonly isLoading = signal<boolean>(true);
+  readonly isAuthenticated = computed<boolean>(() => !!this.user());
+
+  constructor() {
+    this.initPromise = new Promise((resolve) => {
+      onAuthStateChanged(this.auth, async (firebaseUser) => {
+        try {
+          if (!firebaseUser) {
+            this.user.set(null);
+            return;
+          }
+
+          const userProfile = await this.loadOrCreateUserProfile(firebaseUser.uid, firebaseUser.email ?? '');
+          this.user.set(userProfile);
+        } catch (error) {
+          console.error('Failed to load auth state', error);
+          this.user.set(null);
+        } finally {
+          this.finishInit(resolve);
+        }
+      });
+    });
+  }
+
+  private finishInit(resolve: () => void) {
+    this.isLoading.set(false);
+    if (!this.initialized) {
+      this.initialized = true;
+      resolve();
+    }
+  }
+
+  private async loadOrCreateUserProfile(uid: string, email: string): Promise<UserProfile> {
+    const userRef = doc(this.db, 'users', uid);
+    const snapshot = await getDoc(userRef);
+
+    if (snapshot.exists()) {
+      return snapshot.data() as UserProfile;
+    }
+
+    const profile: UserProfile = {
+      id: uid,
+      firstName: '',
+      lastName: '',
+      email,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
+
+    await setDoc(userRef, profile);
+    return profile;
+  }
+
+  async registerUser(form: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+  }): Promise<UserCredential> {
+    const credential = await createUserWithEmailAndPassword(this.auth, form.email, form.password);
+
+    const profile: UserProfile = {
+      id: credential.user.uid,
+      firstName: form.firstName,
+      lastName: form.lastName,
+      email: form.email,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
+
+    await setDoc(doc(this.db, 'users', credential.user.uid), profile);
+    this.user.set(profile);
+
+    return credential;
+  }
+
+  async login(email: string, password: string) {
+    await signInWithEmailAndPassword(this.auth, email, password);
+  }
+
+  async logout() {
+    await signOut(this.auth);
+    this.user.set(null);
+  }
+
+  async waitForInitialization(): Promise<void> {
+    return this.initPromise;
+  }
+}
