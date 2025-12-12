@@ -47,7 +47,6 @@ export class AuthService {
           }
 
           if (!firebaseUser.emailVerified) {
-            await signOut(this.auth);
             this.user.set(null);
             return;
           }
@@ -107,6 +106,7 @@ export class AuthService {
     email: string;
     password: string;
   }): Promise<UserCredential> {
+    this.resetAuthStateReady();
     const credential = await createUserWithEmailAndPassword(this.auth, form.email, form.password);
 
     const profile: UserProfile = {
@@ -122,6 +122,8 @@ export class AuthService {
     await sendEmailVerification(credential.user);
     await signOut(this.auth);
     this.user.set(null);
+    this.resolveAuthStateReady?.();
+    this.resolveAuthStateReady = null;
 
     return credential;
   }
