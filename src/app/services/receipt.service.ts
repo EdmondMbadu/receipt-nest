@@ -560,7 +560,7 @@ export class ReceiptService {
   });
 
   /**
-   * Generate SVG path for the spending chart
+   * Generate SVG path for the spending chart (daily amounts, not cumulative)
    * Returns the path data for the line and area fill
    */
   readonly chartPathData = computed(() => {
@@ -572,20 +572,22 @@ export class ReceiptService {
       return {
         linePath: 'M 0,95 L 200,95',
         areaPath: 'M 0,95 L 200,95 L 200,100 L 0,100 Z',
-        hasData: false
+        hasData: false,
+        maxDailySpend: 0
       };
     }
 
-    const maxValue = Math.max(...data.map(d => d.cumulative), 1);
+    // Use daily amount instead of cumulative for oscillating graph
+    const maxValue = Math.max(...data.map(d => d.amount), 1);
     const width = 200;
     const height = 100;
     const padding = 5;
     const chartHeight = height - padding * 2;
 
-    // Generate points
+    // Generate points based on daily spending
     const points: { x: number; y: number }[] = data.map((d, i) => ({
       x: (i / (data.length - 1)) * width,
-      y: padding + chartHeight - (d.cumulative / maxValue) * chartHeight
+      y: padding + chartHeight - (d.amount / maxValue) * chartHeight
     }));
 
     // Create smooth bezier curve path
@@ -605,7 +607,8 @@ export class ReceiptService {
       linePath,
       areaPath,
       hasData: true,
-      lastPoint: points[points.length - 1]
+      lastPoint: points[points.length - 1],
+      maxDailySpend: maxValue
     };
   });
 

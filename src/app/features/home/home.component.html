@@ -210,21 +210,45 @@
 
     <!-- Robinhood-style Spending Graph -->
     <section *ngIf="!isLoadingReceipts() && receiptCount() > 0" class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <!-- Graph Header -->
+      <!-- Graph Header with Month Picker -->
       <div class="flex items-center justify-between mb-4">
         <div>
-          <p class="text-[10px] sm:text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{{ selectedMonthLabel() }} Spending</p>
-          <p class="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-50" [class.text-emerald-600]="!hoveredDay()" [class.dark:text-emerald-400]="!hoveredDay()">
-            {{ hoveredDay() ? formatCurrency(hoveredDay()!.cumulative) : formatCurrency(selectedMonthSpend()) }}
+          <!-- Month Picker Dropdown -->
+          <div class="relative inline-block">
+            <button type="button" (click)="toggleMonthPicker()"
+              class="inline-flex items-center gap-1 text-[10px] sm:text-xs uppercase tracking-[0.14em] text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition-colors">
+              {{ selectedMonthLabel() }}
+              <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <!-- Month Picker Dropdown Menu -->
+            <div *ngIf="showMonthPicker()"
+              class="absolute left-0 top-full mt-1 z-20 w-48 max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
+              <button *ngFor="let month of availableMonths()"
+                type="button"
+                (click)="selectMonth(month.year, month.month)"
+                class="w-full px-3 py-2 text-left text-xs hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors"
+                [class.bg-emerald-50]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
+                [class.dark:bg-slate-700]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
+                [class.text-emerald-600]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
+                [class.dark:text-emerald-400]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()">
+                {{ month.label }}
+              </button>
+            </div>
+          </div>
+          <!-- Spending Amount -->
+          <p class="text-xl sm:text-2xl font-semibold" [class.text-emerald-600]="!hoveredDay()" [class.dark:text-emerald-400]="!hoveredDay()" [class.text-slate-900]="hoveredDay()" [class.dark:text-slate-50]="hoveredDay()">
+            {{ hoveredDay() ? formatCurrency(hoveredDay()!.amount) : formatCurrency(selectedMonthSpend()) }}
           </p>
           <p *ngIf="hoveredDay()" class="text-xs text-slate-500 dark:text-slate-400">
-            Day {{ hoveredDay()!.day }} • {{ formatCurrency(hoveredDay()!.amount) }} spent
+            Day {{ hoveredDay()!.day }} spending
           </p>
           <p *ngIf="!hoveredDay()" class="text-xs text-slate-500 dark:text-slate-400">
-            Hover over the graph to see daily spending
+            Total for {{ selectedMonthLabel() }}
           </p>
         </div>
-        <!-- Month Navigation -->
+        <!-- Month Navigation Arrows -->
         <div class="flex items-center gap-1">
           <button type="button" (click)="goToPreviousMonth()"
             class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors">
@@ -261,13 +285,13 @@
           <!-- Hover indicator dot -->
           <circle *ngIf="hoveredDay() && chartPathData().hasData"
             [attr.cx]="getChartX(hoveredDay()!.day)"
-            [attr.cy]="getChartY(hoveredDay()!.cumulative)"
+            [attr.cy]="getChartY(hoveredDay()!.amount)"
             r="4" fill="#10b981" stroke="white" stroke-width="2" />
         </svg>
 
         <!-- Invisible hover areas for each day -->
         <div class="absolute inset-0 flex">
-          <div *ngFor="let day of dailySpendingData(); let i = index"
+          <div *ngFor="let day of dailySpendingData()"
             class="flex-1 cursor-crosshair"
             (mouseenter)="hoveredDay.set(day)"
             (touchstart)="hoveredDay.set(day)">
@@ -289,6 +313,9 @@
         <span>{{ dailySpendingData().length }}</span>
       </div>
     </section>
+
+    <!-- Backdrop for month picker -->
+    <div *ngIf="showMonthPicker()" (click)="closeMonthPicker()" class="fixed inset-0 z-10"></div>
 
     <!-- Loading State -->
     <div *ngIf="isLoadingReceipts()" class="flex items-center justify-center py-16">

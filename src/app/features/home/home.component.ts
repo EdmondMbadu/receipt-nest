@@ -546,13 +546,13 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     return ((day - 1) / (data.length - 1)) * 200;
   }
 
-  getChartY(cumulative: number): number {
+  getChartY(amount: number): number {
     const data = this.dailySpendingData();
-    const maxValue = Math.max(...data.map(d => d.cumulative), 1);
+    const maxValue = Math.max(...data.map(d => d.amount), 1);
     const height = 100;
     const padding = 5;
     const chartHeight = height - padding * 2;
-    return padding + chartHeight - (cumulative / maxValue) * chartHeight;
+    return padding + chartHeight - (amount / maxValue) * chartHeight;
   }
 
   @HostListener('document:click', ['$event'])
