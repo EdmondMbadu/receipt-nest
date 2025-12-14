@@ -687,6 +687,21 @@ export class HomeComponent implements OnInit, OnDestroy {
     return dayData?.amount ?? 0;
   }
 
+  // Get the amount for the active day (hovered takes priority, then selected)
+  getActiveDayAmount(): number {
+    const hovered = this.hoveredDay();
+    if (hovered) {
+      return hovered.amount;
+    }
+
+    const selection = this.selectedDay();
+    if (selection) {
+      return this.getAmountForDay(selection.day);
+    }
+
+    return 0;
+  }
+
   // Chart helper methods for Robinhood-style graph
   getChartX(day: number): number {
     const data = this.dailySpendingData();
