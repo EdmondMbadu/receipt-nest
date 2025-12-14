@@ -257,7 +257,41 @@ export const processReceipt = onDocumentCreated(
       // Use lower threshold for PDFs since they're typically cleaner and more machine-readable
       const isPdf = mimeType === "application/pdf";
       const confidenceThreshold = isPdf ? PDF_HIGH_CONFIDENCE_THRESHOLD : HIGH_CONFIDENCE_THRESHOLD;
-      const status = extraction.overallConfidence >= confidenceThreshold
+
+      // Calculate a weighted confidence score that prioritizes the total amount field
+      // Total amount is the MOST IMPORTANT field - if we have it with good confidence, we should auto-approve
+      const hasTotalAmount = extraction.totalAmount?.value !== undefined;
+      const totalConfidence = extraction.totalAmount?.confidence || 0;
+      const hasMerchant = extraction.supplierName?.value !== undefined;
+      const hasDate = extraction.date?.value !== undefined;
+
+      // For PDFs: if we have total amount with any reasonable confidence, mark as final
+      // Total amount is critical - merchant and date are nice-to-have
+      let shouldAutoApprove = false;
+      if (isPdf) {
+        // PDF with total amount: auto-approve if total confidence is decent (>= 0.6)
+        if (hasTotalAmount && totalConfidence >= 0.6) {
+          shouldAutoApprove = true;
+          logger.info("Auto-approving PDF with total amount", {
+            totalAmount: extraction.totalAmount?.value,
+            totalConfidence,
+            hasMerchant,
+            hasDate
+          });
+        }
+      } else {
+        // For images: require higher overall confidence OR strong total + merchant
+        if (hasTotalAmount && hasMerchant && totalConfidence >= 0.7) {
+          shouldAutoApprove = true;
+          logger.info("Auto-approving image with strong total and merchant", {
+            totalAmount: extraction.totalAmount?.value,
+            totalConfidence,
+            merchant: extraction.supplierName?.value
+          });
+        }
+      }
+
+      const status = (shouldAutoApprove || extraction.overallConfidence >= confidenceThreshold)
         ? "final"
         : "needs_review";
 
@@ -525,8 +559,17 @@ async function extractWithGemini(
 
   const prompt = `You are an expert receipt parser. Analyze this receipt image carefully and extract the key information.
 
-CRITICAL INSTRUCTIONS:
-1. MERCHANT NAME: This is the MOST IMPORTANT field. Look very carefully for:
+CRITICAL INSTRUCTIONS - PRIORITY ORDER:
+
+1. TOTAL AMOUNT (HIGHEST PRIORITY): This is the MOST CRITICAL field. Look very carefully for:
+   - The FINAL TOTAL - usually labeled as "Total", "Grand Total", "Amount Due", "Balance Due", or similar
+   - It's typically the LARGEST number on the receipt, often at the bottom
+   - Do NOT use subtotals, tax amounts, or individual item prices
+   - Common patterns: "TOTAL $45.67", "Grand Total 123.45", "Amount Due: $89.00"
+   - Extract ONLY the numeric value (e.g., from "$45.67" extract 45.67)
+   - This field is MANDATORY - you must extract it accurately
+
+2. MERCHANT NAME (IMPORTANT): Look very carefully for:
    - The business/store name printed at the TOP of the receipt (usually largest text)
    - Company logos or branding
    - Header text before the itemized list
@@ -535,7 +578,7 @@ CRITICAL INSTRUCTIONS:
    - DO NOT return null for merchant unless the receipt is completely illegible
    - If unsure, provide your best guess based on any visible text or logos
 
-2. TOTAL AMOUNT: Look for the FINAL TOTAL - usually labeled as "Total", "Grand Total", "Amount Due", or similar. Do NOT use subtotals or individual item prices.
+3. DATE and CURRENCY: Extract if visible, but these are less critical than total and merchant.
 
 Return a JSON object with these exact fields:
 {
@@ -546,14 +589,14 @@ Return a JSON object with these exact fields:
   "confidence": 0.95
 }
 
-Field requirements:
+Field requirements (IN ORDER OF IMPORTANCE):
+- "total": (MOST IMPORTANT) A NUMBER representing the final total paid. This is MANDATORY. Parse from text like "$45.67" → 45.67. Look for "Total", "Grand Total", "Amount Due", etc. DO NOT return null.
 - "merchant": The business name. REQUIRED - make your best effort to extract this. Look at logos, headers, and any text at the top of the receipt. Even partial names are better than null.
-- "total": A NUMBER representing the final total paid. Parse from text like "$45.67" → 45.67
 - "currency": The currency code (default to "USD" for US receipts)
 - "date": The transaction date in YYYY-MM-DD format
-- "confidence": Your confidence in the extraction (0.0 to 1.0)
+- "confidence": Your confidence in the extraction (0.0 to 1.0). Use HIGH confidence (0.9+) if you successfully extracted the total amount from a clear receipt.
 
-If you cannot find the merchant name with high confidence, still provide your best guess based on visible text. Only set merchant to null if the image is completely unreadable.
+IMPORTANT: The total amount is the MOST CRITICAL field. If you extract it correctly, set high confidence even if other fields are missing.
 
 Return ONLY the JSON object.`;
 
@@ -649,13 +692,30 @@ Return ONLY the JSON object.`;
     wasEmpty: !merchantValue
   });
 
-  // Boost confidence for PDFs when all critical fields are successfully extracted
+  // Boost confidence for PDFs when critical fields are successfully extracted
   const isPdf = mimeType === "application/pdf";
+  const hasCriticalFields = totalAmountValue !== undefined;
   const hasAllCriticalFields = totalAmountValue !== undefined && merchantValue && parsed.date;
-  if (isPdf && hasAllCriticalFields && confidence < 0.85) {
-    // PDFs are cleaner and more machine-readable, so boost confidence when extraction is complete
-    confidence = Math.max(confidence, 0.85);
-    logger.info("Boosted confidence for complete PDF extraction", { originalConfidence: parsed.confidence, boostedConfidence: confidence });
+
+  if (isPdf) {
+    if (hasAllCriticalFields && confidence < 0.85) {
+      // PDFs with all fields: boost confidence to 0.85
+      confidence = Math.max(confidence, 0.85);
+      logger.info("Boosted confidence for complete PDF extraction", {
+        originalConfidence: parsed.confidence,
+        boostedConfidence: confidence,
+        total: totalAmountValue,
+        merchant: merchantValue
+      });
+    } else if (hasCriticalFields && confidence < 0.75) {
+      // PDFs with just total (most important field): boost confidence to 0.75
+      confidence = Math.max(confidence, 0.75);
+      logger.info("Boosted confidence for PDF with total amount", {
+        originalConfidence: parsed.confidence,
+        boostedConfidence: confidence,
+        total: totalAmountValue
+      });
+    }
   }
 
   return {
