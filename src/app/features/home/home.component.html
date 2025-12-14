@@ -179,11 +179,19 @@
 
     <!-- Stats Summary Row -->
     <section class="grid gap-3 sm:gap-4 grid-cols-3">
+      <!-- Total Spending - First Card (Most Important) -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-[10px] sm:text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">This month</p>
+        <p class="mt-1 text-lg sm:text-2xl font-semibold text-emerald-600 dark:text-emerald-400">{{ formatCurrency(selectedMonthSpend()) }}</p>
+        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">{{ selectedMonthReceiptCount() }} receipts</p>
+      </div>
+      <!-- Total Receipts -->
       <div class="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <p class="text-[10px] sm:text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Total</p>
-        <p class="mt-1 text-lg sm:text-2xl font-semibold text-emerald-600 dark:text-emerald-400">{{ receiptCount() }}</p>
+        <p class="mt-1 text-lg sm:text-2xl font-semibold text-slate-900 dark:text-slate-50">{{ receiptCount() }}</p>
         <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">receipts</p>
       </div>
+      <!-- Review Status -->
       <div class="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
         [class.border-orange-200]="needsReviewCount() > 0" [class.dark:border-orange-800]="needsReviewCount() > 0">
         <p class="text-[10px] sm:text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Review</p>
@@ -198,10 +206,87 @@
           Review →
         </a>
       </div>
-      <div class="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <p class="text-[10px] sm:text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">This month</p>
-        <p class="mt-1 text-lg sm:text-2xl font-semibold text-slate-900 dark:text-slate-50">{{ formatCurrency(selectedMonthSpend()) }}</p>
-        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">{{ selectedMonthReceiptCount() }} receipts</p>
+    </section>
+
+    <!-- Robinhood-style Spending Graph -->
+    <section *ngIf="!isLoadingReceipts() && receiptCount() > 0" class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <!-- Graph Header -->
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <p class="text-[10px] sm:text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{{ selectedMonthLabel() }} Spending</p>
+          <p class="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-50" [class.text-emerald-600]="!hoveredDay()" [class.dark:text-emerald-400]="!hoveredDay()">
+            {{ hoveredDay() ? formatCurrency(hoveredDay()!.cumulative) : formatCurrency(selectedMonthSpend()) }}
+          </p>
+          <p *ngIf="hoveredDay()" class="text-xs text-slate-500 dark:text-slate-400">
+            Day {{ hoveredDay()!.day }} • {{ formatCurrency(hoveredDay()!.amount) }} spent
+          </p>
+          <p *ngIf="!hoveredDay()" class="text-xs text-slate-500 dark:text-slate-400">
+            Hover over the graph to see daily spending
+          </p>
+        </div>
+        <!-- Month Navigation -->
+        <div class="flex items-center gap-1">
+          <button type="button" (click)="goToPreviousMonth()"
+            class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button type="button" (click)="goToNextMonth()" [disabled]="isCurrentMonth()"
+            class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Interactive SVG Chart -->
+      <div class="relative h-32 sm:h-40" (mouseleave)="hoveredDay.set(null)" (touchend)="hoveredDay.set(null)">
+        <svg class="w-full h-full" viewBox="0 0 200 100" preserveAspectRatio="none">
+          <!-- Gradient for area fill -->
+          <defs>
+            <linearGradient id="spendingGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#10b981" stop-opacity="0.3" />
+              <stop offset="100%" stop-color="#10b981" stop-opacity="0.05" />
+            </linearGradient>
+          </defs>
+
+          <!-- Area fill -->
+          <path [attr.d]="chartPathData().areaPath" fill="url(#spendingGradient)" />
+
+          <!-- Line -->
+          <path [attr.d]="chartPathData().linePath" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+          <!-- Hover indicator dot -->
+          <circle *ngIf="hoveredDay() && chartPathData().hasData"
+            [attr.cx]="getChartX(hoveredDay()!.day)"
+            [attr.cy]="getChartY(hoveredDay()!.cumulative)"
+            r="4" fill="#10b981" stroke="white" stroke-width="2" />
+        </svg>
+
+        <!-- Invisible hover areas for each day -->
+        <div class="absolute inset-0 flex">
+          <div *ngFor="let day of dailySpendingData(); let i = index"
+            class="flex-1 cursor-crosshair"
+            (mouseenter)="hoveredDay.set(day)"
+            (touchstart)="hoveredDay.set(day)">
+          </div>
+        </div>
+
+        <!-- Vertical hover line -->
+        <div *ngIf="hoveredDay()" class="absolute top-0 bottom-0 w-px bg-emerald-500/50 pointer-events-none"
+          [style.left.%]="((hoveredDay()!.day - 1) / (dailySpendingData().length - 1)) * 100">
+        </div>
+      </div>
+
+      <!-- X-axis labels -->
+      <div class="flex justify-between mt-2 text-[10px] text-slate-400 dark:text-slate-500">
+        <span>1</span>
+        <span>{{ Math.ceil(dailySpendingData().length / 4) }}</span>
+        <span>{{ Math.ceil(dailySpendingData().length / 2) }}</span>
+        <span>{{ Math.ceil(dailySpendingData().length * 3 / 4) }}</span>
+        <span>{{ dailySpendingData().length }}</span>
       </div>
     </section>
 
@@ -328,6 +413,15 @@
     </div>
   </div>
 </div>
+
+<!-- Floating Action Button for Add Receipt (Mobile) -->
+<button type="button" (click)="openUploadModal()"
+  class="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 transition-all hover:bg-emerald-600 hover:scale-105 active:scale-95 sm:hidden"
+  aria-label="Add Receipt">
+  <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+  </svg>
+</button>
 
 <!-- Upload Modal -->
 <app-upload *ngIf="showUploadModal()" (uploadComplete)="onUploadComplete($event)" (uploadError)="onUploadError($event)"

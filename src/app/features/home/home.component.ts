@@ -40,6 +40,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly searchQuery = signal('');
   readonly searchFocused = signal(false);
   readonly showAllReceipts = signal(false);
+  readonly hoveredDay = signal<{ day: number; amount: number; cumulative: number } | null>(null);
+
+  // Expose Math for template
+  readonly Math = Math;
 
   // Gallery view state
   readonly visibleMonthCount = signal(2); // Start with 2 months
@@ -533,6 +537,22 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       hour: 'numeric',
       minute: '2-digit'
     });
+  }
+
+  // Chart helper methods for Robinhood-style graph
+  getChartX(day: number): number {
+    const data = this.dailySpendingData();
+    if (data.length <= 1) return 100;
+    return ((day - 1) / (data.length - 1)) * 200;
+  }
+
+  getChartY(cumulative: number): number {
+    const data = this.dailySpendingData();
+    const maxValue = Math.max(...data.map(d => d.cumulative), 1);
+    const height = 100;
+    const padding = 5;
+    const chartHeight = height - padding * 2;
+    return padding + chartHeight - (cumulative / maxValue) * chartHeight;
   }
 
   @HostListener('document:click', ['$event'])
