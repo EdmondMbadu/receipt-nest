@@ -31,6 +31,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly showMonthPicker = signal(false);
   readonly searchQuery = signal('');
   readonly searchFocused = signal(false);
+  readonly showAllReceipts = signal(false);
 
   // Receipts from service
   readonly receipts = this.receiptService.receipts;
@@ -160,6 +161,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.searchFocused.set(false);
   }
 
+  toggleShowAllReceipts(): void {
+    this.showAllReceipts.update(show => !show);
+  }
+
   onSearchBlur(): void {
     // Delay to allow clicking on results
     setTimeout(() => {
@@ -167,10 +172,13 @@ export class HomeComponent implements OnInit, OnDestroy {
     }, 200);
   }
 
-  // Recent receipts (last 5) - now uses filtered if searching
+  // Recent receipts (last 5 or all if expanded) - now uses filtered if searching
   readonly recentReceipts = computed(() => {
     if (this.searchQuery().trim()) {
       return this.filteredReceipts();
+    }
+    if (this.showAllReceipts()) {
+      return this.receipts();
     }
     return this.receipts().slice(0, 5);
   });
