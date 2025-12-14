@@ -87,17 +87,36 @@ export class UploadComponent {
 
     this.selectedFile.set(file);
 
-    // Create preview for images
-    if (file.type.startsWith('image/')) {
+    // Check if it's a HEIC file (browsers can't display these natively)
+    const isHeic = file.type === 'image/heic' || file.type === 'image/heif' ||
+      file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif');
+
+    // Create preview for images (except HEIC which browsers can't render)
+    if (file.type.startsWith('image/') && !isHeic) {
       const reader = new FileReader();
       reader.onload = (e) => {
         this.previewUrl.set(e.target?.result as string);
       };
       reader.readAsDataURL(file);
     } else {
-      // PDF - show icon instead
+      // PDF or HEIC - show icon instead
       this.previewUrl.set(null);
     }
+  }
+
+  // Check if selected file is HEIC
+  isHeicFile(): boolean {
+    const file = this.selectedFile();
+    if (!file) return false;
+    return file.type === 'image/heic' || file.type === 'image/heif' ||
+      file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif');
+  }
+
+  // Check if selected file is PDF
+  isPdfFile(): boolean {
+    const file = this.selectedFile();
+    if (!file) return false;
+    return file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
   }
 
   // Upload the file

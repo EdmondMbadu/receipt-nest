@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import { ReceiptService } from '../../services/receipt.service';
 import { ThemeService } from '../../services/theme.service';
@@ -20,6 +21,7 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly receiptService = inject(ReceiptService);
   private readonly theme = inject(ThemeService);
+  private readonly sanitizer = inject(DomSanitizer);
 
   readonly isDarkMode = this.theme.isDarkMode;
   readonly categories = DEFAULT_CATEGORIES;
@@ -30,6 +32,7 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
   readonly isSaving = signal(false);
   readonly error = signal<string | null>(null);
   readonly imageUrl = signal<string | null>(null);
+  readonly safeImageUrl = signal<SafeResourceUrl | null>(null);
   readonly showImageModal = signal(false);
 
   // Edit form values
@@ -90,6 +93,8 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
         try {
           const url = await this.receiptService.getReceiptFileUrl(receipt.file.storagePath);
           this.imageUrl.set(url);
+          // Create sanitized URL for iframe (PDF viewing)
+          this.safeImageUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(url));
         } catch (e) {
           console.warn('Could not load receipt image:', e);
         }
@@ -118,24 +123,35 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
     try {
       const category = this.categories.find(c => c.id === this.editCategory());
 
-      await this.receiptService.updateReceipt(this.receiptId, {
+      // Build update object, avoiding undefined values that Firestore rejects
+      const updateData: Partial<Receipt> = {
         merchant: {
-          canonicalName: this.editMerchant(),
-          rawName: this.receipt()!.merchant?.rawName || this.editMerchant(),
+          canonicalName: this.editMerchant() || '',
+          rawName: this.receipt()!.merchant?.rawName || this.editMerchant() || '',
           matchConfidence: 1.0,
           matchedBy: 'manual'
         },
-        totalAmount: this.editAmount() || undefined,
-        date: this.editDate() || undefined,
-        category: category ? {
+        notes: this.editNotes() || '', // Use empty string, not undefined
+        status: 'final' as ReceiptStatus
+      };
+
+      // Only set optional fields if they have values
+      if (this.editAmount() !== null && this.editAmount() !== undefined) {
+        updateData.totalAmount = this.editAmount()!;
+      }
+      if (this.editDate()) {
+        updateData.date = this.editDate();
+      }
+      if (category) {
+        updateData.category = {
           id: category.id,
           name: category.name,
           confidence: 1.0,
           assignedBy: 'user'
-        } : undefined,
-        notes: this.editNotes() || undefined,
-        status: 'final' as ReceiptStatus
-      });
+        };
+      }
+
+      await this.receiptService.updateReceipt(this.receiptId, updateData);
 
       // Reload to get updated data
       await this.loadReceipt();
@@ -220,6 +236,28 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
   }
 
   isPdf(): boolean {
-    return this.receipt()?.file?.mimeType === 'application/pdf';
+    const receipt = this.receipt();
+    if (!receipt) return false;
+    return receipt.file?.mimeType === 'application/pdf' ||
+      receipt.file?.originalName?.toLowerCase().endsWith('.pdf');
+  }
+
+  isHeic(): boolean {
+    const receipt = this.receipt();
+    if (!receipt) return false;
+    const mimeType = receipt.file?.mimeType;
+    const fileName = receipt.file?.originalName?.toLowerCase() || '';
+    return mimeType === 'image/heic' || mimeType === 'image/heif' ||
+      fileName.endsWith('.heic') || fileName.endsWith('.heif');
+  }
+
+  isDoc(): boolean {
+    const receipt = this.receipt();
+    if (!receipt) return false;
+    const mimeType = receipt.file?.mimeType;
+    const fileName = receipt.file?.originalName?.toLowerCase() || '';
+    return mimeType === 'application/msword' ||
+      mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      fileName.endsWith('.doc') || fileName.endsWith('.docx');
   }
 }
