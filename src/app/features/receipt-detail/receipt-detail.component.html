@@ -1,0 +1,252 @@
+<div class="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950/70 px-4 py-6">
+  <div class="mx-auto max-w-4xl">
+
+    <!-- Header -->
+    <header class="flex items-center justify-between gap-4 mb-6">
+      <div class="flex items-center gap-3">
+        <a routerLink="/app"
+          class="inline-flex items-center justify-center h-10 w-10 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+          <svg class="h-5 w-5 text-slate-600 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-xl font-semibold text-slate-900 dark:text-white">Receipt Details</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Review and edit receipt information</p>
+        </div>
+      </div>
+      <button type="button" (click)="toggleTheme()"
+        class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+        aria-label="Toggle theme">
+        {{ isDarkMode() ? '☀️' : '🌙' }}
+      </button>
+    </header>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading()" class="flex items-center justify-center py-20">
+      <div class="h-10 w-10 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error() && !isLoading()"
+      class="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-6 text-center">
+      <p class="text-red-700 dark:text-red-400">{{ error() }}</p>
+      <a routerLink="/app" class="mt-4 inline-block text-sm font-medium text-emerald-600 hover:text-emerald-700">
+        ← Back to dashboard
+      </a>
+    </div>
+
+    <!-- Receipt Content -->
+    <div *ngIf="receipt() && !isLoading()" class="space-y-6">
+
+      <!-- Status Banner (for needs_review) -->
+      <div *ngIf="needsReview()"
+        class="rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 p-4">
+        <div class="flex items-start gap-3">
+          <div class="flex-shrink-0 text-2xl">⚠️</div>
+          <div>
+            <h3 class="font-semibold text-orange-800 dark:text-orange-300">Review Required</h3>
+            <p class="text-sm text-orange-700 dark:text-orange-400 mt-1">
+              Some fields couldn't be extracted with high confidence. Please review and confirm the details below.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content Grid -->
+      <div class="grid gap-6 lg:grid-cols-2">
+
+        <!-- Left: Receipt Image/Preview -->
+        <div class="space-y-4">
+          <div
+            class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-800">
+              <div class="flex items-center justify-between">
+                <h2 class="font-semibold text-slate-900 dark:text-white">Original Receipt</h2>
+                <span class="text-xs rounded-full px-2 py-1" [ngClass]="getStatusBadgeClass(receipt()!.status)">
+                  {{ getStatusLabel(receipt()!.status) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Image Preview -->
+            <div class="relative bg-slate-100 dark:bg-slate-800 min-h-[300px] flex items-center justify-center">
+              <div *ngIf="!imageUrl()" class="text-center p-8">
+                <div class="text-4xl mb-2">📄</div>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Loading preview...</p>
+              </div>
+
+              <img *ngIf="imageUrl() && !isPdf()" [src]="imageUrl()" alt="Receipt"
+                class="max-h-[400px] w-full object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                (click)="openImageModal()" />
+
+              <div *ngIf="imageUrl() && isPdf()" class="text-center p-8 cursor-pointer" (click)="openImageModal()">
+                <div
+                  class="inline-flex items-center justify-center h-20 w-20 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
+                  <svg class="h-10 w-10 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <p class="font-medium text-slate-900 dark:text-white">{{ receipt()!.file?.originalName }}</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Click to open PDF</p>
+              </div>
+            </div>
+
+            <!-- File Info -->
+            <div class="p-4 bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-600 dark:text-slate-400">
+              <div class="flex items-center justify-between">
+                <span>{{ receipt()!.file?.originalName }}</span>
+                <span>{{ (receipt()!.file?.sizeBytes || 0) / 1024 | number:'1.0-0' }} KB</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Extraction Confidence -->
+          <div *ngIf="receipt()!.extraction"
+            class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
+            <h3 class="text-sm font-semibold text-slate-900 dark:text-white mb-3">Extraction Details</h3>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between">
+                <span class="text-slate-500 dark:text-slate-400">Source</span>
+                <span class="font-medium text-slate-700 dark:text-slate-200 capitalize">
+                  {{ receipt()!.extraction?.source || '-' }}
+                </span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500 dark:text-slate-400">Overall Confidence</span>
+                <span class="font-medium"
+                  [class.text-emerald-600]="(receipt()!.extraction?.overallConfidence || 0) >= 0.8"
+                  [class.text-orange-600]="(receipt()!.extraction?.overallConfidence || 0) < 0.8">
+                  {{ formatConfidence(receipt()!.extraction?.overallConfidence) }}
+                </span>
+              </div>
+              <div *ngIf="receipt()!.extraction?.totalAmount" class="flex justify-between">
+                <span class="text-slate-500 dark:text-slate-400">Amount Confidence</span>
+                <span class="font-medium text-slate-700 dark:text-slate-200">
+                  {{ formatConfidence(receipt()!.extraction?.totalAmount?.confidence) }}
+                </span>
+              </div>
+              <div *ngIf="receipt()!.extraction?.supplierName" class="flex justify-between">
+                <span class="text-slate-500 dark:text-slate-400">Merchant Confidence</span>
+                <span class="font-medium text-slate-700 dark:text-slate-200">
+                  {{ formatConfidence(receipt()!.extraction?.supplierName?.confidence) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Edit Form -->
+        <div class="space-y-4">
+          <div
+            class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 space-y-5">
+            <h2 class="font-semibold text-slate-900 dark:text-white">Receipt Information</h2>
+
+            <!-- Merchant Name -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">
+                Merchant Name
+              </label>
+              <input type="text" [ngModel]="editMerchant()" (ngModelChange)="editMerchant.set($event)"
+                class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                placeholder="e.g., Walmart, Starbucks" />
+              <p *ngIf="receipt()!.extraction?.supplierName?.rawText"
+                class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Extracted: "{{ receipt()!.extraction?.supplierName?.rawText }}"
+              </p>
+            </div>
+
+            <!-- Amount -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">
+                Total Amount
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                <input type="number" step="0.01" [ngModel]="editAmount()" (ngModelChange)="editAmount.set($event)"
+                  class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 pl-7 pr-3 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  placeholder="0.00" />
+              </div>
+              <p *ngIf="receipt()!.extraction?.totalAmount?.rawText"
+                class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Extracted: "{{ receipt()!.extraction?.totalAmount?.rawText }}"
+              </p>
+            </div>
+
+            <!-- Date -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">
+                Date
+              </label>
+              <input type="date" [ngModel]="editDate()" (ngModelChange)="editDate.set($event)"
+                class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm text-slate-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
+              <p *ngIf="receipt()!.extraction?.date?.rawText" class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Extracted: "{{ receipt()!.extraction?.date?.rawText }}"
+              </p>
+            </div>
+
+            <!-- Category -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">
+                Category
+              </label>
+              <select [ngModel]="editCategory()" (ngModelChange)="editCategory.set($event)"
+                class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm text-slate-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors">
+                <option *ngFor="let cat of categories" [value]="cat.id">
+                  {{ cat.icon }} {{ cat.name }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Notes -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">
+                Notes (optional)
+              </label>
+              <textarea [ngModel]="editNotes()" (ngModelChange)="editNotes.set($event)" rows="3"
+                class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors resize-none"
+                placeholder="Add any notes about this receipt..."></textarea>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-3">
+            <button type="button" (click)="deleteReceipt()"
+              class="flex-shrink-0 rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+              Delete
+            </button>
+            <button type="button" (click)="confirmReceipt()" [disabled]="isSaving()"
+              class="flex-1 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white dark:text-slate-950 shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              {{ isSaving() ? 'Saving...' : (needsReview() ? 'Confirm & Save' : 'Save Changes') }}
+            </button>
+          </div>
+
+          <!-- Unsaved Changes Indicator -->
+          <p *ngIf="isEdited() && !isSaving()" class="text-center text-xs text-amber-600 dark:text-amber-400">
+            You have unsaved changes
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Image Modal -->
+<div *ngIf="showImageModal()"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+  (click)="closeImageModal()">
+  <div class="relative max-w-4xl max-h-[90vh] overflow-auto">
+    <button type="button" (click)="closeImageModal()"
+      class="absolute top-2 right-2 z-10 h-10 w-10 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors flex items-center justify-center">
+      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <img *ngIf="!isPdf()" [src]="imageUrl()" alt="Receipt" class="max-w-full max-h-[85vh] object-contain rounded-lg" />
+
+    <iframe *ngIf="isPdf()" [src]="imageUrl()" class="w-[800px] h-[85vh] rounded-lg bg-white"></iframe>
+  </div>
+</div>

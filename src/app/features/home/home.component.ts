@@ -7,7 +7,7 @@ import { ThemeService } from '../../services/theme.service';
 import { ReceiptService } from '../../services/receipt.service';
 import { UploadComponent } from '../../components/upload/upload.component';
 import { Receipt, ReceiptStatus } from '../../models/receipt.model';
-import { DEFAULT_CATEGORIES, getCategoryById } from '../../models/category.model';
+import { DEFAULT_CATEGORIES, getCategoryById, Category } from '../../models/category.model';
 
 @Component({
   selector: 'app-home',
@@ -94,6 +94,56 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Recent receipts (last 5)
   readonly recentReceipts = computed(() => {
     return this.receipts().slice(0, 5);
+  });
+
+  // Get first receipt that needs review
+  getFirstNeedsReviewId(): string {
+    const receipt = this.receipts().find(r => r.status === 'needs_review');
+    return receipt?.id || '';
+  }
+
+  // Spending by category for current month
+  readonly categorySpending = computed(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    // Filter receipts for current month with final status
+    const monthReceipts = this.receipts().filter(r => {
+      if (!r.date || !r.totalAmount) return false;
+      const receiptDate = new Date(r.date);
+      return receiptDate.getMonth() === currentMonth &&
+        receiptDate.getFullYear() === currentYear &&
+        (r.status === 'final' || r.status === 'extracted');
+    });
+
+    // Group by category
+    const categoryTotals: Record<string, { total: number; category: Category }> = {};
+    let maxTotal = 0;
+
+    for (const receipt of monthReceipts) {
+      const categoryId = receipt.category?.id || 'other';
+      const category = getCategoryById(categoryId) || DEFAULT_CATEGORIES.find(c => c.id === 'other')!;
+
+      if (!categoryTotals[categoryId]) {
+        categoryTotals[categoryId] = { total: 0, category };
+      }
+      categoryTotals[categoryId].total += receipt.totalAmount || 0;
+      maxTotal = Math.max(maxTotal, categoryTotals[categoryId].total);
+    }
+
+    // Convert to array and sort by total
+    return Object.values(categoryTotals)
+      .map(({ total, category }) => ({
+        id: category.id,
+        name: category.name,
+        icon: category.icon,
+        color: category.color,
+        total,
+        percentage: maxTotal > 0 ? (total / maxTotal) * 100 : 0
+      }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5); // Top 5 categories
   });
 
   ngOnInit(): void {
