@@ -89,7 +89,7 @@
                       d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <p class="font-medium text-slate-900 dark:text-white">{{ receipt()!.file?.originalName }}</p>
+                <p class="font-medium text-slate-900 dark:text-white">{{ receipt()!.file.originalName }}</p>
                 <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Click to open PDF</p>
               </div>
             </div>
@@ -97,8 +97,8 @@
             <!-- File Info -->
             <div class="p-4 bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-600 dark:text-slate-400">
               <div class="flex items-center justify-between">
-                <span>{{ receipt()!.file?.originalName }}</span>
-                <span>{{ (receipt()!.file?.sizeBytes || 0) / 1024 | number:'1.0-0' }} KB</span>
+                <span>{{ receipt()!.file.originalName }}</span>
+                <span>{{ (receipt()!.file.sizeBytes || 0) / 1024 | number:'1.0-0' }} KB</span>
               </div>
             </div>
           </div>
