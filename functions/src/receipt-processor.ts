@@ -11,6 +11,8 @@ import * as admin from "firebase-admin";
 import { DocumentProcessorServiceClient } from "@google-cloud/documentai";
 import { VertexAI } from "@google-cloud/vertexai";
 import sharp from "sharp";
+import heicDecode from "heic-decode";
+import jpeg from "jpeg-js";
 
 // Types
 interface ExtractedField<T> {
@@ -116,31 +118,77 @@ export const processReceipt = onDocumentCreated(
 
       // Convert HEIC/HEIF to JPEG for processing
       let processBuffer = fileBuffer;
-      if (mimeType === "image/heic" || mimeType === "image/heif") {
-        logger.info("Converting HEIC/HEIF to JPEG...");
+      let processMimeType = mimeType;
+
+      // Check if it's a HEIC/HEIF file (by mimeType or file extension)
+      const isHeic = mimeType === "image/heic" ||
+        mimeType === "image/heif" ||
+        storagePath.toLowerCase().endsWith(".heic") ||
+        storagePath.toLowerCase().endsWith(".heif");
+
+      if (isHeic) {
+        logger.info("Detected HEIC/HEIF image, attempting conversion to JPEG...");
+
+        // Method 1: Try sharp first (might have native HEIC support)
+        let converted = false;
         try {
           const jpegBuffer = await sharp(fileBuffer)
             .jpeg({ quality: 90 })
             .toBuffer();
           processBuffer = jpegBuffer;
-          mimeType = "image/jpeg";
-          logger.info(`HEIC conversion complete, new size: ${processBuffer.length} bytes`);
-        } catch (heicError) {
-          logger.error("HEIC conversion failed, attempting with original file", heicError);
-          // Continue with original buffer, Gemini might still be able to process it
+          processMimeType = "image/jpeg";
+          converted = true;
+          logger.info(`HEIC conversion with sharp successful, new size: ${processBuffer.length} bytes`);
+        } catch (sharpError: unknown) {
+          const errorMessage = sharpError instanceof Error ? sharpError.message : String(sharpError);
+          logger.warn(`Sharp HEIC conversion failed: ${errorMessage}. Trying heic-decode...`);
+        }
+
+        // Method 2: Fallback to heic-decode (pure JavaScript, works everywhere)
+        if (!converted) {
+          try {
+            const { width, height, data } = await heicDecode({ buffer: fileBuffer });
+            logger.info(`HEIC decoded: ${width}x${height}`);
+
+            // Encode as JPEG using jpeg-js
+            const rawImageData = {
+              data: Buffer.from(data),
+              width,
+              height,
+            };
+            const jpegData = jpeg.encode(rawImageData, 90);
+            processBuffer = jpegData.data;
+            processMimeType = "image/jpeg";
+            converted = true;
+            logger.info(`HEIC conversion with heic-decode successful, new size: ${processBuffer.length} bytes`);
+          } catch (heicDecodeError: unknown) {
+            const errorMessage = heicDecodeError instanceof Error ? heicDecodeError.message : String(heicDecodeError);
+            logger.error(`heic-decode conversion also failed: ${errorMessage}`);
+          }
+        }
+
+        // If still not converted, we'll try Gemini with the original file anyway
+        if (!converted) {
+          logger.warn("All HEIC conversion methods failed. Attempting Gemini with raw file...");
+          processMimeType = "image/jpeg"; // Tell Gemini it's JPEG anyway
         }
       }
 
-      // Step 1: Try Document AI extraction
+      // Step 1: Try Document AI extraction (skip for HEIC if conversion failed)
       let extraction: ExtractionResult | null = null;
 
-      if (PROCESSOR_ID) {
+      // Only try Document AI if we have a supported format (not unconverted HEIC)
+      const canUseDocumentAI = PROCESSOR_ID && processMimeType !== "image/heic" && processMimeType !== "image/heif";
+
+      if (canUseDocumentAI) {
         try {
-          extraction = await extractWithDocumentAI(processBuffer, mimeType);
+          extraction = await extractWithDocumentAI(processBuffer, processMimeType);
           logger.info("Document AI extraction complete", { confidence: extraction.overallConfidence });
         } catch (error) {
           logger.warn("Document AI extraction failed, falling back to Gemini", error);
         }
+      } else if (PROCESSOR_ID) {
+        logger.info("Skipping Document AI for HEIC file, using Gemini directly");
       } else {
         logger.info("Document AI processor not configured, using Gemini directly");
       }
@@ -148,7 +196,8 @@ export const processReceipt = onDocumentCreated(
       // Step 2: If Document AI failed or low confidence, use Gemini
       if (!extraction || extraction.overallConfidence < LOW_CONFIDENCE_THRESHOLD) {
         try {
-          const geminiExtraction = await extractWithGemini(processBuffer, mimeType);
+          // Gemini can handle various formats including HEIC
+          const geminiExtraction = await extractWithGemini(processBuffer, processMimeType);
           if (!extraction || geminiExtraction.overallConfidence > extraction.overallConfidence) {
             extraction = geminiExtraction;
             logger.info("Using Gemini extraction", { confidence: extraction.overallConfidence });
@@ -354,6 +403,15 @@ async function extractWithGemini(
     },
   });
 
+  // Gemini only supports these image mimeTypes: jpeg, png, gif, webp
+  // Map unsupported types to jpeg (the data will still be what it is, but Gemini might handle it)
+  const supportedMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+  let geminiMimeType = mimeType;
+  if (!supportedMimeTypes.includes(mimeType)) {
+    logger.info(`Unsupported mimeType ${mimeType} for Gemini, using image/jpeg`);
+    geminiMimeType = "image/jpeg";
+  }
+
   const prompt = `You are an expert receipt parser. Analyze this receipt image carefully and extract the key information.
 
 IMPORTANT: Look for the FINAL TOTAL amount on the receipt - this is usually labeled as "Total", "Grand Total", "Amount Due", or similar. Do NOT use subtotals or individual item prices.
@@ -378,7 +436,11 @@ If a field cannot be determined, set it to null. Return ONLY the JSON object.`;
 
   const base64Image = fileBuffer.toString("base64");
 
-  logger.info("Calling Gemini 2.5 Flash for receipt extraction");
+  logger.info("Calling Gemini 2.5 Flash for receipt extraction", {
+    originalMimeType: mimeType,
+    geminiMimeType,
+    bufferSize: fileBuffer.length,
+  });
 
   const result = await model.generateContent({
     contents: [
@@ -387,7 +449,7 @@ If a field cannot be determined, set it to null. Return ONLY the JSON object.`;
         parts: [
           {
             inlineData: {
-              mimeType,
+              mimeType: geminiMimeType,
               data: base64Image,
             },
           },
