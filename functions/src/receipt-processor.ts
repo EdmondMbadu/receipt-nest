@@ -12,7 +12,6 @@ import { DocumentProcessorServiceClient } from "@google-cloud/documentai";
 import { VertexAI } from "@google-cloud/vertexai";
 import sharp from "sharp";
 import heicDecode from "heic-decode";
-import jpeg from "jpeg-js";
 
 // Types
 interface ExtractedField<T> {
@@ -148,19 +147,24 @@ export const processReceipt = onDocumentCreated(
         if (!converted) {
           try {
             const { width, height, data } = await heicDecode({ buffer: fileBuffer });
-            logger.info(`HEIC decoded: ${width}x${height}`);
+            logger.info(`HEIC decoded: ${width}x${height}, data length: ${data.length}`);
 
-            // Encode as JPEG using jpeg-js
-            const rawImageData = {
-              data: Buffer.from(data),
-              width,
-              height,
-            };
-            const jpegData = jpeg.encode(rawImageData, 90);
-            processBuffer = jpegData.data;
+            // heic-decode returns RGBA data (4 channels)
+            // Use sharp to properly encode as JPEG with correct color handling
+            const jpegBuffer = await sharp(Buffer.from(data), {
+              raw: {
+                width,
+                height,
+                channels: 4, // RGBA
+              },
+            })
+              .jpeg({ quality: 90 })
+              .toBuffer();
+
+            processBuffer = jpegBuffer;
             processMimeType = "image/jpeg";
             converted = true;
-            logger.info(`HEIC conversion with heic-decode successful, new size: ${processBuffer.length} bytes`);
+            logger.info(`HEIC conversion with heic-decode + sharp successful, new size: ${processBuffer.length} bytes`);
           } catch (heicDecodeError: unknown) {
             const errorMessage = heicDecodeError instanceof Error ? heicDecodeError.message : String(heicDecodeError);
             logger.error(`heic-decode conversion also failed: ${errorMessage}`);
