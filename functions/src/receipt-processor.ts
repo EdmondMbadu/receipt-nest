@@ -10,7 +10,7 @@ import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import { DocumentProcessorServiceClient } from "@google-cloud/documentai";
 import { VertexAI } from "@google-cloud/vertexai";
-import convert from "heic-convert";
+import sharp from "sharp";
 
 // Types
 interface ExtractedField<T> {
@@ -119,12 +119,10 @@ export const processReceipt = onDocumentCreated(
       if (mimeType === "image/heic" || mimeType === "image/heif") {
         logger.info("Converting HEIC/HEIF to JPEG...");
         try {
-          const jpegBuffer = await convert({
-            buffer: fileBuffer,
-            format: "JPEG",
-            quality: 0.9
-          });
-          processBuffer = Buffer.from(jpegBuffer);
+          const jpegBuffer = await sharp(fileBuffer)
+            .jpeg({ quality: 90 })
+            .toBuffer();
+          processBuffer = jpegBuffer;
           mimeType = "image/jpeg";
           logger.info(`HEIC conversion complete, new size: ${processBuffer.length} bytes`);
         } catch (heicError) {
