@@ -53,6 +53,7 @@ const VERTEX_LOCATION = "us-central1"; // Vertex AI location
 
 // Confidence thresholds
 const HIGH_CONFIDENCE_THRESHOLD = 0.8;
+const PDF_HIGH_CONFIDENCE_THRESHOLD = 0.65; // Lower threshold for PDFs since they're typically cleaner
 const LOW_CONFIDENCE_THRESHOLD = 0.5;
 
 // Default categories for classification
@@ -235,7 +236,10 @@ export const processReceipt = onDocumentCreated(
       );
 
       // Step 5: Determine final status
-      const status = extraction.overallConfidence >= HIGH_CONFIDENCE_THRESHOLD
+      // Use lower threshold for PDFs since they're typically cleaner and more machine-readable
+      const isPdf = mimeType === "application/pdf";
+      const confidenceThreshold = isPdf ? PDF_HIGH_CONFIDENCE_THRESHOLD : HIGH_CONFIDENCE_THRESHOLD;
+      const status = extraction.overallConfidence >= confidenceThreshold
         ? "final"
         : "needs_review";
 
@@ -492,7 +496,7 @@ If a field cannot be determined, set it to null. Return ONLY the JSON object.`;
     confidence: parsed.confidence,
   });
 
-  const confidence = (typeof parsed.confidence === 'number' ? parsed.confidence : 0.7);
+  let confidence = (typeof parsed.confidence === 'number' ? parsed.confidence : 0.7);
 
   // Parse total amount - handle both number and string values
   let totalAmountValue: number | undefined;
@@ -513,6 +517,15 @@ If a field cannot be determined, set it to null. Return ONLY the JSON object.`;
 
   // Parse merchant name
   const merchantValue = parsed.merchant != null ? String(parsed.merchant).trim() : undefined;
+
+  // Boost confidence for PDFs when all critical fields are successfully extracted
+  const isPdf = mimeType === "application/pdf";
+  const hasAllCriticalFields = totalAmountValue !== undefined && merchantValue && parsed.date;
+  if (isPdf && hasAllCriticalFields && confidence < 0.85) {
+    // PDFs are cleaner and more machine-readable, so boost confidence when extraction is complete
+    confidence = Math.max(confidence, 0.85);
+    logger.info("Boosted confidence for complete PDF extraction", { originalConfidence: parsed.confidence, boostedConfidence: confidence });
+  }
 
   return {
     source: "gemini",
