@@ -187,25 +187,27 @@
       <!-- Total Spending - First Card (Most Important) with Month Picker -->
       <div
         class="relative rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <button type="button" (click)="toggleMonthPickerCard()"
-          class="inline-flex items-center gap-0.5 text-[10px] sm:text-xs uppercase tracking-[0.14em] text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition-colors">
-          {{ selectedMonthLabel() }}
-          <svg class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        <!-- Month Picker Dropdown -->
-        <div *ngIf="showMonthPickerCard()"
-          class="absolute left-0 top-full mt-1 z-30 w-48 max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
-          <button *ngFor="let month of availableMonths()" type="button"
-            (click)="selectMonthFromCard(month.year, month.month)"
-            class="w-full px-3 py-2 text-left text-xs hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors"
-            [class.bg-emerald-50]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
-            [class.dark:bg-slate-700]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
-            [class.text-emerald-600]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
-            [class.dark:text-emerald-400]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()">
-            {{ month.label }}
+        <div class="relative inline-block">
+          <button type="button" (click)="toggleMonthPickerCard()"
+            class="inline-flex items-center gap-0.5 text-[10px] sm:text-xs uppercase tracking-[0.14em] text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition-colors">
+            {{ selectedMonthLabel() }}
+            <svg class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
           </button>
+          <!-- Month Picker Dropdown -->
+          <div *ngIf="showMonthPickerCard()"
+            class="absolute left-0 top-full mt-0.5 z-30 w-48 max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
+            <button *ngFor="let month of availableMonths()" type="button"
+              (click)="selectMonthFromCard(month.year, month.month)"
+              class="w-full px-3 py-2 text-left text-xs hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors"
+              [class.bg-emerald-50]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
+              [class.dark:bg-slate-700]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
+              [class.text-emerald-600]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
+              [class.dark:text-emerald-400]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()">
+              {{ month.label }}
+            </button>
+          </div>
         </div>
         <p class="mt-1 text-lg sm:text-2xl font-semibold text-emerald-600 dark:text-emerald-400">{{
           formatCurrency(selectedMonthSpend()) }}</p>
@@ -255,7 +257,7 @@
             </button>
             <!-- Month Picker Dropdown Menu -->
             <div *ngIf="showMonthPickerGraph()"
-              class="absolute left-0 top-full mt-1 z-20 w-48 max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
+              class="absolute left-0 top-full mt-0.5 z-20 w-48 max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
               <button *ngFor="let month of availableMonths()" type="button"
                 (click)="selectMonthFromGraph(month.year, month.month)"
                 class="w-full px-3 py-2 text-left text-xs hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors"
