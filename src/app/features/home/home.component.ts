@@ -30,6 +30,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly showUploadModal = signal(false);
   readonly showMonthPicker = signal(false);
   readonly searchQuery = signal('');
+  readonly searchFocused = signal(false);
 
   // Receipts from service
   readonly receipts = this.receiptService.receipts;
@@ -153,6 +154,18 @@ export class HomeComponent implements OnInit, OnDestroy {
       return merchantMatch || amountMatch || dateMatch || fileMatch;
     });
   });
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+    this.searchFocused.set(false);
+  }
+
+  onSearchBlur(): void {
+    // Delay to allow clicking on results
+    setTimeout(() => {
+      this.searchFocused.set(false);
+    }, 200);
+  }
 
   // Recent receipts (last 5) - now uses filtered if searching
   readonly recentReceipts = computed(() => {

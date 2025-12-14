@@ -50,24 +50,72 @@
       </div>
     </header>
 
-    <!-- Search Bar -->
+    <!-- Search Bar with Dropdown Results -->
     <div class="relative">
-      <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+      <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
         <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </div>
       <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+        (focus)="searchFocused.set(true)" (blur)="onSearchBlur()"
         placeholder="Search receipts by merchant, amount, or date..."
-        class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-12 pr-4 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder-slate-500 transition-colors" />
-      <button *ngIf="searchQuery()" type="button" (click)="searchQuery.set('')"
-        class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+        class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-12 pr-10 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder-slate-500 transition-colors" />
+      <button *ngIf="searchQuery()" type="button" (click)="clearSearch()"
+        class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 z-10">
         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
+
+      <!-- Search Results Dropdown -->
+      <div *ngIf="searchQuery() && searchFocused() && filteredReceipts().length > 0"
+        class="absolute top-full left-0 right-0 mt-2 z-30 max-h-80 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
+        <div class="p-2">
+          <p class="px-3 py-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+            {{ filteredReceipts().length }} result{{ filteredReceipts().length === 1 ? '' : 's' }}
+          </p>
+          <a *ngFor="let receipt of filteredReceipts().slice(0, 8)" [routerLink]="['/app/receipt', receipt.id]"
+            (click)="clearSearch()"
+            class="flex items-center justify-between rounded-lg px-3 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors">
+            <div class="flex items-center gap-3 min-w-0">
+              <div
+                class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-sm">
+                {{ getCategoryIcon(receipt.category?.id) }}
+              </div>
+              <div class="min-w-0">
+                <p class="font-medium text-sm text-slate-900 dark:text-slate-100 truncate">
+                  {{ receipt.merchant?.canonicalName || receipt.file.originalName || 'Processing...' }}
+                </p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                  {{ receipt.date || 'No date' }}
+                  <span *ngIf="receipt.category"> • {{ receipt.category.name }}</span>
+                </p>
+              </div>
+            </div>
+            <div class="text-right flex-shrink-0 ml-3">
+              <p class="font-semibold text-sm text-slate-900 dark:text-slate-100">
+                {{ receipt.totalAmount ? formatCurrency(receipt.totalAmount) : '-' }}
+              </p>
+            </div>
+          </a>
+          <div *ngIf="filteredReceipts().length > 8"
+            class="px-3 py-2 text-xs text-center text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800 mt-1">
+            +{{ filteredReceipts().length - 8 }} more results
+          </div>
+        </div>
+      </div>
+
+      <!-- No Results in Dropdown -->
+      <div *ngIf="searchQuery() && searchFocused() && filteredReceipts().length === 0"
+        class="absolute top-full left-0 right-0 mt-2 z-30 rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900 p-4 text-center">
+        <p class="text-sm text-slate-500 dark:text-slate-400">No receipts found matching "{{ searchQuery() }}"</p>
+      </div>
     </div>
+
+    <!-- Backdrop for search dropdown -->
+    <div *ngIf="searchQuery() && searchFocused()" (click)="searchFocused.set(false)" class="fixed inset-0 z-20"></div>
 
     <!-- Month Selector with Picker -->
     <div class="flex items-center justify-center gap-3 relative">

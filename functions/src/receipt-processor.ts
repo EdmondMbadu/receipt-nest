@@ -10,6 +10,7 @@ import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import { DocumentProcessorServiceClient } from "@google-cloud/documentai";
 import { VertexAI } from "@google-cloud/vertexai";
+import convert from "heic-convert";
 
 // Types
 interface ExtractedField<T> {
@@ -109,16 +110,35 @@ export const processReceipt = onDocumentCreated(
       const bucket = admin.storage().bucket();
       const file = bucket.file(storagePath);
       const [fileBuffer] = await file.download();
-      const mimeType = receiptData.file?.mimeType || "application/octet-stream";
+      let mimeType = receiptData.file?.mimeType || "application/octet-stream";
 
-      logger.info(`Downloaded file: ${storagePath}, size: ${fileBuffer.length} bytes`);
+      logger.info(`Downloaded file: ${storagePath}, size: ${fileBuffer.length} bytes, mimeType: ${mimeType}`);
+
+      // Convert HEIC/HEIF to JPEG for processing
+      let processBuffer = fileBuffer;
+      if (mimeType === "image/heic" || mimeType === "image/heif") {
+        logger.info("Converting HEIC/HEIF to JPEG...");
+        try {
+          const jpegBuffer = await convert({
+            buffer: fileBuffer,
+            format: "JPEG",
+            quality: 0.9
+          });
+          processBuffer = Buffer.from(jpegBuffer);
+          mimeType = "image/jpeg";
+          logger.info(`HEIC conversion complete, new size: ${processBuffer.length} bytes`);
+        } catch (heicError) {
+          logger.error("HEIC conversion failed, attempting with original file", heicError);
+          // Continue with original buffer, Gemini might still be able to process it
+        }
+      }
 
       // Step 1: Try Document AI extraction
       let extraction: ExtractionResult | null = null;
 
       if (PROCESSOR_ID) {
         try {
-          extraction = await extractWithDocumentAI(fileBuffer, mimeType);
+          extraction = await extractWithDocumentAI(processBuffer, mimeType);
           logger.info("Document AI extraction complete", { confidence: extraction.overallConfidence });
         } catch (error) {
           logger.warn("Document AI extraction failed, falling back to Gemini", error);
@@ -130,7 +150,7 @@ export const processReceipt = onDocumentCreated(
       // Step 2: If Document AI failed or low confidence, use Gemini
       if (!extraction || extraction.overallConfidence < LOW_CONFIDENCE_THRESHOLD) {
         try {
-          const geminiExtraction = await extractWithGemini(fileBuffer, mimeType);
+          const geminiExtraction = await extractWithGemini(processBuffer, mimeType);
           if (!extraction || geminiExtraction.overallConfidence > extraction.overallConfidence) {
             extraction = geminiExtraction;
             logger.info("Using Gemini extraction", { confidence: extraction.overallConfidence });
