@@ -306,27 +306,39 @@ async function extractWithGemini(
   });
 
   const model = vertexAI.getGenerativeModel({
-    model: "gemini-2.0-flash-exp", // Using Gemini 2.0 Flash (latest available)
+    model: "gemini-2.5-flash-preview-05-20", // Gemini 2.5 Flash - better accuracy for receipts
+    generationConfig: {
+      temperature: 0.1, // Low temperature for more consistent extraction
+      maxOutputTokens: 1024,
+      responseMimeType: "application/json", // Force JSON output
+    },
   });
 
-  const prompt = `Analyze this receipt image and extract the following information.
-Return ONLY a valid JSON object with these exact fields:
+  const prompt = `You are an expert receipt parser. Analyze this receipt image carefully and extract the key information.
+
+IMPORTANT: Look for the FINAL TOTAL amount on the receipt - this is usually labeled as "Total", "Grand Total", "Amount Due", or similar. Do NOT use subtotals or individual item prices.
+
+Return a JSON object with these exact fields:
 {
-  "merchant": "Store or business name",
-  "total": 123.45,
+  "merchant": "The store or business name (look at the top of the receipt)",
+  "total": 0.00,
   "currency": "USD",
   "date": "YYYY-MM-DD",
   "confidence": 0.95
 }
 
-Rules:
-- "total" must be a number (the final total amount paid)
-- "date" must be in YYYY-MM-DD format
-- "confidence" is your confidence in the extraction accuracy (0 to 1)
-- If you cannot determine a value, use null
-- Do not include any explanation, only the JSON object`;
+Field requirements:
+- "merchant": The business name. Look for logos, headers, or store names at the top.
+- "total": A NUMBER representing the final total paid. Parse from text like "$45.67" → 45.67
+- "currency": The currency code (default to "USD" for US receipts)
+- "date": The transaction date in YYYY-MM-DD format
+- "confidence": Your confidence in the extraction (0.0 to 1.0)
+
+If a field cannot be determined, set it to null. Return ONLY the JSON object.`;
 
   const base64Image = fileBuffer.toString("base64");
+
+  logger.info("Calling Gemini 2.5 Flash for receipt extraction");
 
   const result = await model.generateContent({
     contents: [
@@ -348,25 +360,53 @@ Rules:
   const response = result.response;
   const text = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-  // Parse JSON from response
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error("Could not parse JSON from Gemini response");
+  logger.info("Gemini raw response", { text: text.substring(0, 500) });
+
+  // Parse JSON from response - with responseMimeType set, the response should be clean JSON
+  let parsed: Record<string, unknown>;
+  try {
+    // First try direct parse (should work with responseMimeType: "application/json")
+    parsed = JSON.parse(text);
+  } catch {
+    // Fallback: extract JSON from markdown code blocks or text
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      logger.error("Could not parse JSON from Gemini response", { text });
+      throw new Error("Could not parse JSON from Gemini response");
+    }
+    const jsonStr = jsonMatch[1] || jsonMatch[0];
+    parsed = JSON.parse(jsonStr);
   }
 
-  const parsed = JSON.parse(jsonMatch[0]);
-  const confidence = parsed.confidence || 0.7;
+  logger.info("Gemini parsed response", {
+    merchant: parsed.merchant,
+    total: parsed.total,
+    totalType: typeof parsed.total,
+    date: parsed.date,
+    confidence: parsed.confidence,
+  });
+
+  const confidence = (typeof parsed.confidence === 'number' ? parsed.confidence : 0.7);
 
   // Parse total amount - handle both number and string values
   let totalAmountValue: number | undefined;
   if (parsed.total != null) {
-    const numValue = typeof parsed.total === 'string'
-      ? parseFloat(parsed.total.replace(/[^0-9.-]/g, ''))
-      : parsed.total;
-    if (!isNaN(numValue)) {
+    const rawTotal = parsed.total;
+    const numValue = typeof rawTotal === 'string'
+      ? parseFloat(String(rawTotal).replace(/[^0-9.-]/g, ''))
+      : Number(rawTotal);
+    if (!isNaN(numValue) && numValue > 0) {
       totalAmountValue = numValue;
+      logger.info("Parsed total amount", { raw: rawTotal, parsed: numValue });
+    } else {
+      logger.warn("Failed to parse total amount", { raw: rawTotal, parsed: numValue });
     }
+  } else {
+    logger.warn("No total found in Gemini response");
   }
+
+  // Parse merchant name
+  const merchantValue = parsed.merchant != null ? String(parsed.merchant).trim() : undefined;
 
   return {
     source: "gemini",
@@ -375,13 +415,13 @@ Rules:
       ? { value: totalAmountValue, confidence, rawText: String(parsed.total) }
       : undefined,
     currency: parsed.currency
-      ? { value: parsed.currency, confidence }
+      ? { value: String(parsed.currency), confidence }
       : { value: "USD", confidence: 0.5 },
     date: parsed.date
-      ? { value: parsed.date, confidence }
+      ? { value: String(parsed.date), confidence }
       : undefined,
-    supplierName: parsed.merchant
-      ? { value: parsed.merchant, confidence, rawText: parsed.merchant }
+    supplierName: merchantValue
+      ? { value: merchantValue, confidence, rawText: merchantValue }
       : undefined,
     overallConfidence: confidence,
   };
