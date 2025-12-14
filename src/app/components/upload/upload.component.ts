@@ -75,7 +75,7 @@ export class UploadComponent {
   }
 
   // Handle selected file
-  private handleFile(file: File): void {
+  private async handleFile(file: File): Promise<void> {
     this.errorMessage.set(null);
 
     // Validate file
@@ -91,15 +91,50 @@ export class UploadComponent {
     const isHeic = file.type === 'image/heic' || file.type === 'image/heif' ||
       file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif');
 
-    // Create preview for images (except HEIC which browsers can't render)
-    if (file.type.startsWith('image/') && !isHeic) {
+    // Create preview for images
+    if (file.type.startsWith('image/')) {
+      if (isHeic) {
+        // Convert HEIC to JPEG for preview
+        await this.convertHeicForPreview(file);
+      } else {
+        // Regular image - show directly
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.previewUrl.set(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    } else {
+      // PDF - show icon instead
+      this.previewUrl.set(null);
+    }
+  }
+
+  // Convert HEIC to JPEG for preview using heic2any
+  private async convertHeicForPreview(file: File): Promise<void> {
+    try {
+      // Dynamically import heic2any
+      const heic2any = (await import('heic2any')).default;
+
+      // Convert HEIC to JPEG blob
+      const convertedBlob = await heic2any({
+        blob: file,
+        toType: 'image/jpeg',
+        quality: 0.9
+      });
+
+      // Handle both single blob and array of blobs
+      const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+
+      // Create preview URL from converted blob
       const reader = new FileReader();
       reader.onload = (e) => {
         this.previewUrl.set(e.target?.result as string);
       };
-      reader.readAsDataURL(file);
-    } else {
-      // PDF or HEIC - show icon instead
+      reader.readAsDataURL(blob);
+    } catch (error) {
+      console.error('Failed to convert HEIC for preview:', error);
+      // If conversion fails, just show no preview
       this.previewUrl.set(null);
     }
   }

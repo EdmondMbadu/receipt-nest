@@ -34,6 +34,7 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
   readonly imageUrl = signal<string | null>(null);
   readonly safeImageUrl = signal<SafeResourceUrl | null>(null);
   readonly showImageModal = signal(false);
+  readonly heicPreviewUrl = signal<string | null>(null); // Converted HEIC preview
 
   // Edit form values
   readonly editMerchant = signal('');
@@ -95,6 +96,11 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
           this.imageUrl.set(url);
           // Create sanitized URL for iframe (PDF viewing)
           this.safeImageUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(url));
+
+          // If it's a HEIC file, convert it for preview
+          if (this.isHeic()) {
+            await this.convertHeicForPreview(url);
+          }
         } catch (e) {
           console.warn('Could not load receipt image:', e);
         }
@@ -259,5 +265,35 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
     return mimeType === 'application/msword' ||
       mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
       fileName.endsWith('.doc') || fileName.endsWith('.docx');
+  }
+
+  // Convert HEIC to JPEG for preview using heic2any
+  private async convertHeicForPreview(url: string): Promise<void> {
+    try {
+      // Fetch the HEIC file as a blob
+      const response = await fetch(url);
+      const heicBlob = await response.blob();
+
+      // Dynamically import heic2any
+      const heic2any = (await import('heic2any')).default;
+
+      // Convert HEIC to JPEG blob
+      const convertedBlob = await heic2any({
+        blob: heicBlob,
+        toType: 'image/jpeg',
+        quality: 0.9
+      });
+
+      // Handle both single blob and array of blobs
+      const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+
+      // Create object URL for the converted image
+      const jpegUrl = URL.createObjectURL(blob);
+      this.heicPreviewUrl.set(jpegUrl);
+    } catch (error) {
+      console.error('Failed to convert HEIC for preview:', error);
+      // If conversion fails, just show no preview
+      this.heicPreviewUrl.set(null);
+    }
   }
 }
