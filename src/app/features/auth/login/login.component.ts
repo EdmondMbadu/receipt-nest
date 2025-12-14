@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -16,6 +16,7 @@ export class LoginComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly form = this.formBuilder.group({
     email: ['', [Validators.required, Validators.email]],
@@ -62,23 +63,49 @@ export class LoginComponent {
 
     this.resetMessage = '';
     this.resetErrorMessage = '';
+    this.detectChanges();
+    const email = (emailControl.value ?? '').trim();
 
-    if (!emailControl.value || emailControl.invalid) {
+    if (!email || emailControl.invalid) {
       emailControl.markAsTouched();
       this.resetErrorMessage = 'Enter your email above to reset your password.';
+      this.detectChanges();
       return;
     }
 
     this.isSendingReset = true;
+    this.detectChanges();
 
     try {
-      await this.authService.sendPasswordReset(emailControl.value);
-      this.resetMessage = 'Reset link sent! Check your inbox.';
+      await this.authService.sendPasswordReset(email);
+      this.resetMessage =
+        `We sent a reset link to ${email}. Check your inbox to finish resetting your password, then sign in with the new one.`;
+      this.resetErrorMessage = '';
+      this.detectChanges();
     } catch (error: any) {
       this.resetErrorMessage = error?.message ?? 'Unable to send reset link right now.';
+      this.detectChanges();
     } finally {
       this.isSendingReset = false;
+      this.detectChanges();
     }
+  }
+
+  clearResetMessages() {
+    this.resetMessage = '';
+    this.resetErrorMessage = '';
+  }
+
+  get resetButtonLabel(): string {
+    if (this.isSendingReset) {
+      return 'Sending reset link…';
+    }
+
+    if (this.resetMessage) {
+      return 'Link sent! Check your email (tap to resend)';
+    }
+
+    return 'Forgot password?';
   }
 
   async signInWithGoogle() {
@@ -95,5 +122,8 @@ export class LoginComponent {
       this.isSubmitting = false;
     }
   }
-}
 
+  private detectChanges() {
+    this.cdr.detectChanges();
+  }
+}
