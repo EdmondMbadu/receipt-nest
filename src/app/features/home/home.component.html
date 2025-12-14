@@ -1,60 +1,87 @@
 <div class="min-h-screen bg-gradient-to-b from-slate-50 to-white px-3 py-4 sm:px-4 sm:py-8 dark:from-slate-900 dark:to-slate-950/70">
   <div class="mx-auto max-w-5xl space-y-4 sm:space-y-6">
-    <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div class="flex items-center justify-between sm:justify-start gap-2 sm:gap-3">
-        <a routerLink="/app" class="inline-flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial">
-          <img src="assets/receipt-nest.png" alt="ReceiptNest Logo" class="h-10 w-10 sm:h-12 sm:w-12 object-contain flex-shrink-0" />
+    <!-- Mobile Header -->
+    <header class="sm:hidden">
+      <div class="flex items-center justify-between gap-2">
+        <a routerLink="/app" class="inline-flex items-center gap-2 min-w-0 flex-1">
+          <img src="assets/receipt-nest.png" alt="ReceiptNest Logo" class="h-10 w-10 object-contain flex-shrink-0" />
           <div class="min-w-0">
-            <p class="text-[10px] sm:text-xs uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">Receipt dashboard</p>
-            <h1 class="text-sm sm:text-xl font-semibold text-slate-900 dark:text-slate-50 truncate">Welcome, {{ displayName() }} 👋</h1>
+            <p class="text-[10px] uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">Dashboard</p>
+            <h1 class="text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">Welcome 👋</h1>
           </div>
         </a>
-        <div class="flex items-center gap-2 sm:hidden">
-          <button type="button" (click)="toggleTheme()"
-            class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-base dark:border-slate-700 dark:bg-slate-900 flex-shrink-0"
-            aria-label="Toggle theme">
-            {{ isDarkMode() ? '☀️' : '🌙' }}
-          </button>
-          <div class="relative">
-            <button type="button" (click)="toggleMenu()"
-              class="relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-sm font-semibold uppercase text-white shadow-md shadow-emerald-500/30 ring-2 ring-emerald-100 transition hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500 dark:ring-emerald-900 flex-shrink-0"
-              aria-haspopup="menu" [attr.aria-expanded]="menuOpen()">
-              {{ userInitials() }}
-              <span
-                class="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border border-white/70 bg-slate-900/90 text-[9px] font-semibold text-white shadow-md ring-2 ring-emerald-500/40 transition hover:bg-slate-800 hover:text-white dark:border-slate-700 dark:bg-slate-800 dark:ring-emerald-700/50 cursor-pointer">
-                ▼
-              </span>
-            </button>
 
-            <div *ngIf="menuOpen()"
-              class="absolute right-0 z-10 mt-3 w-56 sm:w-64 overflow-hidden rounded-xl border border-slate-200/80 bg-white/95 shadow-lg ring-1 ring-emerald-100 backdrop-blur dark:border-slate-800/80 dark:bg-slate-900/95 dark:ring-slate-800">
-              <div class="border-b border-slate-100/80 px-4 py-3 dark:border-slate-800/80">
-                <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">{{ displayName() || 'Account' }}</p>
-                <p class="truncate text-xs text-slate-500 dark:text-slate-300">{{ user()?.email }}</p>
-              </div>
-              <button type="button" (click)="logout()"
-                class="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-100 dark:hover:bg-slate-800/80">
-                <span>Log out</span>
-              </button>
-            </div>
-          </div>
+        <!-- Hamburger Menu Button -->
+        <button type="button" (click)="toggleMenu()"
+          class="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+          aria-label="Menu">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mobile Menu Dropdown -->
+      <div *ngIf="menuOpen()"
+        class="absolute left-3 right-3 top-16 z-50 overflow-hidden rounded-xl border border-slate-200/80 bg-white/95 shadow-2xl backdrop-blur dark:border-slate-800/80 dark:bg-slate-900/95">
+        <div class="border-b border-slate-100/80 px-4 py-3 dark:border-slate-800/80">
+          <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">{{ displayName() || 'Account' }}</p>
+          <p class="truncate text-xs text-slate-500 dark:text-slate-300">{{ user()?.email }}</p>
+        </div>
+
+        <div class="p-2">
+          <button type="button" (click)="openUploadModal(); toggleMenu()"
+            class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-100 dark:hover:bg-slate-800/80">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Add Receipt</span>
+          </button>
+
+          <button type="button" (click)="toggleTheme()"
+            class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:text-slate-100 dark:hover:bg-slate-800/80">
+            <span class="text-lg">{{ isDarkMode() ? '☀️' : '🌙' }}</span>
+            <span>{{ isDarkMode() ? 'Light mode' : 'Dark mode' }}</span>
+          </button>
+
+          <div class="my-2 border-t border-slate-200 dark:border-slate-800"></div>
+
+          <button type="button" (click)="logout()"
+            class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-medium text-red-600 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span>Log out</span>
+          </button>
         </div>
       </div>
-      <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Upload Button - Always Visible -->
+    </header>
+
+    <!-- Desktop Header -->
+    <header class="hidden sm:flex sm:items-center sm:justify-between">
+      <div class="flex items-center gap-3">
+        <a routerLink="/app" class="inline-flex items-center gap-3">
+          <img src="assets/receipt-nest.png" alt="ReceiptNest Logo" class="h-12 w-12 object-contain" />
+          <div>
+            <p class="text-xs uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">Receipt dashboard</p>
+            <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-50">Welcome, {{ displayName() }} 👋</h1>
+          </div>
+        </a>
+      </div>
+      <div class="flex items-center gap-3">
         <button type="button" (click)="openUploadModal()"
-          class="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-md shadow-emerald-500/30 transition hover:bg-emerald-600 dark:text-slate-950 flex-1 sm:flex-initial">
+          class="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 transition hover:bg-emerald-600 dark:text-slate-950">
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
           <span>Add Receipt</span>
         </button>
         <button type="button" (click)="toggleTheme()"
-          class="hidden sm:inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-base dark:border-slate-700 dark:bg-slate-900 flex-shrink-0"
+          class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-base dark:border-slate-700 dark:bg-slate-900"
           aria-label="Toggle theme">
           {{ isDarkMode() ? '☀️' : '🌙' }}
         </button>
-        <div class="relative hidden sm:block">
+        <div class="relative">
           <button type="button" (click)="toggleMenu()"
             class="relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500 text-sm font-semibold uppercase text-white shadow-md shadow-emerald-500/30 ring-2 ring-emerald-100 transition hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500 dark:ring-emerald-900"
             aria-haspopup="menu" [attr.aria-expanded]="menuOpen()">
@@ -79,6 +106,9 @@
         </div>
       </div>
     </header>
+
+    <!-- Backdrop for mobile menu -->
+    <div *ngIf="menuOpen()" (click)="toggleMenu()" class="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm sm:hidden"></div>
 
     <!-- Search Bar with Dropdown Results -->
     <div class="relative">
