@@ -427,13 +427,13 @@
         <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-1 sm:gap-2">
           <div *ngFor="let receipt of monthGroup.receipts; trackBy: trackReceipt"
             class="relative aspect-square rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 cursor-pointer group transition-all duration-300 ease-out"
-            [class.opacity-20]="selectedDay() && !isReceiptForSelectedDay(receipt)"
-            [class.scale-95]="selectedDay() && !isReceiptForSelectedDay(receipt)"
-            [class.ring-2]="selectedDay() && isReceiptForSelectedDay(receipt)"
-            [class.ring-emerald-500]="selectedDay() && isReceiptForSelectedDay(receipt)"
-            [class.shadow-lg]="selectedDay() && isReceiptForSelectedDay(receipt)"
-            [class.shadow-emerald-500/30]="selectedDay() && isReceiptForSelectedDay(receipt)"
-            [class.z-10]="selectedDay() && isReceiptForSelectedDay(receipt)"
+            [class.opacity-20]="(selectedDay() || hoveredDay()) && !isReceiptForActiveDay(receipt)"
+            [class.scale-95]="(selectedDay() || hoveredDay()) && !isReceiptForActiveDay(receipt)"
+            [class.ring-2]="(selectedDay() || hoveredDay()) && isReceiptForActiveDay(receipt)"
+            [class.ring-emerald-500]="(selectedDay() || hoveredDay()) && isReceiptForActiveDay(receipt)"
+            [class.shadow-lg]="(selectedDay() || hoveredDay()) && isReceiptForActiveDay(receipt)"
+            [class.shadow-emerald-500/30]="(selectedDay() || hoveredDay()) && isReceiptForActiveDay(receipt)"
+            [class.z-10]="(selectedDay() || hoveredDay()) && isReceiptForActiveDay(receipt)"
             (click)="navigateToReceipt(receipt.id)">
 
             <!-- Loading Placeholder (for both PDFs and images) -->

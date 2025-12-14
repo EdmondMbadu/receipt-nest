@@ -280,8 +280,26 @@ export class HomeComponent implements OnInit, OnDestroy {
   });
 
   // Get visible month groups based on infinite scroll
+  // Prioritizes the selected month to appear first
   readonly visibleMonthGroups = computed(() => {
-    return this.receiptsGroupedByMonth().slice(0, this.visibleMonthCount());
+    const allGroups = this.receiptsGroupedByMonth();
+    const selectedMonth = this.receiptService.selectedMonth();
+    const selectedYear = this.receiptService.selectedYear();
+
+    // Find if the selected month exists in groups
+    const selectedIndex = allGroups.findIndex(
+      g => g.month === selectedMonth && g.year === selectedYear
+    );
+
+    // If selected month is found and not already first, reorder
+    if (selectedIndex > 0) {
+      const reordered = [...allGroups];
+      const [selectedGroup] = reordered.splice(selectedIndex, 1);
+      reordered.unshift(selectedGroup);
+      return reordered.slice(0, this.visibleMonthCount());
+    }
+
+    return allGroups.slice(0, this.visibleMonthCount());
   });
 
   // Spending by category for current month
@@ -633,6 +651,33 @@ export class HomeComponent implements OnInit, OnDestroy {
     return receiptDate.getDate() === selection.day &&
            receiptDate.getMonth() === selection.month &&
            receiptDate.getFullYear() === selection.year;
+  }
+
+  // Check if a receipt matches the active day (selected or hovered)
+  // Selected takes priority over hovered
+  isReceiptForActiveDay(receipt: Receipt): boolean {
+    const selection = this.selectedDay();
+    const hovered = this.hoveredDay();
+
+    // If there's a selection, use that
+    if (selection) {
+      return this.isReceiptForSelectedDay(receipt);
+    }
+
+    // If hovering, check against hovered day
+    if (hovered) {
+      if (!receipt.date) return false;
+
+      const receiptDate = new Date(receipt.date);
+      const selectedMonth = this.receiptService.selectedMonth();
+      const selectedYear = this.receiptService.selectedYear();
+
+      return receiptDate.getDate() === hovered.day &&
+             receiptDate.getMonth() === selectedMonth &&
+             receiptDate.getFullYear() === selectedYear;
+    }
+
+    return true; // No active day means all receipts are shown
   }
 
   // Get amount for a specific day from daily spending data
