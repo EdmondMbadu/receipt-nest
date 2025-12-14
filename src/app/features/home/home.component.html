@@ -110,7 +110,8 @@
     </header>
 
     <!-- Backdrop for mobile menu -->
-    <div *ngIf="menuOpen()" (click)="toggleMenu()" class="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm sm:hidden">
+    <div *ngIf="menuOpen()" (click)="toggleMenu()"
+      class="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm sm:hidden cursor-pointer">
     </div>
 
     <!-- Search Bar -->
@@ -178,7 +179,8 @@
     </div>
 
     <!-- Backdrop for search dropdown -->
-    <div *ngIf="searchQuery() && searchFocused()" (click)="searchFocused.set(false)" class="fixed inset-0 z-20"></div>
+    <div *ngIf="searchQuery() && searchFocused()" (click)="searchFocused.set(false)"
+      class="fixed inset-0 z-20 cursor-pointer"></div>
 
     <!-- Stats Summary Row -->
     <section class="grid gap-3 sm:gap-4 grid-cols-3">
@@ -278,7 +280,8 @@
             Total for {{ selectedMonthLabel() }}
           </p>
           <!-- Selected day indicator with clear button -->
-          <div *ngIf="!hoveredDay() && selectedDay() && selectedDay()!.month === receiptService.selectedMonth() && selectedDay()!.year === receiptService.selectedYear()"
+          <div
+            *ngIf="!hoveredDay() && selectedDay() && selectedDay()!.month === receiptService.selectedMonth() && selectedDay()!.year === receiptService.selectedYear()"
             class="flex items-center gap-2">
             <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
               Showing Day {{ selectedDay()!.day }} receipts
@@ -332,10 +335,10 @@
             stroke-linejoin="round" />
 
           <!-- Selected day indicator dot (persistent) -->
-          <circle *ngIf="selectedDay() && chartPathData().hasData && selectedDay()!.month === receiptService.selectedMonth() && selectedDay()!.year === receiptService.selectedYear()"
-            [attr.cx]="getChartX(selectedDay()!.day)"
-            [attr.cy]="getChartY(getAmountForDay(selectedDay()!.day))"
-            r="4" fill="#10b981" stroke="white" stroke-width="2" class="drop-shadow-md" />
+          <circle
+            *ngIf="selectedDay() && chartPathData().hasData && selectedDay()!.month === receiptService.selectedMonth() && selectedDay()!.year === receiptService.selectedYear()"
+            [attr.cx]="getChartX(selectedDay()!.day)" [attr.cy]="getChartY(getAmountForDay(selectedDay()!.day))" r="4"
+            fill="#10b981" stroke="white" stroke-width="2" class="drop-shadow-md" />
 
           <!-- Hover indicator dot -->
           <circle *ngIf="hoveredDay() && chartPathData().hasData" [attr.cx]="getChartX(hoveredDay()!.day)"
@@ -344,14 +347,14 @@
 
         <!-- Invisible hover areas for each day -->
         <div class="absolute inset-0 flex z-10">
-          <div *ngFor="let day of dailySpendingData()" class="flex-1 cursor-pointer"
-            (mouseenter)="hoveredDay.set(day)" (touchstart)="hoveredDay.set(day)"
-            (click)="onDayClick(day, $event)">
+          <div *ngFor="let day of dailySpendingData()" class="flex-1 cursor-pointer" (mouseenter)="hoveredDay.set(day)"
+            (touchstart)="hoveredDay.set(day)" (click)="onDayClick(day, $event)">
           </div>
         </div>
 
         <!-- Vertical selected day line (persistent) -->
-        <div *ngIf="selectedDay() && selectedDay()!.month === receiptService.selectedMonth() && selectedDay()!.year === receiptService.selectedYear()"
+        <div
+          *ngIf="selectedDay() && selectedDay()!.month === receiptService.selectedMonth() && selectedDay()!.year === receiptService.selectedYear()"
           class="absolute top-0 bottom-0 w-0.5 bg-emerald-500 pointer-events-none transition-all duration-300"
           [style.left.%]="((selectedDay()!.day - 1) / (dailySpendingData().length - 1)) * 100">
         </div>
@@ -374,11 +377,10 @@
 
     <!-- Backdrop for month pickers -->
     <div *ngIf="showMonthPickerCard() || showMonthPickerGraph()" (click)="closeAllMonthPickers()"
-      class="fixed inset-0 z-10"></div>
+      class="fixed inset-0 z-10 cursor-pointer"></div>
 
     <!-- Backdrop for day selection - click anywhere to clear -->
-    <div *ngIf="selectedDay()" (click)="clearDaySelection()"
-      class="fixed inset-0 z-0 cursor-pointer"></div>
+    <div *ngIf="selectedDay()" (click)="clearDaySelection()" class="fixed inset-0 z-0 cursor-pointer"></div>
 
     <!-- Loading State -->
     <div *ngIf="isLoadingReceipts()" class="flex items-center justify-center py-16">
@@ -424,7 +426,8 @@
               {{ monthGroup.label }}
             </h2>
             <!-- Show day amount when hovered or selected (only for matching month) -->
-            <span *ngIf="(hoveredDay() || selectedDay()) && monthGroup.month === receiptService.selectedMonth() && monthGroup.year === receiptService.selectedYear()"
+            <span
+              *ngIf="(hoveredDay() || selectedDay()) && monthGroup.month === receiptService.selectedMonth() && monthGroup.year === receiptService.selectedYear()"
               class="text-sm sm:text-base font-semibold text-emerald-600 dark:text-emerald-400 transition-opacity duration-200">
               · Day {{ hoveredDay()?.day || selectedDay()?.day }}: {{ formatCurrency(getActiveDayAmount()) }}
             </span>

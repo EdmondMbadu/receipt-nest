@@ -6,7 +6,8 @@
 /* You can add global styles to this file, and also import other style files */
 
 /* Prevent horizontal scrolling on mobile */
-html, body {
+html,
+body {
   overflow-x: hidden;
 }
 
@@ -19,4 +20,28 @@ body {
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+/* Cursor pointer for all clickable elements */
+button:not(:disabled):not([disabled]),
+a,
+[routerLink],
+[ng-reflect-router-link],
+label[for],
+input[type="file"],
+select:not(:disabled) {
+  cursor: pointer;
+}
+
+/* Disabled buttons should show not-allowed cursor */
+button:disabled,
+button[disabled],
+select:disabled {
+  cursor: not-allowed;
+}
+
+/* Ensure clickable divs and other elements also get pointer cursor */
+[ng-reflect-click],
+*[class*="cursor-pointer"] {
+  cursor: pointer;
 }
