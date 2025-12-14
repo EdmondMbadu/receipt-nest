@@ -270,14 +270,28 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
   // Convert HEIC to JPEG for preview using heic2any
   private async convertHeicForPreview(url: string): Promise<void> {
     try {
-      // Fetch the HEIC file as a blob
-      const response = await fetch(url);
-      const heicBlob = await response.blob();
+      console.log('Starting HEIC conversion, fetching from Firebase Storage...');
+
+      // Use XMLHttpRequest with CORS mode to fetch the file
+      // This works better with Firebase Storage signed URLs than fetch()
+      const heicBlob = await this.fetchBlobWithXHR(url);
+      console.log('Fetched blob, type:', heicBlob.type, 'size:', heicBlob.size);
+
+      // Check if the blob is actually a HEIC file
+      // Sometimes the backend might have already converted it
+      if (heicBlob.type === 'image/jpeg' || heicBlob.type === 'image/jpg') {
+        console.log('File is already JPEG, using directly');
+        const jpegUrl = URL.createObjectURL(heicBlob);
+        this.heicPreviewUrl.set(jpegUrl);
+        return;
+      }
 
       // Dynamically import heic2any
+      console.log('Importing heic2any...');
       const heic2any = (await import('heic2any')).default;
 
       // Convert HEIC to JPEG blob
+      console.log('Converting HEIC to JPEG...');
       const convertedBlob = await heic2any({
         blob: heicBlob,
         toType: 'image/jpeg',
@@ -286,14 +300,37 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
 
       // Handle both single blob and array of blobs
       const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+      console.log('Conversion successful, blob size:', blob.size);
 
       // Create object URL for the converted image
       const jpegUrl = URL.createObjectURL(blob);
       this.heicPreviewUrl.set(jpegUrl);
+      console.log('HEIC preview URL set successfully');
     } catch (error) {
       console.error('Failed to convert HEIC for preview:', error);
-      // If conversion fails, just show no preview
-      this.heicPreviewUrl.set(null);
+      // If conversion fails, just use the original URL as a fallback
+      // The browser may still be able to display it
+      this.heicPreviewUrl.set(url);
     }
+  }
+
+  // Fetch blob using XMLHttpRequest to avoid CORS issues with Firebase Storage
+  private fetchBlobWithXHR(url: string): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.responseType = 'blob';
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          resolve(xhr.response);
+        } else {
+          reject(new Error(`Failed to fetch: ${xhr.status} ${xhr.statusText}`));
+        }
+      };
+
+      xhr.onerror = () => reject(new Error('Network error'));
+      xhr.send();
+    });
   }
 }
