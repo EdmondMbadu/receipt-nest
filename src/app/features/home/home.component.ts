@@ -1,5 +1,6 @@
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
@@ -12,7 +13,7 @@ import { DEFAULT_CATEGORIES, getCategoryById, Category } from '../../models/cate
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink, UploadComponent],
+  imports: [CommonModule, FormsModule, RouterLink, UploadComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -27,6 +28,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly isDarkMode = this.theme.isDarkMode;
   readonly menuOpen = signal(false);
   readonly showUploadModal = signal(false);
+  readonly showMonthPicker = signal(false);
+  readonly searchQuery = signal('');
 
   // Receipts from service
   readonly receipts = this.receiptService.receipts;
@@ -92,8 +95,70 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.receiptService.goToCurrentMonth();
   }
 
-  // Recent receipts (last 5)
+  // Month picker
+  toggleMonthPicker(): void {
+    this.showMonthPicker.set(!this.showMonthPicker());
+  }
+
+  closeMonthPicker(): void {
+    this.showMonthPicker.set(false);
+  }
+
+  selectMonth(year: number, month: number): void {
+    this.receiptService.selectedYear.set(year);
+    this.receiptService.selectedMonth.set(month);
+    this.closeMonthPicker();
+  }
+
+  // Available months for picker (last 24 months)
+  readonly availableMonths = computed(() => {
+    const months: { year: number; month: number; label: string }[] = [];
+    const now = new Date();
+
+    for (let i = 0; i < 24; i++) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({
+        year: date.getFullYear(),
+        month: date.getMonth(),
+        label: date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      });
+    }
+
+    return months;
+  });
+
+  // Search functionality
+  readonly filteredReceipts = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    const receipts = this.receipts();
+
+    if (!query) {
+      return receipts.slice(0, 10); // Show last 10 when no search
+    }
+
+    return receipts.filter(r => {
+      // Search by merchant name
+      const merchantMatch = r.merchant?.canonicalName?.toLowerCase().includes(query) ||
+        r.merchant?.rawName?.toLowerCase().includes(query);
+
+      // Search by amount (as string)
+      const amountMatch = r.totalAmount?.toString().includes(query);
+
+      // Search by date
+      const dateMatch = r.date?.includes(query);
+
+      // Search by file name
+      const fileMatch = r.file?.originalName?.toLowerCase().includes(query);
+
+      return merchantMatch || amountMatch || dateMatch || fileMatch;
+    });
+  });
+
+  // Recent receipts (last 5) - now uses filtered if searching
   readonly recentReceipts = computed(() => {
+    if (this.searchQuery().trim()) {
+      return this.filteredReceipts();
+    }
     return this.receipts().slice(0, 5);
   });
 

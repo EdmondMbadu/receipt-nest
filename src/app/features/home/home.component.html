@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-gradient-to-b from-slate-50 to-white px-4 py-8 dark:from-slate-900 dark:to-slate-950/70">
-  <div class="mx-auto max-w-5xl space-y-8">
+  <div class="mx-auto max-w-5xl space-y-6">
     <header class="flex items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <a routerLink="/app" class="inline-flex items-center gap-3">
@@ -11,6 +11,14 @@
         </a>
       </div>
       <div class="flex items-center gap-3">
+        <!-- Upload Button - Always Visible -->
+        <button type="button" (click)="openUploadModal()"
+          class="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 transition hover:bg-emerald-600 dark:text-slate-950">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <span class="hidden sm:inline">Add Receipt</span>
+        </button>
         <button type="button" (click)="toggleTheme()"
           class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-base dark:border-slate-700 dark:bg-slate-900"
           aria-label="Toggle theme">
@@ -42,21 +50,68 @@
       </div>
     </header>
 
-    <!-- Month Selector -->
-    <div class="flex items-center justify-center gap-3">
+    <!-- Search Bar -->
+    <div class="relative">
+      <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+        <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+        placeholder="Search receipts by merchant, amount, or date..."
+        class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-12 pr-4 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder-slate-500 transition-colors" />
+      <button *ngIf="searchQuery()" type="button" (click)="searchQuery.set('')"
+        class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Month Selector with Picker -->
+    <div class="flex items-center justify-center gap-3 relative">
       <button type="button" (click)="goToPreviousMonth()"
         class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors">
         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
       </button>
-      <div class="text-center min-w-[160px]">
-        <p class="text-lg font-semibold text-slate-900 dark:text-white">{{ selectedMonthLabel() }}</p>
+
+      <!-- Clickable Month Label -->
+      <div class="text-center min-w-[180px] relative">
+        <button type="button" (click)="toggleMonthPicker()"
+          class="text-lg font-semibold text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors inline-flex items-center gap-2">
+          {{ selectedMonthLabel() }}
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
         <button *ngIf="!isCurrentMonth()" type="button" (click)="goToCurrentMonth()"
-          class="text-xs text-emerald-600 hover:text-emerald-700 dark:text-emerald-400">
+          class="block mx-auto text-xs text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 mt-1">
           Back to current month
         </button>
+
+        <!-- Month Picker Dropdown -->
+        <div *ngIf="showMonthPicker()"
+          class="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-20 w-64 max-h-80 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
+          <div class="p-2">
+            <button *ngFor="let m of availableMonths()" type="button" (click)="selectMonth(m.year, m.month)"
+              class="w-full text-left px-4 py-2 text-sm rounded-lg transition-colors"
+              [class.bg-emerald-100]="m.month === receiptService.selectedMonth() && m.year === receiptService.selectedYear()"
+              [class.dark:bg-emerald-900]="m.month === receiptService.selectedMonth() && m.year === receiptService.selectedYear()"
+              [class.text-emerald-700]="m.month === receiptService.selectedMonth() && m.year === receiptService.selectedYear()"
+              [class.dark:text-emerald-300]="m.month === receiptService.selectedMonth() && m.year === receiptService.selectedYear()"
+              [class.text-slate-700]="!(m.month === receiptService.selectedMonth() && m.year === receiptService.selectedYear())"
+              [class.dark:text-slate-300]="!(m.month === receiptService.selectedMonth() && m.year === receiptService.selectedYear())"
+              [class.hover:bg-slate-100]="!(m.month === receiptService.selectedMonth() && m.year === receiptService.selectedYear())"
+              [class.dark:hover:bg-slate-800]="!(m.month === receiptService.selectedMonth() && m.year === receiptService.selectedYear())">
+              {{ m.label }}
+            </button>
+          </div>
+        </div>
       </div>
+
       <button type="button" (click)="goToNextMonth()"
         class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors">
         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -64,6 +119,9 @@
         </svg>
       </button>
     </div>
+
+    <!-- Backdrop for month picker -->
+    <div *ngIf="showMonthPicker()" (click)="closeMonthPicker()" class="fixed inset-0 z-10"></div>
 
     <!-- Spending Chart Card -->
     <section
@@ -169,13 +227,21 @@
         class="lg:col-span-2 space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-xs uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300">Recent receipts</p>
+            <p class="text-xs uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300">
+              {{ searchQuery() ? 'Search results' : 'Recent receipts' }}
+            </p>
             <p class="text-sm text-slate-600 dark:text-slate-300">
-              {{ receiptCount() === 0 ? 'You have no receipts yet. Add one to get started.' : 'Your latest uploads' }}
+              <ng-container *ngIf="searchQuery(); else noSearch">
+                Found {{ filteredReceipts().length }} receipt{{ filteredReceipts().length === 1 ? '' : 's' }} matching
+                "{{ searchQuery() }}"
+              </ng-container>
+              <ng-template #noSearch>
+                {{ receiptCount() === 0 ? 'You have no receipts yet. Add one to get started.' : 'Your latest uploads' }}
+              </ng-template>
             </p>
           </div>
           <button type="button" (click)="openUploadModal()"
-            class="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 transition hover:bg-emerald-600 dark:text-slate-950">
+            class="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 transition hover:bg-emerald-600 dark:text-slate-950 lg:hidden">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
@@ -188,8 +254,8 @@
           <div class="h-8 w-8 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
         </div>
 
-        <!-- Empty State -->
-        <div *ngIf="!isLoadingReceipts() && receiptCount() === 0"
+        <!-- Empty State - No receipts at all -->
+        <div *ngIf="!isLoadingReceipts() && receiptCount() === 0 && !searchQuery()"
           class="space-y-2 rounded-xl border border-dashed border-slate-200 p-8 text-center dark:border-slate-800">
           <div
             class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
@@ -212,8 +278,28 @@
           </button>
         </div>
 
+        <!-- Empty Search Results -->
+        <div *ngIf="!isLoadingReceipts() && searchQuery() && filteredReceipts().length === 0"
+          class="space-y-2 rounded-xl border border-dashed border-slate-200 p-8 text-center dark:border-slate-800">
+          <div
+            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+            <svg class="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <p class="font-semibold text-slate-800 dark:text-slate-100">No results found</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400">
+            No receipts match "{{ searchQuery() }}". Try a different search term.
+          </p>
+          <button type="button" (click)="searchQuery.set('')"
+            class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400">
+            Clear search
+          </button>
+        </div>
+
         <!-- Receipts List -->
-        <div *ngIf="!isLoadingReceipts() && receiptCount() > 0" class="space-y-3">
+        <div *ngIf="!isLoadingReceipts() && recentReceipts().length > 0" class="space-y-3">
           <a *ngFor="let receipt of recentReceipts()" [routerLink]="['/app/receipt', receipt.id]"
             class="group flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-800/50 px-4 py-3 transition hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
             <div class="flex items-center gap-3 min-w-0">
