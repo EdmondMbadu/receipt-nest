@@ -205,3 +205,4 @@ export class UploadComponent {
     this.close.emit();
   }
 }
+

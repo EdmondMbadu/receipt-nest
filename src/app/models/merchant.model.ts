@@ -50,3 +50,4 @@ export function createMerchantDocument(
     updatedAt: serverTimestamp()
   };
 }
+

@@ -386,32 +386,33 @@
             class="relative aspect-square rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 cursor-pointer group"
             (click)="navigateToReceipt(receipt.id)">
 
-            <!-- PDF Preview - Show immediately without waiting for URL -->
-            <div *ngIf="isPdf(receipt)"
-              class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-950/50">
-              <svg class="h-10 w-10 sm:h-12 sm:w-12 text-red-500 dark:text-red-400" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 2l5 5h-5V4zM8.5 13h1v4h-1v-4zm2.5 0h1.5c.83 0 1.5.67 1.5 1.5v1c0 .83-.67 1.5-1.5 1.5H11v-4zm1 3h.5a.5.5 0 00.5-.5v-1a.5.5 0 00-.5-.5H12v2zm2.5-3h3v1h-2v.5h1.5v1H15v1.5h-1v-4z"/>
-              </svg>
-              <p class="text-[10px] sm:text-xs text-red-600 dark:text-red-400 font-medium mt-1.5">PDF</p>
-              <p class="text-[8px] sm:text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate max-w-[90%] px-1">{{ receipt.file?.originalName }}</p>
-            </div>
-
-            <!-- Loading Placeholder for non-PDF files -->
-            <div *ngIf="!isPdf(receipt) && (isImageLoading(receipt.id) || !getImageUrl(receipt))"
+            <!-- Loading Placeholder (for both PDFs and images) -->
+            <div *ngIf="isImageLoading(receipt.id) || !getImageUrl(receipt)"
               class="absolute inset-0 flex items-center justify-center bg-slate-100 dark:bg-slate-800">
-              <div *ngIf="isImageLoading(receipt.id)" class="h-6 w-6 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent"></div>
+              <div *ngIf="isImageLoading(receipt.id)" class="text-center">
+                <div class="h-6 w-6 mx-auto animate-spin rounded-full border-2 border-emerald-500 border-t-transparent"></div>
+                <p *ngIf="isPdf(receipt)" class="text-[8px] text-slate-400 mt-2">Loading PDF...</p>
+              </div>
               <div *ngIf="!isImageLoading(receipt.id) && !getImageUrl(receipt)" class="text-center p-2">
-                <span class="text-2xl">🧾</span>
+                <span class="text-2xl">{{ isPdf(receipt) ? '📄' : '🧾' }}</span>
                 <p class="text-[8px] sm:text-[10px] text-slate-500 dark:text-slate-400 mt-1 truncate">{{ receipt.file?.originalName }}</p>
               </div>
             </div>
 
-            <!-- Receipt Image (non-PDF) -->
-            <img *ngIf="!isPdf(receipt) && getImageUrl(receipt)"
+            <!-- Receipt Image (works for both regular images and PDF thumbnails) -->
+            <img *ngIf="getImageUrl(receipt)"
               [src]="getImageUrl(receipt)"
               [alt]="receipt.merchant?.canonicalName || receipt.file?.originalName || 'Receipt'"
               class="absolute inset-0 w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
               loading="lazy" />
+
+            <!-- PDF Badge overlay -->
+            <div *ngIf="isPdf(receipt) && getImageUrl(receipt)"
+              class="absolute top-1 left-1 sm:top-1.5 sm:left-1.5">
+              <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-red-500/90 text-white text-[8px] sm:text-[10px] font-medium shadow">
+                PDF
+              </span>
+            </div>
 
             <!-- Overlay on hover -->
             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-end justify-start p-1.5 sm:p-2">
@@ -475,3 +476,4 @@
 <app-upload *ngIf="showUploadModal()" (uploadComplete)="onUploadComplete($event)" (uploadError)="onUploadError($event)"
   (close)="closeUploadModal()">
 </app-upload>
+

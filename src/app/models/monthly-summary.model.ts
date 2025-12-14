@@ -72,3 +72,4 @@ export function createMonthlySummaryDocument(
     updatedAt: serverTimestamp()
   };
 }
+

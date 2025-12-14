@@ -6,6 +6,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 import { ReceiptService } from '../../services/receipt.service';
+import { PdfThumbnailService } from '../../services/pdf-thumbnail.service';
 import { UploadComponent } from '../../components/upload/upload.component';
 import { Receipt, ReceiptStatus } from '../../models/receipt.model';
 import { DEFAULT_CATEGORIES, getCategoryById, Category } from '../../models/category.model';
@@ -31,6 +32,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private readonly theme = inject(ThemeService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   readonly receiptService = inject(ReceiptService);
+  private readonly pdfThumbnailService = inject(PdfThumbnailService);
 
   readonly user = this.authService.user;
   readonly isDarkMode = this.theme.isDarkMode;
@@ -349,13 +351,18 @@ export class HomeComponent implements OnInit, OnDestroy {
     const visibleReceipts = this.visibleMonthGroups().flatMap(g => g.receipts);
     for (const receipt of visibleReceipts) {
       if (receipt.file?.storagePath && !this.imageUrls()[receipt.id]) {
-        this.loadImageUrl(receipt.id, receipt.file.storagePath);
+        this.loadImageUrl(receipt);
       }
     }
   }
 
-  // Load a single image URL
-  async loadImageUrl(receiptId: string, storagePath: string): Promise<void> {
+  // Load a single image URL (handles both images and PDFs)
+  async loadImageUrl(receipt: Receipt): Promise<void> {
+    const receiptId = receipt.id;
+    const storagePath = receipt.file?.storagePath;
+
+    if (!storagePath) return;
+
     // Skip if already loaded or loading
     if (this.imageUrls()[receiptId] || this.loadingImages().has(receiptId)) {
       return;
@@ -370,10 +377,30 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     try {
       const url = await this.receiptService.getReceiptFileUrl(storagePath);
-      this.imageUrls.update(urls => ({
-        ...urls,
-        [receiptId]: url
-      }));
+
+      // Check if it's a PDF - if so, generate a thumbnail
+      if (this.isPdf(receipt)) {
+        try {
+          const thumbnailUrl = await this.pdfThumbnailService.generateThumbnail(url, 0.8);
+          this.imageUrls.update(urls => ({
+            ...urls,
+            [receiptId]: thumbnailUrl
+          }));
+        } catch (pdfError) {
+          console.error('Failed to generate PDF thumbnail:', pdfError);
+          // Store the original URL as fallback (will show PDF icon)
+          this.imageUrls.update(urls => ({
+            ...urls,
+            [receiptId]: url
+          }));
+        }
+      } else {
+        // Regular image - just store the URL
+        this.imageUrls.update(urls => ({
+          ...urls,
+          [receiptId]: url
+        }));
+      }
     } catch (error) {
       console.error('Failed to load image URL:', error);
     } finally {
@@ -591,3 +618,4 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 }
+

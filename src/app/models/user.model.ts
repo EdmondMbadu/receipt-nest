@@ -9,3 +9,4 @@ export interface UserProfile {
   updatedAt?: Timestamp | ReturnType<typeof serverTimestamp>;
 }
 
+

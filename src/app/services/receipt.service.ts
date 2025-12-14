@@ -631,3 +631,4 @@ export class ReceiptService {
     return grouped;
   });
 }
+
