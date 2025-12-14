@@ -44,6 +44,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly searchFocused = signal(false);
   readonly showAllReceipts = signal(false);
   readonly hoveredDay = signal<{ day: number; amount: number; cumulative: number } | null>(null);
+  readonly selectedDay = signal<{ day: number; month: number; year: number } | null>(null);
 
   // Expose Math for template
   readonly Math = Math;
@@ -593,6 +594,52 @@ export class HomeComponent implements OnInit, OnDestroy {
       hour: 'numeric',
       minute: '2-digit'
     });
+  }
+
+  // Click on a day in the graph to filter receipts
+  onDayClick(day: { day: number; amount: number; cumulative: number }): void {
+    const currentSelection = this.selectedDay();
+    const selectedMonth = this.receiptService.selectedMonth();
+    const selectedYear = this.receiptService.selectedYear();
+
+    // Toggle off if same day is clicked
+    if (currentSelection &&
+        currentSelection.day === day.day &&
+        currentSelection.month === selectedMonth &&
+        currentSelection.year === selectedYear) {
+      this.selectedDay.set(null);
+    } else {
+      this.selectedDay.set({
+        day: day.day,
+        month: selectedMonth,
+        year: selectedYear
+      });
+    }
+  }
+
+  // Clear day selection
+  clearDaySelection(): void {
+    this.selectedDay.set(null);
+  }
+
+  // Check if a receipt matches the selected day
+  isReceiptForSelectedDay(receipt: Receipt): boolean {
+    const selection = this.selectedDay();
+    if (!selection) return true; // No selection means all receipts are "selected"
+
+    if (!receipt.date) return false;
+
+    const receiptDate = new Date(receipt.date);
+    return receiptDate.getDate() === selection.day &&
+           receiptDate.getMonth() === selection.month &&
+           receiptDate.getFullYear() === selection.year;
+  }
+
+  // Get amount for a specific day from daily spending data
+  getAmountForDay(day: number): number {
+    const data = this.dailySpendingData();
+    const dayData = data.find(d => d.day === day);
+    return dayData?.amount ?? 0;
   }
 
   // Chart helper methods for Robinhood-style graph
