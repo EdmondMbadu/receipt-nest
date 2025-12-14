@@ -42,65 +42,192 @@
       </div>
     </header>
 
+    <!-- Stats Cards -->
     <section class="grid gap-4 md:grid-cols-3">
       <div
         class="rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm dark:border-emerald-800 dark:bg-slate-900">
         <p class="text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">This month</p>
-        <p class="mt-2 text-3xl font-semibold text-emerald-600 dark:text-emerald-300">$0.00</p>
-        <p class="text-xs text-slate-500 dark:text-slate-400">Total spend (demo data coming soon)</p>
+        <p class="mt-2 text-3xl font-semibold text-emerald-600 dark:text-emerald-300">
+          {{ formatCurrency(currentMonthSpend()) }}
+        </p>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Total spend</p>
       </div>
       <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <p class="text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Receipts</p>
-        <p class="mt-2 text-3xl font-semibold text-slate-900 dark:text-slate-50">0</p>
+        <p class="mt-2 text-3xl font-semibold text-slate-900 dark:text-slate-50">{{ currentMonthReceiptCount() }}</p>
         <p class="text-xs text-slate-500 dark:text-slate-400">Uploaded this month</p>
       </div>
       <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <p class="text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Status</p>
-        <p class="mt-2 text-sm font-semibold text-emerald-600 dark:text-emerald-300">Signed in as</p>
-        <p class="mt-1 font-mono text-xs text-slate-700 dark:text-slate-200 break-all">{{ user()?.email }}</p>
+        <p class="text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Needs review</p>
+        <div class="mt-2 flex items-baseline gap-2">
+          <p class="text-3xl font-semibold" [class.text-orange-600]="needsReviewCount() > 0"
+            [class.dark:text-orange-400]="needsReviewCount() > 0" [class.text-emerald-600]="needsReviewCount() === 0"
+            [class.dark:text-emerald-300]="needsReviewCount() === 0">
+            {{ needsReviewCount() }}
+          </p>
+          <span *ngIf="needsReviewCount() === 0" class="text-xs text-emerald-600 dark:text-emerald-400">✓ All
+            good</span>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Awaiting confirmation</p>
       </div>
     </section>
 
+    <!-- Main Content -->
     <section class="grid gap-6 lg:grid-cols-3">
+      <!-- Receipts List -->
       <div
         class="lg:col-span-2 space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-xs uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300">Recent receipts</p>
-            <p class="text-sm text-slate-600 dark:text-slate-300">You have no receipts yet. Add one to get started.</p>
+            <p class="text-sm text-slate-600 dark:text-slate-300">
+              {{ receiptCount() === 0 ? 'You have no receipts yet. Add one to get started.' : 'Your latest uploads' }}
+            </p>
           </div>
-          <button type="button"
+          <button type="button" (click)="openUploadModal()"
             class="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 transition hover:bg-emerald-600 dark:text-slate-950">
-            Upload receipt (coming soon)
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Upload receipt
           </button>
         </div>
-        <div
-          class="space-y-2 rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-200">
+
+        <!-- Loading State -->
+        <div *ngIf="isLoadingReceipts()" class="flex items-center justify-center py-12">
+          <div class="h-8 w-8 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!isLoadingReceipts() && receiptCount() === 0"
+          class="space-y-2 rounded-xl border border-dashed border-slate-200 p-8 text-center dark:border-slate-800">
+          <div
+            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+            <svg class="h-8 w-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
           <p class="font-semibold text-slate-800 dark:text-slate-100">No receipts yet</p>
-          <p class="text-xs text-slate-500 dark:text-slate-400">
-            When you upload, you'll see merchant, total, category, and date here.
+          <p class="text-sm text-slate-500 dark:text-slate-400">
+            Upload your first receipt to start tracking expenses
           </p>
+          <button type="button" (click)="openUploadModal()"
+            class="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 transition hover:bg-emerald-600 dark:text-slate-950">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Upload receipt
+          </button>
+        </div>
+
+        <!-- Receipts List -->
+        <div *ngIf="!isLoadingReceipts() && receiptCount() > 0" class="space-y-3">
+          <div *ngFor="let receipt of recentReceipts()"
+            class="group flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-800/50 px-4 py-3 transition hover:bg-slate-100 dark:hover:bg-slate-800">
+            <div class="flex items-center gap-3 min-w-0">
+              <!-- Category Icon -->
+              <div
+                class="flex-shrink-0 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-lg">
+                {{ getCategoryIcon(receipt.category?.id) }}
+              </div>
+              <div class="min-w-0">
+                <p class="font-medium text-slate-900 dark:text-slate-100 truncate">
+                  {{ receipt.merchant?.canonicalName || receipt.file?.originalName || 'Processing...' }}
+                </p>
+                <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                  <span class="rounded-full px-2 py-0.5" [ngClass]="getStatusBadgeClass(receipt.status)">
+                    {{ getStatusLabel(receipt.status) }}
+                  </span>
+                  <span *ngIf="receipt.category">• {{ receipt.category.name }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-right">
+                <p class="font-semibold text-slate-900 dark:text-slate-100">
+                  {{ receipt.totalAmount ? formatCurrency(receipt.totalAmount) : '-' }}
+                </p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                  {{ receipt.date ? formatDate(receipt.date) : formatUploadDate(receipt.createdAt) }}
+                </p>
+              </div>
+              <!-- Delete button -->
+              <button type="button" (click)="deleteReceipt(receipt, $event)"
+                class="opacity-0 group-hover:opacity-100 p-1.5 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- View All Link -->
+          <div *ngIf="receiptCount() > 5" class="pt-2 text-center">
+            <button
+              class="text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300">
+              View all {{ receiptCount() }} receipts →
+            </button>
+          </div>
         </div>
       </div>
 
-      <div
-        class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <p class="text-xs uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300">Quick actions</p>
-        <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-200">
-          <li class="flex items-center gap-2">
-            <span class="text-emerald-500">⬆</span>
-            <span>Upload a PDF or photo receipt</span>
-          </li>
-          <li class="flex items-center gap-2">
-            <span class="text-emerald-500">🏷️</span>
-            <span>Auto-tag merchant, category, and tax</span>
-          </li>
-          <li class="flex items-center gap-2">
-            <span class="text-emerald-500">📊</span>
-            <span>See monthly totals and trends</span>
-          </li>
-        </ul>
+      <!-- Sidebar -->
+      <div class="space-y-4">
+        <!-- Quick Actions -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <p class="text-xs uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300">Quick actions</p>
+          <ul class="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-200">
+            <li>
+              <button (click)="openUploadModal()"
+                class="flex w-full items-center gap-2 rounded-lg p-2 transition hover:bg-emerald-50 dark:hover:bg-slate-800">
+                <span
+                  class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">⬆</span>
+                <span>Upload a receipt</span>
+              </button>
+            </li>
+            <li class="flex items-center gap-2 rounded-lg p-2 opacity-50">
+              <span
+                class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">🏷️</span>
+              <span>Manage categories (coming soon)</span>
+            </li>
+            <li class="flex items-center gap-2 rounded-lg p-2 opacity-50">
+              <span
+                class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">📊</span>
+              <span>View reports (coming soon)</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Processing Info -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <p class="text-xs uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300">How it works</p>
+          <div class="mt-4 space-y-3 text-xs text-slate-600 dark:text-slate-300">
+            <div class="flex items-start gap-2">
+              <span
+                class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">1</span>
+              <p><strong>Upload</strong> — Drag & drop or select your receipt</p>
+            </div>
+            <div class="flex items-start gap-2">
+              <span
+                class="flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">2</span>
+              <p><strong>Processing</strong> — AI extracts merchant, amount & date</p>
+            </div>
+            <div class="flex items-start gap-2">
+              <span
+                class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">3</span>
+              <p><strong>Done</strong> — Review & confirm, or let it auto-complete</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </div>
 </div>
+
+<!-- Upload Modal -->
+<app-upload *ngIf="showUploadModal()" (uploadComplete)="onUploadComplete($event)" (uploadError)="onUploadError($event)"
+  (close)="closeUploadModal()">
+</app-upload>

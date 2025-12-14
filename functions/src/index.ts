@@ -1,33 +1,22 @@
 /**
- * Import function triggers from their respective submodules:
+ * ReceiptNest Cloud Functions
  *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
+ * Main entry point for all Firebase Cloud Functions.
+ * Handles receipt processing with Document AI and Gemini.
  */
 
-import {setGlobalOptions} from "firebase-functions";
-// Uncomment and import when you need to use these:
-// import {onRequest} from "firebase-functions/https";
-// import * as logger from "firebase-functions/logger";
+// Load environment variables from .env file (for local development)
+import * as dotenv from "dotenv";
+dotenv.config();
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+import { setGlobalOptions } from "firebase-functions";
+import * as admin from "firebase-admin";
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
+// Initialize Firebase Admin
+admin.initializeApp();
+
+// Set global options for cost control
 setGlobalOptions({ maxInstances: 10 });
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+// Export all functions
+export { processReceipt } from "./receipt-processor";

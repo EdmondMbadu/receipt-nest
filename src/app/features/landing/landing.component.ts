@@ -34,3 +34,4 @@ export class LandingComponent {
     this.theme.toggleTheme();
   }
 }
+

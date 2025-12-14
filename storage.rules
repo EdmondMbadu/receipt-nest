@@ -1,12 +1,33 @@
 rules_version = '2';
-// Firebase Storage Security Rules
+// Firebase Storage Security Rules for ReceiptNest
 service firebase.storage {
   match /b/{bucket}/o {
-    // Allow read/write access to all users (you can customize this based on your needs)
+    
+    // User-specific receipt storage
+    // Path: users/{userId}/receipts/{fileName}
+    match /users/{userId}/receipts/{fileName} {
+      // Allow read only if the user owns the file
+      allow read: if request.auth != null && request.auth.uid == userId;
+      
+      // Allow write only if:
+      // 1. User is authenticated and owns the path
+      // 2. File size is under 10MB
+      // 3. File type is allowed (images or PDF)
+      allow write: if request.auth != null 
+        && request.auth.uid == userId
+        && request.resource.size < 10 * 1024 * 1024
+        && (
+          request.resource.contentType.matches('image/.*') ||
+          request.resource.contentType == 'application/pdf'
+        );
+      
+      // Allow delete only if user owns the file
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Deny all other paths by default
     match /{allPaths=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if false;
     }
   }
 }
-
-
