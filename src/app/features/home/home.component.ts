@@ -483,7 +483,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   // Navigate to receipt detail
-  navigateToReceipt(receiptId: string): void {
+  navigateToReceipt(receiptId: string, event?: Event): void {
+    event?.stopPropagation(); // Prevent backdrop click from clearing selection
     this.router.navigate(['/app/receipt', receiptId]);
   }
 
@@ -615,24 +616,19 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   // Click on a day in the graph to filter receipts
-  onDayClick(day: { day: number; amount: number; cumulative: number }): void {
-    const currentSelection = this.selectedDay();
+  onDayClick(day: { day: number; amount: number; cumulative: number }, event?: Event): void {
+    // Stop propagation so backdrop doesn't immediately clear the selection
+    event?.stopPropagation();
+
     const selectedMonth = this.receiptService.selectedMonth();
     const selectedYear = this.receiptService.selectedYear();
 
-    // Toggle off if same day is clicked
-    if (currentSelection &&
-        currentSelection.day === day.day &&
-        currentSelection.month === selectedMonth &&
-        currentSelection.year === selectedYear) {
-      this.selectedDay.set(null);
-    } else {
-      this.selectedDay.set({
-        day: day.day,
-        month: selectedMonth,
-        year: selectedYear
-      });
-    }
+    // Always select the clicked day (clicking elsewhere will clear it)
+    this.selectedDay.set({
+      day: day.day,
+      month: selectedMonth,
+      year: selectedYear
+    });
   }
 
   // Clear day selection

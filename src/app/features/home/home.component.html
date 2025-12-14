@@ -343,10 +343,10 @@
         </svg>
 
         <!-- Invisible hover areas for each day -->
-        <div class="absolute inset-0 flex">
+        <div class="absolute inset-0 flex z-10">
           <div *ngFor="let day of dailySpendingData()" class="flex-1 cursor-pointer"
             (mouseenter)="hoveredDay.set(day)" (touchstart)="hoveredDay.set(day)"
-            (click)="onDayClick(day)">
+            (click)="onDayClick(day, $event)">
           </div>
         </div>
 
@@ -375,6 +375,10 @@
     <!-- Backdrop for month pickers -->
     <div *ngIf="showMonthPickerCard() || showMonthPickerGraph()" (click)="closeAllMonthPickers()"
       class="fixed inset-0 z-10"></div>
+
+    <!-- Backdrop for day selection - click anywhere to clear -->
+    <div *ngIf="selectedDay()" (click)="clearDaySelection()"
+      class="fixed inset-0 z-0 cursor-pointer"></div>
 
     <!-- Loading State -->
     <div *ngIf="isLoadingReceipts()" class="flex items-center justify-center py-16">
@@ -431,7 +435,7 @@
         </div>
 
         <!-- Receipt Grid -->
-        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-1 sm:gap-2">
+        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-1 sm:gap-2 relative z-10">
           <div *ngFor="let receipt of monthGroup.receipts; trackBy: trackReceipt"
             class="relative aspect-square rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 cursor-pointer group transition-all duration-300 ease-out"
             [class.opacity-20]="(selectedDay() || hoveredDay()) && !isReceiptForActiveDay(receipt)"
@@ -441,7 +445,7 @@
             [class.shadow-lg]="(selectedDay() || hoveredDay()) && isReceiptForActiveDay(receipt)"
             [class.shadow-emerald-500/30]="(selectedDay() || hoveredDay()) && isReceiptForActiveDay(receipt)"
             [class.z-10]="(selectedDay() || hoveredDay()) && isReceiptForActiveDay(receipt)"
-            (click)="navigateToReceipt(receipt.id)">
+            (click)="navigateToReceipt(receipt.id, $event)">
 
             <!-- Loading Placeholder (for both PDFs and images) -->
             <div *ngIf="isImageLoading(receipt.id) || !getImageUrl(receipt)"
