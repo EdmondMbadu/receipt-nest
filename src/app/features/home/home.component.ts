@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, computed, inject, signal, AfterViewInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, computed, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -25,7 +25,7 @@ interface MonthGroup {
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
-export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
+export class HomeComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly theme = inject(ThemeService);
@@ -325,14 +325,19 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       .slice(0, 5); // Top 5 categories
   });
 
+  // Effect to load image URLs when receipts or visible months change
+  private receiptsEffect = effect(() => {
+    // React to changes in visible month groups (which depends on receipts)
+    const visibleGroups = this.visibleMonthGroups();
+    if (visibleGroups.length > 0) {
+      // Load image URLs for visible receipts
+      this.loadVisibleImageUrls();
+    }
+  });
+
   ngOnInit(): void {
     // Subscribe to real-time receipt updates
     this.receiptService.subscribeToReceipts();
-  }
-
-  ngAfterViewInit(): void {
-    // Load image URLs for visible receipts
-    this.loadVisibleImageUrls();
   }
 
   ngOnDestroy(): void {
@@ -427,7 +432,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Check if file is a PDF
   isPdf(receipt: Receipt): boolean {
-    return receipt.file?.mimeType === 'application/pdf';
+    return receipt.file?.mimeType === 'application/pdf' ||
+      receipt.file?.originalName?.toLowerCase().endsWith('.pdf');
   }
 
   // Navigate to receipt detail
