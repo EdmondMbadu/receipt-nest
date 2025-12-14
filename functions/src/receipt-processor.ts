@@ -357,11 +357,22 @@ Rules:
   const parsed = JSON.parse(jsonMatch[0]);
   const confidence = parsed.confidence || 0.7;
 
+  // Parse total amount - handle both number and string values
+  let totalAmountValue: number | undefined;
+  if (parsed.total != null) {
+    const numValue = typeof parsed.total === 'string'
+      ? parseFloat(parsed.total.replace(/[^0-9.-]/g, ''))
+      : parsed.total;
+    if (!isNaN(numValue)) {
+      totalAmountValue = numValue;
+    }
+  }
+
   return {
     source: "gemini",
     processedAt: admin.firestore.FieldValue.serverTimestamp(),
-    totalAmount: parsed.total !== null
-      ? { value: parsed.total, confidence }
+    totalAmount: totalAmountValue !== undefined
+      ? { value: totalAmountValue, confidence, rawText: String(parsed.total) }
       : undefined,
     currency: parsed.currency
       ? { value: parsed.currency, confidence }
@@ -370,7 +381,7 @@ Rules:
       ? { value: parsed.date, confidence }
       : undefined,
     supplierName: parsed.merchant
-      ? { value: parsed.merchant, confidence }
+      ? { value: parsed.merchant, confidence, rawText: parsed.merchant }
       : undefined,
     overallConfidence: confidence,
   };
