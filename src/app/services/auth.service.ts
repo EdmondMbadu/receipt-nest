@@ -6,6 +6,7 @@ import {
   createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -162,6 +163,16 @@ export class AuthService {
     await sendEmailVerification(user);
   }
 
+  async sendPasswordReset(email: string): Promise<void> {
+    if (!email) {
+      const error: any = new Error('Please enter a valid email address.');
+      error.code = 'auth/invalid-email';
+      throw error;
+    }
+
+    await sendPasswordResetEmail(this.auth, email);
+  }
+
   async logout() {
     await signOut(this.auth);
     this.user.set(null);
@@ -175,5 +186,4 @@ export class AuthService {
     return this.authStateReady;
   }
 }
-
 

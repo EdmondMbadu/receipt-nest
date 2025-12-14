@@ -23,7 +23,10 @@ export class LoginComponent {
   });
 
   isSubmitting = false;
+  isSendingReset = false;
   errorMessage = '';
+  resetMessage = '';
+  resetErrorMessage = '';
 
   async submit() {
     if (this.form.invalid) {
@@ -51,6 +54,33 @@ export class LoginComponent {
     }
   }
 
+  async sendPasswordReset() {
+    const emailControl = this.form.get('email');
+    if (!emailControl) {
+      return;
+    }
+
+    this.resetMessage = '';
+    this.resetErrorMessage = '';
+
+    if (!emailControl.value || emailControl.invalid) {
+      emailControl.markAsTouched();
+      this.resetErrorMessage = 'Enter your email above to reset your password.';
+      return;
+    }
+
+    this.isSendingReset = true;
+
+    try {
+      await this.authService.sendPasswordReset(emailControl.value);
+      this.resetMessage = 'Reset link sent! Check your inbox.';
+    } catch (error: any) {
+      this.resetErrorMessage = error?.message ?? 'Unable to send reset link right now.';
+    } finally {
+      this.isSendingReset = false;
+    }
+  }
+
   async signInWithGoogle() {
     this.errorMessage = '';
     this.isSubmitting = true;
@@ -66,5 +96,4 @@ export class LoginComponent {
     }
   }
 }
-
 
