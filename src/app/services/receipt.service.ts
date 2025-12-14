@@ -508,6 +508,108 @@ export class ReceiptService {
   readonly currentMonthSpend = this.selectedMonthSpend;
 
   /**
+   * Get daily cumulative spending data for the selected month
+   * Returns an array of { day, amount, cumulative } for chart rendering
+   */
+  readonly dailySpendingData = computed(() => {
+    const targetMonth = this.selectedMonth();
+    const targetYear = this.selectedYear();
+
+    // Get number of days in the selected month
+    const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+
+    // Initialize daily totals
+    const dailyTotals: number[] = new Array(daysInMonth).fill(0);
+
+    // Sum up spending per day
+    for (const receipt of this.selectedMonthReceipts()) {
+      if (!receipt.totalAmount) continue;
+
+      let day: number;
+      if (receipt.date) {
+        const receiptDate = new Date(receipt.date);
+        day = receiptDate.getDate();
+      } else if (receipt.createdAt) {
+        const createdDate = (receipt.createdAt as any).toDate
+          ? (receipt.createdAt as any).toDate()
+          : new Date(receipt.createdAt as any);
+        day = createdDate.getDate();
+      } else {
+        continue;
+      }
+
+      if (day >= 1 && day <= daysInMonth) {
+        dailyTotals[day - 1] += receipt.totalAmount;
+      }
+    }
+
+    // Build cumulative data
+    let cumulative = 0;
+    const data: { day: number; amount: number; cumulative: number }[] = [];
+
+    for (let i = 0; i < daysInMonth; i++) {
+      cumulative += dailyTotals[i];
+      data.push({
+        day: i + 1,
+        amount: dailyTotals[i],
+        cumulative
+      });
+    }
+
+    return data;
+  });
+
+  /**
+   * Generate SVG path for the spending chart
+   * Returns the path data for the line and area fill
+   */
+  readonly chartPathData = computed(() => {
+    const data = this.dailySpendingData();
+    const total = this.selectedMonthSpend();
+
+    if (data.length === 0 || total === 0) {
+      // Return flat line at bottom if no data
+      return {
+        linePath: 'M 0,95 L 200,95',
+        areaPath: 'M 0,95 L 200,95 L 200,100 L 0,100 Z',
+        hasData: false
+      };
+    }
+
+    const maxValue = Math.max(...data.map(d => d.cumulative), 1);
+    const width = 200;
+    const height = 100;
+    const padding = 5;
+    const chartHeight = height - padding * 2;
+
+    // Generate points
+    const points: { x: number; y: number }[] = data.map((d, i) => ({
+      x: (i / (data.length - 1)) * width,
+      y: padding + chartHeight - (d.cumulative / maxValue) * chartHeight
+    }));
+
+    // Create smooth bezier curve path
+    let linePath = `M ${points[0].x},${points[0].y}`;
+
+    for (let i = 1; i < points.length; i++) {
+      const prev = points[i - 1];
+      const curr = points[i];
+      const cpx = (prev.x + curr.x) / 2;
+      linePath += ` C ${cpx},${prev.y} ${cpx},${curr.y} ${curr.x},${curr.y}`;
+    }
+
+    // Area path (same as line, but closes to bottom)
+    const areaPath = linePath + ` L ${width},${height} L 0,${height} Z`;
+
+    return {
+      linePath,
+      areaPath,
+      hasData: true,
+      lastPoint: points[points.length - 1]
+    };
+  });
+
+  /**
    * Get receipts grouped by status
    */
   readonly receiptsByStatus = computed(() => {

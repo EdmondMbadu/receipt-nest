@@ -65,18 +65,77 @@
       </button>
     </div>
 
-    <!-- Stats Cards -->
-    <section class="grid gap-4 md:grid-cols-3">
-      <div
-        class="rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm dark:border-emerald-800 dark:bg-slate-900">
-        <p class="text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
-          {{ isCurrentMonth() ? 'This month' : selectedMonthLabel() }}
+    <!-- Spending Chart Card -->
+    <section
+      class="rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-950/70 p-5 shadow-sm transition-colors">
+      <!-- Amount section -->
+      <div class="mb-4">
+        <p class="text-xs font-medium text-slate-600 dark:text-slate-400">Total spend</p>
+        <div class="mt-2 flex items-baseline gap-3">
+          <p class="text-4xl font-semibold text-emerald-600 dark:text-emerald-300">
+            {{ formatCurrency(selectedMonthSpend()) }}
+          </p>
+        </div>
+        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+          {{ selectedMonthReceiptCount() }} receipt{{ selectedMonthReceiptCount() === 1 ? '' : 's' }} in {{
+          selectedMonthLabel() }}
         </p>
-        <p class="mt-2 text-3xl font-semibold text-emerald-600 dark:text-emerald-300">
-          {{ formatCurrency(selectedMonthSpend()) }}
-        </p>
-        <p class="text-xs text-slate-500 dark:text-slate-400">Total spend</p>
       </div>
+
+      <!-- Line chart container -->
+      <div class="relative h-40 w-full flex items-end">
+        <!-- Grid lines -->
+        <div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+          <div class="border-t border-slate-200/50 dark:border-slate-700/50"></div>
+          <div class="border-t border-slate-200/50 dark:border-slate-700/50"></div>
+          <div class="border-t border-slate-200/50 dark:border-slate-700/50"></div>
+          <div class="border-t border-slate-200/50 dark:border-slate-700/50"></div>
+        </div>
+
+        <!-- No data placeholder -->
+        <div *ngIf="!chartPathData().hasData"
+          class="absolute inset-0 flex items-center justify-center text-slate-400 dark:text-slate-500">
+          <div class="text-center">
+            <p class="text-sm">No spending data yet</p>
+            <p class="text-xs mt-1">Upload receipts to see your spending trend</p>
+          </div>
+        </div>
+
+        <!-- Line chart SVG -->
+        <svg *ngIf="chartPathData().hasData" class="absolute inset-0 w-full h-full" viewBox="0 0 200 100"
+          preserveAspectRatio="none">
+          <!-- Gradient for area under line -->
+          <defs>
+            <linearGradient id="spendingChartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:rgb(16, 185, 129);stop-opacity:0.3" />
+              <stop offset="100%" style="stop-color:rgb(16, 185, 129);stop-opacity:0" />
+            </linearGradient>
+          </defs>
+          <!-- Area under line -->
+          <path [attr.d]="chartPathData().areaPath" fill="url(#spendingChartGradient)" />
+          <!-- Main line -->
+          <path [attr.d]="chartPathData().linePath" stroke="rgb(16, 185, 129)" stroke-width="2.5" fill="none"
+            stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
+          <!-- Highlight point at the end -->
+          <circle *ngIf="chartPathData().lastPoint" [attr.cx]="chartPathData().lastPoint?.x"
+            [attr.cy]="chartPathData().lastPoint?.y" r="4" fill="rgb(16, 185, 129)" />
+          <circle *ngIf="chartPathData().lastPoint" [attr.cx]="chartPathData().lastPoint?.x"
+            [attr.cy]="chartPathData().lastPoint?.y" r="2" fill="white" />
+        </svg>
+      </div>
+
+      <!-- Chart footer -->
+      <div class="mt-3 flex items-center justify-between text-xs">
+        <span class="text-slate-500 dark:text-slate-400">{{ dailySpendingData().length }} days</span>
+        <div class="flex items-center gap-2">
+          <span class="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
+          <span class="text-slate-600 dark:text-slate-400">Cumulative spending</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Cards -->
+    <section class="grid gap-4 md:grid-cols-2">
       <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <p class="text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Receipts</p>
         <p class="mt-2 text-3xl font-semibold text-slate-900 dark:text-slate-50">{{ selectedMonthReceiptCount() }}</p>
