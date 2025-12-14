@@ -177,16 +177,37 @@ export const processReceipt = onDocumentCreated(
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       };
 
-      // Set final values if high confidence
+      // ALWAYS set final values if they exist (not just for high confidence)
+      logger.info(`Setting final values for ${receiptId}`, {
+        hasTotal: extraction.totalAmount?.value !== undefined,
+        totalValue: extraction.totalAmount?.value,
+        totalType: typeof extraction.totalAmount?.value,
+        hasCurrency: !!extraction.currency?.value,
+        hasDate: !!extraction.date?.value,
+      });
+
       if (extraction.totalAmount?.value !== undefined) {
         updateData.totalAmount = extraction.totalAmount.value;
+        logger.info(`Adding totalAmount to update: ${extraction.totalAmount.value}`);
+      } else {
+        logger.warn(`No totalAmount to add for receipt ${receiptId}`);
       }
+
       if (extraction.currency?.value) {
         updateData.currency = extraction.currency.value;
       }
       if (extraction.date?.value) {
         updateData.date = extraction.date.value;
       }
+
+      // Log the full update data (excluding extraction for brevity)
+      logger.info(`Updating receipt ${receiptId}`, {
+        status: updateData.status,
+        totalAmount: updateData.totalAmount,
+        currency: updateData.currency,
+        date: updateData.date,
+        merchantName: merchant.canonicalName,
+      });
 
       await receiptRef.update(updateData);
 
@@ -195,6 +216,7 @@ export const processReceipt = onDocumentCreated(
         merchant: merchant.canonicalName,
         category: category.name,
         amount: extraction.totalAmount?.value,
+        savedTotalAmount: updateData.totalAmount,
       });
 
     } catch (error) {

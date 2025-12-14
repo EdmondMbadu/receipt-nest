@@ -376,24 +376,136 @@ export class ReceiptService {
     return { id: snapshot.id, ...snapshot.data() } as MonthlySummary;
   }
 
+  // Selected month for filtering (default: current month)
+  readonly selectedMonth = signal(new Date().getMonth());
+  readonly selectedYear = signal(new Date().getFullYear());
+
   /**
-   * Calculate current month's spending from receipts
+   * Calculate spending for the selected month
+   * Uses the extracted receipt date for filtering
    */
-  readonly currentMonthSpend = computed(() => {
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
+  readonly selectedMonthSpend = computed(() => {
+    const targetMonth = this.selectedMonth();
+    const targetYear = this.selectedYear();
 
     return this.receipts()
       .filter(r => {
-        if (!r.date) return false;
-        const receiptDate = new Date(r.date);
-        return receiptDate.getMonth() === currentMonth &&
-          receiptDate.getFullYear() === currentYear &&
-          r.status === 'final';
+        // Must have a total amount to count
+        if (r.totalAmount === undefined || r.totalAmount === null) {
+          return false;
+        }
+
+        // Use the extracted receipt date
+        if (r.date) {
+          const receiptDate = new Date(r.date);
+          return receiptDate.getMonth() === targetMonth &&
+            receiptDate.getFullYear() === targetYear;
+        }
+
+        // Fallback to createdAt if no extracted date
+        if (r.createdAt) {
+          const createdDate = (r.createdAt as any).toDate
+            ? (r.createdAt as any).toDate()
+            : new Date(r.createdAt as any);
+          return createdDate.getMonth() === targetMonth &&
+            createdDate.getFullYear() === targetYear;
+        }
+
+        return false;
       })
       .reduce((sum, r) => sum + (r.totalAmount || 0), 0);
   });
+
+  /**
+   * Get receipts for the selected month
+   */
+  readonly selectedMonthReceipts = computed(() => {
+    const targetMonth = this.selectedMonth();
+    const targetYear = this.selectedYear();
+
+    return this.receipts().filter(r => {
+      if (r.date) {
+        const receiptDate = new Date(r.date);
+        return receiptDate.getMonth() === targetMonth &&
+          receiptDate.getFullYear() === targetYear;
+      }
+
+      if (r.createdAt) {
+        const createdDate = (r.createdAt as any).toDate
+          ? (r.createdAt as any).toDate()
+          : new Date(r.createdAt as any);
+        return createdDate.getMonth() === targetMonth &&
+          createdDate.getFullYear() === targetYear;
+      }
+
+      return false;
+    });
+  });
+
+  /**
+   * Get the selected month label (e.g., "December 2024")
+   */
+  readonly selectedMonthLabel = computed(() => {
+    const date = new Date(this.selectedYear(), this.selectedMonth(), 1);
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  });
+
+  /**
+   * Check if viewing current month
+   */
+  readonly isCurrentMonth = computed(() => {
+    const now = new Date();
+    return this.selectedMonth() === now.getMonth() &&
+      this.selectedYear() === now.getFullYear();
+  });
+
+  /**
+   * Navigate to previous month
+   */
+  goToPreviousMonth(): void {
+    let month = this.selectedMonth();
+    let year = this.selectedYear();
+
+    if (month === 0) {
+      month = 11;
+      year--;
+    } else {
+      month--;
+    }
+
+    this.selectedMonth.set(month);
+    this.selectedYear.set(year);
+  }
+
+  /**
+   * Navigate to next month
+   */
+  goToNextMonth(): void {
+    let month = this.selectedMonth();
+    let year = this.selectedYear();
+
+    if (month === 11) {
+      month = 0;
+      year++;
+    } else {
+      month++;
+    }
+
+    this.selectedMonth.set(month);
+    this.selectedYear.set(year);
+  }
+
+  /**
+   * Reset to current month
+   */
+  goToCurrentMonth(): void {
+    const now = new Date();
+    this.selectedMonth.set(now.getMonth());
+    this.selectedYear.set(now.getFullYear());
+  }
+
+  // Keep for backward compatibility
+  readonly currentMonthSpend = this.selectedMonthSpend;
 
   /**
    * Get receipts grouped by status

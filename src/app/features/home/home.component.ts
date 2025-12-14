@@ -59,37 +59,34 @@ export class HomeComponent implements OnInit, OnDestroy {
     return emailInitial ? emailInitial.toUpperCase() : '?';
   });
 
-  // Current month stats
-  readonly currentMonthSpend = computed(() => {
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
+  // Month selection from service
+  readonly selectedMonthSpend = this.receiptService.selectedMonthSpend;
+  readonly selectedMonthLabel = this.receiptService.selectedMonthLabel;
+  readonly selectedMonthReceipts = this.receiptService.selectedMonthReceipts;
+  readonly isCurrentMonth = this.receiptService.isCurrentMonth;
 
-    return this.receipts()
-      .filter(r => {
-        if (!r.date) return false;
-        const receiptDate = new Date(r.date);
-        return receiptDate.getMonth() === currentMonth &&
-          receiptDate.getFullYear() === currentYear &&
-          (r.status === 'final' || r.status === 'extracted');
-      })
-      .reduce((sum, r) => sum + (r.totalAmount || 0), 0);
+  // Keep for backward compatibility
+  readonly currentMonthSpend = this.selectedMonthSpend;
+
+  readonly selectedMonthReceiptCount = computed(() => {
+    return this.selectedMonthReceipts().length;
   });
 
-  readonly currentMonthReceiptCount = computed(() => {
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
+  // Keep for backward compatibility
+  readonly currentMonthReceiptCount = this.selectedMonthReceiptCount;
 
-    return this.receipts().filter(r => {
-      const createdAt = r.createdAt as any;
-      if (!createdAt) return false;
+  // Month navigation
+  goToPreviousMonth(): void {
+    this.receiptService.goToPreviousMonth();
+  }
 
-      // Handle Firestore Timestamp
-      const date = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
-      return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
-    }).length;
-  });
+  goToNextMonth(): void {
+    this.receiptService.goToNextMonth();
+  }
+
+  goToCurrentMonth(): void {
+    this.receiptService.goToCurrentMonth();
+  }
 
   // Recent receipts (last 5)
   readonly recentReceipts = computed(() => {
