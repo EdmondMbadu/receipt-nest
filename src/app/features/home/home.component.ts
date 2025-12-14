@@ -36,7 +36,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly isDarkMode = this.theme.isDarkMode;
   readonly menuOpen = signal(false);
   readonly showUploadModal = signal(false);
-  readonly showMonthPicker = signal(false);
+  readonly showMonthPickerCard = signal(false);
+  readonly showMonthPickerGraph = signal(false);
   readonly searchQuery = signal('');
   readonly searchFocused = signal(false);
   readonly showAllReceipts = signal(false);
@@ -118,19 +119,41 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.receiptService.goToCurrentMonth();
   }
 
-  // Month picker
-  toggleMonthPicker(): void {
-    this.showMonthPicker.set(!this.showMonthPicker());
+  // Month picker - Card (stats section)
+  toggleMonthPickerCard(): void {
+    this.showMonthPickerCard.set(!this.showMonthPickerCard());
+    this.showMonthPickerGraph.set(false); // Close the other picker
   }
 
-  closeMonthPicker(): void {
-    this.showMonthPicker.set(false);
+  closeMonthPickerCard(): void {
+    this.showMonthPickerCard.set(false);
   }
 
-  selectMonth(year: number, month: number): void {
+  // Month picker - Graph section
+  toggleMonthPickerGraph(): void {
+    this.showMonthPickerGraph.set(!this.showMonthPickerGraph());
+    this.showMonthPickerCard.set(false); // Close the other picker
+  }
+
+  closeMonthPickerGraph(): void {
+    this.showMonthPickerGraph.set(false);
+  }
+
+  closeAllMonthPickers(): void {
+    this.showMonthPickerCard.set(false);
+    this.showMonthPickerGraph.set(false);
+  }
+
+  selectMonthFromCard(year: number, month: number): void {
     this.receiptService.selectedYear.set(year);
     this.receiptService.selectedMonth.set(month);
-    this.closeMonthPicker();
+    this.closeMonthPickerCard();
+  }
+
+  selectMonthFromGraph(year: number, month: number): void {
+    this.receiptService.selectedYear.set(year);
+    this.receiptService.selectedMonth.set(month);
+    this.closeMonthPickerGraph();
   }
 
   // Available months for picker (last 24 months)
