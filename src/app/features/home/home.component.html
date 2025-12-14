@@ -110,7 +110,7 @@
     <!-- Backdrop for mobile menu -->
     <div *ngIf="menuOpen()" (click)="toggleMenu()" class="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm sm:hidden"></div>
 
-    <!-- Search Bar with Dropdown Results -->
+    <!-- Search Bar -->
     <div class="relative">
       <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
         <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -177,361 +177,155 @@
     <!-- Backdrop for search dropdown -->
     <div *ngIf="searchQuery() && searchFocused()" (click)="searchFocused.set(false)" class="fixed inset-0 z-20"></div>
 
-    <!-- Month Selector with Picker -->
-    <div class="flex items-center justify-center gap-2 sm:gap-3 relative">
-      <button type="button" (click)="goToPreviousMonth()"
-        class="inline-flex h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors">
-        <svg class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-
-      <!-- Clickable Month Label -->
-      <div class="text-center min-w-[140px] sm:min-w-[180px] relative">
-        <button type="button" (click)="toggleMonthPicker()"
-          class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors inline-flex items-center gap-1 sm:gap-2">
-          {{ selectedMonthLabel() }}
-          <svg class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        <button *ngIf="!isCurrentMonth()" type="button" (click)="goToCurrentMonth()"
-          class="block mx-auto text-[10px] sm:text-xs text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 mt-1">
-          Back to current month
-        </button>
-
-        <!-- Month Picker Dropdown -->
-        <div *ngIf="showMonthPicker()"
-          class="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-20 w-64 max-h-80 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
-          <div class="p-2">
-            <button *ngFor="let m of availableMonths()" type="button" (click)="selectMonth(m.year, m.month)"
-              class="w-full text-left px-4 py-2 text-sm rounded-lg transition-colors"
-              [class.bg-emerald-100]="m.month === receiptService.selectedMonth() && m.year === receiptService.selectedYear()"
-              [class.dark:bg-emerald-900]="m.month === receiptService.selectedMonth() && m.year === receiptService.selectedYear()"
-              [class.text-emerald-700]="m.month === receiptService.selectedMonth() && m.year === receiptService.selectedYear()"
-              [class.dark:text-emerald-300]="m.month === receiptService.selectedMonth() && m.year === receiptService.selectedYear()"
-              [class.text-slate-700]="!(m.month === receiptService.selectedMonth() && m.year === receiptService.selectedYear())"
-              [class.dark:text-slate-300]="!(m.month === receiptService.selectedMonth() && m.year === receiptService.selectedYear())"
-              [class.hover:bg-slate-100]="!(m.month === receiptService.selectedMonth() && m.year === receiptService.selectedYear())"
-              [class.dark:hover:bg-slate-800]="!(m.month === receiptService.selectedMonth() && m.year === receiptService.selectedYear())">
-              {{ m.label }}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <button type="button" (click)="goToNextMonth()"
-        class="inline-flex h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors">
-        <svg class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
-    </div>
-
-    <!-- Backdrop for month picker -->
-    <div *ngIf="showMonthPicker()" (click)="closeMonthPicker()" class="fixed inset-0 z-10"></div>
-
-    <!-- Spending Chart Card -->
-    <section
-      class="rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-950/70 p-5 shadow-sm transition-colors">
-      <!-- Amount section -->
-      <div class="mb-4">
-        <p class="text-xs font-medium text-slate-600 dark:text-slate-400">Total spend</p>
-        <div class="mt-2 flex items-baseline gap-3">
-          <p class="text-4xl font-semibold text-emerald-600 dark:text-emerald-300">
-            {{ formatCurrency(selectedMonthSpend()) }}
-          </p>
-        </div>
-        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-          {{ selectedMonthReceiptCount() }} receipt{{ selectedMonthReceiptCount() === 1 ? '' : 's' }} in {{
-          selectedMonthLabel() }}
-        </p>
-      </div>
-
-      <!-- Line chart container -->
-      <div class="relative h-40 w-full flex items-end">
-        <!-- Grid lines -->
-        <div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
-          <div class="border-t border-slate-200/50 dark:border-slate-700/50"></div>
-          <div class="border-t border-slate-200/50 dark:border-slate-700/50"></div>
-          <div class="border-t border-slate-200/50 dark:border-slate-700/50"></div>
-          <div class="border-t border-slate-200/50 dark:border-slate-700/50"></div>
-        </div>
-
-        <!-- No data placeholder -->
-        <div *ngIf="!chartPathData().hasData"
-          class="absolute inset-0 flex items-center justify-center text-slate-400 dark:text-slate-500">
-          <div class="text-center">
-            <p class="text-sm">No spending data yet</p>
-            <p class="text-xs mt-1">Upload receipts to see your spending trend</p>
-          </div>
-        </div>
-
-        <!-- Line chart SVG -->
-        <svg *ngIf="chartPathData().hasData" class="absolute inset-0 w-full h-full" viewBox="0 0 200 100"
-          preserveAspectRatio="none">
-          <!-- Gradient for area under line -->
-          <defs>
-            <linearGradient id="spendingChartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style="stop-color:rgb(16, 185, 129);stop-opacity:0.3" />
-              <stop offset="100%" style="stop-color:rgb(16, 185, 129);stop-opacity:0" />
-            </linearGradient>
-          </defs>
-          <!-- Area under line -->
-          <path [attr.d]="chartPathData().areaPath" fill="url(#spendingChartGradient)" />
-          <!-- Main line -->
-          <path [attr.d]="chartPathData().linePath" stroke="rgb(16, 185, 129)" stroke-width="2.5" fill="none"
-            stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
-          <!-- Highlight point at the end -->
-          <circle *ngIf="chartPathData().lastPoint" [attr.cx]="chartPathData().lastPoint?.x"
-            [attr.cy]="chartPathData().lastPoint?.y" r="4" fill="rgb(16, 185, 129)" />
-          <circle *ngIf="chartPathData().lastPoint" [attr.cx]="chartPathData().lastPoint?.x"
-            [attr.cy]="chartPathData().lastPoint?.y" r="2" fill="white" />
-        </svg>
-      </div>
-
-      <!-- Chart footer -->
-      <div class="mt-3 flex items-center justify-between text-xs">
-        <span class="text-slate-500 dark:text-slate-400">{{ dailySpendingData().length }} days</span>
-        <div class="flex items-center gap-2">
-          <span class="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
-          <span class="text-slate-600 dark:text-slate-400">Cumulative spending</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Stats Cards -->
-    <section class="grid gap-3 sm:gap-4 grid-cols-2">
+    <!-- Stats Summary Row -->
+    <section class="grid gap-3 sm:gap-4 grid-cols-3">
       <div class="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <p class="text-[10px] sm:text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Receipts</p>
-        <p class="mt-1 sm:mt-2 text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-slate-50">{{ selectedMonthReceiptCount() }}</p>
-        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">In {{ isCurrentMonth() ? 'this month' :
-          selectedMonthLabel() }}</p>
+        <p class="text-[10px] sm:text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Total</p>
+        <p class="mt-1 text-lg sm:text-2xl font-semibold text-emerald-600 dark:text-emerald-400">{{ receiptCount() }}</p>
+        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">receipts</p>
       </div>
       <div class="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
         [class.border-orange-200]="needsReviewCount() > 0" [class.dark:border-orange-800]="needsReviewCount() > 0">
-        <p class="text-[10px] sm:text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Needs review</p>
-        <div class="mt-1 sm:mt-2 flex items-baseline gap-1 sm:gap-2">
-          <p class="text-2xl sm:text-3xl font-semibold" [class.text-orange-600]="needsReviewCount() > 0"
-            [class.dark:text-orange-400]="needsReviewCount() > 0" [class.text-emerald-600]="needsReviewCount() === 0"
-            [class.dark:text-emerald-300]="needsReviewCount() === 0">
-            {{ needsReviewCount() }}
-          </p>
-          <span *ngIf="needsReviewCount() === 0" class="text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400">✓ All
-            good</span>
-        </div>
-        <p *ngIf="needsReviewCount() === 0" class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">Awaiting confirmation</p>
+        <p class="text-[10px] sm:text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Review</p>
+        <p class="mt-1 text-lg sm:text-2xl font-semibold" [class.text-orange-600]="needsReviewCount() > 0"
+          [class.dark:text-orange-400]="needsReviewCount() > 0" [class.text-emerald-600]="needsReviewCount() === 0"
+          [class.dark:text-emerald-400]="needsReviewCount() === 0">
+          {{ needsReviewCount() }}
+        </p>
+        <p *ngIf="needsReviewCount() === 0" class="text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400">✓ Done</p>
         <a *ngIf="needsReviewCount() > 0" [routerLink]="['/app/receipt', getFirstNeedsReviewId()]"
-          class="mt-1 sm:mt-2 inline-flex items-center gap-1 text-[10px] sm:text-xs font-medium text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300">
-          Review now →
+          class="text-[10px] sm:text-xs text-orange-600 hover:text-orange-700 dark:text-orange-400">
+          Review →
         </a>
       </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-[10px] sm:text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">This month</p>
+        <p class="mt-1 text-lg sm:text-2xl font-semibold text-slate-900 dark:text-slate-50">{{ formatCurrency(selectedMonthSpend()) }}</p>
+        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">{{ selectedMonthReceiptCount() }} receipts</p>
+      </div>
     </section>
 
-    <!-- Main Content -->
-    <section class="grid gap-6 lg:grid-cols-3">
-      <!-- Receipts List -->
-      <div
-        class="lg:col-span-2 space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300">
-              {{ searchQuery() ? 'Search results' : 'Recent receipts' }}
-            </p>
-            <p class="text-sm text-slate-600 dark:text-slate-300">
-              <ng-container *ngIf="searchQuery(); else noSearch">
-                Found {{ filteredReceipts().length }} receipt{{ filteredReceipts().length === 1 ? '' : 's' }} matching
-                "{{ searchQuery() }}"
-              </ng-container>
-              <ng-template #noSearch>
-                {{ receiptCount() === 0 ? 'You have no receipts yet. Add one to get started.' : 'Your latest uploads' }}
-              </ng-template>
-            </p>
-          </div>
-          <button type="button" (click)="openUploadModal()"
-            class="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 transition hover:bg-emerald-600 dark:text-slate-950 lg:hidden">
-            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Upload receipt
-          </button>
-        </div>
+    <!-- Loading State -->
+    <div *ngIf="isLoadingReceipts()" class="flex items-center justify-center py-16">
+      <div class="text-center">
+        <div class="h-10 w-10 mx-auto animate-spin rounded-full border-4 border-emerald-500 border-t-transparent mb-4"></div>
+        <p class="text-sm text-slate-500 dark:text-slate-400">Loading your receipts...</p>
+      </div>
+    </div>
 
-        <!-- Loading State -->
-        <div *ngIf="isLoadingReceipts()" class="flex items-center justify-center py-12">
-          <div class="h-8 w-8 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
-        </div>
+    <!-- Empty State -->
+    <div *ngIf="!isLoadingReceipts() && receiptCount() === 0"
+      class="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center dark:border-slate-700 dark:bg-slate-900">
+      <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+        <svg class="h-10 w-10 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">No receipts yet</h3>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-sm mx-auto">
+        Start building your receipt gallery by uploading your first receipt. We support images, PDFs, and HEIC files.
+      </p>
+      <button type="button" (click)="openUploadModal()"
+        class="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 transition hover:bg-emerald-600 dark:text-slate-950">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Upload your first receipt
+      </button>
+    </div>
 
-        <!-- Empty State - No receipts at all -->
-        <div *ngIf="!isLoadingReceipts() && receiptCount() === 0 && !searchQuery()"
-          class="space-y-2 rounded-xl border border-dashed border-slate-200 p-8 text-center dark:border-slate-800">
-          <div
-            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-            <svg class="h-8 w-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          <p class="font-semibold text-slate-800 dark:text-slate-100">No receipts yet</p>
-          <p class="text-sm text-slate-500 dark:text-slate-400">
-            Upload your first receipt to start tracking expenses
+    <!-- Photo Gallery by Month -->
+    <div *ngIf="!isLoadingReceipts() && receiptCount() > 0" class="space-y-8">
+      <div *ngFor="let monthGroup of visibleMonthGroups(); trackBy: trackMonthGroup" class="space-y-3">
+        <!-- Month Header -->
+        <div class="sticky top-0 z-10 bg-gradient-to-b from-slate-50 via-slate-50/95 to-transparent dark:from-slate-900 dark:via-slate-900/95 py-2">
+          <h2 class="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">
+            {{ monthGroup.label }}
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+            {{ monthGroup.receipts.length }} receipt{{ monthGroup.receipts.length === 1 ? '' : 's' }}
           </p>
-          <button type="button" (click)="openUploadModal()"
-            class="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 transition hover:bg-emerald-600 dark:text-slate-950">
-            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Upload receipt
-          </button>
         </div>
 
-        <!-- Empty Search Results -->
-        <div *ngIf="!isLoadingReceipts() && searchQuery() && filteredReceipts().length === 0"
-          class="space-y-2 rounded-xl border border-dashed border-slate-200 p-8 text-center dark:border-slate-800">
-          <div
-            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
-            <svg class="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <p class="font-semibold text-slate-800 dark:text-slate-100">No results found</p>
-          <p class="text-sm text-slate-500 dark:text-slate-400">
-            No receipts match "{{ searchQuery() }}". Try a different search term.
-          </p>
-          <button type="button" (click)="searchQuery.set('')"
-            class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400">
-            Clear search
-          </button>
-        </div>
+        <!-- Receipt Grid -->
+        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-1 sm:gap-2">
+          <div *ngFor="let receipt of monthGroup.receipts; trackBy: trackReceipt"
+            class="relative aspect-square rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 cursor-pointer group"
+            (click)="navigateToReceipt(receipt.id)">
 
-        <!-- Receipts List -->
-        <div *ngIf="!isLoadingReceipts() && recentReceipts().length > 0" class="space-y-3">
-          <a *ngFor="let receipt of recentReceipts()" [routerLink]="['/app/receipt', receipt.id]"
-            class="group flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-800/50 px-4 py-3 transition hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
-            <div class="flex items-center gap-3 min-w-0">
-              <!-- Category Icon -->
-              <div
-                class="flex-shrink-0 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-lg">
-                {{ getCategoryIcon(receipt.category?.id) }}
-              </div>
-              <div class="min-w-0">
-                <p class="font-medium text-slate-900 dark:text-slate-100 truncate">
-                  {{ receipt.merchant?.canonicalName || receipt.file.originalName || 'Processing...' }}
-                </p>
-                <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                  <span class="rounded-full px-2 py-0.5" [ngClass]="getStatusBadgeClass(receipt.status)">
-                    {{ getStatusLabel(receipt.status) }}
-                  </span>
-                  <span *ngIf="receipt.category">• {{ receipt.category.name }}</span>
-                  <span *ngIf="receipt.status === 'needs_review'" class="text-orange-600 dark:text-orange-400">
-                    • Click to review
-                  </span>
-                </div>
+            <!-- Loading Placeholder -->
+            <div *ngIf="isImageLoading(receipt.id) || !getImageUrl(receipt)"
+              class="absolute inset-0 flex items-center justify-center bg-slate-100 dark:bg-slate-800">
+              <div *ngIf="isImageLoading(receipt.id)" class="h-6 w-6 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent"></div>
+              <div *ngIf="!isImageLoading(receipt.id) && !getImageUrl(receipt)" class="text-center p-2">
+                <span class="text-2xl">{{ isPdf(receipt) ? '📄' : '🧾' }}</span>
+                <p class="text-[8px] sm:text-[10px] text-slate-500 dark:text-slate-400 mt-1 truncate">{{ receipt.file?.originalName }}</p>
               </div>
             </div>
-            <div class="flex items-center gap-4">
-              <div class="text-right">
-                <p class="font-semibold text-slate-900 dark:text-slate-100">
-                  {{ receipt.totalAmount ? formatCurrency(receipt.totalAmount) : '-' }}
+
+            <!-- Receipt Image -->
+            <img *ngIf="getImageUrl(receipt) && !isPdf(receipt)"
+              [src]="getImageUrl(receipt)"
+              [alt]="receipt.merchant?.canonicalName || receipt.file?.originalName || 'Receipt'"
+              class="absolute inset-0 w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+              loading="lazy" />
+
+            <!-- PDF Preview -->
+            <div *ngIf="getImageUrl(receipt) && isPdf(receipt)"
+              class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-950/50">
+              <svg class="h-8 w-8 sm:h-10 sm:w-10 text-red-500 dark:text-red-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 2l5 5h-5V4zM8.5 13h1v4h-1v-4zm2.5 0h1.5c.83 0 1.5.67 1.5 1.5v1c0 .83-.67 1.5-1.5 1.5H11v-4zm1 3h.5a.5.5 0 00.5-.5v-1a.5.5 0 00-.5-.5H12v2zm2.5-3h3v1h-2v.5h1.5v1H15v1.5h-1v-4z"/>
+              </svg>
+              <p class="text-[8px] sm:text-[10px] text-red-600 dark:text-red-400 font-medium mt-1">PDF</p>
+            </div>
+
+            <!-- Overlay on hover -->
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-end justify-start p-1.5 sm:p-2">
+              <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-white">
+                <p class="text-[10px] sm:text-xs font-medium truncate max-w-full">
+                  {{ receipt.merchant?.canonicalName || 'Processing...' }}
                 </p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">
-                  {{ receipt.date ? formatDate(receipt.date) : formatUploadDate(receipt.createdAt) }}
+                <p *ngIf="receipt.totalAmount" class="text-[10px] sm:text-xs font-semibold">
+                  {{ formatCurrency(receipt.totalAmount) }}
                 </p>
-              </div>
-              <!-- Edit indicator -->
-              <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
               </div>
             </div>
-          </a>
 
-          <!-- View All Link -->
-          <div *ngIf="receiptCount() > 5 && !searchQuery().trim()" class="pt-2 text-center">
-            <button (click)="toggleShowAllReceipts()"
-              class="text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors">
-              {{ showAllReceipts() ? '← Show less' : 'View all ' + receiptCount() + ' receipts →' }}
-            </button>
+            <!-- Status Badge (for needs_review) -->
+            <div *ngIf="receipt.status === 'needs_review'"
+              class="absolute top-1 right-1 sm:top-1.5 sm:right-1.5">
+              <span class="inline-flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-orange-500 text-white text-[8px] sm:text-[10px] font-bold shadow-md">
+                !
+              </span>
+            </div>
+
+            <!-- Processing indicator -->
+            <div *ngIf="receipt.status === 'processing' || receipt.status === 'uploaded'"
+              class="absolute top-1 right-1 sm:top-1.5 sm:right-1.5">
+              <span class="inline-flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-blue-500 text-white shadow-md">
+                <div class="h-2 w-2 animate-spin rounded-full border border-white border-t-transparent"></div>
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Sidebar -->
-      <div class="space-y-4">
-        <!-- Spending by Category -->
-        <div *ngIf="categorySpending().length > 0"
-          class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <p class="text-xs uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300">Spending by category</p>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">This month</p>
-          <div class="space-y-3">
-            <div *ngFor="let cat of categorySpending()" class="space-y-1">
-              <div class="flex items-center justify-between text-sm">
-                <span class="flex items-center gap-2">
-                  <span>{{ cat.icon }}</span>
-                  <span class="text-slate-700 dark:text-slate-200">{{ cat.name }}</span>
-                </span>
-                <span class="font-medium text-slate-900 dark:text-white">{{ formatCurrency(cat.total) }}</span>
-              </div>
-              <div class="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                <div class="h-full rounded-full transition-all duration-500" [style.width.%]="cat.percentage"
-                  [style.backgroundColor]="cat.color">
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- Loading More Indicator -->
+      <div *ngIf="isLoadingMore()" class="flex items-center justify-center py-8">
+        <div class="h-8 w-8 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
+      </div>
 
-        <!-- Quick Actions -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <p class="text-xs uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300">Quick actions</p>
-          <ul class="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-200">
-            <li>
-              <button (click)="openUploadModal()"
-                class="flex w-full items-center gap-2 rounded-lg p-2 transition hover:bg-emerald-50 dark:hover:bg-slate-800">
-                <span
-                  class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">⬆</span>
-                <span>Upload a receipt</span>
-              </button>
-            </li>
-            <li class="flex items-center gap-2 rounded-lg p-2 opacity-50">
-              <span
-                class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">🏷️</span>
-              <span>Manage categories (coming soon)</span>
-            </li>
-            <li class="flex items-center gap-2 rounded-lg p-2 opacity-50">
-              <span
-                class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">📊</span>
-              <span>View reports (coming soon)</span>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Processing Info -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <p class="text-xs uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300">How it works</p>
-          <div class="mt-4 space-y-3 text-xs text-slate-600 dark:text-slate-300">
-            <div class="flex items-start gap-2">
-              <span
-                class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">1</span>
-              <p><strong>Upload</strong> — Drag & drop or select your receipt</p>
-            </div>
-            <div class="flex items-start gap-2">
-              <span
-                class="flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">2</span>
-              <p><strong>Processing</strong> — AI extracts merchant, amount & date</p>
-            </div>
-            <div class="flex items-start gap-2">
-              <span
-                class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">3</span>
-              <p><strong>Done</strong> — Review & confirm, or let it auto-complete</p>
-            </div>
-          </div>
+      <!-- End of Gallery -->
+      <div *ngIf="!hasMoreMonths() && visibleMonthGroups().length > 0" class="text-center py-8">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800 text-sm text-slate-500 dark:text-slate-400">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          You've seen all your receipts
         </div>
       </div>
-    </section>
+    </div>
   </div>
 </div>
 

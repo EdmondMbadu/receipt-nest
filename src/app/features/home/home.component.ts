@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, computed, inject, signal, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -10,6 +10,14 @@ import { UploadComponent } from '../../components/upload/upload.component';
 import { Receipt, ReceiptStatus } from '../../models/receipt.model';
 import { DEFAULT_CATEGORIES, getCategoryById, Category } from '../../models/category.model';
 
+// Interface for grouped receipts by month
+interface MonthGroup {
+  year: number;
+  month: number;
+  label: string;
+  receipts: Receipt[];
+}
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -17,7 +25,7 @@ import { DEFAULT_CATEGORIES, getCategoryById, Category } from '../../models/cate
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
-export class HomeComponent implements OnInit, OnDestroy {
+export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly theme = inject(ThemeService);
@@ -32,6 +40,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly searchQuery = signal('');
   readonly searchFocused = signal(false);
   readonly showAllReceipts = signal(false);
+
+  // Gallery view state
+  readonly visibleMonthCount = signal(2); // Start with 2 months
+  readonly imageUrls = signal<Record<string, string>>({}); // Cache for image URLs
+  readonly loadingImages = signal<Set<string>>(new Set());
+  readonly isLoadingMore = signal(false);
+  readonly hasMoreMonths = computed(() => {
+    return this.visibleMonthCount() < this.receiptsGroupedByMonth().length;
+  });
 
   // Receipts from service
   readonly receipts = this.receiptService.receipts;
@@ -189,6 +206,54 @@ export class HomeComponent implements OnInit, OnDestroy {
     return receipt?.id || '';
   }
 
+  // Group all receipts by month for gallery view
+  readonly receiptsGroupedByMonth = computed(() => {
+    const receipts = this.receipts();
+    const groups: Map<string, MonthGroup> = new Map();
+
+    for (const receipt of receipts) {
+      let year: number;
+      let month: number;
+
+      // Use receipt date if available, otherwise use createdAt
+      if (receipt.date) {
+        const date = new Date(receipt.date);
+        year = date.getFullYear();
+        month = date.getMonth();
+      } else if (receipt.createdAt) {
+        const date = (receipt.createdAt as any).toDate
+          ? (receipt.createdAt as any).toDate()
+          : new Date(receipt.createdAt as any);
+        year = date.getFullYear();
+        month = date.getMonth();
+      } else {
+        // Skip receipts without any date
+        continue;
+      }
+
+      const key = `${year}-${month}`;
+      if (!groups.has(key)) {
+        const label = new Date(year, month, 1).toLocaleDateString('en-US', {
+          month: 'long',
+          year: 'numeric'
+        });
+        groups.set(key, { year, month, label, receipts: [] });
+      }
+      groups.get(key)!.receipts.push(receipt);
+    }
+
+    // Sort groups by date (newest first)
+    return Array.from(groups.values()).sort((a, b) => {
+      if (a.year !== b.year) return b.year - a.year;
+      return b.month - a.month;
+    });
+  });
+
+  // Get visible month groups based on infinite scroll
+  readonly visibleMonthGroups = computed(() => {
+    return this.receiptsGroupedByMonth().slice(0, this.visibleMonthCount());
+  });
+
   // Spending by category for current month
   readonly categorySpending = computed(() => {
     const now = new Date();
@@ -238,8 +303,118 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.receiptService.subscribeToReceipts();
   }
 
+  ngAfterViewInit(): void {
+    // Load image URLs for visible receipts
+    this.loadVisibleImageUrls();
+  }
+
   ngOnDestroy(): void {
     this.receiptService.unsubscribeFromReceipts();
+  }
+
+  // Load image URLs for visible month groups
+  async loadVisibleImageUrls(): Promise<void> {
+    const visibleReceipts = this.visibleMonthGroups().flatMap(g => g.receipts);
+    for (const receipt of visibleReceipts) {
+      if (receipt.file?.storagePath && !this.imageUrls()[receipt.id]) {
+        this.loadImageUrl(receipt.id, receipt.file.storagePath);
+      }
+    }
+  }
+
+  // Load a single image URL
+  async loadImageUrl(receiptId: string, storagePath: string): Promise<void> {
+    // Skip if already loaded or loading
+    if (this.imageUrls()[receiptId] || this.loadingImages().has(receiptId)) {
+      return;
+    }
+
+    // Mark as loading
+    this.loadingImages.update(set => {
+      const newSet = new Set(set);
+      newSet.add(receiptId);
+      return newSet;
+    });
+
+    try {
+      const url = await this.receiptService.getReceiptFileUrl(storagePath);
+      this.imageUrls.update(urls => ({
+        ...urls,
+        [receiptId]: url
+      }));
+    } catch (error) {
+      console.error('Failed to load image URL:', error);
+    } finally {
+      this.loadingImages.update(set => {
+        const newSet = new Set(set);
+        newSet.delete(receiptId);
+        return newSet;
+      });
+    }
+  }
+
+  // Handle scroll for infinite loading
+  @HostListener('window:scroll')
+  onScroll(): void {
+    if (this.isLoadingMore() || !this.hasMoreMonths()) {
+      return;
+    }
+
+    const scrollPosition = window.innerHeight + window.scrollY;
+    const documentHeight = document.documentElement.scrollHeight;
+    const threshold = 300; // Load more when 300px from bottom
+
+    if (scrollPosition >= documentHeight - threshold) {
+      this.loadMoreMonths();
+    }
+  }
+
+  // Load more months
+  async loadMoreMonths(): Promise<void> {
+    if (this.isLoadingMore() || !this.hasMoreMonths()) {
+      return;
+    }
+
+    this.isLoadingMore.set(true);
+
+    // Simulate a small delay for smooth UX
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    this.visibleMonthCount.update(count => count + 2);
+
+    // Load image URLs for newly visible receipts
+    await this.loadVisibleImageUrls();
+
+    this.isLoadingMore.set(false);
+  }
+
+  // Get image URL for a receipt
+  getImageUrl(receipt: Receipt): string | null {
+    return this.imageUrls()[receipt.id] || null;
+  }
+
+  // Check if image is loading
+  isImageLoading(receiptId: string): boolean {
+    return this.loadingImages().has(receiptId);
+  }
+
+  // Check if file is a PDF
+  isPdf(receipt: Receipt): boolean {
+    return receipt.file?.mimeType === 'application/pdf';
+  }
+
+  // Navigate to receipt detail
+  navigateToReceipt(receiptId: string): void {
+    this.router.navigate(['/app/receipt', receiptId]);
+  }
+
+  // TrackBy functions for ngFor performance
+  trackMonthGroup(index: number, group: MonthGroup): string {
+    return `${group.year}-${group.month}`;
+  }
+
+  trackReceipt(index: number, receipt: Receipt): string {
+    return receipt.id;
   }
 
   async logout() {
