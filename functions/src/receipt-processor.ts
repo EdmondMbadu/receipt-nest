@@ -212,6 +212,24 @@ export const processReceipt = onDocumentCreated(
         }
       }
 
+      // Step 2.5: If we still don't have a merchant name, try focused merchant extraction
+      if (extraction && (!extraction.supplierName || !extraction.supplierName.value)) {
+        logger.warn("No merchant name found in initial extraction, attempting focused merchant-only extraction");
+        try {
+          const merchantName = await extractMerchantNameOnly(processBuffer, processMimeType);
+          if (merchantName) {
+            logger.info("Focused merchant extraction successful", { merchantName });
+            extraction.supplierName = {
+              value: merchantName,
+              confidence: 0.75,
+              rawText: merchantName
+            };
+          }
+        } catch (error) {
+          logger.error("Focused merchant extraction failed", error);
+        }
+      }
+
       // If we still have no extraction, mark for review
       if (!extraction) {
         await receiptRef.update({
@@ -305,6 +323,91 @@ export const processReceipt = onDocumentCreated(
     }
   }
 );
+
+/**
+ * Focused extraction to get just the merchant name using Gemini
+ * Used as a fallback when the main extraction doesn't find a merchant
+ */
+async function extractMerchantNameOnly(
+  fileBuffer: Buffer,
+  mimeType: string
+): Promise<string | null> {
+  const vertexAI = new VertexAI({
+    project: PROJECT_ID,
+    location: VERTEX_LOCATION,
+  });
+
+  const model = vertexAI.getGenerativeModel({
+    model: "gemini-2.5-flash-preview-05-20",
+    generationConfig: {
+      temperature: 0.1,
+      maxOutputTokens: 256,
+      responseMimeType: "application/json",
+    },
+  });
+
+  // Gemini only supports these image mimeTypes
+  const supportedMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+  let geminiMimeType = mimeType;
+  if (!supportedMimeTypes.includes(mimeType)) {
+    geminiMimeType = "image/jpeg";
+  }
+
+  const prompt = `You are analyzing a receipt image. Your ONLY task is to identify the merchant/store/business name.
+
+Look for:
+- The largest text at the TOP of the receipt
+- Company logos or branding
+- Store name in the header
+- Business name before the itemized list
+
+Common examples: "WALMART", "TARGET", "STARBUCKS", "CVS PHARMACY", "WHOLE FOODS MARKET", "MCDONALD'S", etc.
+
+Return ONLY a JSON object with this format:
+{
+  "merchant": "Store Name Here"
+}
+
+Make your best effort. Even a partial name is better than nothing. Only return null if the image is completely illegible.`;
+
+  const base64Image = fileBuffer.toString("base64");
+
+  const result = await model.generateContent({
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            inlineData: {
+              mimeType: geminiMimeType,
+              data: base64Image,
+            },
+          },
+          { text: prompt },
+        ],
+      },
+    ],
+  });
+
+  const response = result.response;
+  const text = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+  try {
+    const parsed = JSON.parse(text);
+    const merchantName = parsed.merchant;
+
+    if (merchantName && typeof merchantName === 'string') {
+      const trimmed = merchantName.trim();
+      if (trimmed.length > 0 && !["null", "unknown", "n/a", "none"].includes(trimmed.toLowerCase())) {
+        return trimmed;
+      }
+    }
+  } catch (error) {
+    logger.warn("Failed to parse merchant-only extraction", { error, text });
+  }
+
+  return null;
+}
 
 /**
  * Extract receipt data using Google Document AI
@@ -422,11 +525,21 @@ async function extractWithGemini(
 
   const prompt = `You are an expert receipt parser. Analyze this receipt image carefully and extract the key information.
 
-IMPORTANT: Look for the FINAL TOTAL amount on the receipt - this is usually labeled as "Total", "Grand Total", "Amount Due", or similar. Do NOT use subtotals or individual item prices.
+CRITICAL INSTRUCTIONS:
+1. MERCHANT NAME: This is the MOST IMPORTANT field. Look very carefully for:
+   - The business/store name printed at the TOP of the receipt (usually largest text)
+   - Company logos or branding
+   - Header text before the itemized list
+   - Store location or branch name
+   - Common patterns: "WALMART", "TARGET", "STARBUCKS", "CVS", "WHOLE FOODS", etc.
+   - DO NOT return null for merchant unless the receipt is completely illegible
+   - If unsure, provide your best guess based on any visible text or logos
+
+2. TOTAL AMOUNT: Look for the FINAL TOTAL - usually labeled as "Total", "Grand Total", "Amount Due", or similar. Do NOT use subtotals or individual item prices.
 
 Return a JSON object with these exact fields:
 {
-  "merchant": "The store or business name (look at the top of the receipt)",
+  "merchant": "The store or business name",
   "total": 0.00,
   "currency": "USD",
   "date": "YYYY-MM-DD",
@@ -434,13 +547,15 @@ Return a JSON object with these exact fields:
 }
 
 Field requirements:
-- "merchant": The business name. Look for logos, headers, or store names at the top.
+- "merchant": The business name. REQUIRED - make your best effort to extract this. Look at logos, headers, and any text at the top of the receipt. Even partial names are better than null.
 - "total": A NUMBER representing the final total paid. Parse from text like "$45.67" → 45.67
 - "currency": The currency code (default to "USD" for US receipts)
 - "date": The transaction date in YYYY-MM-DD format
 - "confidence": Your confidence in the extraction (0.0 to 1.0)
 
-If a field cannot be determined, set it to null. Return ONLY the JSON object.`;
+If you cannot find the merchant name with high confidence, still provide your best guess based on visible text. Only set merchant to null if the image is completely unreadable.
+
+Return ONLY the JSON object.`;
 
   const base64Image = fileBuffer.toString("base64");
 
@@ -515,8 +630,24 @@ If a field cannot be determined, set it to null. Return ONLY the JSON object.`;
     logger.warn("No total found in Gemini response");
   }
 
-  // Parse merchant name
-  const merchantValue = parsed.merchant != null ? String(parsed.merchant).trim() : undefined;
+  // Parse merchant name - be more robust in handling empty/null values
+  let merchantValue: string | undefined;
+  if (parsed.merchant != null) {
+    const trimmed = String(parsed.merchant).trim();
+    // Only accept non-empty strings that aren't just "null", "unknown", etc.
+    if (trimmed.length > 0 &&
+        !["null", "unknown", "n/a", "none", ""].includes(trimmed.toLowerCase())) {
+      merchantValue = trimmed;
+    }
+  }
+
+  // Log merchant extraction for debugging
+  logger.info("Merchant extraction from Gemini", {
+    raw: parsed.merchant,
+    parsed: merchantValue,
+    wasNull: parsed.merchant == null,
+    wasEmpty: !merchantValue
+  });
 
   // Boost confidence for PDFs when all critical fields are successfully extracted
   const isPdf = mimeType === "application/pdf";
