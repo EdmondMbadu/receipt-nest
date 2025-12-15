@@ -4,7 +4,10 @@ import {
   Output,
   inject,
   signal,
-  computed
+  computed,
+  ViewChild,
+  ElementRef,
+  effect
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -25,6 +28,8 @@ export class UploadComponent {
   @Output() uploadError = new EventEmitter<string>();
   @Output() close = new EventEmitter<void>();
 
+  @ViewChild('videoElement') videoElement?: ElementRef<HTMLVideoElement>;
+
   // State
   readonly isDragging = signal(false);
   readonly isUploading = signal(false);
@@ -32,6 +37,18 @@ export class UploadComponent {
   readonly selectedFile = signal<File | null>(null);
   readonly previewUrl = signal<string | null>(null);
   readonly errorMessage = signal<string | null>(null);
+  readonly showCamera = signal(false);
+  private videoStream: MediaStream | null = null;
+
+  constructor() {
+    // Watch for camera state changes and initialize camera
+    effect(() => {
+      if (this.showCamera()) {
+        // Small delay to ensure video element is available
+        setTimeout(() => this.initializeCamera(), 100);
+      }
+    });
+  }
 
   // Computed
   readonly progressPercent = computed(() => {
@@ -201,8 +218,94 @@ export class UploadComponent {
 
   // Close modal
   onClose(): void {
+    this.stopCamera();
     this.reset();
     this.close.emit();
+  }
+
+  // Open camera to take a picture
+  openCamera(): void {
+    this.showCamera.set(true);
+    this.errorMessage.set(null);
+  }
+
+  // Initialize camera stream
+  async initializeCamera(): Promise<void> {
+    if (!this.videoElement) {
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'environment', // Use back camera on mobile devices
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        }
+      });
+
+      this.videoStream = stream;
+      this.videoElement.nativeElement.srcObject = stream;
+    } catch (error: any) {
+      console.error('Failed to access camera:', error);
+      this.errorMessage.set('Failed to access camera. Please check permissions.');
+      this.showCamera.set(false);
+    }
+  }
+
+  // Stop camera stream
+  stopCamera(): void {
+    if (this.videoStream) {
+      this.videoStream.getTracks().forEach(track => track.stop());
+      this.videoStream = null;
+    }
+    if (this.videoElement?.nativeElement) {
+      this.videoElement.nativeElement.srcObject = null;
+    }
+  }
+
+  // Capture photo from camera
+  capturePhoto(videoElement: HTMLVideoElement): void {
+    if (!videoElement.videoWidth || !videoElement.videoHeight) {
+      this.errorMessage.set('Camera not ready. Please wait a moment.');
+      return;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      this.errorMessage.set('Failed to capture photo');
+      return;
+    }
+
+    ctx.drawImage(videoElement, 0, 0);
+
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        this.errorMessage.set('Failed to create image from capture');
+        return;
+      }
+
+      // Create a File object from the blob
+      const timestamp = Date.now();
+      const file = new File([blob], `receipt-${timestamp}.jpg`, {
+        type: 'image/jpeg',
+        lastModified: timestamp
+      });
+
+      this.stopCamera();
+      this.showCamera.set(false);
+      this.handleFile(file);
+    }, 'image/jpeg', 0.95);
+  }
+
+  // Cancel camera
+  cancelCamera(): void {
+    this.stopCamera();
+    this.showCamera.set(false);
   }
 }
 
