@@ -29,8 +29,8 @@
       <p class="text-sm text-red-700 dark:text-red-400">{{ errorMessage() }}</p>
     </div>
 
-    <!-- Upload Area (when no file selected) -->
-    <div *ngIf="!selectedFile()" class="space-y-4">
+    <!-- Upload Area (when no file selected and camera not active) -->
+    <div *ngIf="!selectedFile() && !showCamera()" class="space-y-4">
 
       <!-- Camera Capture Button -->
       <button type="button" (click)="openCamera()"
@@ -92,15 +92,15 @@
     </div>
 
     <!-- Camera View -->
-    <div *ngIf="showCamera()" class="space-y-4">
+    <div *ngIf="showCamera()" class="space-y-3">
       <!-- Video Preview -->
-      <div class="relative rounded-xl overflow-hidden bg-black">
+      <div class="relative rounded-xl overflow-hidden bg-black" style="min-height: 400px;">
         <video #videoElement autoplay playsinline
-          class="w-full max-h-96 object-contain">
+          class="w-full h-full object-cover">
         </video>
 
         <!-- Camera Controls Overlay -->
-        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
           <div class="flex items-center justify-center gap-4">
             <!-- Cancel Button -->
             <button type="button" (click)="cancelCamera()"
@@ -112,8 +112,8 @@
 
             <!-- Capture Button -->
             <button type="button" (click)="capturePhoto(videoElement)"
-              class="rounded-full bg-white hover:bg-slate-100 p-5 shadow-lg transition-all hover:scale-105">
-              <div class="rounded-full bg-emerald-500 w-12 h-12"></div>
+              class="rounded-full bg-white hover:bg-slate-100 p-4 shadow-lg transition-all hover:scale-105">
+              <div class="rounded-full bg-emerald-500 w-10 h-10"></div>
             </button>
 
             <!-- Flip Camera Button (placeholder for future enhancement) -->
