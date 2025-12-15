@@ -37,6 +37,8 @@
             aria-label="Toggle theme">
             <span class="text-base">{{ isDarkMode() ? '☀️' : '🌙' }}</span>
           </button>
+
+          <!-- Desktop Auth Links -->
           <ng-container *ngIf="auth.isAuthenticated(); else guestLinks">
             <a routerLink="/app"
               class="inline-flex items-center justify-center rounded-full bg-emerald-500 px-3 py-2 sm:px-4 text-xs sm:text-sm font-medium text-white dark:text-slate-950 shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all duration-200 whitespace-nowrap">
@@ -50,13 +52,98 @@
               Sign in
             </a>
             <a routerLink="/register"
-              class="inline-flex items-center justify-center rounded-full bg-emerald-500 px-3 py-2 sm:px-4 text-xs sm:text-sm font-medium text-white dark:text-slate-950 shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all duration-200 whitespace-nowrap">
-              <span class="hidden sm:inline">Get started</span>
-              <span class="sm:hidden">Start</span>
+              class="hidden sm:inline-flex items-center justify-center rounded-full bg-emerald-500 px-4 text-sm font-medium text-white dark:text-slate-950 shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all duration-200 whitespace-nowrap">
+              Get started
             </a>
+
+            <!-- Mobile Hamburger Menu Button -->
+            <button type="button" (click)="toggleMobileMenu()"
+              class="sm:hidden inline-flex items-center justify-center h-9 w-9 flex-shrink-0 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200"
+              aria-label="Toggle menu">
+              <svg *ngIf="!isMobileMenuOpen()" class="h-5 w-5 text-slate-700 dark:text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+              <svg *ngIf="isMobileMenuOpen()" class="h-5 w-5 text-slate-700 dark:text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </ng-template>
         </div>
       </header>
+
+      <!-- Mobile Menu Overlay -->
+      <div *ngIf="isMobileMenuOpen()"
+           (click)="toggleMobileMenu()"
+           class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 sm:hidden animate-[fadeIn_0.3s_ease-out]">
+      </div>
+
+      <!-- Mobile Menu Slide-out -->
+      <div *ngIf="isMobileMenuOpen()"
+           class="fixed top-0 right-0 h-full w-72 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50 sm:hidden animate-[slideInRight_0.3s_ease-out]">
+        <div class="flex flex-col h-full p-6">
+          <!-- Menu Header -->
+          <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-2">
+              <img src="assets/receipt-nest.png" alt="ReceiptNest" class="h-8 w-8 object-contain" />
+              <span class="text-sm font-bold uppercase tracking-[0.2em]">
+                <span class="text-slate-900 dark:text-white">Receipt</span><span class="text-emerald-600 dark:text-emerald-300">Nest</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Menu Links -->
+          <nav class="flex flex-col gap-4 flex-1">
+            <a routerLink="/login"
+               (click)="toggleMobileMenu()"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 hover:border-emerald-500 dark:hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-all duration-200">
+              <svg class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+              <span class="text-sm font-medium">Sign in</span>
+            </a>
+
+            <a routerLink="/register"
+               (click)="toggleMobileMenu()"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white dark:text-slate-950 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+              <span class="text-sm font-medium">Create account</span>
+            </a>
+
+            <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+              <p class="text-xs text-slate-500 dark:text-slate-400 mb-3 px-2">Quick links</p>
+              <a href="#features"
+                 (click)="toggleMobileMenu()"
+                 class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors">
+                Features
+              </a>
+              <a href="#how-it-works"
+                 (click)="toggleMobileMenu()"
+                 class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors">
+                How it works
+              </a>
+              <a href="#pricing"
+                 (click)="toggleMobileMenu()"
+                 class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors">
+                Pricing
+              </a>
+              <a href="#faq"
+                 (click)="toggleMobileMenu()"
+                 class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors">
+                FAQ
+              </a>
+            </div>
+          </nav>
+
+          <!-- Menu Footer -->
+          <div class="pt-4 border-t border-slate-200 dark:border-slate-800">
+            <p class="text-xs text-slate-500 dark:text-slate-400 text-center">
+              © {{ currentYear }} ReceiptNest
+            </p>
+          </div>
+        </div>
+      </div>
 
       <!-- Hero -->
       <main class="mt-2 flex flex-1 flex-col gap-12 lg:mt-3 lg:flex-row lg:items-center lg:gap-16">

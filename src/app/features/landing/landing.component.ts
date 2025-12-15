@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
@@ -19,6 +19,7 @@ export class LandingComponent {
   readonly user = this.auth.user;
   readonly isDarkMode = this.theme.isDarkMode;
   readonly currentYear = new Date().getFullYear();
+  readonly isMobileMenuOpen = signal(false);
 
   readonly displayName = computed(() => {
     const profile = this.user();
@@ -32,6 +33,10 @@ export class LandingComponent {
 
   toggleTheme() {
     this.theme.toggleTheme();
+  }
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen.update(isOpen => !isOpen);
   }
 }
 
