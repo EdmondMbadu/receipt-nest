@@ -2,7 +2,6 @@ import { Component, ElementRef, HostListener, OnDestroy, OnInit, computed, injec
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { PDFDocument } from 'pdf-lib';
 
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
@@ -29,6 +28,7 @@ interface MonthGroup {
   styleUrl: './home.component.css'
 })
 export class HomeComponent implements OnInit, OnDestroy {
+  private pdfLibPromise: Promise<typeof import('pdf-lib')> | null = null;
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly theme = inject(ThemeService);
@@ -545,6 +545,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         throw new Error('No receipts available for this month yet.');
       }
 
+      const { PDFDocument } = await this.loadPdfLib();
       const pdfDoc = await PDFDocument.create();
       let appendedPages = 0;
 
@@ -716,6 +717,13 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (!categoryId) return 'Uncategorized';
     const category = getCategoryById(categoryId);
     return category?.name || 'Other';
+  }
+
+  private loadPdfLib(): Promise<typeof import('pdf-lib')> {
+    if (!this.pdfLibPromise) {
+      this.pdfLibPromise = import('pdf-lib');
+    }
+    return this.pdfLibPromise;
   }
 
   private buildReceiptCaption(receipt: Receipt): string {

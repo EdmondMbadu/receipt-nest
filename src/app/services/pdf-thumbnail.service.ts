@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
-import * as pdfjsLib from 'pdfjs-dist';
 
-// Set the worker source to use local file from assets
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/assets/pdfjs/pdf.worker.min.mjs';
+type PdfJsLib = typeof import('pdfjs-dist');
 
 @Injectable({
   providedIn: 'root'
 })
 export class PdfThumbnailService {
   private thumbnailCache = new Map<string, string>();
+  private pdfjsPromise: Promise<PdfJsLib> | null = null;
 
   /**
    * Generate a thumbnail image from a PDF URL
@@ -17,6 +16,8 @@ export class PdfThumbnailService {
    * @returns Promise<string> Data URL of the thumbnail image
    */
   async generateThumbnail(pdfUrl: string, scale: number = 0.5): Promise<string> {
+    const pdfjsLib = await this.loadPdfJs();
+
     // Check cache first
     const cacheKey = `${pdfUrl}_${scale}`;
     if (this.thumbnailCache.has(cacheKey)) {
@@ -86,5 +87,15 @@ export class PdfThumbnailService {
         this.thumbnailCache.delete(key);
       }
     }
+  }
+
+  private loadPdfJs(): Promise<PdfJsLib> {
+    if (!this.pdfjsPromise) {
+      this.pdfjsPromise = import('pdfjs-dist').then(module => {
+        module.GlobalWorkerOptions.workerSrc = '/assets/pdfjs/pdf.worker.min.mjs';
+        return module;
+      });
+    }
+    return this.pdfjsPromise;
   }
 }

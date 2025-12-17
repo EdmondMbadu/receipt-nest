@@ -16,7 +16,8 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "allowedCommonJsDependencies": [
-              "heic2any"
+              "heic2any",
+              "pako"
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
