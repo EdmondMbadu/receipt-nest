@@ -40,5 +40,11 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow write: if false; // Admin only via console
     }
+
+    // Public graph share links
+    match /graphShares/{shareId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
+    }
   }
 }

@@ -14,3 +14,4 @@ declare module 'heic-decode' {
   export default decode;
 }
 
+

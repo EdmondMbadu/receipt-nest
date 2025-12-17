@@ -115,3 +115,4 @@ export function getCategoryByName(name: string): Category | undefined {
   return DEFAULT_CATEGORIES.find(c => c.name.toLowerCase() === lowerName);
 }
 
+

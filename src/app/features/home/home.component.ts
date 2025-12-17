@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 import { ReceiptService } from '../../services/receipt.service';
 import { PdfThumbnailService } from '../../services/pdf-thumbnail.service';
+import { ShareService } from '../../services/share.service';
 import { UploadComponent } from '../../components/upload/upload.component';
 import { Receipt, ReceiptStatus } from '../../models/receipt.model';
 import { DEFAULT_CATEGORIES, getCategoryById, Category } from '../../models/category.model';
@@ -33,6 +34,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   readonly receiptService = inject(ReceiptService);
   private readonly pdfThumbnailService = inject(PdfThumbnailService);
+  private readonly shareService = inject(ShareService);
 
   readonly user = this.authService.user;
   readonly isDarkMode = this.theme.isDarkMode;
@@ -45,6 +47,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly showAllReceipts = signal(false);
   readonly hoveredDay = signal<{ day: number; amount: number; cumulative: number } | null>(null);
   readonly selectedDay = signal<{ day: number; month: number; year: number } | null>(null);
+  readonly showShareModal = signal(false);
+  readonly shareIncludeName = signal(true);
+  readonly shareIncludeEmail = signal(true);
+  readonly shareOwnerName = signal('');
+  readonly shareOwnerEmail = signal('');
+  readonly isCreatingShareLink = signal(false);
+  readonly shareLink = signal<string | null>(null);
+  readonly shareError = signal<string | null>(null);
+  readonly shareCopied = signal(false);
 
   // Expose Math for template
   readonly Math = Math;
@@ -353,6 +364,22 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (visibleGroups.length > 0) {
       // Load image URLs for visible receipts
       this.loadVisibleImageUrls();
+    }
+  });
+
+  private shareProfileEffect = effect(() => {
+    const profile = this.user();
+    if (!profile) {
+      return;
+    }
+
+    const fullName = `${profile.firstName ?? ''} ${profile.lastName ?? ''}`.trim();
+    if (!this.shareOwnerName() && fullName) {
+      this.shareOwnerName.set(fullName);
+    }
+
+    if (!this.shareOwnerEmail() && profile.email) {
+      this.shareOwnerEmail.set(profile.email);
     }
   });
 
@@ -720,5 +747,107 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.menuOpen.set(false);
     }
   }
-}
 
+  openShareModal(): void {
+    this.shareError.set(null);
+    this.shareLink.set(null);
+    this.shareCopied.set(false);
+    this.showShareModal.set(true);
+  }
+
+  closeShareModal(): void {
+    this.showShareModal.set(false);
+  }
+
+  async createShareLink(): Promise<void> {
+    this.shareError.set(null);
+    this.shareCopied.set(false);
+
+    if (this.isCreatingShareLink()) {
+      return;
+    }
+
+    if (this.shareIncludeName() && !this.shareOwnerName().trim()) {
+      this.shareError.set('Please enter the name you want to share.');
+      return;
+    }
+
+    if (this.shareIncludeEmail()) {
+      const email = this.shareOwnerEmail().trim();
+      if (!email) {
+        this.shareError.set('Please enter the email you want to share.');
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        this.shareError.set('Please enter a valid email address.');
+        return;
+      }
+    }
+
+    const dailyData = this.dailySpendingData().map(day => ({ ...day }));
+    this.isCreatingShareLink.set(true);
+
+    try {
+      const share = await this.shareService.createGraphShare({
+        month: this.receiptService.selectedMonth(),
+        year: this.receiptService.selectedYear(),
+        monthLabel: this.selectedMonthLabel(),
+        totalSpend: this.selectedMonthSpend(),
+        dailyData,
+        includeName: this.shareIncludeName(),
+        includeEmail: this.shareIncludeEmail(),
+        ownerName: this.shareIncludeName() ? this.shareOwnerName().trim() : undefined,
+        ownerEmail: this.shareIncludeEmail() ? this.shareOwnerEmail().trim() : undefined
+      });
+
+      this.shareLink.set(this.buildShareUrl(share.id));
+    } catch (error: any) {
+      const message = error?.message ?? 'Unable to create share link right now.';
+      this.shareError.set(message);
+    } finally {
+      this.isCreatingShareLink.set(false);
+    }
+  }
+
+  async copyShareLink(): Promise<void> {
+    const link = this.shareLink();
+    if (!link) {
+      return;
+    }
+
+    try {
+      const nav = typeof navigator !== 'undefined' ? navigator : null;
+      if (nav?.clipboard?.writeText) {
+        await nav.clipboard.writeText(link);
+      } else if (typeof document !== 'undefined') {
+        const textarea = document.createElement('textarea');
+        textarea.value = link;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      this.shareCopied.set(true);
+      setTimeout(() => this.shareCopied.set(false), 3000);
+    } catch (error) {
+      console.error('Failed to copy share link', error);
+    }
+  }
+
+  onShareLinkInputClick(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    if (target?.select) {
+      target.select();
+    }
+  }
+
+  private buildShareUrl(shareId: string): string {
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}/share/${shareId}`;
+    }
+    return `/share/${shareId}`;
+  }
+}

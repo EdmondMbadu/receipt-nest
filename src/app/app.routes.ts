@@ -35,6 +35,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/verify/verify-email.component').then((m) => m.VerifyEmailComponent)
   },
   {
+    path: 'share/:id',
+    loadComponent: () => import('./features/share/share-view.component').then((m) => m.ShareViewComponent)
+  },
+  {
     path: '**',
     redirectTo: ''
   }

@@ -1,0 +1,7 @@
+:host {
+  display: block;
+}
+
+img {
+  image-rendering: -webkit-optimize-contrast;
+}
