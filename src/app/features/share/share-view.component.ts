@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 
 import { GraphShare, GraphSharePoint } from '../../models/share-link.model';
 import { ShareService } from '../../services/share.service';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-share-view',
@@ -16,6 +17,7 @@ import { ShareService } from '../../services/share.service';
 export class ShareViewComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly shareService = inject(ShareService);
+  private readonly theme = inject(ThemeService);
   private routeSub: Subscription | null = null;
 
   readonly isLoading = signal(true);
@@ -23,6 +25,7 @@ export class ShareViewComponent implements OnInit, OnDestroy {
   readonly share = signal<GraphShare | null>(null);
   readonly hoveredDay = signal<GraphSharePoint | null>(null);
   readonly Math = Math;
+  readonly isDarkMode = this.theme.isDarkMode;
 
   readonly dailyData = computed(() => this.share()?.dailyData ?? []);
   readonly monthLabel = computed(() => this.share()?.monthLabel ?? '');
@@ -141,5 +144,9 @@ export class ShareViewComponent implements OnInit, OnDestroy {
   axisLabel(value: number): number {
     const totalDays = this.dailyData().length || 1;
     return Math.min(totalDays, Math.max(1, value));
+  }
+
+  toggleTheme(): void {
+    this.theme.toggleTheme();
   }
 }
