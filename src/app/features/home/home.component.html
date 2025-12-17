@@ -435,20 +435,47 @@
         <!-- Month Header -->
         <div
           class="sticky top-0 z-10 bg-gradient-to-b from-slate-50 via-slate-50/95 to-transparent dark:from-slate-900 dark:via-slate-900/95 py-2">
-          <div class="flex items-baseline gap-2">
-            <h2 class="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">
-              {{ monthGroup.label }}
-            </h2>
-            <!-- Show day amount when hovered or selected (only for matching month) -->
-            <span
-              *ngIf="(hoveredDay() || selectedDay()) && monthGroup.month === receiptService.selectedMonth() && monthGroup.year === receiptService.selectedYear()"
-              class="text-sm sm:text-base font-semibold text-emerald-600 dark:text-emerald-400 transition-opacity duration-200">
-              · Day {{ hoveredDay()?.day || selectedDay()?.day }}: {{ formatCurrency(getActiveDayAmount()) }}
-            </span>
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div class="flex flex-wrap items-baseline gap-2">
+                <h2 class="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">
+                  {{ monthGroup.label }}
+                </h2>
+                <!-- Show day amount when hovered or selected (only for matching month) -->
+                <span
+                  *ngIf="(hoveredDay() || selectedDay()) && monthGroup.month === receiptService.selectedMonth() && monthGroup.year === receiptService.selectedYear()"
+                  class="text-sm sm:text-base font-semibold text-emerald-600 dark:text-emerald-400 transition-opacity duration-200">
+                  · Day {{ hoveredDay()?.day || selectedDay()?.day }}: {{ formatCurrency(getActiveDayAmount()) }}
+                </span>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                {{ monthGroup.receipts.length }} receipt{{ monthGroup.receipts.length === 1 ? '' : 's' }}
+              </p>
+            </div>
+            <div class="flex flex-col items-start gap-1 sm:items-end">
+              <button type="button" (click)="downloadMonthReceipts(monthGroup)" [disabled]="!!downloadingMonthKey()"
+                class="inline-flex items-center gap-2 rounded-full border border-emerald-200/60 bg-white/90 px-3 py-1.5 text-xs font-semibold text-emerald-600 shadow-sm transition hover:bg-emerald-50 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-emerald-500/40 dark:bg-slate-900/80 dark:text-emerald-300">
+                <svg *ngIf="downloadingMonthKey() !== getMonthGroupKey(monthGroup)" class="h-3.5 w-3.5" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 4v16h16V4H4zm4 4h8m-8 4h8m-8 4h8" />
+                </svg>
+                <svg *ngIf="downloadingMonthKey() === getMonthGroupKey(monthGroup)"
+                  class="h-3.5 w-3.5 animate-spin text-emerald-600 dark:text-emerald-300" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                  <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+                <span>
+                  {{ downloadingMonthKey() === getMonthGroupKey(monthGroup) ? 'Preparing PDF…' : 'Download month PDF' }}
+                </span>
+              </button>
+              <p *ngIf="monthDownloadError()?.key === getMonthGroupKey(monthGroup)"
+                class="text-[10px] font-medium text-red-500 dark:text-red-400 max-w-xs text-left">
+                {{ monthDownloadError()?.message }}
+              </p>
+            </div>
           </div>
-          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            {{ monthGroup.receipts.length }} receipt{{ monthGroup.receipts.length === 1 ? '' : 's' }}
-          </p>
         </div>
 
         <!-- Receipt Grid -->

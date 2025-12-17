@@ -2,6 +2,7 @@ import { Component, ElementRef, HostListener, OnDestroy, OnInit, computed, injec
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { PDFDocument } from 'pdf-lib';
 
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
@@ -56,6 +57,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly shareLink = signal<string | null>(null);
   readonly shareError = signal<string | null>(null);
   readonly shareCopied = signal(false);
+  readonly downloadingMonthKey = signal<string | null>(null);
+  readonly monthDownloadError = signal<{ key: string; message: string } | null>(null);
 
   // Expose Math for template
   readonly Math = Math;
@@ -524,6 +527,109 @@ export class HomeComponent implements OnInit, OnDestroy {
     return receipt.id;
   }
 
+  getMonthGroupKey(group: MonthGroup): string {
+    return `${group.year}-${group.month}`;
+  }
+
+  async downloadMonthReceipts(monthGroup: MonthGroup): Promise<void> {
+    if (this.downloadingMonthKey()) {
+      return;
+    }
+
+    const key = this.getMonthGroupKey(monthGroup);
+    this.downloadingMonthKey.set(key);
+    this.monthDownloadError.set(null);
+
+    try {
+      if (!monthGroup.receipts.length) {
+        throw new Error('No receipts available for this month yet.');
+      }
+
+      const pdfDoc = await PDFDocument.create();
+      let appendedPages = 0;
+
+      for (const receipt of monthGroup.receipts) {
+        try {
+          if (!receipt.file?.storagePath) {
+            continue;
+          }
+
+          const blob = await this.fetchReceiptBlob(receipt);
+          const mimeType = this.getReceiptMimeType(receipt, blob);
+
+          if (this.isPdf(receipt) || mimeType === 'application/pdf') {
+            const sourcePdf = await PDFDocument.load(await blob.arrayBuffer());
+            const copiedPages = await pdfDoc.copyPages(sourcePdf, sourcePdf.getPageIndices());
+            copiedPages.forEach(page => pdfDoc.addPage(page));
+            appendedPages += copiedPages.length;
+          } else {
+            const { bytes, type } = await this.normalizeImageBlob(blob, receipt);
+            const embeddedImage = type === 'png'
+              ? await pdfDoc.embedPng(bytes)
+              : await pdfDoc.embedJpg(bytes);
+
+            const pageWidth = 612; // Letter
+            const pageHeight = 792;
+            const margin = 36;
+            const maxWidth = pageWidth - margin * 2;
+            const maxHeight = pageHeight - margin * 3;
+
+            const dimensions = embeddedImage.scale(1);
+            const scale = Math.min(maxWidth / dimensions.width, maxHeight / dimensions.height, 1);
+            const scaledWidth = dimensions.width * scale;
+            const scaledHeight = dimensions.height * scale;
+
+            const page = pdfDoc.addPage([pageWidth, pageHeight]);
+            page.drawImage(embeddedImage, {
+              x: (pageWidth - scaledWidth) / 2,
+              y: margin * 1.5,
+              width: scaledWidth,
+              height: scaledHeight
+            });
+
+            const caption = this.buildReceiptCaption(receipt);
+            const text = caption.length > 90 ? `${caption.slice(0, 87)}…` : caption;
+            page.drawText(text, {
+              x: margin,
+              y: margin / 2,
+              size: 12,
+              maxWidth: pageWidth - margin * 2
+            });
+
+            appendedPages += 1;
+          }
+        } catch (innerError) {
+          console.error('Failed to add receipt to PDF', innerError);
+        }
+      }
+
+      if (appendedPages === 0) {
+        throw new Error('Unable to prepare this download. Please try again later.');
+      }
+
+      const pdfBytes = await pdfDoc.save();
+      const pdfBuffer = pdfBytes.buffer.slice(0) as ArrayBuffer;
+      const pdfBlob = new Blob([pdfBuffer], { type: 'application/pdf' });
+      const downloadUrl = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      const safeLabel = monthGroup.label.replace(/\\s+/g, '-');
+      link.download = `${safeLabel}-receipts.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(downloadUrl), 250);
+    } catch (error: any) {
+      console.error('Download failed', error);
+      this.monthDownloadError.set({
+        key,
+        message: error?.message || 'Failed to download this month. Please try again.'
+      });
+    } finally {
+      this.downloadingMonthKey.set(null);
+    }
+  }
+
   async logout() {
     this.menuOpen.set(false);
     await this.authService.logout();
@@ -610,6 +716,146 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (!categoryId) return 'Uncategorized';
     const category = getCategoryById(categoryId);
     return category?.name || 'Other';
+  }
+
+  private buildReceiptCaption(receipt: Receipt): string {
+    const parts: string[] = [];
+
+    if (receipt.merchant?.canonicalName) {
+      parts.push(receipt.merchant.canonicalName);
+    } else if (receipt.merchant?.rawName) {
+      parts.push(receipt.merchant.rawName);
+    } else if (receipt.file?.originalName) {
+      parts.push(receipt.file.originalName);
+    }
+
+    if (receipt.totalAmount !== undefined && receipt.totalAmount !== null) {
+      parts.push(this.formatCurrency(receipt.totalAmount));
+    }
+
+    if (receipt.date) {
+      const parsed = new Date(receipt.date);
+      if (!Number.isNaN(parsed.getTime())) {
+        parts.push(parsed.toLocaleDateString('en-US'));
+      }
+    }
+
+    return parts.join(' • ') || 'Receipt';
+  }
+
+  private getReceiptMimeType(receipt: Receipt, blob: Blob): string {
+    return blob?.type || receipt.file?.mimeType || '';
+  }
+
+  private async fetchReceiptBlob(receipt: Receipt): Promise<Blob> {
+    if (!receipt.file?.storagePath) {
+      throw new Error('Missing file path for receipt.');
+    }
+
+    const url = await this.receiptService.getReceiptFileUrl(receipt.file.storagePath);
+    return this.fetchBlobWithXHR(url);
+  }
+
+  private async normalizeImageBlob(blob: Blob, receipt: Receipt): Promise<{ bytes: Uint8Array; type: 'jpg' | 'png' }> {
+    const mimeType = this.getReceiptMimeType(receipt, blob).toLowerCase();
+    const fileName = receipt.file?.originalName?.toLowerCase() || '';
+    const asUint8Array = async (b: Blob) => new Uint8Array(await b.arrayBuffer());
+
+    const isPng = mimeType.includes('png') || fileName.endsWith('.png');
+    if (isPng) {
+      return { bytes: await asUint8Array(blob), type: 'png' };
+    }
+
+    const isJpeg = mimeType.includes('jpeg') || mimeType.includes('jpg') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg');
+    if (isJpeg) {
+      return { bytes: await asUint8Array(blob), type: 'jpg' };
+    }
+
+    const isWebp = mimeType.includes('webp') || fileName.endsWith('.webp');
+    if (isWebp) {
+      const converted = await this.convertImageViaCanvas(blob, 'image/png');
+      return { bytes: await asUint8Array(converted), type: 'png' };
+    }
+
+    const isHeic = mimeType.includes('heic') || mimeType.includes('heif') || fileName.endsWith('.heic') || fileName.endsWith('.heif');
+    if (isHeic) {
+      const heic2anyModule = await import('heic2any');
+      const heic2any = (heic2anyModule as any).default ?? heic2anyModule;
+      const converted = await heic2any({
+        blob,
+        toType: 'image/jpeg',
+        quality: 0.9
+      });
+      const normalizedBlob = Array.isArray(converted) ? converted[0] : converted;
+      return { bytes: await asUint8Array(normalizedBlob), type: 'jpg' };
+    }
+
+    const fallback = await this.convertImageViaCanvas(blob, 'image/jpeg');
+    return { bytes: await asUint8Array(fallback), type: 'jpg' };
+  }
+
+  private convertImageViaCanvas(blob: Blob, outputType: 'image/png' | 'image/jpeg'): Promise<Blob> {
+    if (typeof document === 'undefined') {
+      return Promise.reject(new Error('Image conversion is not supported in this environment.'));
+    }
+
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob);
+      const image = new Image();
+      image.crossOrigin = 'anonymous';
+
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth || image.width || 0;
+        canvas.height = image.naturalHeight || image.height || 0;
+        const context = canvas.getContext('2d');
+
+        if (!context) {
+          URL.revokeObjectURL(url);
+          reject(new Error('Unable to convert image.'));
+          return;
+        }
+
+        context.drawImage(image, 0, 0);
+        canvas.toBlob((converted) => {
+          URL.revokeObjectURL(url);
+          if (converted) {
+            resolve(converted);
+          } else {
+            reject(new Error('Image conversion failed.'));
+          }
+        }, outputType, 0.95);
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Failed to load image for conversion.'));
+      };
+
+      image.src = url;
+    });
+  }
+
+  private fetchBlobWithXHR(url: string): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.responseType = 'blob';
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          resolve(xhr.response);
+        } else {
+          reject(new Error(`Failed to download receipt (${xhr.status}).`));
+        }
+      };
+
+      xhr.onerror = () => {
+        reject(new Error('Network error while downloading receipt.'));
+      };
+
+      xhr.send();
+    });
   }
 
   // Format currency
