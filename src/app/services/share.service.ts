@@ -30,6 +30,9 @@ export class ShareService {
       throw new Error('No spending data available for the selected month.');
     }
 
+    const ownerName = payload.includeName ? (payload.ownerName ?? '').trim() : '';
+    const ownerEmail = payload.includeEmail ? (payload.ownerEmail ?? '').trim() : '';
+
     const document = {
       userId: user.id,
       month: payload.month,
@@ -39,8 +42,8 @@ export class ShareService {
       dailyData: payload.dailyData,
       includeName: payload.includeName,
       includeEmail: payload.includeEmail,
-      ownerName: payload.includeName ? payload.ownerName ?? '' : '',
-      ownerEmail: payload.includeEmail ? payload.ownerEmail ?? '' : '',
+      ownerName,
+      ownerEmail,
       createdAt: serverTimestamp()
     };
 
@@ -66,4 +69,3 @@ export class ShareService {
     return { id: snapshot.id, ...snapshot.data() } as GraphShare;
   }
 }
-

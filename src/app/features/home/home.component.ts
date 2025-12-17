@@ -802,8 +802,12 @@ export class HomeComponent implements OnInit, OnDestroy {
 
       this.shareLink.set(this.buildShareUrl(share.id));
     } catch (error: any) {
-      const message = error?.message ?? 'Unable to create share link right now.';
-      this.shareError.set(message);
+      if (error?.code === 'permission-denied') {
+        this.shareError.set('Sharing is blocked by your Firestore security rules. Please deploy the latest rules and try again.');
+      } else {
+        const message = error?.message ?? 'Unable to create share link right now.';
+        this.shareError.set(message);
+      }
     } finally {
       this.isCreatingShareLink.set(false);
     }
