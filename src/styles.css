@@ -45,3 +45,43 @@ select:disabled {
 *[class*="cursor-pointer"] {
   cursor: pointer;
 }
+
+/* Premium font rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Smooth color transitions for theme switching */
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+/* Disable transitions on page load to prevent flash */
+.preload *,
+.preload *::before,
+.preload *::after {
+  transition: none !important;
+}
+
+/* Selection styling */
+::selection {
+  background-color: rgb(16 185 129 / 0.2);
+  color: inherit;
+}
+
+/* Focus visible styling for accessibility */
+:focus-visible {
+  outline: 2px solid rgb(16 185 129);
+  outline-offset: 2px;
+}
+
+/* Remove default focus outline when not using keyboard */
+:focus:not(:focus-visible) {
+  outline: none;
+}

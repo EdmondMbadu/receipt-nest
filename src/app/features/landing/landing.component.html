@@ -1,890 +1,808 @@
-<div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-50 antialiased transition-colors duration-300">
-  <div
-    class="relative min-h-screen overflow-hidden bg-gradient-to-b from-emerald-50/50 to-white dark:bg-[radial-gradient(circle_at_top,_#1e293b99,_#0f172a)] transition-colors duration-300">
-    <!-- Glow blobs -->
-    <div
-      class="pointer-events-none absolute -top-32 -left-32 h-64 w-64 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 blur-3xl">
-    </div>
-    <div
-      class="pointer-events-none absolute top-64 -right-32 h-64 w-64 rounded-full bg-emerald-400/5 dark:bg-emerald-400/10 blur-3xl">
-    </div>
+<div class="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 antialiased">
+  <!-- Ambient background -->
+  <div class="fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute top-0 left-1/4 w-[800px] h-[800px] rounded-full bg-emerald-500/[0.03] dark:bg-emerald-500/[0.07] blur-[120px]"></div>
+    <div class="absolute bottom-0 right-1/4 w-[600px] h-[600px] rounded-full bg-emerald-400/[0.02] dark:bg-emerald-400/[0.05] blur-[100px]"></div>
+  </div>
 
-    <!-- Page container -->
-    <div class="mx-auto flex min-h-screen max-w-6xl flex-col px-4 pb-16 pt-2 sm:px-6 lg:px-8 lg:pt-3">
-
-      <!-- Nav -->
-      <header class="flex items-center justify-between gap-2 sm:gap-4">
-        <a routerLink="/" class="inline-flex items-center flex-shrink-0">
-          <!-- Logo -->
-          <img src="assets/receipt-nest.png" alt="ReceiptNest Logo" class="h-10 w-10 sm:h-14 sm:w-14 object-contain" />
-          <span class="text-sm sm:text-base font-bold uppercase tracking-[0.2em]">
-            <span class="text-slate-900 dark:text-white">Receipt</span><span
-              class="text-emerald-600 dark:text-emerald-300">Nest</span>
+  <!-- Floating Nav -->
+  <header class="fixed top-0 left-0 right-0 z-50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
+      <nav class="flex items-center justify-between gap-4 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl px-4 py-3 shadow-lg shadow-slate-900/5 dark:shadow-slate-950/50">
+        <a routerLink="/" class="inline-flex items-center gap-2 flex-shrink-0">
+          <img src="assets/receipt-nest.png" alt="ReceiptNest Logo" class="h-9 w-9 object-contain" />
+          <span class="text-base font-semibold tracking-tight">
+            <span class="text-slate-900 dark:text-white">Receipt</span><span class="text-emerald-600 dark:text-emerald-400">Nest</span>
           </span>
         </a>
 
-        <nav class="hidden items-center gap-8 text-sm text-slate-700 dark:text-slate-300 lg:flex">
-          <a href="#features" class="hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors">Features</a>
-          <a href="#how-it-works" class="hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors">How it
-            works</a>
-          <a href="#pricing" class="hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors">Pricing</a>
-          <a href="#faq" class="hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors">FAQ</a>
-        </nav>
+        <div class="hidden items-center gap-1 lg:flex">
+          <a href="#features" class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Features</a>
+          <a href="#how-it-works" class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">How it works</a>
+          <a href="#pricing" class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Pricing</a>
+          <a href="#faq" class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">FAQ</a>
+        </div>
 
-        <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex items-center gap-3">
           <button type="button" (click)="toggleTheme()"
-            class="inline-flex items-center justify-center h-9 w-9 flex-shrink-0 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200"
+            class="inline-flex items-center justify-center h-9 w-9 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
             aria-label="Toggle theme">
-            <span class="text-base">{{ isDarkMode() ? '☀️' : '🌙' }}</span>
+            <svg *ngIf="isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+            </svg>
+            <svg *ngIf="!isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+            </svg>
           </button>
 
-          <!-- Desktop Auth Links -->
           <ng-container *ngIf="auth.isAuthenticated(); else guestLinks">
             <a routerLink="/app"
-              class="inline-flex items-center justify-center rounded-full bg-emerald-500 px-3 py-2 sm:px-4 text-xs sm:text-sm font-medium text-white dark:text-slate-950 shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all duration-200 whitespace-nowrap">
-              <span class="hidden sm:inline">Go to app</span>
-              <span class="sm:hidden">App</span>
+              class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-400 px-5 py-2.5 text-sm font-medium text-white dark:text-slate-950 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all duration-200">
+              Go to app
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
             </a>
           </ng-container>
           <ng-template #guestLinks>
             <a routerLink="/login"
-              class="hidden sm:inline-flex items-center justify-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:border-emerald-500 dark:hover:border-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-300 transition-all duration-200">
+              class="hidden sm:inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
               Sign in
             </a>
             <a routerLink="/register"
-              class="hidden sm:inline-flex items-center justify-center rounded-full bg-emerald-500 px-5 py-2 text-sm font-medium text-white dark:text-slate-950 shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all duration-200 whitespace-nowrap">
-              Get started
+              class="hidden sm:inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 px-5 py-2.5 text-sm font-medium text-white dark:text-slate-900 shadow-lg shadow-slate-900/10 dark:shadow-white/10 transition-all duration-200">
+              Get started free
             </a>
 
-            <!-- Mobile Hamburger Menu Button -->
+            <!-- Mobile Menu Button -->
             <button type="button" (click)="toggleMobileMenu()"
-              class="sm:hidden inline-flex items-center justify-center h-9 w-9 flex-shrink-0 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200"
+              class="sm:hidden inline-flex items-center justify-center h-9 w-9 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
               aria-label="Toggle menu">
-              <svg *ngIf="!isMobileMenuOpen()" class="h-5 w-5 text-slate-700 dark:text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              <svg *ngIf="!isMobileMenuOpen()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
               </svg>
-              <svg *ngIf="isMobileMenuOpen()" class="h-5 w-5 text-slate-700 dark:text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              <svg *ngIf="isMobileMenuOpen()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </ng-template>
         </div>
-      </header>
+      </nav>
+    </div>
+  </header>
 
-      <!-- Mobile Menu Overlay -->
-      <div *ngIf="isMobileMenuOpen()"
-           (click)="toggleMobileMenu()"
-           class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 sm:hidden animate-[fadeIn_0.3s_ease-out]">
+  <!-- Mobile Menu Overlay -->
+  <div *ngIf="isMobileMenuOpen()"
+       (click)="toggleMobileMenu()"
+       class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 sm:hidden animate-[fadeIn_0.2s_ease-out]">
+  </div>
+
+  <!-- Mobile Menu -->
+  <div *ngIf="isMobileMenuOpen()"
+       class="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50 sm:hidden animate-[slideInRight_0.3s_ease-out]">
+    <div class="flex flex-col h-full">
+      <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-2">
+          <img src="assets/receipt-nest.png" alt="ReceiptNest" class="h-8 w-8 object-contain" />
+          <span class="text-base font-semibold">
+            <span class="text-slate-900 dark:text-white">Receipt</span><span class="text-emerald-600 dark:text-emerald-400">Nest</span>
+          </span>
+        </div>
+        <button (click)="toggleMobileMenu()" class="p-2 -mr-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
-      <!-- Mobile Menu Slide-out -->
-      <div *ngIf="isMobileMenuOpen()"
-           class="fixed top-0 right-0 h-full w-72 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50 sm:hidden animate-[slideInRight_0.3s_ease-out]">
-        <div class="flex flex-col h-full p-6">
-          <!-- Menu Header -->
-          <div class="flex items-center justify-between mb-8">
-            <div class="flex items-center gap-2">
-              <img src="assets/receipt-nest.png" alt="ReceiptNest" class="h-8 w-8 object-contain" />
-              <span class="text-sm font-bold uppercase tracking-[0.2em]">
-                <span class="text-slate-900 dark:text-white">Receipt</span><span class="text-emerald-600 dark:text-emerald-300">Nest</span>
-              </span>
-            </div>
-          </div>
+      <div class="flex-1 overflow-y-auto p-5">
+        <div class="space-y-1">
+          <a href="#features" (click)="toggleMobileMenu()" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+            </svg>
+            Features
+          </a>
+          <a href="#how-it-works" (click)="toggleMobileMenu()" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+            </svg>
+            How it works
+          </a>
+          <a href="#pricing" (click)="toggleMobileMenu()" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+            </svg>
+            Pricing
+          </a>
+          <a href="#faq" (click)="toggleMobileMenu()" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+            </svg>
+            FAQ
+          </a>
+        </div>
 
-          <!-- Menu Links -->
-          <nav class="flex flex-col gap-4 flex-1">
-            <a routerLink="/login"
-               (click)="toggleMobileMenu()"
-               class="flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 hover:border-emerald-500 dark:hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-all duration-200">
-              <svg class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-              </svg>
-              <span class="text-sm font-medium">Sign in</span>
-            </a>
-
-            <a routerLink="/register"
-               (click)="toggleMobileMenu()"
-               class="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white dark:text-slate-950 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200">
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
-              <span class="text-sm font-medium">Create account</span>
-            </a>
-
-            <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-              <p class="text-xs text-slate-500 dark:text-slate-400 mb-3 px-2">Quick links</p>
-              <a href="#features"
-                 (click)="toggleMobileMenu()"
-                 class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors">
-                Features
-              </a>
-              <a href="#how-it-works"
-                 (click)="toggleMobileMenu()"
-                 class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors">
-                How it works
-              </a>
-              <a href="#pricing"
-                 (click)="toggleMobileMenu()"
-                 class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors">
-                Pricing
-              </a>
-              <a href="#faq"
-                 (click)="toggleMobileMenu()"
-                 class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors">
-                FAQ
-              </a>
-            </div>
-          </nav>
-
-          <!-- Menu Footer -->
-          <div class="pt-4 border-t border-slate-200 dark:border-slate-800">
-            <p class="text-xs text-slate-500 dark:text-slate-400 text-center">
-              © {{ currentYear }} ReceiptNest
-            </p>
-          </div>
+        <div class="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 space-y-3">
+          <a routerLink="/login" (click)="toggleMobileMenu()"
+             class="flex items-center justify-center w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            Sign in
+          </a>
+          <a routerLink="/register" (click)="toggleMobileMenu()"
+             class="flex items-center justify-center w-full px-4 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors">
+            Get started free
+          </a>
         </div>
       </div>
 
-      <!-- Hero -->
-      <main class="mt-2 flex flex-1 flex-col gap-12 lg:mt-3 lg:flex-row lg:items-center lg:gap-16">
-        <!-- Hero text -->
-        <section class="max-w-xl space-y-8">
-          <div
-            class="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-slate-900/70 px-3 py-1 text-xs text-slate-700 dark:text-slate-300 ring-1 ring-emerald-500/40 transition-colors">
-            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
-            <span>New • Private-by-design receipt hub</span>
+      <div class="p-5 border-t border-slate-100 dark:border-slate-800">
+        <p class="text-xs text-slate-400 text-center">© {{ currentYear }} ReceiptNest</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="relative pt-32 pb-20 sm:pt-40 sm:pb-32 overflow-hidden">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:gap-20">
+        <!-- Hero Text -->
+        <div class="max-w-2xl lg:flex-1">
+          <!-- Badge -->
+          <div class="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 px-4 py-1.5 mb-8 ring-1 ring-emerald-500/20">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">Private-first receipt management</span>
           </div>
 
-          <div class="space-y-4">
-            <h1
-              class="text-balance text-4xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-6xl transition-colors">
-              All your receipts in one nest.
-              <span class="text-emerald-600 dark:text-emerald-300">And your spending, crystal clear.</span>
-            </h1>
-            <p
-              class="max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base transition-colors">
-              ReceiptNest automatically collects, organizes, and summarizes your receipts
-              so you always know <span class="text-emerald-600 dark:text-emerald-300 font-medium">where your money went
-                this month</span>—without
-              spreadsheets,
-              folders, or inbox chaos.
-            </p>
-          </div>
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+            All your receipts in one nest.
+            <span class="block mt-2 bg-gradient-to-r from-emerald-600 to-emerald-400 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent">And your spending, crystal clear.</span>
+          </h1>
 
-          <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <p class="mt-8 text-lg sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl">
+            ReceiptNest automatically collects, organizes, and summarizes your receipts so you always know where your money went—without spreadsheets or inbox chaos.
+          </p>
+
+          <!-- CTA Buttons -->
+          <div class="mt-10 flex flex-col sm:flex-row gap-4">
             <a routerLink="/register"
-              class="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-6 py-3 text-sm font-medium text-white dark:text-slate-950 shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all duration-200">
-              Start in 30 seconds
-              <span class="text-xs font-semibold uppercase tracking-[0.2em] text-white/90 dark:text-emerald-950">
-                No card required
-              </span>
+              class="group inline-flex items-center justify-center gap-3 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 px-8 py-4 text-base font-semibold text-white dark:text-slate-900 shadow-xl shadow-slate-900/10 dark:shadow-white/5 transition-all duration-200 hover:scale-[1.02]">
+              Start for free
+              <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
             </a>
             <button
-              class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 dark:border-slate-700/80 bg-white/60 dark:bg-slate-900/60 px-5 py-3 text-sm text-slate-700 dark:text-slate-200 hover:border-emerald-500 dark:hover:border-emerald-400/70 hover:text-emerald-600 dark:hover:text-emerald-200 transition-all duration-200 cursor-pointer">
-              <span
-                class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-400 dark:border-slate-500 text-[10px]">
-                ▶
+              class="group inline-flex items-center justify-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 px-8 py-4 text-base font-semibold text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-white dark:hover:bg-slate-800 transition-all duration-200">
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
               </span>
-              Watch overview (1:03)
+              Watch demo
             </button>
           </div>
 
-          <div class="flex flex-wrap gap-6 pt-4 text-xs text-slate-600 dark:text-slate-400 transition-colors">
-            <div class="flex items-center gap-2">
-              <span
-                class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">✓</span>
-              <span>Unlimited digital receipts</span>
+          <!-- Trust Badges -->
+          <div class="mt-12 flex flex-wrap items-center gap-x-8 gap-y-4">
+            <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+              <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+              </svg>
+              <span>Bank-grade encryption</span>
             </div>
-            <div class="flex items-center gap-2">
-              <span
-                class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">✓</span>
-              <span>Instant monthly spend reports</span>
+            <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+              <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+              </svg>
+              <span>Instant sync</span>
             </div>
-            <div class="flex items-center gap-2">
-              <span
-                class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">✓</span>
-              <span>Secure, encrypted storage</span>
+            <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+              <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+              </svg>
+              <span>No credit card required</span>
             </div>
           </div>
-        </section>
+        </div>
 
-        <!-- Hero visual -->
-        <section class="relative w-full max-w-xl">
-          <div
-            class="pointer-events-none absolute -inset-10 rounded-[2.5rem] bg-emerald-500/5 dark:bg-emerald-500/10 blur-3xl transition-colors">
-          </div>
+        <!-- Hero Visual -->
+        <div class="mt-16 lg:mt-0 lg:flex-1 relative">
+          <!-- Glow Effect -->
+          <div class="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 to-emerald-400/20 dark:from-emerald-500/10 dark:to-emerald-400/10 rounded-[2rem] blur-3xl opacity-60"></div>
 
-          <div
-            class="relative rounded-[2rem] border border-emerald-500/20 bg-white/90 dark:bg-slate-900/80 p-5 shadow-2xl shadow-emerald-500/10 dark:shadow-emerald-500/20 backdrop-blur transition-all duration-300">
+          <!-- Dashboard Card -->
+          <div class="relative rounded-2xl border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-slate-900 p-6 shadow-2xl shadow-slate-900/10 dark:shadow-slate-950/50">
             <!-- Top bar -->
-            <div class="mb-4 flex items-center justify-between gap-4">
-              <div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 transition-colors">
+            <div class="flex items-center justify-between mb-6">
+              <div class="flex items-center gap-3">
                 <img src="assets/receipt-nest.png" alt="ReceiptNest" class="h-8 w-8 object-contain" />
-                <span class="text-slate-700 dark:text-slate-200">This month's snapshot</span>
+                <span class="text-sm font-medium text-slate-700 dark:text-slate-200">This month's snapshot</span>
               </div>
-              <div class="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400 transition-colors">
-                <button
-                  class="rounded-full bg-emerald-100 dark:bg-slate-800 px-2 py-1 text-[10px] text-emerald-700 dark:text-emerald-300 transition-colors cursor-pointer">Oct</button>
-                <button
-                  class="rounded-full px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">Nov</button>
-                <button
-                  class="rounded-full px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">Custom</button>
+              <div class="flex items-center gap-1 text-xs">
+                <button class="rounded-lg bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1.5 text-emerald-700 dark:text-emerald-300 font-medium">Oct</button>
+                <button class="rounded-lg px-3 py-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Nov</button>
               </div>
             </div>
 
-            <!-- Cards grid -->
-            <div class="grid gap-4 md:grid-cols-2">
-              <!-- Total spend with line chart (Robinhood style) -->
-              <div
-                class="md:col-span-2 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-950/70 p-5 transition-colors">
-                <!-- Amount section -->
-                <div class="mb-4">
-                  <p class="text-xs font-medium text-slate-600 dark:text-slate-400">Total spend</p>
-                  <div class="mt-2 flex items-baseline gap-3">
-                    <p class="text-4xl font-semibold text-emerald-600 dark:text-emerald-300">$2,437.19</p>
-                    <p class="text-sm font-medium text-emerald-600/80 dark:text-emerald-300/80">↓ 18%</p>
-                  </div>
-                  <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">vs last month</p>
-                </div>
-
-                <!-- Line chart container -->
-                <div class="relative h-40 w-full flex items-end">
-                  <!-- Grid lines -->
-                  <div class="absolute inset-0 flex flex-col justify-between">
-                    <div class="border-t border-slate-200/50 dark:border-slate-700/50"></div>
-                    <div class="border-t border-slate-200/50 dark:border-slate-700/50"></div>
-                    <div class="border-t border-slate-200/50 dark:border-slate-700/50"></div>
-                    <div class="border-t border-slate-200/50 dark:border-slate-700/50"></div>
-                  </div>
-                  <!-- Line chart SVG -->
-                  <svg class="absolute inset-0 w-full h-full" viewBox="0 0 200 100" preserveAspectRatio="none">
-                    <!-- Gradient for area under line -->
-                    <defs>
-                      <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" style="stop-color:rgb(16, 185, 129);stop-opacity:0.2" />
-                        <stop offset="100%" style="stop-color:rgb(16, 185, 129);stop-opacity:0" />
-                      </linearGradient>
-                    </defs>
-                    <!-- Area under line -->
-                    <path d="M 0,80 
-                             C 15,79 30,75 45,72
-                             C 60,68 75,63 90,58
-                             C 105,52 120,46 135,40
-                             C 150,34 165,28 180,24
-                             C 190,21 195,23 200,20
-                             L 200,100 L 0,100 Z" fill="url(#chartGradient)" />
-                    <!-- Main line with smooth stock-like curve and subtle fluctuations -->
-                    <path d="M 0,80 
-                             C 15,79 30,75 45,72
-                             C 60,68 75,63 90,58
-                             C 105,52 120,46 135,40
-                             C 150,34 165,28 180,24
-                             C 190,21 195,23 200,20" stroke="rgb(16, 185, 129)" stroke-width="2.2" fill="none"
-                      stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
-                    <!-- Highlight point at the end -->
-                    <circle cx="200" cy="20" r="3.5" fill="rgb(16, 185, 129)" />
-                    <circle cx="200" cy="20" r="2" fill="white" />
+            <!-- Total spend card -->
+            <div class="rounded-xl border border-slate-100 dark:border-slate-800 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/50 dark:to-slate-900/50 p-5 mb-4">
+              <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total spend</p>
+              <div class="mt-2 flex items-baseline gap-3">
+                <p class="text-4xl font-bold text-slate-900 dark:text-white">$2,437.19</p>
+                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                  <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
                   </svg>
-                </div>
-                <!-- Chart footer -->
-                <div class="mt-3 flex items-center justify-between text-xs">
-                  <span class="text-slate-500 dark:text-slate-400">30 days</span>
-                  <div class="flex items-center gap-2">
-                    <span class="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
-                    <span class="text-slate-600 dark:text-slate-400">This month</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Timeline -->
-              <div
-                class="md:col-span-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/80 p-4 transition-colors">
-                <div
-                  class="flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 transition-colors">
-                  <span>Recent receipts</span>
-                  <button
-                    class="text-emerald-600 dark:text-emerald-300 hover:text-emerald-700 dark:hover:text-emerald-200 transition-colors cursor-pointer">View
-                    all</button>
-                </div>
-                <div class="mt-3 space-y-2 text-xs">
-                  <div
-                    class="flex items-center justify-between rounded-xl bg-white dark:bg-slate-900/80 px-3 py-2 border border-slate-200 dark:border-slate-800 transition-colors">
-                    <div class="flex items-center gap-3">
-                      <span
-                        class="h-6 w-6 rounded-full bg-emerald-500/10 text-center text-[10px] leading-6 text-emerald-600 dark:text-emerald-300">G</span>
-                      <div>
-                        <p class="text-slate-900 dark:text-slate-100 font-medium">Whole Foods Market</p>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Auto-tagged • Groceries</p>
-                      </div>
-                    </div>
-                    <div class="text-right">
-                      <p class="font-medium text-slate-900 dark:text-slate-100">-$86.41</p>
-                      <p class="text-[11px] text-slate-500">Nov 14 • Card • PDF</p>
-                    </div>
-                  </div>
-
-                  <div
-                    class="flex items-center justify-between rounded-xl bg-white dark:bg-slate-900/80 px-3 py-2 border border-slate-200 dark:border-slate-800 transition-colors">
-                    <div class="flex items-center gap-3">
-                      <span
-                        class="h-6 w-6 rounded-full bg-emerald-500/10 text-center text-[10px] leading-6 text-emerald-600 dark:text-emerald-300">S</span>
-                      <div>
-                        <p class="text-slate-900 dark:text-slate-100 font-medium">Spotify</p>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Auto-tagged • Subscriptions</p>
-                      </div>
-                    </div>
-                    <div class="text-right">
-                      <p class="font-medium text-slate-900 dark:text-slate-100">-$9.99</p>
-                      <p class="text-[11px] text-slate-500">Nov 13 • Email</p>
-                    </div>
-                  </div>
-
-                  <div
-                    class="flex items-center justify-between rounded-xl bg-white dark:bg-slate-900/80 px-3 py-2 border border-slate-200 dark:border-slate-800 transition-colors">
-                    <div class="flex items-center gap-3">
-                      <span
-                        class="h-6 w-6 rounded-full bg-emerald-500/10 text-center text-[10px] leading-6 text-emerald-600 dark:text-emerald-300">R</span>
-                      <div>
-                        <p class="text-slate-900 dark:text-slate-100 font-medium">Uber Eats</p>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Auto-tagged • Eating out</p>
-                      </div>
-                    </div>
-                    <div class="text-right">
-                      <p class="font-medium text-slate-900 dark:text-slate-100">-$34.20</p>
-                      <p class="text-[11px] text-slate-500">Nov 12 • Screenshot</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <!-- Social proof / stats -->
-      <section class="mt-16 border-y border-slate-200 dark:border-slate-800 py-8 transition-colors">
-        <div class="grid gap-6 text-xs text-slate-600 dark:text-slate-300 sm:grid-cols-3 transition-colors">
-          <div class="flex flex-col gap-1">
-            <span class="text-sm font-semibold text-emerald-600 dark:text-emerald-300">24k+</span>
-            <span>Receipts safely nested every week.</span>
-          </div>
-          <div class="flex flex-col gap-1">
-            <span class="text-sm font-semibold text-emerald-600 dark:text-emerald-300">11 min</span>
-            <span>Average time saved per month vs manual tracking.</span>
-          </div>
-          <div class="flex flex-col gap-1">
-            <span class="text-sm font-semibold text-emerald-600 dark:text-emerald-300">100%</span>
-            <span>Encrypted in transit and at rest.</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- App Screenshots Showcase -->
-      <section class="mt-20 space-y-10">
-        <div class="max-w-2xl mx-auto text-center space-y-3">
-          <p
-            class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300 transition-colors">
-            See it in action
-          </p>
-          <h2
-            class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-3xl transition-colors">
-            Your receipts, beautifully organized
-          </h2>
-          <p class="text-sm text-slate-600 dark:text-slate-300 transition-colors">
-            ReceiptNest transforms receipt chaos into clarity with smart organization and insights.
-          </p>
-        </div>
-
-        <!-- Screenshot Grid -->
-        <div class="grid gap-8 md:grid-cols-2 lg:gap-10">
-          <!-- Screenshot 1: Dashboard Overview -->
-          <div class="space-y-4">
-            <div
-              class="relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-2 shadow-xl transition-all duration-300 hover:shadow-2xl overflow-hidden">
-              <div
-                class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-slate-200/50 dark:border-slate-700/50">
-                <div class="text-center space-y-3 p-6">
-                  <div class="text-5xl">📊</div>
-                  <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Dashboard Overview</p>
-                  <p class="text-xs text-slate-500 dark:text-slate-400">See all your spending at a glance</p>
-                </div>
-              </div>
-            </div>
-            <div class="space-y-2 px-1">
-              <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 transition-colors">
-                Monthly spending dashboard
-              </h3>
-              <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed transition-colors">
-                Track your total spend, compare to previous months, and see trends over time with beautiful charts and
-                visualizations.
-              </p>
-            </div>
-          </div>
-
-          <!-- Screenshot 2: Receipt List -->
-          <div class="space-y-4">
-            <div
-              class="relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-2 shadow-xl transition-all duration-300 hover:shadow-2xl overflow-hidden">
-              <div
-                class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-slate-200/50 dark:border-slate-700/50">
-                <div class="text-center space-y-3 p-6">
-                  <div class="text-5xl">🧾</div>
-                  <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Smart Receipt List</p>
-                  <p class="text-xs text-slate-500 dark:text-slate-400">All receipts auto-organized</p>
-                </div>
-              </div>
-            </div>
-            <div class="space-y-2 px-1">
-              <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 transition-colors">
-                Auto-categorized receipts
-              </h3>
-              <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed transition-colors">
-                Every receipt automatically tagged with merchant, category, amount, and payment method. Search and
-                filter in seconds.
-              </p>
-            </div>
-          </div>
-
-          <!-- Screenshot 3: Upload Interface -->
-          <div class="space-y-4">
-            <div
-              class="relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-2 shadow-xl transition-all duration-300 hover:shadow-2xl overflow-hidden">
-              <div
-                class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-slate-200/50 dark:border-slate-700/50">
-                <div class="text-center space-y-3 p-6">
-                  <div class="text-5xl">📤</div>
-                  <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Easy Upload</p>
-                  <p class="text-xs text-slate-500 dark:text-slate-400">Multiple ways to capture</p>
-                </div>
-              </div>
-            </div>
-            <div class="space-y-2 px-1">
-              <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 transition-colors">
-                Multiple capture methods
-              </h3>
-              <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed transition-colors">
-                Upload photos, PDFs, forward emails, or scan receipts. All formats supported with instant text
-                extraction.
-              </p>
-            </div>
-          </div>
-
-          <!-- Screenshot 4: Analytics (Premium) -->
-          <div class="space-y-4">
-            <div
-              class="relative rounded-2xl border border-emerald-500/30 dark:border-emerald-500/40 bg-slate-50 dark:bg-slate-900/50 p-2 shadow-xl shadow-emerald-500/10 transition-all duration-300 hover:shadow-2xl overflow-hidden">
-              <!-- Premium Badge -->
-              <div class="absolute top-4 right-4 z-10">
-                <span
-                  class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-semibold text-white dark:text-slate-950 shadow-lg">
-                  <span>✨</span>
-                  <span>PRO</span>
+                  18% down
                 </span>
               </div>
-              <div
-                class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-emerald-200/50 dark:border-emerald-700/50">
-                <div class="text-center space-y-3 p-6">
-                  <div class="text-5xl">📈</div>
-                  <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Advanced Analytics</p>
-                  <p class="text-xs text-slate-500 dark:text-slate-400">Deep spending insights</p>
-                </div>
-              </div>
-            </div>
-            <div class="space-y-2 px-1">
-              <div class="flex items-center gap-2">
-                <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 transition-colors">
-                  Category breakdown & trends
-                </h3>
-              </div>
-              <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed transition-colors">
-                Visualize spending by category, track trends over time, and export detailed reports for tax season or
-                budgeting.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+              <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">vs last month</p>
 
-      <!-- Features -->
-      <section id="features" class="mt-16 space-y-10">
-        <div class="max-w-xl space-y-3">
-          <p
-            class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300 transition-colors">
-            Why ReceiptNest
-          </p>
-          <h2
-            class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-3xl transition-colors">
-            Turn messy receipts into a clean money story.
-          </h2>
-          <p class="text-sm text-slate-600 dark:text-slate-300 transition-colors">
-            ReceiptNest doesn't just store receipts. It understands them —
-            grouping, tagging, and summarizing everything so you can see your spending
-            at a glance.
-          </p>
-        </div>
-
-        <div class="grid gap-6 md:grid-cols-3">
-          <!-- Feature card -->
-          <div
-            class="flex flex-col gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 transition-all duration-200 hover:shadow-lg">
-            <div class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15 text-lg">
-              📥
-            </div>
-            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50 transition-colors">Capture from anywhere
-            </h3>
-            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 transition-colors">
-              Forward emails, upload PDFs, snap photos, or connect integrations.
-              If it looks like a receipt, ReceiptNest will catch it.
-            </p>
-          </div>
-
-          <div
-            class="flex flex-col gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 transition-all duration-200 hover:shadow-lg">
-            <div class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15 text-lg">
-              🧠
-            </div>
-            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50 transition-colors">Smart auto-tagging
-            </h3>
-            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 transition-colors">
-              Merchant, category, payment method, tax, and more — extracted instantly,
-              with clean categories you can actually use.
-            </p>
-          </div>
-
-          <div
-            class="flex flex-col gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 transition-all duration-200 hover:shadow-lg">
-            <div class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15 text-lg">
-              📊
-            </div>
-            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50 transition-colors">Monthly clarity</h3>
-            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 transition-colors">
-              Beautiful summaries and exportable reports at the end of every month,
-              so "where did it all go?" becomes an easy question.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <!-- How it works -->
-      <section id="how-it-works" class="mt-20 space-y-10">
-        <div class="max-w-xl space-y-3">
-          <p
-            class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300 transition-colors">
-            How it works
-          </p>
-          <h2
-            class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-3xl transition-colors">
-            From inbox chaos to a calm monthly snapshot in three steps.
-          </h2>
-        </div>
-
-        <ol class="grid gap-6 md:grid-cols-3">
-          <li
-            class="flex flex-col gap-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden transition-all duration-200 hover:shadow-lg">
-            <!-- Screenshot placeholder for Step 1 -->
-            <div
-              class="relative h-56 w-full bg-gradient-to-br from-emerald-50 to-slate-50 dark:from-emerald-950/30 dark:to-slate-900/50 flex items-center justify-center overflow-hidden">
-              <!-- Decorative background -->
-              <div class="absolute inset-0 opacity-10">
-                <div
-                  class="absolute top-1/4 left-1/4 w-32 h-32 border-2 border-emerald-500 rounded-lg transform rotate-12">
-                </div>
-                <div
-                  class="absolute bottom-1/4 right-1/4 w-24 h-24 border-2 border-emerald-400 rounded-lg transform -rotate-6">
-                </div>
-              </div>
-              <!-- Content -->
-              <div class="relative z-10 text-center space-y-4 px-6">
-                <div
-                  class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-lg border border-emerald-500/30">
-                  <div class="text-3xl">📧</div>
-                </div>
-                <div class="space-y-1">
-                  <div
-                    class="inline-flex items-center gap-2 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                    <span
-                      class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white text-xs font-bold">1</span>
-                    <span>Upload & Forward</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="flex flex-col gap-3 p-4">
-              <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50 transition-colors">Connect & capture
-              </h3>
-              <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 transition-colors">
-                Create your account, set up your ReceiptNest email, or connect integrations.
-                Every new receipt finds its way into your nest automatically.
-              </p>
-            </div>
-          </li>
-          <li
-            class="flex flex-col gap-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden transition-all duration-200 hover:shadow-lg">
-            <!-- Screenshot placeholder for Step 2 -->
-            <div
-              class="relative h-56 w-full bg-gradient-to-br from-emerald-50 to-slate-50 dark:from-emerald-950/30 dark:to-slate-900/50 flex items-center justify-center overflow-hidden">
-              <!-- Decorative background -->
-              <div class="absolute inset-0 opacity-10">
-                <div class="absolute top-8 left-8 w-40 h-2 bg-emerald-500 rounded"></div>
-                <div class="absolute top-14 left-8 w-32 h-2 bg-emerald-400 rounded"></div>
-                <div class="absolute top-20 left-8 w-36 h-2 bg-emerald-300 rounded"></div>
-              </div>
-              <!-- Content -->
-              <div class="relative z-10 text-center space-y-4 px-6">
-                <div
-                  class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-lg border border-emerald-500/30">
-                  <div class="text-3xl">🤖</div>
-                </div>
-                <div class="space-y-1">
-                  <div
-                    class="inline-flex items-center gap-2 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                    <span
-                      class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white text-xs font-bold">2</span>
-                    <span>Auto-organize</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="flex flex-col gap-3 p-4">
-              <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50 transition-colors">We organize the
-                details</h3>
-              <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 transition-colors">
-                Amounts, dates, merchants, categories — parsed and cleaned.
-                You can tweak rules once, and ReceiptNest remembers for next time.
-              </p>
-            </div>
-          </li>
-          <li
-            class="flex flex-col gap-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden transition-all duration-200 hover:shadow-lg">
-            <!-- Screenshot placeholder for Step 3 -->
-            <div
-              class="relative h-56 w-full bg-gradient-to-br from-emerald-50 to-slate-50 dark:from-emerald-950/30 dark:to-slate-900/50 flex items-center justify-center overflow-hidden">
-              <!-- Decorative background - mini chart -->
-              <div class="absolute inset-0 opacity-10">
-                <svg class="absolute bottom-8 left-8 right-8" viewBox="0 0 200 60" fill="none">
-                  <path d="M0,50 L40,30 L80,40 L120,15 L160,25 L200,10" stroke="rgb(16, 185, 129)" stroke-width="3"
-                    fill="none" />
-                  <circle cx="200" cy="10" r="4" fill="rgb(16, 185, 129)" />
+              <!-- Mini Chart -->
+              <div class="mt-4 h-24 w-full">
+                <svg class="w-full h-full" viewBox="0 0 200 80" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" style="stop-color:rgb(16, 185, 129);stop-opacity:0.2" />
+                      <stop offset="100%" style="stop-color:rgb(16, 185, 129);stop-opacity:0" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M 0,65 C 20,63 40,58 60,52 C 80,46 100,40 120,35 C 140,30 160,26 180,22 C 190,20 195,18 200,16 L 200,80 L 0,80 Z" fill="url(#chartGradient)" />
+                  <path d="M 0,65 C 20,63 40,58 60,52 C 80,46 100,40 120,35 C 140,30 160,26 180,22 C 190,20 195,18 200,16"
+                    stroke="rgb(16, 185, 129)" stroke-width="2.5" fill="none" stroke-linecap="round" />
+                  <circle cx="200" cy="16" r="4" fill="rgb(16, 185, 129)" />
+                  <circle cx="200" cy="16" r="2" fill="white" />
                 </svg>
               </div>
-              <!-- Content -->
-              <div class="relative z-10 text-center space-y-4 px-6">
-                <div
-                  class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-lg border border-emerald-500/30">
-                  <div class="text-3xl">📊</div>
-                </div>
-                <div class="space-y-1">
-                  <div
-                    class="inline-flex items-center gap-2 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                    <span
-                      class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white text-xs font-bold">3</span>
-                    <span>View & Export</span>
+            </div>
+
+            <!-- Recent receipts -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-sm">
+                <span class="font-medium text-slate-700 dark:text-slate-200">Recent receipts</span>
+                <button class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">View all</button>
+              </div>
+
+              <div class="space-y-2">
+                <div class="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 px-4 py-3 transition-colors hover:bg-slate-100/50 dark:hover:bg-slate-800/50">
+                  <div class="flex items-center gap-3">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 text-sm font-bold">WF</span>
+                    <div>
+                      <p class="text-sm font-medium text-slate-900 dark:text-white">Whole Foods Market</p>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">Groceries • Nov 14</p>
+                    </div>
                   </div>
+                  <p class="text-sm font-semibold text-slate-900 dark:text-white">-$86.41</p>
+                </div>
+
+                <div class="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 px-4 py-3 transition-colors hover:bg-slate-100/50 dark:hover:bg-slate-800/50">
+                  <div class="flex items-center gap-3">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 text-sm font-bold">SP</span>
+                    <div>
+                      <p class="text-sm font-medium text-slate-900 dark:text-white">Spotify</p>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">Subscription • Nov 13</p>
+                    </div>
+                  </div>
+                  <p class="text-sm font-semibold text-slate-900 dark:text-white">-$9.99</p>
+                </div>
+
+                <div class="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 px-4 py-3 transition-colors hover:bg-slate-100/50 dark:hover:bg-slate-800/50">
+                  <div class="flex items-center gap-3">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 text-sm font-bold">UE</span>
+                    <div>
+                      <p class="text-sm font-medium text-slate-900 dark:text-white">Uber Eats</p>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">Food • Nov 12</p>
+                    </div>
+                  </div>
+                  <p class="text-sm font-semibold text-slate-900 dark:text-white">-$34.20</p>
                 </div>
               </div>
             </div>
-            <div class="flex flex-col gap-3 p-4">
-              <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50 transition-colors">See the full picture
-              </h3>
-              <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 transition-colors">
-                Open your monthly dashboard to see totals, trends, and categories —
-                or export for your accountant in one click.
-              </p>
-            </div>
-          </li>
-        </ol>
-      </section>
-
-      <!-- Pricing -->
-      <section id="pricing" class="mt-20 space-y-10">
-        <div class="max-w-xl space-y-3">
-          <p
-            class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300 transition-colors">
-            Pricing
-          </p>
-          <h2
-            class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-3xl transition-colors">
-            Start free. Upgrade when receipts become serious.
-          </h2>
-        </div>
-
-        <div class="grid gap-6 md:grid-cols-2">
-          <!-- Free -->
-          <div
-            class="flex flex-col justify-between rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 transition-all duration-200 hover:shadow-lg">
-            <div class="space-y-4">
-              <p
-                class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 transition-colors">
-                Starter
-              </p>
-              <div class="flex items-baseline gap-1">
-                <span class="text-3xl font-semibold text-slate-900 dark:text-white transition-colors">$0</span>
-                <span class="text-xs text-slate-500">forever</span>
-              </div>
-              <p class="text-xs text-slate-600 dark:text-slate-300 transition-colors">
-                For individuals who want clean, simple visibility into monthly spending.
-              </p>
-              <ul class="mt-4 space-y-2 text-xs text-slate-700 dark:text-slate-200 transition-colors">
-                <li class="flex items-center gap-2">
-                  <span class="text-slate-500 dark:text-slate-400">✓</span>
-                  <span>Up to 200 receipts per month</span>
-                </li>
-                <li class="flex items-center gap-2">
-                  <span class="text-slate-500 dark:text-slate-400">✓</span>
-                  <span>Smart auto-tagging & summaries</span>
-                </li>
-                <li class="flex items-center gap-2">
-                  <span class="text-slate-500 dark:text-slate-400">✓</span>
-                  <span>Single user</span>
-                </li>
-                <li class="flex items-center gap-2">
-                  <span class="text-slate-500 dark:text-slate-400">✓</span>
-                  <span>Email & PDF uploads</span>
-                </li>
-              </ul>
-            </div>
-            <a routerLink="/register"
-              class="mt-6 w-full text-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-100 hover:border-emerald-500 dark:hover:border-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-200 transition-all duration-200">
-              Get started free
-            </a>
-          </div>
-
-          <!-- Pro -->
-          <div
-            class="flex flex-col justify-between rounded-2xl border border-emerald-500/60 bg-gradient-to-br from-emerald-50/50 via-white to-white dark:from-emerald-500/20 dark:via-slate-900 dark:to-slate-950/80 p-6 shadow-xl shadow-emerald-500/20 dark:shadow-emerald-500/30 transition-all duration-200 hover:shadow-2xl">
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <p
-                  class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300 transition-colors">
-                  Pro
-                </p>
-                <span
-                  class="rounded-full bg-emerald-500/20 px-2 py-1 text-[10px] font-medium text-emerald-700 dark:text-emerald-200 transition-colors">
-                  Most popular
-                </span>
-              </div>
-              <div class="flex items-baseline gap-1">
-                <span class="text-3xl font-semibold text-slate-900 dark:text-white transition-colors">$9</span>
-                <span class="text-xs text-slate-600 dark:text-slate-300 transition-colors">/month</span>
-              </div>
-              <p class="text-xs text-slate-700 dark:text-slate-200 transition-colors">
-                For power users, freelancers and founders who need receipts tight and export-ready.
-              </p>
-              <ul class="mt-4 space-y-2 text-xs text-slate-800 dark:text-slate-100 transition-colors">
-                <li class="flex items-center gap-2">
-                  <span class="text-emerald-600 dark:text-emerald-300">✓</span>
-                  <span>Unlimited receipts</span>
-                </li>
-                <li class="flex items-center gap-2">
-                  <span class="text-emerald-600 dark:text-emerald-300">✓</span>
-                  <span>Advanced search & filters</span>
-                </li>
-                <li class="flex items-center gap-2">
-                  <span class="text-emerald-600 dark:text-emerald-300">✓</span>
-                  <span>Export to CSV / PDF / your accountant</span>
-                </li>
-                <li class="flex items-center gap-2">
-                  <span class="text-emerald-600 dark:text-emerald-300">✓</span>
-                  <span>Priority support</span>
-                </li>
-                <li class="flex items-center gap-2">
-                  <span class="text-emerald-600 dark:text-emerald-300">✓</span>
-                  <span>Early access to new automations</span>
-                </li>
-              </ul>
-            </div>
-            <a routerLink="/register"
-              class="mt-6 w-full text-center rounded-full bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white dark:text-slate-950 hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all duration-200">
-              Upgrade to Pro
-            </a>
           </div>
         </div>
-      </section>
-
-      <!-- FAQ -->
-      <section id="faq" class="mt-20 space-y-10">
-        <div class="max-w-xl space-y-3">
-          <p
-            class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300 transition-colors">
-            FAQ
-          </p>
-          <h2
-            class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-3xl transition-colors">
-            Questions, meet answers.
-          </h2>
-        </div>
-
-        <div class="grid gap-4 md:grid-cols-2">
-          <div
-            class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 text-xs transition-all duration-200 hover:shadow-md">
-            <p class="font-semibold text-slate-900 dark:text-slate-100 transition-colors">Is my data private?</p>
-            <p class="mt-2 text-slate-600 dark:text-slate-300 transition-colors">
-              Yes. Receipts are encrypted in transit and at rest. We never sell your data,
-              and you can export or delete everything at any time.
-            </p>
-          </div>
-          <div
-            class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 text-xs transition-all duration-200 hover:shadow-md">
-            <p class="font-semibold text-slate-900 dark:text-slate-100 transition-colors">How do receipts get into
-              ReceiptNest?</p>
-            <p class="mt-2 text-slate-600 dark:text-slate-300 transition-colors">
-              You can forward emails, upload PDF or photo receipts, or connect supported
-              integrations. Everything lands in one organized inbox.
-            </p>
-          </div>
-          <div
-            class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 text-xs transition-all duration-200 hover:shadow-md">
-            <p class="font-semibold text-slate-900 dark:text-slate-100 transition-colors">Can I export for taxes or
-              accounting?</p>
-            <p class="mt-2 text-slate-600 dark:text-slate-300 transition-colors">
-              Absolutely. Export any time by month, category, or tag to CSV or PDF and share
-              with your accountant.
-            </p>
-          </div>
-          <div
-            class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 text-xs transition-all duration-200 hover:shadow-md">
-            <p class="font-semibold text-slate-900 dark:text-slate-100 transition-colors">What happens if I cancel?</p>
-            <p class="mt-2 text-slate-600 dark:text-slate-300 transition-colors">
-              You keep access to your data. Pro features are disabled, but you can still view
-              and export your existing receipts.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Footer CTA -->
-      <section
-        class="mt-20 rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-50/50 via-white to-white dark:from-emerald-500/20 dark:via-slate-900 dark:to-slate-950/80 p-8 text-center transition-all duration-300">
-        <h2
-          class="text-balance text-2xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-3xl transition-colors">
-          Ready to give your receipts a home?
-        </h2>
-        <p class="mt-3 text-sm text-slate-600 dark:text-slate-200 transition-colors">
-          Create your ReceiptNest in under a minute and see your next month in
-          a completely new light.
-        </p>
-        <div class="mt-6 flex flex-wrap items-center justify-center gap-4">
-          <a routerLink="/register"
-            class="rounded-full bg-emerald-500 px-6 py-3 text-sm font-medium text-white dark:text-slate-950 shadow-lg shadow-emerald-500/40 hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-all duration-200">
-            Get started
-          </a>
-          <button
-            class="rounded-full border border-slate-300 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 px-5 py-3 text-sm text-slate-700 dark:text-slate-100 hover:border-emerald-500 dark:hover:border-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-200 transition-all duration-200 cursor-pointer">
-            Book a 15-min demo
-          </button>
-        </div>
-      </section>
-
-      <!-- Footer -->
-      <footer
-        class="mt-10 flex flex-col items-center justify-between gap-4 border-t border-slate-200 dark:border-slate-900 pt-6 text-[11px] text-slate-500 sm:flex-row transition-colors">
-        <p>© {{ currentYear }} ReceiptNest. All rights reserved.</p>
-        <div class="flex items-center gap-4">
-          <a href="#" class="hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors">Privacy</a>
-          <a href="#" class="hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors">Terms</a>
-          <a href="#" class="hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors">Support</a>
-        </div>
-      </footer>
+      </div>
     </div>
-  </div>
+  </section>
+
+  <!-- Social Proof / Metrics -->
+  <section class="py-16 sm:py-20 border-y border-slate-100 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-900/30">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid gap-8 sm:grid-cols-3">
+        <div class="text-center">
+          <p class="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white">24K+</p>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Receipts organized weekly</p>
+        </div>
+        <div class="text-center">
+          <p class="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white">11 min</p>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Saved per month on average</p>
+        </div>
+        <div class="text-center">
+          <p class="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white">100%</p>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Encrypted in transit & at rest</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-24 sm:py-32">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="max-w-2xl">
+        <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">Why ReceiptNest</p>
+        <h2 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+          Turn messy receipts into a clean money story
+        </h2>
+        <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
+          ReceiptNest doesn't just store receipts. It understands them—grouping, tagging, and summarizing everything so you can see your spending at a glance.
+        </p>
+      </div>
+
+      <div class="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- Feature 1 -->
+        <div class="group relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 transition-all duration-300 hover:border-emerald-200 dark:hover:border-emerald-800 hover:shadow-xl hover:shadow-emerald-500/5">
+          <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 mb-6">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Capture from anywhere</h3>
+          <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
+            Forward emails, upload PDFs, snap photos, or connect integrations. If it looks like a receipt, ReceiptNest will catch it.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="group relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 transition-all duration-300 hover:border-emerald-200 dark:hover:border-emerald-800 hover:shadow-xl hover:shadow-emerald-500/5">
+          <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 mb-6">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Smart auto-tagging</h3>
+          <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
+            Merchant, category, payment method, tax, and more—extracted instantly, with clean categories you can actually use.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="group relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 transition-all duration-300 hover:border-emerald-200 dark:hover:border-emerald-800 hover:shadow-xl hover:shadow-emerald-500/5">
+          <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 mb-6">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Monthly clarity</h3>
+          <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
+            Beautiful summaries and exportable reports at the end of every month, so "where did it all go?" becomes an easy question.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it Works -->
+  <section id="how-it-works" class="py-24 sm:py-32 bg-slate-50/50 dark:bg-slate-900/30">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="max-w-2xl">
+        <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">How it works</p>
+        <h2 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+          From inbox chaos to a calm monthly snapshot
+        </h2>
+      </div>
+
+      <div class="mt-16 grid gap-8 lg:grid-cols-3">
+        <!-- Step 1 -->
+        <div class="relative">
+          <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
+            <div class="h-48 bg-gradient-to-br from-emerald-50 to-slate-50 dark:from-emerald-950/30 dark:to-slate-900/50 flex items-center justify-center">
+              <div class="text-center">
+                <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg border border-slate-100 dark:border-slate-700">
+                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                  </svg>
+                </div>
+                <div class="mt-4">
+                  <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white">
+                    <span>1</span>
+                    <span>Upload & Forward</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Connect & capture</h3>
+              <p class="mt-2 text-slate-600 dark:text-slate-300">
+                Create your account, set up your ReceiptNest email, or connect integrations. Every new receipt finds its way automatically.
+              </p>
+            </div>
+          </div>
+          <div class="hidden lg:block absolute top-1/2 -right-4 w-8 h-px bg-gradient-to-r from-emerald-300 to-transparent dark:from-emerald-700"></div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="relative">
+          <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
+            <div class="h-48 bg-gradient-to-br from-emerald-50 to-slate-50 dark:from-emerald-950/30 dark:to-slate-900/50 flex items-center justify-center">
+              <div class="text-center">
+                <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg border border-slate-100 dark:border-slate-700">
+                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                  </svg>
+                </div>
+                <div class="mt-4">
+                  <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white">
+                    <span>2</span>
+                    <span>Auto-organize</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <h3 class="text-lg font-semibold text-slate-900 dark:text-white">We organize the details</h3>
+              <p class="mt-2 text-slate-600 dark:text-slate-300">
+                Amounts, dates, merchants, categories—parsed and cleaned. Tweak rules once, and ReceiptNest remembers.
+              </p>
+            </div>
+          </div>
+          <div class="hidden lg:block absolute top-1/2 -right-4 w-8 h-px bg-gradient-to-r from-emerald-300 to-transparent dark:from-emerald-700"></div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="relative">
+          <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
+            <div class="h-48 bg-gradient-to-br from-emerald-50 to-slate-50 dark:from-emerald-950/30 dark:to-slate-900/50 flex items-center justify-center">
+              <div class="text-center">
+                <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg border border-slate-100 dark:border-slate-700">
+                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                  </svg>
+                </div>
+                <div class="mt-4">
+                  <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white">
+                    <span>3</span>
+                    <span>View & Export</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <h3 class="text-lg font-semibold text-slate-900 dark:text-white">See the full picture</h3>
+              <p class="mt-2 text-slate-600 dark:text-slate-300">
+                Open your monthly dashboard to see totals, trends, and categories—or export for your accountant in one click.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- App Showcase -->
+  <section class="py-24 sm:py-32">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="max-w-2xl mx-auto text-center">
+        <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">See it in action</p>
+        <h2 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+          Your receipts, beautifully organized
+        </h2>
+        <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
+          ReceiptNest transforms receipt chaos into clarity with smart organization and insights.
+        </p>
+      </div>
+
+      <div class="mt-16 grid gap-8 sm:grid-cols-2">
+        <!-- Screenshot 1 -->
+        <div class="group">
+          <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:border-slate-300 dark:group-hover:border-slate-700">
+            <div class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-slate-100 dark:border-slate-800">
+              <div class="text-center p-8">
+                <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg mb-4">
+                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                  </svg>
+                </div>
+                <p class="font-semibold text-slate-700 dark:text-slate-200">Dashboard Overview</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">See all your spending at a glance</p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 px-1">
+            <h3 class="font-semibold text-slate-900 dark:text-white">Monthly spending dashboard</h3>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Track total spend, compare to previous months, and see trends with beautiful charts.</p>
+          </div>
+        </div>
+
+        <!-- Screenshot 2 -->
+        <div class="group">
+          <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:border-slate-300 dark:group-hover:border-slate-700">
+            <div class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-slate-100 dark:border-slate-800">
+              <div class="text-center p-8">
+                <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg mb-4">
+                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
+                  </svg>
+                </div>
+                <p class="font-semibold text-slate-700 dark:text-slate-200">Smart Receipt List</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">All receipts auto-organized</p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 px-1">
+            <h3 class="font-semibold text-slate-900 dark:text-white">Auto-categorized receipts</h3>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Every receipt automatically tagged with merchant, category, amount, and payment method.</p>
+          </div>
+        </div>
+
+        <!-- Screenshot 3 -->
+        <div class="group">
+          <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:border-slate-300 dark:group-hover:border-slate-700">
+            <div class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-slate-100 dark:border-slate-800">
+              <div class="text-center p-8">
+                <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg mb-4">
+                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                  </svg>
+                </div>
+                <p class="font-semibold text-slate-700 dark:text-slate-200">Easy Upload</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Multiple ways to capture</p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 px-1">
+            <h3 class="font-semibold text-slate-900 dark:text-white">Multiple capture methods</h3>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Upload photos, PDFs, forward emails, or scan receipts. All formats supported.</p>
+          </div>
+        </div>
+
+        <!-- Screenshot 4 (Pro) -->
+        <div class="group">
+          <div class="relative rounded-2xl border border-emerald-200 dark:border-emerald-800/50 bg-white dark:bg-slate-900 p-3 shadow-lg shadow-emerald-500/5 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-emerald-500/10">
+            <div class="absolute top-5 right-5 z-10">
+              <span class="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-3 py-1 text-xs font-bold text-white shadow-lg">
+                PRO
+              </span>
+            </div>
+            <div class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/50">
+              <div class="text-center p-8">
+                <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg mb-4">
+                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                  </svg>
+                </div>
+                <p class="font-semibold text-slate-700 dark:text-slate-200">Advanced Analytics</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Deep spending insights</p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 px-1">
+            <h3 class="font-semibold text-slate-900 dark:text-white">Category breakdown & trends</h3>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Visualize spending by category, track trends, and export detailed reports.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing" class="py-24 sm:py-32 bg-slate-50/50 dark:bg-slate-900/30">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="max-w-2xl">
+        <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">Pricing</p>
+        <h2 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+          Start free. Upgrade when you're ready.
+        </h2>
+      </div>
+
+      <div class="mt-16 grid gap-8 lg:grid-cols-2 max-w-4xl">
+        <!-- Free Plan -->
+        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 lg:p-10">
+          <div>
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Starter</p>
+            <div class="mt-4 flex items-baseline gap-2">
+              <span class="text-5xl font-bold text-slate-900 dark:text-white">$0</span>
+              <span class="text-slate-500 dark:text-slate-400">forever</span>
+            </div>
+            <p class="mt-4 text-slate-600 dark:text-slate-300">
+              For individuals who want clean, simple visibility into monthly spending.
+            </p>
+          </div>
+
+          <ul class="mt-8 space-y-4">
+            <li class="flex items-start gap-3">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              <span class="text-slate-600 dark:text-slate-300">Up to 200 receipts per month</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              <span class="text-slate-600 dark:text-slate-300">Smart auto-tagging & summaries</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              <span class="text-slate-600 dark:text-slate-300">Email & PDF uploads</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              <span class="text-slate-600 dark:text-slate-300">Single user</span>
+            </li>
+          </ul>
+
+          <a routerLink="/register"
+            class="mt-10 block w-full text-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-4 text-base font-semibold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200">
+            Get started free
+          </a>
+        </div>
+
+        <!-- Pro Plan -->
+        <div class="relative rounded-2xl border-2 border-emerald-500 bg-white dark:bg-slate-900 p-8 lg:p-10 shadow-xl shadow-emerald-500/10">
+          <div class="absolute -top-4 left-8">
+            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-4 py-1.5 text-sm font-semibold text-white shadow-lg">
+              Most popular
+            </span>
+          </div>
+
+          <div>
+            <p class="text-sm font-medium text-emerald-600 dark:text-emerald-400">Pro</p>
+            <div class="mt-4 flex items-baseline gap-2">
+              <span class="text-5xl font-bold text-slate-900 dark:text-white">$9</span>
+              <span class="text-slate-500 dark:text-slate-400">/month</span>
+            </div>
+            <p class="mt-4 text-slate-600 dark:text-slate-300">
+              For power users, freelancers, and founders who need receipts tight and export-ready.
+            </p>
+          </div>
+
+          <ul class="mt-8 space-y-4">
+            <li class="flex items-start gap-3">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              <span class="text-slate-700 dark:text-slate-200 font-medium">Unlimited receipts</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              <span class="text-slate-700 dark:text-slate-200 font-medium">Advanced search & filters</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              <span class="text-slate-700 dark:text-slate-200 font-medium">Export to CSV / PDF</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              <span class="text-slate-700 dark:text-slate-200 font-medium">Priority support</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              <span class="text-slate-700 dark:text-slate-200 font-medium">Early access to new features</span>
+            </li>
+          </ul>
+
+          <a routerLink="/register"
+            class="mt-10 block w-full text-center rounded-xl bg-slate-900 dark:bg-white px-6 py-4 text-base font-semibold text-white dark:text-slate-900 shadow-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-all duration-200 hover:scale-[1.02]">
+            Upgrade to Pro
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="py-24 sm:py-32">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="max-w-2xl">
+        <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">FAQ</p>
+        <h2 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+          Questions, meet answers
+        </h2>
+      </div>
+
+      <div class="mt-16 grid gap-6 lg:grid-cols-2 max-w-5xl">
+        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 lg:p-8">
+          <h3 class="text-base font-semibold text-slate-900 dark:text-white">Is my data private?</h3>
+          <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
+            Yes. Receipts are encrypted in transit and at rest. We never sell your data, and you can export or delete everything at any time.
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 lg:p-8">
+          <h3 class="text-base font-semibold text-slate-900 dark:text-white">How do receipts get into ReceiptNest?</h3>
+          <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
+            You can forward emails, upload PDF or photo receipts, or connect supported integrations. Everything lands in one organized inbox.
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 lg:p-8">
+          <h3 class="text-base font-semibold text-slate-900 dark:text-white">Can I export for taxes or accounting?</h3>
+          <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
+            Absolutely. Export any time by month, category, or tag to CSV or PDF and share with your accountant.
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 lg:p-8">
+          <h3 class="text-base font-semibold text-slate-900 dark:text-white">What happens if I cancel?</h3>
+          <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
+            You keep access to your data. Pro features are disabled, but you can still view and export your existing receipts.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="py-24 sm:py-32">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="relative rounded-3xl overflow-hidden">
+        <!-- Background -->
+        <div class="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxIDAgNiAyLjY5IDYgNnMtMi42OSA2LTYgNi02LTIuNjktNi02IDIuNjktNiA2LTZ6IiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiIHN0cm9rZS13aWR0aD0iMiIvPjwvZz48L3N2Zz4=')] opacity-40"></div>
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl"></div>
+
+        <!-- Content -->
+        <div class="relative px-8 py-20 sm:px-16 sm:py-28 text-center">
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white max-w-3xl mx-auto leading-tight">
+            Ready to give your receipts a home?
+          </h2>
+          <p class="mt-6 text-lg text-slate-300 max-w-xl mx-auto">
+            Create your ReceiptNest in under a minute and see your next month in a completely new light.
+          </p>
+          <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a routerLink="/register"
+              class="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-slate-100 px-8 py-4 text-base font-semibold text-slate-900 shadow-xl transition-all duration-200 hover:scale-[1.02]">
+              Get started free
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </a>
+            <button
+              class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-600 hover:border-slate-500 bg-transparent px-8 py-4 text-base font-semibold text-white hover:bg-slate-800/50 transition-all duration-200">
+              Book a demo
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 dark:border-slate-800">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-2">
+          <img src="assets/receipt-nest.png" alt="ReceiptNest" class="h-8 w-8 object-contain" />
+          <span class="font-semibold">
+            <span class="text-slate-900 dark:text-white">Receipt</span><span class="text-emerald-600 dark:text-emerald-400">Nest</span>
+          </span>
+        </div>
+
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          © {{ currentYear }} ReceiptNest. All rights reserved.
+        </p>
+
+        <div class="flex items-center gap-6">
+          <a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Privacy</a>
+          <a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Terms</a>
+          <a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Support</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 </div>
