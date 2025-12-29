@@ -129,11 +129,20 @@
               </div>
             </div>
 
-            <!-- File Info -->
-            <div class="p-4 bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-600 dark:text-slate-400">
+            <!-- File Info & Download -->
+            <div class="p-4 bg-slate-50 dark:bg-slate-800/50">
               <div class="flex items-center justify-between">
-                <span>{{ receipt()!.file.originalName }}</span>
-                <span>{{ (receipt()!.file.sizeBytes || 0) / 1024 | number:'1.0-0' }} KB</span>
+                <div class="text-xs text-slate-600 dark:text-slate-400 min-w-0 flex-1 mr-3">
+                  <p class="truncate">{{ receipt()!.file.originalName }}</p>
+                  <p class="mt-0.5">{{ (receipt()!.file.sizeBytes || 0) / 1024 | number:'1.0-0' }} KB</p>
+                </div>
+                <button type="button" (click)="downloadReceipt()" *ngIf="imageUrl()"
+                  class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors flex-shrink-0">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download
+                </button>
               </div>
             </div>
           </div>

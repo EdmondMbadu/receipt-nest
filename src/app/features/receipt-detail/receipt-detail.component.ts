@@ -195,6 +195,50 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
     this.showImageModal.set(false);
   }
 
+  /**
+   * Download the receipt image/file
+   */
+  async downloadReceipt(): Promise<void> {
+    const receipt = this.receipt();
+    const url = this.imageUrl();
+
+    if (!receipt || !url) return;
+
+    try {
+      // For HEIC files that have been converted, use the converted preview
+      const downloadUrl = this.isHeic() && this.heicPreviewUrl()
+        ? this.heicPreviewUrl()!
+        : url;
+
+      // Fetch the file
+      const response = await fetch(downloadUrl);
+      const blob = await response.blob();
+
+      // Determine file extension
+      let fileName = receipt.file?.originalName || 'receipt';
+
+      // If HEIC was converted, change extension to jpg
+      if (this.isHeic() && this.heicPreviewUrl()) {
+        fileName = fileName.replace(/\.(heic|heif)$/i, '.jpg');
+      }
+
+      // Create download link
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Cleanup
+      URL.revokeObjectURL(link.href);
+    } catch (error) {
+      console.error('Failed to download receipt:', error);
+      // Fallback: open in new tab
+      window.open(url, '_blank');
+    }
+  }
+
   toggleTheme(): void {
     this.theme.toggleTheme();
   }
