@@ -508,6 +508,63 @@ export class ReceiptService {
   readonly currentMonthSpend = this.selectedMonthSpend;
 
   /**
+   * Calculate spending for the previous month (relative to selected month)
+   */
+  readonly previousMonthSpend = computed(() => {
+    let prevMonth = this.selectedMonth() - 1;
+    let prevYear = this.selectedYear();
+
+    if (prevMonth < 0) {
+      prevMonth = 11;
+      prevYear--;
+    }
+
+    return this.receipts()
+      .filter(r => {
+        if (r.totalAmount === undefined || r.totalAmount === null) {
+          return false;
+        }
+
+        if (r.date) {
+          const receiptDate = new Date(r.date);
+          return receiptDate.getMonth() === prevMonth &&
+            receiptDate.getFullYear() === prevYear;
+        }
+
+        if (r.createdAt) {
+          const createdDate = (r.createdAt as any).toDate
+            ? (r.createdAt as any).toDate()
+            : new Date(r.createdAt as any);
+          return createdDate.getMonth() === prevMonth &&
+            createdDate.getFullYear() === prevYear;
+        }
+
+        return false;
+      })
+      .reduce((sum, r) => sum + (r.totalAmount || 0), 0);
+  });
+
+  /**
+   * Calculate the percentage change from previous month to selected month
+   * Returns { percent: number, isIncrease: boolean } or null if no previous data
+   */
+  readonly monthOverMonthChange = computed(() => {
+    const current = this.selectedMonthSpend();
+    const previous = this.previousMonthSpend();
+
+    // If no previous month data, return null
+    if (previous === 0) {
+      return null;
+    }
+
+    const change = ((current - previous) / previous) * 100;
+    return {
+      percent: Math.abs(Math.round(change)),
+      isIncrease: change > 0
+    };
+  });
+
+  /**
    * Get daily cumulative spending data for the selected month
    * Returns an array of { day, amount, cumulative } for chart rendering
    */

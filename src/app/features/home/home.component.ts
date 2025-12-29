@@ -108,6 +108,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly selectedMonthLabel = this.receiptService.selectedMonthLabel;
   readonly selectedMonthReceipts = this.receiptService.selectedMonthReceipts;
   readonly isCurrentMonth = this.receiptService.isCurrentMonth;
+  readonly monthOverMonthChange = this.receiptService.monthOverMonthChange;
 
   // Chart data from service
   readonly dailySpendingData = this.receiptService.dailySpendingData;
