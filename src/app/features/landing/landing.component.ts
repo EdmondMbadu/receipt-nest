@@ -1,6 +1,7 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { Meta, Title } from '@angular/platform-browser';
 
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
@@ -16,6 +17,8 @@ export class LandingComponent {
   readonly auth = inject(AuthService);
   private readonly theme = inject(ThemeService);
   private readonly router = inject(Router);
+  private readonly title = inject(Title);
+  private readonly meta = inject(Meta);
 
   readonly user = this.auth.user;
   readonly isDarkMode = this.theme.isDarkMode;
@@ -33,6 +36,10 @@ export class LandingComponent {
   });
 
   constructor() {
+    // Set SEO meta tags
+    this.title.setTitle('ReceiptNest - AI-Powered Receipt Scanner & Expense Tracker');
+    this.meta.updateTag({ name: 'description', content: 'ReceiptNest is a free AI-powered receipt scanner and expense tracker. Scan receipts, organize expenses by category, track spending trends, and export reports.' });
+
     // Redirect to home if user is already authenticated
     effect(() => {
       if (this.auth.isAuthenticated()) {
