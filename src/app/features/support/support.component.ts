@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-support',
@@ -10,5 +11,11 @@ import { RouterLink } from '@angular/router';
   styleUrl: './support.component.css'
 })
 export class SupportComponent {
+  private readonly theme = inject(ThemeService);
+  readonly isDarkMode = this.theme.isDarkMode;
   readonly currentYear = new Date().getFullYear();
+
+  toggleTheme() {
+    this.theme.toggleTheme();
+  }
 }
