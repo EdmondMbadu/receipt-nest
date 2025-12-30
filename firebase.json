@@ -22,6 +22,7 @@
     }
   ],
   "hosting": {
+    "site": "receiptnest",
     "public": "dist/receipt-nest/browser",
     "ignore": [
       "firebase.json",
