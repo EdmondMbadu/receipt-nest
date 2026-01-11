@@ -13,6 +13,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent)
   },
   {
+    path: 'app/pricing',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/pricing/pricing.component').then((m) => m.PricingComponent)
+  },
+  {
     path: 'app/receipt/:id',
     canActivate: [authGuard],
     loadComponent: () => import('./features/receipt-detail/receipt-detail.component').then((m) => m.ReceiptDetailComponent)

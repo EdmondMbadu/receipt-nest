@@ -1,0 +1,132 @@
+<div class="min-h-screen bg-slate-50 dark:bg-slate-900">
+  <header class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      <a routerLink="/app" class="flex items-center gap-2 w-fit">
+        <img src="assets/receipt-nest.png" alt="ReceiptNest" class="h-8 w-8 object-contain" />
+        <span class="font-semibold">
+          <span class="text-slate-900 dark:text-white">Receipt</span><span class="text-emerald-600 dark:text-emerald-400">Nest</span>
+        </span>
+      </a>
+      <button type="button" (click)="toggleTheme()"
+        class="inline-flex items-center justify-center h-9 w-9 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+        aria-label="Toggle theme">
+        <svg *ngIf="isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+        </svg>
+        <svg *ngIf="!isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
+    <div class="max-w-2xl">
+      <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">Plan & Pricing</p>
+      <h1 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+        You are on the Free plan
+      </h1>
+      <p class="mt-3 text-slate-600 dark:text-slate-300">
+        Review what is included today and upgrade whenever you are ready.
+      </p>
+    </div>
+
+    <div class="mt-12 grid gap-8 lg:grid-cols-2">
+      <section class="rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-white dark:bg-slate-900 p-8">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Current plan</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Free</h2>
+          </div>
+          <span class="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">Active</span>
+        </div>
+
+        <p class="mt-4 text-slate-600 dark:text-slate-300">
+          Best for staying on top of everyday receipts with clean summaries.
+        </p>
+
+        <ul class="mt-6 space-y-4">
+          <li class="flex items-start gap-3">
+            <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+            <span class="text-slate-600 dark:text-slate-300">Up to 200 receipts per month</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+            <span class="text-slate-600 dark:text-slate-300">Smart auto-tagging and summaries</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+            <span class="text-slate-600 dark:text-slate-300">Email and PDF uploads</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+            <span class="text-slate-600 dark:text-slate-300">Single user workspace</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="relative rounded-2xl border-2 border-emerald-500 bg-white dark:bg-slate-900 p-8 shadow-xl shadow-emerald-500/10">
+        <div class="absolute -top-4 left-6">
+          <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-4 py-1.5 text-sm font-semibold text-white shadow-lg">
+            Upgrade
+          </span>
+        </div>
+
+        <div>
+          <p class="text-sm font-medium text-emerald-600 dark:text-emerald-400">Pro</p>
+          <div class="mt-4 flex items-baseline gap-2">
+            <span class="text-4xl font-bold text-slate-900 dark:text-white">$9</span>
+            <span class="text-slate-500 dark:text-slate-400">/month</span>
+          </div>
+          <p class="mt-4 text-slate-600 dark:text-slate-300">
+            Built for power users who want unlimited receipts and richer exports.
+          </p>
+        </div>
+
+        <ul class="mt-6 space-y-4">
+          <li class="flex items-start gap-3">
+            <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+            <span class="text-slate-700 dark:text-slate-200 font-medium">Unlimited receipts</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+            <span class="text-slate-700 dark:text-slate-200 font-medium">Advanced search and filters</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+            <span class="text-slate-700 dark:text-slate-200 font-medium">Export to CSV and PDF</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+            <span class="text-slate-700 dark:text-slate-200 font-medium">Priority support and early access</span>
+          </li>
+        </ul>
+
+        <button type="button"
+          class="mt-8 w-full rounded-xl bg-slate-900 dark:bg-white px-6 py-4 text-base font-semibold text-white dark:text-slate-900 shadow-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-all duration-200 hover:scale-[1.02]">
+          Switch to Pro
+        </button>
+
+        <p class="mt-4 text-xs text-slate-500 dark:text-slate-400">
+          Want the full feature breakdown? Visit the <a routerLink="/" fragment="pricing" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium">home page pricing section</a>.
+        </p>
+      </section>
+    </div>
+  </main>
+</div>
