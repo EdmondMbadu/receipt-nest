@@ -33,21 +33,59 @@
     <div class="max-w-2xl">
       <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">Plan & Pricing</p>
       <h1 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-        You are on the Free plan
+        You are on the {{ subscriptionPlan() === 'pro' ? 'Pro' : 'Free' }} plan
       </h1>
       <p class="mt-3 text-slate-600 dark:text-slate-300">
         Review what is included today and upgrade whenever you are ready.
       </p>
     </div>
 
-    <div class="mt-12 grid gap-8 lg:grid-cols-2">
+    <div class="mt-8 flex flex-wrap items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
+      <span class="inline-flex items-center gap-2 rounded-full bg-white dark:bg-slate-800 px-3 py-1.5 border border-slate-200 dark:border-slate-700">
+        <span class="h-2 w-2 rounded-full" [class.bg-emerald-500]="subscriptionPlan() === 'pro'" [class.bg-slate-400]="subscriptionPlan() !== 'pro'"></span>
+        Status: {{ subscriptionStatus() || 'inactive' }}
+      </span>
+      <span *ngIf="renewalLabel()" class="inline-flex items-center gap-2 rounded-full bg-white dark:bg-slate-800 px-3 py-1.5 border border-slate-200 dark:border-slate-700">
+        Renews: {{ renewalLabel() }}
+      </span>
+      <span *ngIf="cancelAtPeriodEnd()" class="inline-flex items-center gap-2 rounded-full bg-amber-50 dark:bg-amber-900/30 px-3 py-1.5 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-200">
+        Cancels at period end
+      </span>
+    </div>
+
+    <div class="mt-6 inline-flex rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1">
+      <button type="button" (click)="setBillingInterval('monthly')"
+        class="rounded-lg px-4 py-2 text-sm font-semibold transition-colors"
+        [class.bg-slate-900]="billingInterval() === 'monthly'" [class.text-white]="billingInterval() === 'monthly'"
+        [class.text-slate-700]="billingInterval() !== 'monthly'" [class.dark:text-slate-200]="billingInterval() !== 'monthly'">
+        Monthly
+      </button>
+      <button type="button" (click)="setBillingInterval('annual')"
+        class="rounded-lg px-4 py-2 text-sm font-semibold transition-colors"
+        [class.bg-slate-900]="billingInterval() === 'annual'" [class.text-white]="billingInterval() === 'annual'"
+        [class.text-slate-700]="billingInterval() !== 'annual'" [class.dark:text-slate-200]="billingInterval() !== 'annual'">
+        Annual
+      </button>
+    </div>
+
+    <div class="mt-10 grid gap-8 lg:grid-cols-2">
       <section class="rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-white dark:bg-slate-900 p-8">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Current plan</p>
             <h2 class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Free</h2>
           </div>
-          <span class="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">Active</span>
+          <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
+            [class.bg-emerald-100]="subscriptionPlan() !== 'pro'"
+            [class.dark:bg-emerald-900/40]="subscriptionPlan() !== 'pro'"
+            [class.text-emerald-700]="subscriptionPlan() !== 'pro'"
+            [class.dark:text-emerald-300]="subscriptionPlan() !== 'pro'"
+            [class.bg-slate-100]="subscriptionPlan() === 'pro'"
+            [class.dark:bg-slate-800]="subscriptionPlan() === 'pro'"
+            [class.text-slate-600]="subscriptionPlan() === 'pro'"
+            [class.dark:text-slate-300]="subscriptionPlan() === 'pro'">
+            {{ subscriptionPlan() === 'pro' ? 'Not active' : 'Active' }}
+          </span>
         </div>
 
         <p class="mt-4 text-slate-600 dark:text-slate-300">
@@ -92,8 +130,12 @@
         <div>
           <p class="text-sm font-medium text-emerald-600 dark:text-emerald-400">Pro</p>
           <div class="mt-4 flex items-baseline gap-2">
-            <span class="text-4xl font-bold text-slate-900 dark:text-white">$9</span>
-            <span class="text-slate-500 dark:text-slate-400">/month</span>
+            <span class="text-4xl font-bold text-slate-900 dark:text-white">
+              {{ billingInterval() === 'annual' ? '$100' : '$9' }}
+            </span>
+            <span class="text-slate-500 dark:text-slate-400">
+              {{ billingInterval() === 'annual' ? '/year' : '/month' }}
+            </span>
           </div>
           <p class="mt-4 text-slate-600 dark:text-slate-300">
             Built for power users who want unlimited receipts and richer exports.
@@ -127,10 +169,20 @@
           </li>
         </ul>
 
-        <button type="button"
-          class="mt-8 w-full rounded-xl bg-slate-900 dark:bg-white px-6 py-4 text-base font-semibold text-white dark:text-slate-900 shadow-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-all duration-200 hover:scale-[1.02]">
-          Switch to Pro
+        <button type="button" (click)="switchToPro()" [disabled]="isProcessing() || isPro()"
+          class="mt-8 w-full rounded-xl px-6 py-4 text-base font-semibold shadow-lg transition-all duration-200"
+          [class.bg-slate-900]="!isPro()" [class.dark:bg-white]="!isPro()"
+          [class.text-white]="!isPro()" [class.dark:text-slate-900]="!isPro()"
+          [class.bg-slate-200]="isPro()" [class.dark:bg-slate-800]="isPro()"
+          [class.text-slate-600]="isPro()" [class.dark:text-slate-300]="isPro()"
+          [class.cursor-not-allowed]="isPro() || isProcessing()"
+          [ngClass]="!isPro() ? 'hover:bg-slate-800 dark:hover:bg-slate-100 hover:scale-[1.02]' : ''">
+          {{ isPro() ? 'You are on Pro' : (isProcessing() ? 'Redirecting...' : 'Switch to Pro') }}
         </button>
+
+        <p *ngIf="checkoutError()" class="mt-4 text-sm text-rose-600 dark:text-rose-400">
+          {{ checkoutError() }}
+        </p>
 
         <p class="mt-4 text-xs text-slate-500 dark:text-slate-400">
           Want the full feature breakdown? Visit the <a routerLink="/" fragment="pricing" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium">home page pricing section</a>.
