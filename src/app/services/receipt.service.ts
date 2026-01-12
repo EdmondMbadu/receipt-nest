@@ -8,6 +8,7 @@ import {
   deleteDoc,
   getDoc,
   getDocs,
+  getCountFromServer,
   query,
   where,
   orderBy,
@@ -137,6 +138,15 @@ export class ReceiptService {
   ): Promise<Receipt> {
     const userId = this.auth.user()?.id;
     if (!userId) throw new Error('User not authenticated');
+
+    const plan = this.auth.user()?.subscriptionPlan ?? 'free';
+    if (plan !== 'pro') {
+      const receiptsRef = collection(this.db, this.getReceiptsPath());
+      const countSnapshot = await getCountFromServer(receiptsRef);
+      if (countSnapshot.data().count >= 200) {
+        throw new Error('FREE_PLAN_LIMIT_REACHED');
+      }
+    }
 
     // Validate file
     const validation = this.validateFile(file);
@@ -688,5 +698,4 @@ export class ReceiptService {
     return grouped;
   });
 }
-
 

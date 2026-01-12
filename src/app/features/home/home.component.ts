@@ -685,7 +685,11 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   onUploadError(error: string) {
     console.error('Upload error:', error);
-    // Could show a toast notification here
+    if (error === 'FREE_PLAN_LIMIT_REACHED') {
+      this.showUploadModal.set(false);
+      this.menuOpen.set(false);
+      this.router.navigate(['/app/pricing'], { queryParams: { limit: 'free' } });
+    }
   }
 
   async deleteReceipt(receipt: Receipt, event: Event) {

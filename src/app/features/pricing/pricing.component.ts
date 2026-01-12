@@ -1,12 +1,13 @@
 import { Component, EffectRef, OnDestroy, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
 import { doc, getFirestore, onSnapshot, Timestamp } from 'firebase/firestore';
 import { httpsCallable, getFunctions } from 'firebase/functions';
 import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../services/auth.service';
 import { app } from '../../../../environments/environments';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-pricing',
@@ -22,12 +23,14 @@ export class PricingComponent implements OnDestroy {
   private readonly auth = inject(AuthService);
   private readonly db = getFirestore(app);
   private readonly functions = getFunctions(app);
+  private readonly route = inject(ActivatedRoute);
   readonly isDarkMode = this.theme.isDarkMode;
   readonly billingInterval = signal<'monthly' | 'annual'>('monthly');
   readonly isProcessing = signal(false);
   readonly isPortalProcessing = signal(false);
   readonly checkoutError = signal<string | null>(null);
   readonly portalError = signal<string | null>(null);
+  readonly limitReachedNotice = signal(false);
 
   readonly subscriptionPlan = signal<'free' | 'pro'>('free');
   readonly subscriptionStatus = signal<string>('inactive');
@@ -36,6 +39,7 @@ export class PricingComponent implements OnDestroy {
   readonly cancelAtPeriodEnd = signal<boolean>(false);
   private userSubscriptionCleanup: (() => void) | null = null;
   private userEffectRef: EffectRef | null = null;
+  private routeSubscription: Subscription | null = null;
 
   readonly isPro = computed(() => this.subscriptionPlan() === 'pro');
   readonly renewalLabel = computed(() => {
@@ -50,6 +54,10 @@ export class PricingComponent implements OnDestroy {
   constructor() {
     this.title.setTitle('Pricing - ReceiptNest');
     this.meta.updateTag({ name: 'description', content: 'Review your ReceiptNest plan and upgrade when you are ready.' });
+
+    this.routeSubscription = this.route.queryParamMap.subscribe((params) => {
+      this.limitReachedNotice.set(params.get('limit') === 'free');
+    });
 
     this.userEffectRef = effect(
       () => {
@@ -88,6 +96,8 @@ export class PricingComponent implements OnDestroy {
     this.detachUserSubscription();
     this.userEffectRef?.destroy();
     this.userEffectRef = null;
+    this.routeSubscription?.unsubscribe();
+    this.routeSubscription = null;
   }
 
   setBillingInterval(interval: 'monthly' | 'annual') {

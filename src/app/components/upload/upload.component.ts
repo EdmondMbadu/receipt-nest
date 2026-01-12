@@ -188,8 +188,13 @@ export class UploadComponent {
       this.uploadComplete.emit(receipt);
       this.reset();
     } catch (error: any) {
-      this.errorMessage.set(error.message || 'Upload failed');
-      this.uploadError.emit(error.message);
+      if (error?.message === 'FREE_PLAN_LIMIT_REACHED') {
+        this.errorMessage.set('Free plan includes up to 200 receipts total. Upgrade to add more.');
+        this.uploadError.emit('FREE_PLAN_LIMIT_REACHED');
+      } else {
+        this.errorMessage.set(error.message || 'Upload failed');
+        this.uploadError.emit(error.message);
+      }
     } finally {
       this.isUploading.set(false);
     }
@@ -308,5 +313,4 @@ export class UploadComponent {
     this.showCamera.set(false);
   }
 }
-
 
