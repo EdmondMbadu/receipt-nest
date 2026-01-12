@@ -2,6 +2,7 @@ import { Component, ElementRef, HostListener, OnDestroy, OnInit, computed, injec
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
@@ -11,6 +12,7 @@ import { ShareService } from '../../services/share.service';
 import { UploadComponent } from '../../components/upload/upload.component';
 import { Receipt, ReceiptStatus } from '../../models/receipt.model';
 import { DEFAULT_CATEGORIES, getCategoryById, Category } from '../../models/category.model';
+import { app } from '../../../../environments/environments';
 
 // Interface for grouped receipts by month
 interface MonthGroup {
@@ -36,6 +38,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly receiptService = inject(ReceiptService);
   private readonly pdfThumbnailService = inject(PdfThumbnailService);
   private readonly shareService = inject(ShareService);
+  private readonly functions = getFunctions(app);
 
   readonly user = this.authService.user;
   readonly isDarkMode = this.theme.isDarkMode;
@@ -59,6 +62,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly shareCopied = signal(false);
   readonly downloadingMonthKey = signal<string | null>(null);
   readonly monthDownloadError = signal<{ key: string; message: string } | null>(null);
+  readonly billingPortalError = signal<string | null>(null);
+  readonly billingPortalLoading = signal(false);
 
   // Expose Math for template
   readonly Math = Math;
@@ -636,6 +641,25 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.menuOpen.set(false);
     await this.authService.logout();
     await this.router.navigateByUrl('/login');
+  }
+
+  async openBillingPortal() {
+    this.billingPortalError.set(null);
+    this.billingPortalLoading.set(true);
+    try {
+      const portal = httpsCallable(this.functions, 'createPortalSession');
+      const response = await portal({});
+      const data = response.data as { url?: string };
+      if (!data?.url) {
+        throw new Error('Missing portal URL from server.');
+      }
+      window.location.assign(data.url);
+    } catch (error) {
+      console.error('Failed to open billing portal', error);
+      this.billingPortalError.set('Unable to open billing portal right now.');
+    } finally {
+      this.billingPortalLoading.set(false);
+    }
   }
 
   toggleTheme() {

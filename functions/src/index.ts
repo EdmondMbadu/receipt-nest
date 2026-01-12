@@ -20,4 +20,4 @@ setGlobalOptions({ maxInstances: 10 });
 
 // Export all functions
 export { processReceipt } from "./receipt-processor";
-export { createCheckoutSession, stripeWebhook } from "./billing";
+export { createCheckoutSession, createPortalSession, stripeWebhook } from "./billing";

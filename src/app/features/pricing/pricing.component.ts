@@ -25,7 +25,9 @@ export class PricingComponent implements OnDestroy {
   readonly isDarkMode = this.theme.isDarkMode;
   readonly billingInterval = signal<'monthly' | 'annual'>('monthly');
   readonly isProcessing = signal(false);
+  readonly isPortalProcessing = signal(false);
   readonly checkoutError = signal<string | null>(null);
+  readonly portalError = signal<string | null>(null);
 
   readonly subscriptionPlan = signal<'free' | 'pro'>('free');
   readonly subscriptionStatus = signal<string>('inactive');
@@ -108,6 +110,25 @@ export class PricingComponent implements OnDestroy {
       this.checkoutError.set('Unable to start checkout. Please try again in a moment.');
     } finally {
       this.isProcessing.set(false);
+    }
+  }
+
+  async openBillingPortal() {
+    this.portalError.set(null);
+    this.isPortalProcessing.set(true);
+    try {
+      const portal = httpsCallable(this.functions, 'createPortalSession');
+      const response = await portal({});
+      const data = response.data as { url?: string };
+      if (!data?.url) {
+        throw new Error('Missing portal URL from server.');
+      }
+      window.location.assign(data.url);
+    } catch (error) {
+      console.error('Failed to open billing portal', error);
+      this.portalError.set('Unable to open the billing portal right now.');
+    } finally {
+      this.isPortalProcessing.set(false);
     }
   }
 

@@ -53,16 +53,18 @@
       </span>
     </div>
 
-    <div class="mt-6 inline-flex rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1">
+    <div class="mt-6 inline-flex rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/70 p-1">
       <button type="button" (click)="setBillingInterval('monthly')"
         class="rounded-lg px-4 py-2 text-sm font-semibold transition-colors"
         [class.bg-slate-900]="billingInterval() === 'monthly'" [class.text-white]="billingInterval() === 'monthly'"
+        [class.dark:bg-white]="billingInterval() === 'monthly'" [class.dark:text-slate-900]="billingInterval() === 'monthly'"
         [class.text-slate-700]="billingInterval() !== 'monthly'" [class.dark:text-slate-200]="billingInterval() !== 'monthly'">
         Monthly
       </button>
       <button type="button" (click)="setBillingInterval('annual')"
         class="rounded-lg px-4 py-2 text-sm font-semibold transition-colors"
         [class.bg-slate-900]="billingInterval() === 'annual'" [class.text-white]="billingInterval() === 'annual'"
+        [class.dark:bg-white]="billingInterval() === 'annual'" [class.dark:text-slate-900]="billingInterval() === 'annual'"
         [class.text-slate-700]="billingInterval() !== 'annual'" [class.dark:text-slate-200]="billingInterval() !== 'annual'">
         Annual
       </button>
@@ -182,6 +184,16 @@
 
         <p *ngIf="checkoutError()" class="mt-4 text-sm text-rose-600 dark:text-rose-400">
           {{ checkoutError() }}
+        </p>
+
+        <button type="button" (click)="openBillingPortal()" [disabled]="isPortalProcessing()"
+          class="mt-4 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+          [class.cursor-not-allowed]="isPortalProcessing()">
+          {{ isPortalProcessing() ? 'Opening portal...' : 'Manage billing' }}
+        </button>
+
+        <p *ngIf="portalError()" class="mt-3 text-sm text-rose-600 dark:text-rose-400">
+          {{ portalError() }}
         </p>
 
         <p class="mt-4 text-xs text-slate-500 dark:text-slate-400">

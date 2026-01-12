@@ -117,6 +117,37 @@ export const createCheckoutSession = onCall(
   }
 );
 
+export const createPortalSession = onCall(
+  { region: "us-central1", secrets: [stripeSecretKey, appBaseUrl] },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "User must be authenticated to access the billing portal.");
+    }
+
+    if (!stripeSecretKey.value() || !appBaseUrl.value()) {
+      throw new HttpsError("failed-precondition", "Stripe configuration is incomplete.");
+    }
+
+    const uid = request.auth.uid;
+    const userRef = admin.firestore().doc(`users/${uid}`);
+    const userSnap = await userRef.get();
+    const userData = userSnap.data() || {};
+    const customerId = userData.stripeCustomerId as string | undefined;
+
+    if (!customerId) {
+      throw new HttpsError("failed-precondition", "No Stripe customer found for this account.");
+    }
+
+    const stripe = getStripe();
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${appBaseUrl.value()}/app/pricing`,
+    });
+
+    return { url: portalSession.url };
+  }
+);
+
 export const stripeWebhook = onRequest(
   { region: "us-central1", secrets: [stripeSecretKey, stripeWebhookSecret, stripePriceIdMonthly, stripePriceIdAnnual] },
   async (req, res) => {
