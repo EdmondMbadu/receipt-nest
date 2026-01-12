@@ -1,14 +1,20 @@
 <div class="min-h-screen bg-white dark:bg-slate-950">
   <!-- Ambient background -->
   <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-    <div class="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-purple-500/[0.03] dark:bg-purple-500/[0.06] blur-[100px]"></div>
-    <div class="absolute bottom-1/4 right-0 w-[400px] h-[400px] rounded-full bg-indigo-400/[0.03] dark:bg-indigo-400/[0.05] blur-[80px]"></div>
+    <div
+      class="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-emerald-500/[0.04] dark:bg-emerald-500/[0.08] blur-[100px]">
+    </div>
+    <div
+      class="absolute bottom-1/4 right-0 w-[400px] h-[400px] rounded-full bg-emerald-400/[0.03] dark:bg-emerald-400/[0.06] blur-[80px]">
+    </div>
   </div>
 
   <!-- Pro Users: Full AI Insights Experience -->
-  <div *ngIf="isPro()" class="flex flex-col h-screen">
+  @if (isPro()) {
+  <div class="flex flex-col h-screen">
     <!-- Header -->
-    <header class="flex-shrink-0 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
+    <header
+      class="flex-shrink-0 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
       <div class="mx-auto max-w-4xl px-4 py-4 sm:px-6">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -20,32 +26,44 @@
             </button>
             <div>
               <div class="flex items-center gap-2">
-                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 shadow-lg shadow-purple-500/25">
-                  <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+                <div
+                  class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 shadow-xl shadow-emerald-500/25">
+                  <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
                   </svg>
                 </div>
                 <h1 class="text-lg font-semibold text-slate-900 dark:text-white">AI Insights</h1>
               </div>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ monthLabel() }} · {{ receiptCount() }} receipts · {{ formatCurrency(totalSpend()) }}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ monthLabel() }} · {{ receiptCount() }}
+                receipts · {{ formatCurrency(totalSpend()) }}</p>
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <button type="button" (click)="clearChat()" *ngIf="messages().length > 0"
+            @if (messages().length > 0) {
+            <button type="button" (click)="clearChat()"
               class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800">
               <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
               </svg>
               New chat
             </button>
+            }
             <button type="button" (click)="toggleTheme()"
               class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800">
-              <svg *ngIf="isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+              @if (isDarkMode()) {
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
               </svg>
-              <svg *ngIf="!isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+              } @else {
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
               </svg>
+              }
             </button>
           </div>
         </div>
@@ -56,50 +74,65 @@
     <div #chatContainer class="flex-1 overflow-y-auto">
       <div class="mx-auto max-w-3xl px-4 py-6 sm:px-6">
         <!-- Initial Insights Cards (shown when no messages) -->
-        <div *ngIf="messages().length === 0" class="space-y-6">
+        @if (messages().length === 0) {
+        <div class="space-y-6">
           <!-- Welcome Message -->
           <div class="text-center py-8">
-            <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 shadow-xl shadow-purple-500/30 mb-4">
+            <div
+              class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-2xl shadow-emerald-500/30 mb-4">
               <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
               </svg>
             </div>
             <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Your Personal Finance AI</h2>
             <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-              I analyze your spending patterns and provide personalized insights to help you save money and make smarter financial decisions.
+              I analyze your spending patterns and provide personalized insights to help you save money and make smarter
+              financial decisions.
             </p>
           </div>
 
           <!-- Quick Insights -->
-          <div *ngIf="!insightsLoading() && insights().length > 0" class="space-y-3">
+          @if (!insightsLoading() && insights().length > 0) {
+          <div class="space-y-3">
             <div class="flex items-center justify-between">
-              <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Quick Insights for {{ monthLabel() }}</h3>
+              <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Quick Insights for {{ monthLabel() }}
+              </h3>
               <button type="button" (click)="refreshInsights()"
-                class="inline-flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium">
+                class="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium">
                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                 </svg>
                 Refresh
               </button>
             </div>
             <div class="grid gap-3">
-              <div *ngFor="let insight of insights()"
+              @for (insight of insights(); track insight) {
+              <div
                 class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
                 <div class="flex items-start gap-3">
-                  <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
-                    <svg class="h-4 w-4 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                  <div
+                    class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                    <svg class="h-4 w-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
                     </svg>
                   </div>
                   <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{{ insight }}</p>
                 </div>
               </div>
+              }
             </div>
           </div>
+          }
 
           <!-- Insights Loading -->
-          <div *ngIf="insightsLoading()" class="space-y-3">
-            <div *ngFor="let _ of [1, 2, 3]"
+          @if (insightsLoading()) {
+          <div class="space-y-3">
+            @for (_ of [1, 2, 3]; track _) {
+            <div
               class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 animate-pulse">
               <div class="flex items-start gap-3">
                 <div class="flex-shrink-0 h-8 w-8 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
@@ -109,78 +142,86 @@
                 </div>
               </div>
             </div>
+            }
           </div>
+          }
 
           <!-- Suggested Questions -->
           <div class="space-y-3">
-            <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Ask me anything about your expenses</h3>
+            <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Ask me anything about your expenses
+            </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <button *ngFor="let question of suggestedQuestions" type="button" (click)="selectSuggestion(question)"
-                class="text-left rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-slate-700 dark:text-slate-300 shadow-sm transition-all hover:border-purple-300 dark:hover:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300">
+              @for (question of suggestedQuestions; track question) {
+              <button type="button" (click)="selectSuggestion(question)"
+                class="text-left rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-slate-700 dark:text-slate-300 shadow-sm transition-all hover:border-emerald-300 dark:hover:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-300">
                 {{ question }}
               </button>
+              }
             </div>
           </div>
         </div>
+        }
 
         <!-- Chat Messages -->
-        <div *ngIf="messages().length > 0" class="space-y-4">
-          <div *ngFor="let message of messages()" class="flex"
-            [class.justify-end]="message.role === 'user'"
+        @if (messages().length > 0) {
+        <div class="space-y-4">
+          @for (message of messages(); track message.id) {
+          <div class="flex" [class.justify-end]="message.role === 'user'"
             [class.justify-start]="message.role === 'assistant'">
             <div class="max-w-[85%] sm:max-w-[75%]">
-              <div class="rounded-2xl px-4 py-3 shadow-sm"
-                [class.bg-purple-600]="message.role === 'user'"
-                [class.text-white]="message.role === 'user'"
-                [class.bg-white]="message.role === 'assistant'"
-                [class.dark:bg-slate-900]="message.role === 'assistant'"
-                [class.border]="message.role === 'assistant'"
+              <div class="rounded-2xl px-4 py-3 shadow-sm" [class.bg-emerald-600]="message.role === 'user'"
+                [class.text-white]="message.role === 'user'" [class.bg-white]="message.role === 'assistant'"
+                [class.dark:bg-slate-900]="message.role === 'assistant'" [class.border]="message.role === 'assistant'"
                 [class.border-slate-200]="message.role === 'assistant'"
                 [class.dark:border-slate-800]="message.role === 'assistant'"
                 [class.text-slate-700]="message.role === 'assistant'"
                 [class.dark:text-slate-300]="message.role === 'assistant'">
                 <p class="text-sm leading-relaxed whitespace-pre-wrap">{{ message.content }}</p>
               </div>
-              <p class="text-[10px] text-slate-400 mt-1 px-2"
-                [class.text-right]="message.role === 'user'">
+              <p class="text-[10px] text-slate-400 mt-1 px-2" [class.text-right]="message.role === 'user'">
                 {{ formatTime(message.timestamp) }}
               </p>
             </div>
           </div>
+          }
 
           <!-- Loading indicator -->
-          <div *ngIf="isLoading()" class="flex justify-start">
-            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm">
+          @if (isLoading()) {
+          <div class="flex justify-start">
+            <div
+              class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm">
               <div class="flex items-center gap-2">
                 <div class="flex gap-1">
-                  <div class="h-2 w-2 rounded-full bg-purple-500 animate-bounce" style="animation-delay: 0ms;"></div>
-                  <div class="h-2 w-2 rounded-full bg-purple-500 animate-bounce" style="animation-delay: 150ms;"></div>
-                  <div class="h-2 w-2 rounded-full bg-purple-500 animate-bounce" style="animation-delay: 300ms;"></div>
+                  <div class="h-2 w-2 rounded-full bg-emerald-500 animate-bounce" style="animation-delay: 0ms;"></div>
+                  <div class="h-2 w-2 rounded-full bg-emerald-500 animate-bounce" style="animation-delay: 150ms;"></div>
+                  <div class="h-2 w-2 rounded-full bg-emerald-500 animate-bounce" style="animation-delay: 300ms;"></div>
                 </div>
                 <span class="text-xs text-slate-500 dark:text-slate-400">Analyzing your expenses...</span>
               </div>
             </div>
           </div>
+          }
         </div>
+        }
       </div>
     </div>
 
     <!-- Input Area -->
-    <div class="flex-shrink-0 border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
+    <div
+      class="flex-shrink-0 border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
       <div class="mx-auto max-w-3xl px-4 py-4 sm:px-6">
         <div class="flex items-end gap-3">
           <div class="relative flex-1">
             <input #messageInput type="text" [ngModel]="messageText()" (ngModelChange)="messageText.set($event)"
-              (keydown)="onKeyDown($event)"
-              placeholder="Ask about your spending..."
-              class="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 py-3 pl-4 pr-12 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 shadow-sm transition-all focus:border-purple-500 dark:focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+              (keydown)="onKeyDown($event)" placeholder="Ask about your spending..."
+              class="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 py-3 pl-4 pr-12 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 shadow-sm transition-all focus:border-emerald-500 dark:focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
               [disabled]="isLoading()" />
           </div>
-          <button type="button" (click)="sendMessage()"
-            [disabled]="isLoading() || !messageText().trim()"
-            class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/25 transition-all hover:shadow-purple-500/40 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-purple-500/25">
+          <button type="button" (click)="sendMessage()" [disabled]="isLoading() || !messageText().trim()"
+            class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-emerald-500/25">
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
             </svg>
           </button>
         </div>
@@ -190,9 +231,9 @@
       </div>
     </div>
   </div>
-
+  } @else {
   <!-- Free Users: Upgrade Prompt -->
-  <div *ngIf="!isPro()" class="min-h-screen flex items-center justify-center px-4 py-12">
+  <div class="min-h-screen flex items-center justify-center px-4 py-12">
     <div class="max-w-lg w-full text-center">
       <!-- Back button -->
       <button type="button" (click)="goBack()"
@@ -203,10 +244,13 @@
       </button>
 
       <!-- Lock Icon -->
-      <div class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 dark:from-purple-500/30 dark:to-indigo-500/30 ring-1 ring-purple-500/20">
-        <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 shadow-xl shadow-purple-500/30">
+      <div
+        class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 dark:from-emerald-500/30 dark:to-teal-500/30 ring-1 ring-emerald-500/20">
+        <div
+          class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-xl shadow-emerald-500/30">
           <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
           </svg>
         </div>
       </div>
@@ -217,44 +261,50 @@
       </p>
 
       <!-- Feature List -->
-      <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 mb-8 text-left shadow-lg">
+      <div
+        class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 mb-8 text-left shadow-lg">
         <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Pro Features Include:</h3>
         <ul class="space-y-3">
           <li class="flex items-center gap-3">
-            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
-              <svg class="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+              <svg class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
             </div>
             <span class="text-sm text-slate-700 dark:text-slate-300">Smart spending analysis & insights</span>
           </li>
           <li class="flex items-center gap-3">
-            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
-              <svg class="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+              <svg class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
             </div>
             <span class="text-sm text-slate-700 dark:text-slate-300">Personalized savings recommendations</span>
           </li>
           <li class="flex items-center gap-3">
-            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
-              <svg class="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+              <svg class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
             </div>
             <span class="text-sm text-slate-700 dark:text-slate-300">Ask unlimited questions about your expenses</span>
           </li>
           <li class="flex items-center gap-3">
-            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
-              <svg class="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+              <svg class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
             </div>
             <span class="text-sm text-slate-700 dark:text-slate-300">Category breakdown & trend analysis</span>
           </li>
           <li class="flex items-center gap-3">
-            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
-              <svg class="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+              <svg class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
             </div>
@@ -265,9 +315,10 @@
 
       <!-- CTA Button -->
       <button type="button" (click)="goToPricing()"
-        class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-purple-500/30 transition-all hover:shadow-purple-500/40 hover:scale-[1.02]">
+        class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-emerald-500/30 transition-all hover:shadow-emerald-500/40 hover:scale-[1.02]">
         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
         </svg>
         Upgrade to Pro
       </button>
@@ -277,4 +328,5 @@
       </p>
     </div>
   </div>
+  }
 </div>

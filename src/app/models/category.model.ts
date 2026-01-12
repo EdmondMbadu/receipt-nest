@@ -32,7 +32,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     id: 'shopping',
     name: 'Shopping',
     icon: '🛍️',
-    color: '#8b5cf6', // violet-500
+    color: '#06b6d4', // cyan-500
     keywords: ['retail', 'store', 'amazon', 'target', 'walmart', 'costco', 'best buy', 'clothing', 'apparel']
   },
   {
@@ -46,14 +46,14 @@ export const DEFAULT_CATEGORIES: Category[] = [
     id: 'entertainment',
     name: 'Entertainment',
     icon: '🎬',
-    color: '#ec4899', // pink-500
+    color: '#f43f5e', // rose-500
     keywords: ['movie', 'theater', 'concert', 'netflix', 'spotify', 'gaming', 'music', 'streaming']
   },
   {
     id: 'subscriptions',
     name: 'Subscriptions',
     icon: '📱',
-    color: '#6366f1', // indigo-500
+    color: '#3b82f6', // blue-500
     keywords: ['subscription', 'monthly', 'recurring', 'membership', 'spotify', 'netflix', 'adobe', 'microsoft']
   },
   {
@@ -81,14 +81,14 @@ export const DEFAULT_CATEGORIES: Category[] = [
     id: 'education',
     name: 'Education',
     icon: '📚',
-    color: '#a855f7', // purple-500
+    color: '#f97316', // orange-500
     keywords: ['book', 'course', 'school', 'university', 'training', 'udemy', 'coursera', 'education']
   },
   {
     id: 'personal',
     name: 'Personal Care',
     icon: '💆',
-    color: '#f472b6', // pink-400
+    color: '#fb7185', // rose-400
     keywords: ['salon', 'spa', 'haircut', 'beauty', 'cosmetics', 'gym', 'fitness']
   },
   {

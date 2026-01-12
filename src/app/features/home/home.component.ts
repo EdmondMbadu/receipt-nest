@@ -710,7 +710,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       case 'processing':
         return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
       case 'extracted':
-        return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400';
+        return 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400';
       case 'needs_review':
         return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
       case 'final':
@@ -951,8 +951,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     const receiptDate = new Date(receipt.date);
     return receiptDate.getDate() === selection.day &&
-           receiptDate.getMonth() === selection.month &&
-           receiptDate.getFullYear() === selection.year;
+      receiptDate.getMonth() === selection.month &&
+      receiptDate.getFullYear() === selection.year;
   }
 
   // Check if a receipt matches the active day (selected or hovered)
@@ -975,8 +975,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       const selectedYear = this.receiptService.selectedYear();
 
       return receiptDate.getDate() === hovered.day &&
-             receiptDate.getMonth() === selectedMonth &&
-             receiptDate.getFullYear() === selectedYear;
+        receiptDate.getMonth() === selectedMonth &&
+        receiptDate.getFullYear() === selectedYear;
     }
 
     return true; // No active day means all receipts are shown

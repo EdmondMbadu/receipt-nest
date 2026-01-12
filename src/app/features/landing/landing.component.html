@@ -1,37 +1,54 @@
 <div class="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 antialiased">
-  <!-- Ambient background -->
-  <div class="fixed inset-0 -z-10 overflow-hidden">
-    <div class="absolute top-0 left-1/4 w-[800px] h-[800px] rounded-full bg-emerald-500/[0.03] dark:bg-emerald-500/[0.07] blur-[120px]"></div>
-    <div class="absolute bottom-0 right-1/4 w-[600px] h-[600px] rounded-full bg-emerald-400/[0.02] dark:bg-emerald-400/[0.05] blur-[100px]"></div>
+  <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div
+      class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-500/[0.08] dark:bg-emerald-500/[0.12] blur-[120px] animate-pulse-slow">
+    </div>
+    <div
+      class="absolute bottom-[-10%] right-[-10%] w-[35%] h-[35%] rounded-full bg-emerald-400/[0.06] dark:bg-emerald-400/[0.1] blur-[100px] animate-pulse-slow-delay">
+    </div>
+    <div
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] rounded-full bg-emerald-300/[0.03] dark:bg-emerald-300/[0.05] blur-[150px]">
+    </div>
   </div>
 
   <!-- Floating Nav -->
   <header class="fixed top-0 left-0 right-0 z-50">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
-      <nav class="flex items-center justify-between gap-4 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl px-4 py-3 shadow-lg shadow-slate-900/5 dark:shadow-slate-950/50">
+      <nav
+        class="flex items-center justify-between gap-4 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl px-4 py-3 shadow-lg shadow-slate-900/5 dark:shadow-slate-950/50">
         <a routerLink="/" class="inline-flex items-center gap-2 flex-shrink-0">
           <img src="assets/receipt-nest.png" alt="ReceiptNest Logo" class="h-9 w-9 object-contain" />
           <span class="text-base font-semibold tracking-tight">
-            <span class="text-slate-900 dark:text-white">Receipt</span><span class="text-emerald-600 dark:text-emerald-400">Nest</span>
+            <span class="text-slate-900 dark:text-white">Receipt</span><span
+              class="text-emerald-600 dark:text-emerald-400">Nest</span>
           </span>
         </a>
 
         <div class="hidden items-center gap-1 lg:flex">
-          <a href="#features" class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Features</a>
-          <a href="#how-it-works" class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">How it works</a>
-          <a href="#pricing" class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Pricing</a>
-          <a href="#faq" class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">FAQ</a>
+          <a href="#features"
+            class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Features</a>
+          <a href="#how-it-works"
+            class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">How
+            it works</a>
+          <a href="#pricing"
+            class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Pricing</a>
+          <a href="#faq"
+            class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">FAQ</a>
         </div>
 
         <div class="flex items-center gap-3">
           <button type="button" (click)="toggleTheme()"
             class="inline-flex items-center justify-center h-9 w-9 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
             aria-label="Toggle theme">
-            <svg *ngIf="isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+            <svg *ngIf="isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
             </svg>
-            <svg *ngIf="!isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+            <svg *ngIf="!isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
             </svg>
           </button>
 
@@ -58,10 +75,12 @@
             <button type="button" (click)="toggleMobileMenu()"
               class="sm:hidden inline-flex items-center justify-center h-9 w-9 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
               aria-label="Toggle menu">
-              <svg *ngIf="!isMobileMenuOpen()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <svg *ngIf="!isMobileMenuOpen()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"
+                viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
               </svg>
-              <svg *ngIf="isMobileMenuOpen()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <svg *ngIf="isMobileMenuOpen()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"
+                viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -72,23 +91,24 @@
   </header>
 
   <!-- Mobile Menu Overlay -->
-  <div *ngIf="isMobileMenuOpen()"
-       (click)="toggleMobileMenu()"
-       class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 sm:hidden animate-[fadeIn_0.2s_ease-out]">
+  <div *ngIf="isMobileMenuOpen()" (click)="toggleMobileMenu()"
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 sm:hidden animate-[fadeIn_0.2s_ease-out]">
   </div>
 
   <!-- Mobile Menu -->
   <div *ngIf="isMobileMenuOpen()"
-       class="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50 sm:hidden animate-[slideInRight_0.3s_ease-out]">
+    class="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50 sm:hidden animate-[slideInRight_0.3s_ease-out]">
     <div class="flex flex-col h-full">
       <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800">
         <div class="flex items-center gap-2">
           <img src="assets/receipt-nest.png" alt="ReceiptNest" class="h-8 w-8 object-contain" />
           <span class="text-base font-semibold">
-            <span class="text-slate-900 dark:text-white">Receipt</span><span class="text-emerald-600 dark:text-emerald-400">Nest</span>
+            <span class="text-slate-900 dark:text-white">Receipt</span><span
+              class="text-emerald-600 dark:text-emerald-400">Nest</span>
           </span>
         </div>
-        <button (click)="toggleMobileMenu()" class="p-2 -mr-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+        <button (click)="toggleMobileMenu()"
+          class="p-2 -mr-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -97,27 +117,39 @@
 
       <div class="flex-1 overflow-y-auto p-5">
         <div class="space-y-1">
-          <a href="#features" (click)="toggleMobileMenu()" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-            <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+          <a href="#features" (click)="toggleMobileMenu()"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
             </svg>
             Features
           </a>
-          <a href="#how-it-works" (click)="toggleMobileMenu()" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-            <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+          <a href="#how-it-works" (click)="toggleMobileMenu()"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
             </svg>
             How it works
           </a>
-          <a href="#pricing" (click)="toggleMobileMenu()" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-            <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+          <a href="#pricing" (click)="toggleMobileMenu()"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
             </svg>
             Pricing
           </a>
-          <a href="#faq" (click)="toggleMobileMenu()" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-            <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+          <a href="#faq" (click)="toggleMobileMenu()"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
             </svg>
             FAQ
           </a>
@@ -125,11 +157,11 @@
 
         <div class="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 space-y-3">
           <a routerLink="/login" (click)="toggleMobileMenu()"
-             class="flex items-center justify-center w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            class="flex items-center justify-center w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
             Sign in
           </a>
           <a routerLink="/register" (click)="toggleMobileMenu()"
-             class="flex items-center justify-center w-full px-4 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors">
+            class="flex items-center justify-center w-full px-4 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors">
             Get started free
           </a>
         </div>
@@ -148,21 +180,32 @@
         <!-- Hero Text -->
         <div class="max-w-2xl lg:flex-1">
           <!-- Badge -->
-          <div class="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 px-4 py-1.5 mb-8 ring-1 ring-emerald-500/20">
+          <div
+            class="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 px-4 py-1.5 mb-8 ring-1 ring-emerald-500/20">
             <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span
+                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">Private-first receipt management</span>
+            <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">Private-first receipt
+              management</span>
           </div>
 
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
-            All your receipts in one nest.
-            <span class="block mt-2 bg-gradient-to-r from-emerald-600 to-emerald-400 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent">And your spending, crystal clear.</span>
+          <h1
+            class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.05]">
+            All your receipts in <span class="relative">
+              <span class="relative z-10">one nest.</span>
+              <span
+                class="absolute bottom-2 left-0 w-full h-3 bg-emerald-500/10 dark:bg-emerald-500/20 -rotate-1"></span>
+            </span>
+            <span
+              class="block mt-4 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-400 dark:from-emerald-400 dark:via-emerald-300 dark:to-teal-300 bg-clip-text text-transparent">Spending,
+              crystal clear.</span>
           </h1>
 
           <p class="mt-8 text-lg sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl">
-            ReceiptNest automatically collects, organizes, and summarizes your receipts so you always know where your money went—without spreadsheets or inbox chaos.
+            ReceiptNest automatically collects, organizes, and summarizes your receipts so you always know where your
+            money went—without spreadsheets or inbox chaos.
           </p>
 
           <!-- CTA Buttons -->
@@ -170,15 +213,17 @@
             <a routerLink="/register"
               class="group inline-flex items-center justify-center gap-3 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 px-8 py-4 text-base font-semibold text-white dark:text-slate-900 shadow-xl shadow-slate-900/10 dark:shadow-white/5 transition-all duration-200 hover:scale-[1.02]">
               Start for free
-              <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
               </svg>
             </a>
             <button
               class="group inline-flex items-center justify-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 px-8 py-4 text-base font-semibold text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-white dark:hover:bg-slate-800 transition-all duration-200">
-              <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+              <span
+                class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z"/>
+                  <path d="M8 5v14l11-7z" />
                 </svg>
               </span>
               Watch demo
@@ -188,20 +233,26 @@
           <!-- Trust Badges -->
           <div class="mt-12 flex flex-wrap items-center gap-x-8 gap-y-4">
             <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-              <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+              <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
               </svg>
               <span>Bank-grade encryption</span>
             </div>
             <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-              <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+              <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
               </svg>
               <span>Instant sync</span>
             </div>
             <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-              <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+              <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
               </svg>
               <span>No credit card required</span>
             </div>
@@ -211,93 +262,110 @@
         <!-- Hero Visual -->
         <div class="mt-16 lg:mt-0 lg:flex-1 relative">
           <!-- Glow Effect -->
-          <div class="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 to-emerald-400/20 dark:from-emerald-500/10 dark:to-emerald-400/10 rounded-[2rem] blur-3xl opacity-60"></div>
-
-          <!-- Dashboard Card -->
-          <div class="relative rounded-2xl border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-slate-900 p-6 shadow-2xl shadow-slate-900/10 dark:shadow-slate-950/50">
-            <!-- Top bar -->
-            <div class="flex items-center justify-between mb-6">
-              <div class="flex items-center gap-3">
-                <img src="assets/receipt-nest.png" alt="ReceiptNest" class="h-8 w-8 object-contain" />
-                <span class="text-sm font-medium text-slate-700 dark:text-slate-200">This month's snapshot</span>
+          <div
+            class="relative rounded-[2.5rem] border border-slate-200/60 dark:border-white/10 bg-white/60 dark:bg-slate-900/60 p-2 shadow-2xl backdrop-blur-2xl">
+            <div
+              class="relative rounded-[2rem] border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-slate-900 p-8 shadow-inner">
+              <!-- Top bar -->
+              <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                  <img src="assets/receipt-nest.png" alt="ReceiptNest" class="h-8 w-8 object-contain" />
+                  <span class="text-sm font-medium text-slate-700 dark:text-slate-200">This month's snapshot</span>
+                </div>
+                <div class="flex items-center gap-1 text-xs">
+                  <button
+                    class="rounded-lg bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1.5 text-emerald-700 dark:text-emerald-300 font-medium">Oct</button>
+                  <button
+                    class="rounded-lg px-3 py-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Nov</button>
+                </div>
               </div>
-              <div class="flex items-center gap-1 text-xs">
-                <button class="rounded-lg bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1.5 text-emerald-700 dark:text-emerald-300 font-medium">Oct</button>
-                <button class="rounded-lg px-3 py-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Nov</button>
-              </div>
-            </div>
 
-            <!-- Total spend card -->
-            <div class="rounded-xl border border-slate-100 dark:border-slate-800 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/50 dark:to-slate-900/50 p-5 mb-4">
-              <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total spend</p>
-              <div class="mt-2 flex items-baseline gap-3">
-                <p class="text-4xl font-bold text-slate-900 dark:text-white">$2,437.19</p>
-                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                  <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
+              <!-- Total spend card -->
+              <div
+                class="rounded-xl border border-slate-100 dark:border-slate-800 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/50 dark:to-slate-900/50 p-5 mb-4">
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total spend</p>
+                <div class="mt-2 flex items-baseline gap-3">
+                  <p class="text-4xl font-bold text-slate-900 dark:text-white">$2,437.19</p>
+                  <span
+                    class="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
+                    </svg>
+                    18% down
+                  </span>
+                </div>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">vs last month</p>
+
+                <!-- Mini Chart -->
+                <div class="mt-4 h-24 w-full">
+                  <svg class="w-full h-full" viewBox="0 0 200 80" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:rgb(16, 185, 129);stop-opacity:0.2" />
+                        <stop offset="100%" style="stop-color:rgb(16, 185, 129);stop-opacity:0" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M 0,65 C 20,63 40,58 60,52 C 80,46 100,40 120,35 C 140,30 160,26 180,22 C 190,20 195,18 200,16 L 200,80 L 0,80 Z"
+                      fill="url(#chartGradient)" />
+                    <path
+                      d="M 0,65 C 20,63 40,58 60,52 C 80,46 100,40 120,35 C 140,30 160,26 180,22 C 190,20 195,18 200,16"
+                      stroke="rgb(16, 185, 129)" stroke-width="2.5" fill="none" stroke-linecap="round" />
+                    <circle cx="200" cy="16" r="4" fill="rgb(16, 185, 129)" />
+                    <circle cx="200" cy="16" r="2" fill="white" />
                   </svg>
-                  18% down
-                </span>
-              </div>
-              <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">vs last month</p>
-
-              <!-- Mini Chart -->
-              <div class="mt-4 h-24 w-full">
-                <svg class="w-full h-full" viewBox="0 0 200 80" preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style="stop-color:rgb(16, 185, 129);stop-opacity:0.2" />
-                      <stop offset="100%" style="stop-color:rgb(16, 185, 129);stop-opacity:0" />
-                    </linearGradient>
-                  </defs>
-                  <path d="M 0,65 C 20,63 40,58 60,52 C 80,46 100,40 120,35 C 140,30 160,26 180,22 C 190,20 195,18 200,16 L 200,80 L 0,80 Z" fill="url(#chartGradient)" />
-                  <path d="M 0,65 C 20,63 40,58 60,52 C 80,46 100,40 120,35 C 140,30 160,26 180,22 C 190,20 195,18 200,16"
-                    stroke="rgb(16, 185, 129)" stroke-width="2.5" fill="none" stroke-linecap="round" />
-                  <circle cx="200" cy="16" r="4" fill="rgb(16, 185, 129)" />
-                  <circle cx="200" cy="16" r="2" fill="white" />
-                </svg>
-              </div>
-            </div>
-
-            <!-- Recent receipts -->
-            <div class="space-y-2">
-              <div class="flex items-center justify-between text-sm">
-                <span class="font-medium text-slate-700 dark:text-slate-200">Recent receipts</span>
-                <button class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">View all</button>
+                </div>
               </div>
 
+              <!-- Recent receipts -->
               <div class="space-y-2">
-                <div class="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 px-4 py-3 transition-colors hover:bg-slate-100/50 dark:hover:bg-slate-800/50">
-                  <div class="flex items-center gap-3">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 text-sm font-bold">WF</span>
-                    <div>
-                      <p class="text-sm font-medium text-slate-900 dark:text-white">Whole Foods Market</p>
-                      <p class="text-xs text-slate-500 dark:text-slate-400">Groceries • Nov 14</p>
-                    </div>
-                  </div>
-                  <p class="text-sm font-semibold text-slate-900 dark:text-white">-$86.41</p>
+                <div class="flex items-center justify-between text-sm">
+                  <span class="font-medium text-slate-700 dark:text-slate-200">Recent receipts</span>
+                  <button
+                    class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">View
+                    all</button>
                 </div>
 
-                <div class="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 px-4 py-3 transition-colors hover:bg-slate-100/50 dark:hover:bg-slate-800/50">
-                  <div class="flex items-center gap-3">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 text-sm font-bold">SP</span>
-                    <div>
-                      <p class="text-sm font-medium text-slate-900 dark:text-white">Spotify</p>
-                      <p class="text-xs text-slate-500 dark:text-slate-400">Subscription • Nov 13</p>
+                <div class="space-y-2">
+                  <div
+                    class="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 px-4 py-3 transition-colors hover:bg-slate-100/50 dark:hover:bg-slate-800/50">
+                    <div class="flex items-center gap-3">
+                      <span
+                        class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 text-sm font-bold">WF</span>
+                      <div>
+                        <p class="text-sm font-medium text-slate-900 dark:text-white">Whole Foods Market</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Groceries • Nov 14</p>
+                      </div>
                     </div>
+                    <p class="text-sm font-semibold text-slate-900 dark:text-white">-$86.41</p>
                   </div>
-                  <p class="text-sm font-semibold text-slate-900 dark:text-white">-$9.99</p>
-                </div>
 
-                <div class="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 px-4 py-3 transition-colors hover:bg-slate-100/50 dark:hover:bg-slate-800/50">
-                  <div class="flex items-center gap-3">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 text-sm font-bold">UE</span>
-                    <div>
-                      <p class="text-sm font-medium text-slate-900 dark:text-white">Uber Eats</p>
-                      <p class="text-xs text-slate-500 dark:text-slate-400">Food • Nov 12</p>
+                  <div
+                    class="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 px-4 py-3 transition-colors hover:bg-slate-100/50 dark:hover:bg-slate-800/50">
+                    <div class="flex items-center gap-3">
+                      <span
+                        class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 text-sm font-bold">SP</span>
+                      <div>
+                        <p class="text-sm font-medium text-slate-900 dark:text-white">Spotify</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Subscription • Nov 13</p>
+                      </div>
                     </div>
+                    <p class="text-sm font-semibold text-slate-900 dark:text-white">-$9.99</p>
                   </div>
-                  <p class="text-sm font-semibold text-slate-900 dark:text-white">-$34.20</p>
+
+                  <div
+                    class="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 px-4 py-3 transition-colors hover:bg-slate-100/50 dark:hover:bg-slate-800/50">
+                    <div class="flex items-center gap-3">
+                      <span
+                        class="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 text-sm font-bold">UE</span>
+                      <div>
+                        <p class="text-sm font-medium text-slate-900 dark:text-white">Uber Eats</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Food • Nov 12</p>
+                      </div>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-900 dark:text-white">-$34.20</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -308,7 +376,8 @@
   </section>
 
   <!-- Social Proof / Metrics -->
-  <section class="py-16 sm:py-20 border-y border-slate-100 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-900/30">
+  <section
+    class="py-16 sm:py-20 border-y border-slate-100 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-900/30">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="grid gap-8 sm:grid-cols-3">
         <div class="text-center">
@@ -331,52 +400,66 @@
   <section id="features" class="py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="max-w-2xl">
-        <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">Why ReceiptNest</p>
+        <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">Why ReceiptNest
+        </p>
         <h2 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
           Turn messy receipts into a clean money story
         </h2>
         <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
-          ReceiptNest doesn't just store receipts. It understands them—grouping, tagging, and summarizing everything so you can see your spending at a glance.
+          ReceiptNest doesn't just store receipts. It understands them—grouping, tagging, and summarizing everything so
+          you can see your spending at a glance.
         </p>
       </div>
 
       <div class="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <!-- Feature 1 -->
-        <div class="group relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 transition-all duration-300 hover:border-emerald-200 dark:hover:border-emerald-800 hover:shadow-xl hover:shadow-emerald-500/5">
-          <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 mb-6">
+        <div
+          class="group relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 transition-all duration-300 hover:border-emerald-200 dark:hover:border-emerald-800 hover:shadow-xl hover:shadow-emerald-500/5">
+          <div
+            class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 mb-6">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
             </svg>
           </div>
           <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Capture from anywhere</h3>
           <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
-            Forward emails, upload PDFs, snap photos, or connect integrations. If it looks like a receipt, ReceiptNest will catch it.
+            Forward emails, upload PDFs, snap photos, or connect integrations. If it looks like a receipt, ReceiptNest
+            will catch it.
           </p>
         </div>
 
         <!-- Feature 2 -->
-        <div class="group relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 transition-all duration-300 hover:border-emerald-200 dark:hover:border-emerald-800 hover:shadow-xl hover:shadow-emerald-500/5">
-          <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 mb-6">
+        <div
+          class="group relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 transition-all duration-300 hover:border-emerald-200 dark:hover:border-emerald-800 hover:shadow-xl hover:shadow-emerald-500/5">
+          <div
+            class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 mb-6">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
             </svg>
           </div>
           <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Smart auto-tagging</h3>
           <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
-            Merchant, category, payment method, tax, and more—extracted instantly, with clean categories you can actually use.
+            Merchant, category, payment method, tax, and more—extracted instantly, with clean categories you can
+            actually use.
           </p>
         </div>
 
         <!-- Feature 3 -->
-        <div class="group relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 transition-all duration-300 hover:border-emerald-200 dark:hover:border-emerald-800 hover:shadow-xl hover:shadow-emerald-500/5">
-          <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 mb-6">
+        <div
+          class="group relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 transition-all duration-300 hover:border-emerald-200 dark:hover:border-emerald-800 hover:shadow-xl hover:shadow-emerald-500/5">
+          <div
+            class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 mb-6">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
             </svg>
           </div>
           <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Monthly clarity</h3>
           <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
-            Beautiful summaries and exportable reports at the end of every month, so "where did it all go?" becomes an easy question.
+            Beautiful summaries and exportable reports at the end of every month, so "where did it all go?" becomes an
+            easy question.
           </p>
         </div>
       </div>
@@ -396,16 +479,22 @@
       <div class="mt-16 grid gap-8 lg:grid-cols-3">
         <!-- Step 1 -->
         <div class="relative">
-          <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
-            <div class="h-48 bg-gradient-to-br from-emerald-50 to-slate-50 dark:from-emerald-950/30 dark:to-slate-900/50 flex items-center justify-center">
+          <div
+            class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
+            <div
+              class="h-48 bg-gradient-to-br from-emerald-50 to-slate-50 dark:from-emerald-950/30 dark:to-slate-900/50 flex items-center justify-center">
               <div class="text-center">
-                <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg border border-slate-100 dark:border-slate-700">
-                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                <div
+                  class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg border border-slate-100 dark:border-slate-700">
+                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                   </svg>
                 </div>
                 <div class="mt-4">
-                  <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white">
+                  <span
+                    class="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white">
                     <span>1</span>
                     <span>Upload & Forward</span>
                   </span>
@@ -415,25 +504,34 @@
             <div class="p-6">
               <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Connect & capture</h3>
               <p class="mt-2 text-slate-600 dark:text-slate-300">
-                Create your account, set up your ReceiptNest email, or connect integrations. Every new receipt finds its way automatically.
+                Create your account, set up your ReceiptNest email, or connect integrations. Every new receipt finds its
+                way automatically.
               </p>
             </div>
           </div>
-          <div class="hidden lg:block absolute top-1/2 -right-4 w-8 h-px bg-gradient-to-r from-emerald-300 to-transparent dark:from-emerald-700"></div>
+          <div
+            class="hidden lg:block absolute top-1/2 -right-4 w-8 h-px bg-gradient-to-r from-emerald-300 to-transparent dark:from-emerald-700">
+          </div>
         </div>
 
         <!-- Step 2 -->
         <div class="relative">
-          <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
-            <div class="h-48 bg-gradient-to-br from-emerald-50 to-slate-50 dark:from-emerald-950/30 dark:to-slate-900/50 flex items-center justify-center">
+          <div
+            class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
+            <div
+              class="h-48 bg-gradient-to-br from-emerald-50 to-slate-50 dark:from-emerald-950/30 dark:to-slate-900/50 flex items-center justify-center">
               <div class="text-center">
-                <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg border border-slate-100 dark:border-slate-700">
-                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                <div
+                  class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg border border-slate-100 dark:border-slate-700">
+                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                   </svg>
                 </div>
                 <div class="mt-4">
-                  <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white">
+                  <span
+                    class="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white">
                     <span>2</span>
                     <span>Auto-organize</span>
                   </span>
@@ -447,21 +545,29 @@
               </p>
             </div>
           </div>
-          <div class="hidden lg:block absolute top-1/2 -right-4 w-8 h-px bg-gradient-to-r from-emerald-300 to-transparent dark:from-emerald-700"></div>
+          <div
+            class="hidden lg:block absolute top-1/2 -right-4 w-8 h-px bg-gradient-to-r from-emerald-300 to-transparent dark:from-emerald-700">
+          </div>
         </div>
 
         <!-- Step 3 -->
         <div class="relative">
-          <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
-            <div class="h-48 bg-gradient-to-br from-emerald-50 to-slate-50 dark:from-emerald-950/30 dark:to-slate-900/50 flex items-center justify-center">
+          <div
+            class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
+            <div
+              class="h-48 bg-gradient-to-br from-emerald-50 to-slate-50 dark:from-emerald-950/30 dark:to-slate-900/50 flex items-center justify-center">
               <div class="text-center">
-                <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg border border-slate-100 dark:border-slate-700">
-                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                <div
+                  class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg border border-slate-100 dark:border-slate-700">
+                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                   </svg>
                 </div>
                 <div class="mt-4">
-                  <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white">
+                  <span
+                    class="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white">
                     <span>3</span>
                     <span>View & Export</span>
                   </span>
@@ -471,7 +577,8 @@
             <div class="p-6">
               <h3 class="text-lg font-semibold text-slate-900 dark:text-white">See the full picture</h3>
               <p class="mt-2 text-slate-600 dark:text-slate-300">
-                Open your monthly dashboard to see totals, trends, and categories—or export for your accountant in one click.
+                Open your monthly dashboard to see totals, trends, and categories—or export for your accountant in one
+                click.
               </p>
             </div>
           </div>
@@ -484,7 +591,8 @@
   <section class="py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="max-w-2xl mx-auto text-center">
-        <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">See it in action</p>
+        <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">See it in action
+        </p>
         <h2 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
           Your receipts, beautifully organized
         </h2>
@@ -496,12 +604,17 @@
       <div class="mt-16 grid gap-8 sm:grid-cols-2">
         <!-- Screenshot 1 -->
         <div class="group">
-          <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:border-slate-300 dark:group-hover:border-slate-700">
-            <div class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-slate-100 dark:border-slate-800">
+          <div
+            class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:border-slate-300 dark:group-hover:border-slate-700">
+            <div
+              class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-slate-100 dark:border-slate-800">
               <div class="text-center p-8">
-                <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg mb-4">
-                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                <div
+                  class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg mb-4">
+                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                   </svg>
                 </div>
                 <p class="font-semibold text-slate-700 dark:text-slate-200">Dashboard Overview</p>
@@ -511,18 +624,24 @@
           </div>
           <div class="mt-4 px-1">
             <h3 class="font-semibold text-slate-900 dark:text-white">Monthly spending dashboard</h3>
-            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Track total spend, compare to previous months, and see trends with beautiful charts.</p>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Track total spend, compare to previous months,
+              and see trends with beautiful charts.</p>
           </div>
         </div>
 
         <!-- Screenshot 2 -->
         <div class="group">
-          <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:border-slate-300 dark:group-hover:border-slate-700">
-            <div class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-slate-100 dark:border-slate-800">
+          <div
+            class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:border-slate-300 dark:group-hover:border-slate-700">
+            <div
+              class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-slate-100 dark:border-slate-800">
               <div class="text-center p-8">
-                <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg mb-4">
-                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
+                <div
+                  class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg mb-4">
+                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
                   </svg>
                 </div>
                 <p class="font-semibold text-slate-700 dark:text-slate-200">Smart Receipt List</p>
@@ -532,18 +651,24 @@
           </div>
           <div class="mt-4 px-1">
             <h3 class="font-semibold text-slate-900 dark:text-white">Auto-categorized receipts</h3>
-            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Every receipt automatically tagged with merchant, category, amount, and payment method.</p>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Every receipt automatically tagged with merchant,
+              category, amount, and payment method.</p>
           </div>
         </div>
 
         <!-- Screenshot 3 -->
         <div class="group">
-          <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:border-slate-300 dark:group-hover:border-slate-700">
-            <div class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-slate-100 dark:border-slate-800">
+          <div
+            class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:border-slate-300 dark:group-hover:border-slate-700">
+            <div
+              class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-slate-100 dark:border-slate-800">
               <div class="text-center p-8">
-                <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg mb-4">
-                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                <div
+                  class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg mb-4">
+                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                   </svg>
                 </div>
                 <p class="font-semibold text-slate-700 dark:text-slate-200">Easy Upload</p>
@@ -553,23 +678,30 @@
           </div>
           <div class="mt-4 px-1">
             <h3 class="font-semibold text-slate-900 dark:text-white">Multiple capture methods</h3>
-            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Upload photos, PDFs, forward emails, or scan receipts. All formats supported.</p>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Upload photos, PDFs, forward emails, or scan
+              receipts. All formats supported.</p>
           </div>
         </div>
 
         <!-- Screenshot 4 (Pro) -->
         <div class="group">
-          <div class="relative rounded-2xl border border-emerald-200 dark:border-emerald-800/50 bg-white dark:bg-slate-900 p-3 shadow-lg shadow-emerald-500/5 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-emerald-500/10">
+          <div
+            class="relative rounded-2xl border border-emerald-200 dark:border-emerald-800/50 bg-white dark:bg-slate-900 p-3 shadow-lg shadow-emerald-500/5 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-emerald-500/10">
             <div class="absolute top-5 right-5 z-10">
-              <span class="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-3 py-1 text-xs font-bold text-white shadow-lg">
+              <span
+                class="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-3 py-1 text-xs font-bold text-white shadow-lg">
                 PRO
               </span>
             </div>
-            <div class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/50">
+            <div
+              class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/50">
               <div class="text-center p-8">
-                <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg mb-4">
-                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                <div
+                  class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg mb-4">
+                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
                   </svg>
                 </div>
                 <p class="font-semibold text-slate-700 dark:text-slate-200">Advanced Analytics</p>
@@ -579,7 +711,8 @@
           </div>
           <div class="mt-4 px-1">
             <h3 class="font-semibold text-slate-900 dark:text-white">Category breakdown & trends</h3>
-            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Visualize spending by category, track trends, and export detailed reports.</p>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Visualize spending by category, track trends, and
+              export detailed reports.</p>
           </div>
         </div>
       </div>
@@ -612,25 +745,29 @@
 
           <ul class="mt-8 space-y-4">
             <li class="flex items-start gap-3">
-              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
               <span class="text-slate-600 dark:text-slate-300">Up to 200 receipts per month</span>
             </li>
             <li class="flex items-start gap-3">
-              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
               <span class="text-slate-600 dark:text-slate-300">Smart auto-tagging & summaries</span>
             </li>
             <li class="flex items-start gap-3">
-              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
               <span class="text-slate-600 dark:text-slate-300">Email & PDF uploads</span>
             </li>
             <li class="flex items-start gap-3">
-              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
               <span class="text-slate-600 dark:text-slate-300">Single user</span>
@@ -644,9 +781,11 @@
         </div>
 
         <!-- Pro Plan -->
-        <div class="relative rounded-2xl border-2 border-emerald-500 bg-white dark:bg-slate-900 p-8 lg:p-10 shadow-xl shadow-emerald-500/10">
+        <div
+          class="relative rounded-2xl border-2 border-emerald-500 bg-white dark:bg-slate-900 p-8 lg:p-10 shadow-xl shadow-emerald-500/10">
           <div class="absolute -top-4 left-8">
-            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-4 py-1.5 text-sm font-semibold text-white shadow-lg">
+            <span
+              class="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-4 py-1.5 text-sm font-semibold text-white shadow-lg">
               Most popular
             </span>
           </div>
@@ -664,31 +803,36 @@
 
           <ul class="mt-8 space-y-4">
             <li class="flex items-start gap-3">
-              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
               <span class="text-slate-700 dark:text-slate-200 font-medium">Unlimited receipts</span>
             </li>
             <li class="flex items-start gap-3">
-              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
               <span class="text-slate-700 dark:text-slate-200 font-medium">Advanced search & filters</span>
             </li>
             <li class="flex items-start gap-3">
-              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
               <span class="text-slate-700 dark:text-slate-200 font-medium">Export to CSV / PDF</span>
             </li>
             <li class="flex items-start gap-3">
-              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
               <span class="text-slate-700 dark:text-slate-200 font-medium">Priority support</span>
             </li>
             <li class="flex items-start gap-3">
-              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
               <span class="text-slate-700 dark:text-slate-200 font-medium">Early access to new features</span>
@@ -718,14 +862,16 @@
         <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 lg:p-8">
           <h3 class="text-base font-semibold text-slate-900 dark:text-white">Is my data private?</h3>
           <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
-            Yes. Receipts are encrypted in transit and at rest. We never sell your data, and you can export or delete everything at any time.
+            Yes. Receipts are encrypted in transit and at rest. We never sell your data, and you can export or delete
+            everything at any time.
           </p>
         </div>
 
         <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 lg:p-8">
           <h3 class="text-base font-semibold text-slate-900 dark:text-white">How do receipts get into ReceiptNest?</h3>
           <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
-            You can forward emails, upload PDF or photo receipts, or connect supported integrations. Everything lands in one organized inbox.
+            You can forward emails, upload PDF or photo receipts, or connect supported integrations. Everything lands in
+            one organized inbox.
           </p>
         </div>
 
@@ -739,7 +885,8 @@
         <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 lg:p-8">
           <h3 class="text-base font-semibold text-slate-900 dark:text-white">What happens if I cancel?</h3>
           <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
-            You keep access to your data. Pro features are disabled, but you can still view and export your existing receipts.
+            You keep access to your data. Pro features are disabled, but you can still view and export your existing
+            receipts.
           </p>
         </div>
       </div>
@@ -751,8 +898,12 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="relative rounded-3xl overflow-hidden">
         <!-- Background -->
-        <div class="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900"></div>
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxIDAgNiAyLjY5IDYgNnMtMi42OSA2LTYgNi02LTIuNjktNi02IDIuNjktNiA2LTZ6IiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiIHN0cm9rZS13aWR0aD0iMiIvPjwvZz48L3N2Zz4=')] opacity-40"></div>
+        <div
+          class="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900">
+        </div>
+        <div
+          class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxIDAgNiAyLjY5IDYgNnMtMi42OSA2LTYgNi02LTIuNjktNi02IDIuNjktNiA2LTZ6IiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiIHN0cm9rZS13aWR0aD0iMiIvPjwvZz48L3N2Zz4=')] opacity-40">
+        </div>
         <div class="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl"></div>
         <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl"></div>
 
@@ -789,7 +940,8 @@
         <div class="flex items-center gap-2">
           <img src="assets/receipt-nest.png" alt="ReceiptNest" class="h-8 w-8 object-contain" />
           <span class="font-semibold">
-            <span class="text-slate-900 dark:text-white">Receipt</span><span class="text-emerald-600 dark:text-emerald-400">Nest</span>
+            <span class="text-slate-900 dark:text-white">Receipt</span><span
+              class="text-emerald-600 dark:text-emerald-400">Nest</span>
           </span>
         </div>
 
@@ -798,8 +950,10 @@
         </p>
 
         <div class="flex items-center gap-6">
-          <a routerLink="/terms" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Terms</a>
-          <a routerLink="/support" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Support</a>
+          <a routerLink="/terms"
+            class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Terms</a>
+          <a routerLink="/support"
+            class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Support</a>
         </div>
       </div>
     </div>

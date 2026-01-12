@@ -8,6 +8,7 @@
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -18,6 +19,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -68,4 +70,59 @@ svg {
 
 .dark ::-webkit-scrollbar-thumb:hover {
   background: rgb(51 65 85 / 0.8);
+}
+
+@keyframes pulse-slow {
+
+  0%,
+  100% {
+    opacity: 0.08;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.12;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulse-slow-delay {
+
+  0%,
+  100% {
+    opacity: 0.06;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.1;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-pulse-slow-delay {
+  animation: pulse-slow-delay 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation-delay: 2s;
+}
+
+.dark .animate-pulse-slow {
+  animation: pulse-slow-dark 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-slow-dark {
+
+  0%,
+  100% {
+    opacity: 0.12;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.18;
+    transform: scale(1.05);
+  }
 }

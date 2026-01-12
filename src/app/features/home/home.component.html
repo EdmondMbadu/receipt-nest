@@ -1,8 +1,12 @@
 <div class="min-h-screen bg-white dark:bg-slate-950">
   <!-- Ambient background -->
   <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-    <div class="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-emerald-500/[0.02] dark:bg-emerald-500/[0.05] blur-[100px]"></div>
-    <div class="absolute bottom-1/4 right-0 w-[400px] h-[400px] rounded-full bg-emerald-400/[0.02] dark:bg-emerald-400/[0.04] blur-[80px]"></div>
+    <div
+      class="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-emerald-500/[0.02] dark:bg-emerald-500/[0.05] blur-[100px]">
+    </div>
+    <div
+      class="absolute bottom-1/4 right-0 w-[400px] h-[400px] rounded-full bg-emerald-400/[0.02] dark:bg-emerald-400/[0.04] blur-[80px]">
+    </div>
   </div>
 
   <div class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8 space-y-6">
@@ -12,7 +16,8 @@
         <a routerLink="/app" class="inline-flex items-center gap-2.5 min-w-0 flex-1">
           <img src="assets/receipt-nest.png" alt="ReceiptNest Logo" class="h-10 w-10 object-contain flex-shrink-0" />
           <div class="min-w-0">
-            <p class="text-[10px] font-medium uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Dashboard</p>
+            <p class="text-[10px] font-medium uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Dashboard
+            </p>
             <h1 class="text-sm font-semibold text-slate-900 dark:text-white truncate">Welcome back</h1>
           </div>
         </a>
@@ -44,27 +49,33 @@
             <span>Add Receipt</span>
           </button>
           <a routerLink="/app/insights" (click)="toggleMenu()"
-            class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-purple-700 dark:text-purple-300 transition-colors hover:bg-purple-50 dark:hover:bg-purple-900/20">
+            class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-emerald-700 dark:text-emerald-300 transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
             </svg>
             <span>AI Insights</span>
           </a>
           <a routerLink="/app/pricing" (click)="toggleMenu()"
             class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-emerald-700 dark:text-emerald-300 transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75V3m0 0l-3 3m3-3l3 3m0 6.75v6m0 0l-3-3m3 3l3-3m-9-9h6a3 3 0 013 3v6a3 3 0 01-3 3H9a3 3 0 01-3-3v-6a3 3 0 013-3z" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 6.75V3m0 0l-3 3m3-3l3 3m0 6.75v6m0 0l-3-3m3 3l3-3m-9-9h6a3 3 0 013 3v6a3 3 0 01-3 3H9a3 3 0 01-3-3v-6a3 3 0 013-3z" />
             </svg>
             <span>Upgrade plan</span>
           </a>
 
           <button type="button" (click)="toggleTheme()"
             class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800">
-            <svg *ngIf="isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+            <svg *ngIf="isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
             </svg>
-            <svg *ngIf="!isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+            <svg *ngIf="!isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
             </svg>
             <span>{{ isDarkMode() ? 'Light mode' : 'Dark mode' }}</span>
           </button>
@@ -74,8 +85,10 @@
           <button type="button" (click)="openBillingPortal(); toggleMenu()" [disabled]="billingPortalLoading()"
             class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
             [class.opacity-70]="billingPortalLoading()" [class.cursor-not-allowed]="billingPortalLoading()">
-            <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9 5.25L3 7.5m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 7.5m18 0v9A2.25 2.25 0 0118.75 18.75H5.25A2.25 2.25 0 013 16.5v-9" />
+            <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+              stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21 7.5l-9 5.25L3 7.5m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 7.5m18 0v9A2.25 2.25 0 0118.75 18.75H5.25A2.25 2.25 0 013 16.5v-9" />
             </svg>
             <span>Manage billing</span>
           </button>
@@ -83,7 +96,8 @@
           <button type="button" (click)="logout()"
             class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-rose-600 dark:text-rose-400 transition-colors hover:bg-rose-50 dark:hover:bg-rose-900/20">
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
             </svg>
             <span>Log out</span>
           </button>
@@ -95,7 +109,8 @@
     <header class="hidden sm:flex sm:items-center sm:justify-between">
       <div class="flex items-center gap-4">
         <a routerLink="/app" class="inline-flex items-center gap-3 group">
-          <img src="assets/receipt-nest.png" alt="ReceiptNest Logo" class="h-11 w-11 object-contain transition-transform group-hover:scale-105" />
+          <img src="assets/receipt-nest.png" alt="ReceiptNest Logo"
+            class="h-11 w-11 object-contain transition-transform group-hover:scale-105" />
           <div>
             <p class="text-xs font-medium uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Dashboard</p>
             <h1 class="text-xl font-semibold text-slate-900 dark:text-white">Welcome, {{ displayName() }}</h1>
@@ -104,16 +119,18 @@
       </div>
       <div class="flex items-center gap-3">
         <a routerLink="/app/insights"
-          class="inline-flex items-center justify-center gap-2 rounded-xl border border-purple-200 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/30 px-4 py-2.5 text-sm font-semibold text-purple-700 dark:text-purple-200 shadow-sm transition-all hover:bg-purple-100 dark:hover:bg-purple-900/50 hover:scale-[1.02]">
+          class="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 px-4 py-2.5 text-sm font-semibold text-emerald-700 dark:text-emerald-200 shadow-sm transition-all hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:scale-[1.02]">
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
           </svg>
           <span>AI Insights</span>
         </a>
         <a routerLink="/app/pricing"
           class="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 px-4 py-2.5 text-sm font-semibold text-emerald-700 dark:text-emerald-200 shadow-sm transition-all hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:scale-[1.02]">
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75V3m0 0l-3 3m3-3l3 3m0 6.75v6m0 0l-3-3m3 3l3-3m-9-9h6a3 3 0 013 3v6a3 3 0 01-3 3H9a3 3 0 01-3-3v-6a3 3 0 013-3z" />
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 6.75V3m0 0l-3 3m3-3l3 3m0 6.75v6m0 0l-3-3m3 3l3-3m-9-9h6a3 3 0 013 3v6a3 3 0 01-3 3H9a3 3 0 01-3-3v-6a3 3 0 013-3z" />
           </svg>
           <span>Upgrade</span>
         </a>
@@ -127,11 +144,15 @@
         <button type="button" (click)="toggleTheme()"
           class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200"
           aria-label="Toggle theme">
-          <svg *ngIf="isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+          <svg *ngIf="isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
           </svg>
-          <svg *ngIf="!isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+          <svg *ngIf="!isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
           </svg>
         </button>
         <div class="relative">
@@ -150,15 +171,19 @@
             <button type="button" (click)="openBillingPortal()" [disabled]="billingPortalLoading()"
               class="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
               [class.opacity-70]="billingPortalLoading()" [class.cursor-not-allowed]="billingPortalLoading()">
-              <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9 5.25L3 7.5m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 7.5m18 0v9A2.25 2.25 0 0118.75 18.75H5.25A2.25 2.25 0 013 16.5v-9" />
+              <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M21 7.5l-9 5.25L3 7.5m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 7.5m18 0v9A2.25 2.25 0 0118.75 18.75H5.25A2.25 2.25 0 013 16.5v-9" />
               </svg>
               <span>Manage billing</span>
             </button>
             <button type="button" (click)="logout()"
               class="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
-              <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+              <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
               </svg>
               <span>Log out</span>
             </button>
@@ -176,7 +201,8 @@
     <div class="relative">
       <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
         <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
         </svg>
       </div>
       <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
@@ -201,7 +227,8 @@
             (click)="clearSearch()"
             class="flex items-center justify-between rounded-xl px-3 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
             <div class="flex items-center gap-3 min-w-0">
-              <div class="flex-shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-base">
+              <div
+                class="flex-shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-base">
                 {{ getCategoryIcon(receipt.category?.id) }}
               </div>
               <div class="min-w-0">
@@ -235,13 +262,13 @@
     </div>
 
     <!-- Backdrop for search dropdown -->
-    <div *ngIf="searchQuery() && searchFocused()" (click)="searchFocused.set(false)"
-      class="fixed inset-0 z-20"></div>
+    <div *ngIf="searchQuery() && searchFocused()" (click)="searchFocused.set(false)" class="fixed inset-0 z-20"></div>
 
     <!-- Stats Summary Row -->
     <section class="grid gap-4 grid-cols-1 sm:grid-cols-3">
       <!-- Total Spending - Always visible, with inline stats on mobile -->
-      <div class="relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700">
+      <div
+        class="relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700">
         <div class="flex items-center justify-between">
           <div class="relative inline-block">
             <button type="button" (click)="toggleMonthPickerCard()"
@@ -280,31 +307,32 @@
           </div>
         </div>
         <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{{ formatCurrency(selectedMonthSpend()) }}</p>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ selectedMonthReceiptCount() }} receipts this month</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ selectedMonthReceiptCount() }} receipts this month
+        </p>
       </div>
 
       <!-- Total Receipts - Hidden on mobile -->
-      <div class="hidden sm:block rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700">
+      <div
+        class="hidden sm:block rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700">
         <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Total</p>
         <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{{ receiptCount() }}</p>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">receipts</p>
       </div>
 
       <!-- Review Status - Hidden on mobile -->
-      <div class="hidden sm:block rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all hover:shadow-md"
-        [class.border-amber-200]="needsReviewCount() > 0"
-        [class.dark:border-amber-800/50]="needsReviewCount() > 0"
+      <div
+        class="hidden sm:block rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all hover:shadow-md"
+        [class.border-amber-200]="needsReviewCount() > 0" [class.dark:border-amber-800/50]="needsReviewCount() > 0"
         [class.hover:border-amber-300]="needsReviewCount() > 0"
         [class.dark:hover:border-amber-700]="needsReviewCount() > 0">
         <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Review</p>
-        <p class="mt-2 text-3xl font-bold"
-          [class.text-amber-600]="needsReviewCount() > 0"
-          [class.dark:text-amber-400]="needsReviewCount() > 0"
-          [class.text-emerald-600]="needsReviewCount() === 0"
+        <p class="mt-2 text-3xl font-bold" [class.text-amber-600]="needsReviewCount() > 0"
+          [class.dark:text-amber-400]="needsReviewCount() > 0" [class.text-emerald-600]="needsReviewCount() === 0"
           [class.dark:text-emerald-400]="needsReviewCount() === 0">
           {{ needsReviewCount() }}
         </p>
-        <p *ngIf="needsReviewCount() === 0" class="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">All done</p>
+        <p *ngIf="needsReviewCount() === 0" class="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">All
+          done</p>
         <a *ngIf="needsReviewCount() > 0" [routerLink]="['/app/receipt', getFirstNeedsReviewId()]"
           class="inline-flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 mt-1 font-medium transition-colors">
           Review now
@@ -320,16 +348,20 @@
       class="sm:hidden flex items-center justify-between rounded-2xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-900/20 p-4 shadow-sm transition-all active:scale-[0.98]">
       <div class="flex items-center gap-3">
         <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/40">
-          <svg class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          <svg class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
           </svg>
         </div>
         <div>
-          <p class="text-sm font-semibold text-amber-800 dark:text-amber-200">{{ needsReviewCount() }} receipt{{ needsReviewCount() === 1 ? '' : 's' }} need{{ needsReviewCount() === 1 ? 's' : '' }} review</p>
+          <p class="text-sm font-semibold text-amber-800 dark:text-amber-200">{{ needsReviewCount() }} receipt{{
+            needsReviewCount() === 1 ? '' : 's' }} need{{ needsReviewCount() === 1 ? 's' : '' }} review</p>
           <p class="text-xs text-amber-600 dark:text-amber-400">Tap to review and confirm details</p>
         </div>
       </div>
-      <svg class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <svg class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+        stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
       </svg>
     </a>
@@ -365,10 +397,8 @@
           </div>
           <!-- Spending Amount -->
           <div class="flex items-baseline gap-3 mt-1">
-            <p class="text-2xl sm:text-3xl font-bold"
-              [class.text-emerald-600]="!hoveredDay()"
-              [class.dark:text-emerald-400]="!hoveredDay()"
-              [class.text-slate-900]="hoveredDay()"
+            <p class="text-2xl sm:text-3xl font-bold" [class.text-emerald-600]="!hoveredDay()"
+              [class.dark:text-emerald-400]="!hoveredDay()" [class.text-slate-900]="hoveredDay()"
               [class.dark:text-white]="hoveredDay()">
               {{ hoveredDay() ? formatCurrency(hoveredDay()!.amount) : formatCurrency(selectedMonthSpend()) }}
             </p>
@@ -384,12 +414,16 @@
               [class.text-red-700]="monthOverMonthChange()!.isIncrease"
               [class.dark:text-red-300]="monthOverMonthChange()!.isIncrease">
               <!-- Down arrow (spending decreased - good) -->
-              <svg *ngIf="!monthOverMonthChange()!.isIncrease" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
+              <svg *ngIf="!monthOverMonthChange()!.isIncrease" class="h-3 w-3" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
               </svg>
               <!-- Up arrow (spending increased - bad) -->
-              <svg *ngIf="monthOverMonthChange()!.isIncrease" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22m0 0l-5.94-2.281m5.94 2.28l-2.28 5.941" />
+              <svg *ngIf="monthOverMonthChange()!.isIncrease" class="h-3 w-3" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22m0 0l-5.94-2.281m5.94 2.28l-2.28 5.941" />
               </svg>
               {{ monthOverMonthChange()!.percent }}% {{ monthOverMonthChange()!.isIncrease ? 'up' : 'down' }}
             </span>
@@ -426,11 +460,13 @@
             class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
             aria-label="Share this month's snapshot">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
             </svg>
             <span class="hidden sm:inline">Share</span>
           </button>
-          <div class="flex items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1">
+          <div
+            class="flex items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1">
             <button type="button" (click)="goToPreviousMonth()"
               class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 transition-colors">
               <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -516,7 +552,8 @@
     <!-- Loading State -->
     <div *ngIf="isLoadingReceipts()" class="flex items-center justify-center py-20">
       <div class="text-center">
-        <div class="h-12 w-12 mx-auto animate-spin rounded-full border-4 border-emerald-500 border-t-transparent mb-4"></div>
+        <div class="h-12 w-12 mx-auto animate-spin rounded-full border-4 border-emerald-500 border-t-transparent mb-4">
+        </div>
         <p class="text-sm text-slate-500 dark:text-slate-400">Loading your receipts...</p>
       </div>
     </div>
@@ -524,9 +561,12 @@
     <!-- Empty State -->
     <div *ngIf="!isLoadingReceipts() && receiptCount() === 0"
       class="rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 p-12 sm:p-16 text-center">
-      <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/30">
-        <svg class="h-10 w-10 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
+      <div
+        class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/30">
+        <svg class="h-10 w-10 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
         </svg>
       </div>
       <h3 class="text-xl font-semibold text-slate-800 dark:text-white mb-2">No receipts yet</h3>
@@ -546,7 +586,8 @@
     <div *ngIf="!isLoadingReceipts() && receiptCount() > 0" class="space-y-8">
       <div *ngFor="let monthGroup of visibleMonthGroups(); trackBy: trackMonthGroup" class="space-y-4">
         <!-- Month Header -->
-        <div class="sticky top-0 z-10 bg-gradient-to-b from-white via-white/95 to-transparent dark:from-slate-950 dark:via-slate-950/95 py-3">
+        <div
+          class="sticky top-0 z-10 bg-gradient-to-b from-white via-white/95 to-transparent dark:from-slate-950 dark:via-slate-950/95 py-3">
           <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div class="flex flex-wrap items-baseline gap-2">
@@ -567,14 +608,19 @@
             <div class="flex flex-col items-start gap-1 sm:items-end">
               <button type="button" (click)="downloadMonthReceipts(monthGroup)" [disabled]="!!downloadingMonthKey()"
                 class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 disabled:cursor-not-allowed disabled:opacity-60">
-                <svg *ngIf="downloadingMonthKey() !== getMonthGroupKey(monthGroup)" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                <svg *ngIf="downloadingMonthKey() !== getMonthGroupKey(monthGroup)" class="h-4 w-4" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
-                <svg *ngIf="downloadingMonthKey() === getMonthGroupKey(monthGroup)" class="h-4 w-4 animate-spin" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none"></circle>
+                <svg *ngIf="downloadingMonthKey() === getMonthGroupKey(monthGroup)" class="h-4 w-4 animate-spin"
+                  viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none">
+                  </circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                 </svg>
-                <span>{{ downloadingMonthKey() === getMonthGroupKey(monthGroup) ? 'Preparing...' : 'Download PDF' }}</span>
+                <span>{{ downloadingMonthKey() === getMonthGroupKey(monthGroup) ? 'Preparing...' : 'Download PDF'
+                  }}</span>
               </button>
               <p *ngIf="monthDownloadError()?.key === getMonthGroupKey(monthGroup)"
                 class="text-[10px] font-medium text-rose-500 dark:text-rose-400 max-w-xs text-left">
@@ -601,12 +647,14 @@
             <div *ngIf="isImageLoading(receipt.id) || !getImageUrl(receipt)"
               class="absolute inset-0 flex items-center justify-center bg-slate-100 dark:bg-slate-800">
               <div *ngIf="isImageLoading(receipt.id)" class="text-center">
-                <div class="h-6 w-6 mx-auto animate-spin rounded-full border-2 border-emerald-500 border-t-transparent"></div>
+                <div class="h-6 w-6 mx-auto animate-spin rounded-full border-2 border-emerald-500 border-t-transparent">
+                </div>
                 <p *ngIf="isPdf(receipt)" class="text-[8px] text-slate-400 mt-2">Loading PDF...</p>
               </div>
               <div *ngIf="!isImageLoading(receipt.id) && !getImageUrl(receipt)" class="text-center p-2">
                 <span class="text-2xl">{{ isPdf(receipt) ? '📄' : '🧾' }}</span>
-                <p class="text-[8px] sm:text-[10px] text-slate-500 dark:text-slate-400 mt-1 truncate">{{ receipt.file.originalName }}</p>
+                <p class="text-[8px] sm:text-[10px] text-slate-500 dark:text-slate-400 mt-1 truncate">{{
+                  receipt.file.originalName }}</p>
               </div>
             </div>
 
@@ -618,13 +666,15 @@
 
             <!-- PDF Badge overlay -->
             <div *ngIf="isPdf(receipt) && getImageUrl(receipt)" class="absolute top-2 left-2">
-              <span class="inline-flex items-center gap-0.5 px-2 py-1 rounded-lg bg-rose-500/90 text-white text-[9px] sm:text-[10px] font-semibold shadow-lg">
+              <span
+                class="inline-flex items-center gap-0.5 px-2 py-1 rounded-lg bg-rose-500/90 text-white text-[9px] sm:text-[10px] font-semibold shadow-lg">
                 PDF
               </span>
             </div>
 
             <!-- Overlay on hover -->
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-3">
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-3">
               <div class="text-white">
                 <p class="text-xs sm:text-sm font-semibold truncate max-w-full">
                   {{ receipt.merchant?.canonicalName || 'Processing...' }}
@@ -637,14 +687,17 @@
 
             <!-- Status Badge (for needs_review) -->
             <div *ngIf="receipt.status === 'needs_review'" class="absolute top-2 right-2">
-              <span class="inline-flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-amber-500 text-white text-[9px] sm:text-[10px] font-bold shadow-lg">
+              <span
+                class="inline-flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-amber-500 text-white text-[9px] sm:text-[10px] font-bold shadow-lg">
                 !
               </span>
             </div>
 
             <!-- Processing indicator -->
-            <div *ngIf="receipt.status === 'processing' || receipt.status === 'uploaded'" class="absolute top-2 right-2">
-              <span class="inline-flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg">
+            <div *ngIf="receipt.status === 'processing' || receipt.status === 'uploaded'"
+              class="absolute top-2 right-2">
+              <span
+                class="inline-flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg">
                 <div class="h-2.5 w-2.5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
               </span>
             </div>
@@ -659,7 +712,8 @@
 
       <!-- End of Gallery -->
       <div *ngIf="!hasMoreMonths() && visibleMonthGroups().length > 0" class="text-center py-10">
-        <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-100 dark:bg-slate-800 text-sm font-medium text-slate-500 dark:text-slate-400">
+        <div
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-100 dark:bg-slate-800 text-sm font-medium text-slate-500 dark:text-slate-400">
           <svg class="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
@@ -670,13 +724,14 @@
   </div>
 
   <!-- Share Snapshot Modal -->
-  <div *ngIf="showShareModal()"
-    class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-6 sm:py-10">
+  <div *ngIf="showShareModal()" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-6 sm:py-10">
     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="closeShareModal()"></div>
-    <div class="relative z-10 w-full max-w-lg rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-2xl">
+    <div
+      class="relative z-10 w-full max-w-lg rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-2xl">
       <div class="flex items-start justify-between gap-4">
         <div>
-          <p class="text-xs font-medium uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Share snapshot</p>
+          <p class="text-xs font-medium uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Share snapshot
+          </p>
           <h2 class="mt-1 text-xl font-bold text-slate-900 dark:text-white">Share your spending summary</h2>
           <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
             Create a shareable link to your monthly spending snapshot with the details you choose.
@@ -692,13 +747,16 @@
       </div>
 
       <div class="mt-6 space-y-4">
-        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
+        <div
+          class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
           <p>Only the selected month, graph data, and the info below will be shared.</p>
         </div>
 
-        <label class="flex flex-col gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-4 text-sm transition-colors hover:border-slate-300 dark:hover:border-slate-600">
+        <label
+          class="flex flex-col gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-4 text-sm transition-colors hover:border-slate-300 dark:hover:border-slate-600">
           <div class="flex items-start gap-3">
-            <input type="checkbox" class="mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 dark:bg-slate-800"
+            <input type="checkbox"
+              class="mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 dark:bg-slate-800"
               [ngModel]="shareIncludeName()" (ngModelChange)="shareIncludeName.set($event)" />
             <div class="flex-1">
               <div class="flex items-center justify-between gap-2">
@@ -710,12 +768,15 @@
           </div>
           <input type="text" placeholder="e.g. Alex Johnson"
             class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm text-slate-900 dark:text-white transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 disabled:cursor-not-allowed disabled:bg-slate-100 dark:disabled:bg-slate-800 disabled:text-slate-400"
-            [disabled]="!shareIncludeName()" [ngModel]="shareOwnerName()" (ngModelChange)="shareOwnerName.set($event)" />
+            [disabled]="!shareIncludeName()" [ngModel]="shareOwnerName()"
+            (ngModelChange)="shareOwnerName.set($event)" />
         </label>
 
-        <label class="flex flex-col gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-4 text-sm transition-colors hover:border-slate-300 dark:hover:border-slate-600">
+        <label
+          class="flex flex-col gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-4 text-sm transition-colors hover:border-slate-300 dark:hover:border-slate-600">
           <div class="flex items-start gap-3">
-            <input type="checkbox" class="mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 dark:bg-slate-800"
+            <input type="checkbox"
+              class="mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 dark:bg-slate-800"
               [ngModel]="shareIncludeEmail()" (ngModelChange)="shareIncludeEmail.set($event)" />
             <div class="flex-1">
               <div class="flex items-center justify-between gap-2">
@@ -727,7 +788,8 @@
           </div>
           <input type="email" placeholder="you@email.com"
             class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm text-slate-900 dark:text-white transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 disabled:cursor-not-allowed disabled:bg-slate-100 dark:disabled:bg-slate-800 disabled:text-slate-400"
-            [disabled]="!shareIncludeEmail()" [ngModel]="shareOwnerEmail()" (ngModelChange)="shareOwnerEmail.set($event)" />
+            [disabled]="!shareIncludeEmail()" [ngModel]="shareOwnerEmail()"
+            (ngModelChange)="shareOwnerEmail.set($event)" />
         </label>
 
         <div *ngIf="shareError()"
@@ -746,7 +808,8 @@
 
         <div *ngIf="shareLink()"
           class="space-y-3 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 px-4 py-4 text-sm">
-          <label class="text-xs font-medium uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Shareable link</label>
+          <label class="text-xs font-medium uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Shareable
+            link</label>
           <div class="flex flex-col gap-2 sm:flex-row">
             <input type="text" [value]="shareLink()" readonly
               class="flex-1 rounded-xl border border-emerald-200 dark:border-emerald-700 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm font-medium text-emerald-700 dark:text-emerald-300"
@@ -754,7 +817,8 @@
             <button type="button" (click)="copyShareLink()"
               class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition-colors">
               <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
               </svg>
               {{ shareCopied() ? 'Copied!' : 'Copy' }}
             </button>
@@ -763,7 +827,8 @@
             class="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors">
             Open shared page
             <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
             </svg>
           </a>
         </div>
