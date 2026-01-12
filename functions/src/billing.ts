@@ -1,43 +1,46 @@
 import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
+import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import Stripe from "stripe";
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY || "";
-const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
-const stripePriceIdMonthly = process.env.STRIPE_PRICE_ID_MONTHLY || "";
-const stripePriceIdAnnual = process.env.STRIPE_PRICE_ID_ANNUAL || "";
-const appBaseUrl = process.env.APP_BASE_URL || "";
+const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
+const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
+const stripePriceIdMonthly = defineSecret("STRIPE_PRICE_ID_MONTHLY");
+const stripePriceIdAnnual = defineSecret("STRIPE_PRICE_ID_ANNUAL");
+const appBaseUrl = defineSecret("APP_BASE_URL");
 
-if (!stripeSecretKey) {
-  logger.warn("Missing STRIPE_SECRET_KEY env var. Stripe billing functions will fail.");
-}
-
-const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: "2024-06-20",
-});
+const getStripe = () => {
+  const secret = stripeSecretKey.value();
+  if (!secret) {
+    throw new Error("Missing STRIPE_SECRET_KEY.");
+  }
+  return new Stripe(secret, {
+    apiVersion: "2024-06-20",
+  });
+};
 
 const VALID_INTERVALS = new Set(["monthly", "annual"]);
 
 const getPriceIdForInterval = (interval: string) => {
   if (interval === "annual") {
-    return stripePriceIdAnnual;
+    return stripePriceIdAnnual.value();
   }
-  return stripePriceIdMonthly;
+  return stripePriceIdMonthly.value();
 };
 
 const resolvePlanFromPrice = (priceId: string | null | undefined) => {
-  if (priceId === stripePriceIdMonthly || priceId === stripePriceIdAnnual) {
+  if (priceId === stripePriceIdMonthly.value() || priceId === stripePriceIdAnnual.value()) {
     return "pro";
   }
   return "free";
 };
 
 const resolveIntervalFromPrice = (priceId: string | null | undefined) => {
-  if (priceId === stripePriceIdAnnual) {
+  if (priceId === stripePriceIdAnnual.value()) {
     return "annual";
   }
-  if (priceId === stripePriceIdMonthly) {
+  if (priceId === stripePriceIdMonthly.value()) {
     return "monthly";
   }
   return "monthly";
@@ -46,13 +49,26 @@ const resolveIntervalFromPrice = (priceId: string | null | undefined) => {
 const activeStatusSet = new Set(["active", "trialing", "past_due", "unpaid"]);
 
 export const createCheckoutSession = onCall(
-  { region: "us-central1" },
+  {
+    region: "us-central1",
+    secrets: [
+      stripeSecretKey,
+      stripePriceIdMonthly,
+      stripePriceIdAnnual,
+      appBaseUrl,
+    ],
+  },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "User must be authenticated to start checkout.");
     }
 
-    if (!stripeSecretKey || !stripePriceIdMonthly || !stripePriceIdAnnual || !appBaseUrl) {
+    if (
+      !stripeSecretKey.value() ||
+      !stripePriceIdMonthly.value() ||
+      !stripePriceIdAnnual.value() ||
+      !appBaseUrl.value()
+    ) {
       throw new HttpsError("failed-precondition", "Stripe configuration is incomplete.");
     }
 
@@ -66,6 +82,7 @@ export const createCheckoutSession = onCall(
       throw new HttpsError("failed-precondition", "Stripe price ID missing for selected interval.");
     }
 
+    const stripe = getStripe();
     const uid = request.auth.uid;
     const userRef = admin.firestore().doc(`users/${uid}`);
     const userSnap = await userRef.get();
@@ -86,8 +103,8 @@ export const createCheckoutSession = onCall(
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
       allow_promotion_codes: true,
-      success_url: `${appBaseUrl}/app/pricing?checkout=success`,
-      cancel_url: `${appBaseUrl}/app/pricing?checkout=cancel`,
+      success_url: `${appBaseUrl.value()}/app/pricing?checkout=success`,
+      cancel_url: `${appBaseUrl.value()}/app/pricing?checkout=cancel`,
       subscription_data: {
         metadata: {
           firebaseUID: uid,
@@ -101,14 +118,14 @@ export const createCheckoutSession = onCall(
 );
 
 export const stripeWebhook = onRequest(
-  { region: "us-central1" },
+  { region: "us-central1", secrets: [stripeSecretKey, stripeWebhookSecret, stripePriceIdMonthly, stripePriceIdAnnual] },
   async (req, res) => {
     if (req.method !== "POST") {
       res.status(405).send("Method Not Allowed");
       return;
     }
 
-    if (!stripeSecretKey || !stripeWebhookSecret) {
+    if (!stripeSecretKey.value() || !stripeWebhookSecret.value()) {
       logger.error("Stripe webhook configuration missing.");
       res.status(500).send("Webhook configuration missing.");
       return;
@@ -122,7 +139,8 @@ export const stripeWebhook = onRequest(
 
     let event: Stripe.Event;
     try {
-      event = stripe.webhooks.constructEvent(req.rawBody, signature, stripeWebhookSecret);
+      const stripe = getStripe();
+      event = stripe.webhooks.constructEvent(req.rawBody, signature, stripeWebhookSecret.value());
     } catch (error) {
       logger.error("Stripe webhook signature verification failed.", error);
       res.status(400).send("Webhook signature verification failed.");
@@ -141,6 +159,7 @@ export const stripeWebhook = onRequest(
         case "checkout.session.completed": {
           const session = event.data.object as Stripe.Checkout.Session;
           if (session.subscription) {
+            const stripe = getStripe();
             const subscription = await stripe.subscriptions.retrieve(String(session.subscription));
             await syncSubscription(subscription);
           }
@@ -150,6 +169,7 @@ export const stripeWebhook = onRequest(
         case "invoice.payment_failed": {
           const invoice = event.data.object as Stripe.Invoice;
           if (invoice.subscription) {
+            const stripe = getStripe();
             const subscription = await stripe.subscriptions.retrieve(String(invoice.subscription));
             await syncSubscription(subscription);
           }
