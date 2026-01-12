@@ -18,6 +18,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/pricing/pricing.component').then((m) => m.PricingComponent)
   },
   {
+    path: 'app/insights',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/ai-insights/ai-insights.component').then((m) => m.AiInsightsComponent)
+  },
+  {
     path: 'app/receipt/:id',
     canActivate: [authGuard],
     loadComponent: () => import('./features/receipt-detail/receipt-detail.component').then((m) => m.ReceiptDetailComponent)

@@ -372,7 +372,7 @@ async function extractMerchantNameOnly(
   });
 
   const model = vertexAI.getGenerativeModel({
-    model: "gemini-2.5-flash-preview-05-20",
+    model: "gemini-3-flash-preview",
     generationConfig: {
       temperature: 0.1,
       maxOutputTokens: 256,
@@ -540,7 +540,7 @@ async function extractWithGemini(
   });
 
   const model = vertexAI.getGenerativeModel({
-    model: "gemini-2.5-flash-preview-05-20", // Gemini 2.5 Flash - better accuracy for receipts
+    model: "gemini-3-flash-preview", // Gemini 2.5 Flash - better accuracy for receipts
     generationConfig: {
       temperature: 0.1, // Low temperature for more consistent extraction
       maxOutputTokens: 1024,

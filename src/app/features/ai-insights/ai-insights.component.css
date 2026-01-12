@@ -1,0 +1,47 @@
+/* AI Insights Component Styles */
+
+/* Bounce animation for typing indicator */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 0.6s ease-in-out infinite;
+}
+
+/* Smooth scroll for chat container */
+:host ::ng-deep .overflow-y-auto {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+:host ::ng-deep .overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+:host ::ng-deep .overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:host ::ng-deep .overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.3);
+  border-radius: 3px;
+}
+
+:host ::ng-deep .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(148, 163, 184, 0.5);
+}
+
+/* Dark mode scrollbar */
+:host-context(.dark) ::ng-deep .overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: rgba(71, 85, 105, 0.4);
+}
+
+:host-context(.dark) ::ng-deep .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(71, 85, 105, 0.6);
+}
