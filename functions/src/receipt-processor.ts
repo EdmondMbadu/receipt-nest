@@ -2,13 +2,12 @@
  * Receipt Processor Cloud Function
  *
  * Triggered when a new receipt is uploaded.
- * Uses Document AI for primary extraction and Gemini 2.5 as fallback.
+ * Uses a two-pass Gemini extraction for accurate receipt parsing.
  */
 
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
-import { DocumentProcessorServiceClient } from "@google-cloud/documentai";
 import { VertexAI } from "@google-cloud/vertexai";
 import sharp from "sharp";
 import heicDecode from "heic-decode";
@@ -21,7 +20,7 @@ interface ExtractedField<T> {
 }
 
 interface ExtractionResult {
-  source: "document_ai" | "gemini" | "manual";
+  source: "gemini" | "manual";
   processedAt: admin.firestore.FieldValue;
   totalAmount?: ExtractedField<number>;
   currency?: ExtractedField<string>;
@@ -29,6 +28,7 @@ interface ExtractionResult {
   supplierName?: ExtractedField<string>;
   overallConfidence: number;
 }
+
 
 interface ReceiptMerchant {
   canonicalId?: string;
@@ -45,16 +45,10 @@ interface ReceiptCategory {
   assignedBy: "ai" | "user" | "rule" | "default";
 }
 
-// Configuration - UPDATE THESE WITH YOUR VALUES
+// Configuration
 const PROJECT_ID = process.env.GCLOUD_PROJECT || "receipt-nest";
-const LOCATION = "us"; // Document AI processor location
-const PROCESSOR_ID = process.env.DOCUMENT_AI_PROCESSOR_ID || ""; // Set via environment
 const VERTEX_LOCATION = "us-central1"; // Vertex AI location
 
-// Confidence thresholds
-const HIGH_CONFIDENCE_THRESHOLD = 0.8;
-const PDF_HIGH_CONFIDENCE_THRESHOLD = 0.65; // Lower threshold for PDFs since they're typically cleaner
-const LOW_CONFIDENCE_THRESHOLD = 0.5;
 
 // Default categories for classification
 const CATEGORIES = [
@@ -69,6 +63,176 @@ const CATEGORIES = [
   { id: "travel", name: "Travel", keywords: ["hotel", "flight", "airline", "airbnb", "booking"] },
   { id: "other", name: "Other", keywords: [] },
 ];
+
+/**
+ * Simple, robust Gemini extraction for receipts
+ * Single pass with clear instructions - optimized for reliability
+ */
+async function extractWithGemini(
+  fileBuffer: Buffer,
+  mimeType: string
+): Promise<ExtractionResult> {
+  const vertexAI = new VertexAI({
+    project: PROJECT_ID,
+    location: VERTEX_LOCATION,
+  });
+
+  // Use stable model ID - gemini-2.5-flash is recommended
+  // Fallback order: gemini-2.5-flash -> gemini-2.0-flash
+  const model = vertexAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+    generationConfig: {
+      temperature: 0.1,
+      maxOutputTokens: 1024,
+      responseMimeType: "application/json",
+    },
+  });
+
+  // Normalize mimeType for Gemini
+  const supportedMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"];
+  let geminiMimeType = mimeType;
+  if (!supportedMimeTypes.includes(mimeType)) {
+    logger.info(`Unsupported mimeType ${mimeType} for Gemini, using image/jpeg`);
+    geminiMimeType = "image/jpeg";
+  }
+
+  const base64Image = fileBuffer.toString("base64");
+
+  const prompt = `You are a receipt parser. Extract these fields from the receipt image:
+
+{
+  "total": 123.45,
+  "merchant": "Store Name",
+  "date": "2024-01-15",
+  "currency": "USD"
+}
+
+Instructions:
+- total: The FINAL total amount paid. Look for "TOTAL", "GRAND TOTAL", "AMOUNT DUE", "BALANCE". This is the number AFTER tax is added. Do NOT use subtotal or tax amount.
+- merchant: The store or business name, usually at the top of the receipt. Remove any store numbers like "#1234".
+- date: The transaction date in YYYY-MM-DD format.
+- currency: Default to "USD" for US receipts.
+
+Return ONLY the JSON object, no other text.`;
+
+  logger.info("Starting Gemini extraction", {
+    model: "gemini-2.5-flash",
+    mimeType: geminiMimeType,
+    bufferSize: fileBuffer.length
+  });
+
+  const result = await model.generateContent({
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { inlineData: { mimeType: geminiMimeType, data: base64Image } },
+          { text: prompt },
+        ],
+      },
+    ],
+  });
+
+  const responseText = result.response.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  logger.info("Gemini raw response", { text: responseText });
+
+  // Handle empty response
+  if (!responseText || responseText.trim() === "") {
+    logger.error("Gemini returned empty response");
+    throw new Error("Gemini returned empty response");
+  }
+
+  // Parse the response
+  let parsed: { total?: unknown; merchant?: unknown; date?: unknown; currency?: unknown };
+  try {
+    parsed = JSON.parse(responseText);
+  } catch (parseError) {
+    // Try to extract JSON from the response if it's wrapped in markdown
+    const jsonMatch = responseText.match(/\{[\s\S]*?\}/);
+    if (jsonMatch) {
+      try {
+        parsed = JSON.parse(jsonMatch[0]);
+      } catch {
+        logger.error("Failed to parse extracted JSON", { responseText, extracted: jsonMatch[0] });
+        throw new Error("Failed to parse Gemini response as JSON");
+      }
+    } else {
+      logger.error("Failed to parse Gemini response - no JSON found", { responseText });
+      throw new Error("Failed to parse Gemini response as JSON");
+    }
+  }
+
+  logger.info("Gemini parsed response", parsed);
+
+  // Extract and validate total
+  let totalValue: number | undefined;
+  if (parsed.total !== undefined && parsed.total !== null) {
+    const rawTotal = parsed.total;
+    if (typeof rawTotal === 'number' && rawTotal > 0) {
+      totalValue = rawTotal;
+    } else if (typeof rawTotal === 'string') {
+      const numStr = rawTotal.replace(/[^0-9.-]/g, '');
+      const num = parseFloat(numStr);
+      if (!isNaN(num) && num > 0) {
+        totalValue = num;
+      }
+    }
+  }
+
+  // Extract merchant
+  let merchantValue: string | undefined;
+  if (parsed.merchant) {
+    const merchant = String(parsed.merchant).trim();
+    if (merchant.length > 0 && !['null', 'unknown', 'n/a', 'none'].includes(merchant.toLowerCase())) {
+      // Clean up merchant name - remove store numbers
+      merchantValue = merchant.replace(/#\s*\d+/g, '').replace(/\s+/g, ' ').trim();
+    }
+  }
+
+  // Extract date
+  let dateValue: string | undefined;
+  if (parsed.date) {
+    const dateStr = String(parsed.date);
+    if (dateStr && !['null', 'unknown', 'n/a'].includes(dateStr.toLowerCase())) {
+      dateValue = parseDate(dateStr) || undefined;
+    }
+  }
+
+  // Extract currency
+  const currencyValue = parsed.currency ? String(parsed.currency).toUpperCase() : 'USD';
+
+  // Calculate confidence - be generous to avoid needs_review
+  let confidence = 0.85;
+  if (!totalValue || totalValue <= 0) {
+    confidence = 0.5;
+  } else if (!merchantValue) {
+    confidence = 0.75;
+  }
+
+  logger.info("Final extraction values", {
+    total: totalValue,
+    merchant: merchantValue,
+    date: dateValue,
+    currency: currencyValue,
+    confidence
+  });
+
+  return {
+    source: "gemini",
+    processedAt: admin.firestore.FieldValue.serverTimestamp(),
+    totalAmount: totalValue !== undefined && totalValue > 0
+      ? { value: totalValue, confidence, rawText: String(totalValue) }
+      : undefined,
+    currency: { value: currencyValue, confidence: 0.9 },
+    date: dateValue
+      ? { value: dateValue, confidence }
+      : undefined,
+    supplierName: merchantValue
+      ? { value: merchantValue, confidence, rawText: merchantValue }
+      : undefined,
+    overallConfidence: confidence,
+  };
+}
 
 /**
  * Main Cloud Function - Triggered when a receipt document is created
@@ -179,55 +343,27 @@ export const processReceipt = onDocumentCreated(
         }
       }
 
-      // Step 1: Try Document AI extraction (skip for HEIC if conversion failed)
+      // Step 1: Gemini extraction for accurate receipt parsing
       let extraction: ExtractionResult | null = null;
 
-      // Only try Document AI if we have a supported format (not unconverted HEIC)
-      const canUseDocumentAI = PROCESSOR_ID && processMimeType !== "image/heic" && processMimeType !== "image/heif";
-
-      if (canUseDocumentAI) {
-        try {
-          extraction = await extractWithDocumentAI(processBuffer, processMimeType);
-          logger.info("Document AI extraction complete", { confidence: extraction.overallConfidence });
-        } catch (error) {
-          logger.warn("Document AI extraction failed, falling back to Gemini", error);
+      try {
+        extraction = await extractWithGemini(processBuffer, processMimeType);
+        if (extraction) {
+          logger.info("Gemini extraction complete", {
+            confidence: extraction.overallConfidence,
+            total: extraction.totalAmount?.value,
+            merchant: extraction.supplierName?.value
+          });
         }
-      } else if (PROCESSOR_ID) {
-        logger.info("Skipping Document AI for HEIC file, using Gemini directly");
-      } else {
-        logger.info("Document AI processor not configured, using Gemini directly");
-      }
-
-      // Step 2: If Document AI failed or low confidence, use Gemini
-      if (!extraction || extraction.overallConfidence < LOW_CONFIDENCE_THRESHOLD) {
-        try {
-          // Gemini can handle various formats including HEIC
-          const geminiExtraction = await extractWithGemini(processBuffer, processMimeType);
-          if (!extraction || geminiExtraction.overallConfidence > extraction.overallConfidence) {
-            extraction = geminiExtraction;
-            logger.info("Using Gemini extraction", { confidence: extraction.overallConfidence });
-          }
-        } catch (error) {
-          logger.error("Gemini extraction failed", error);
-        }
-      }
-
-      // Step 2.5: If we still don't have a merchant name, try focused merchant extraction
-      if (extraction && (!extraction.supplierName || !extraction.supplierName.value)) {
-        logger.warn("No merchant name found in initial extraction, attempting focused merchant-only extraction");
-        try {
-          const merchantName = await extractMerchantNameOnly(processBuffer, processMimeType);
-          if (merchantName) {
-            logger.info("Focused merchant extraction successful", { merchantName });
-            extraction.supplierName = {
-              value: merchantName,
-              confidence: 0.75,
-              rawText: merchantName
-            };
-          }
-        } catch (error) {
-          logger.error("Focused merchant extraction failed", error);
-        }
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorStack = error instanceof Error ? error.stack : undefined;
+        logger.error("Two-pass Gemini extraction failed", {
+          message: errorMessage,
+          stack: errorStack,
+          mimeType: processMimeType,
+          bufferSize: processBuffer.length
+        });
       }
 
       // If we still have no extraction, mark for review
@@ -254,46 +390,28 @@ export const processReceipt = onDocumentCreated(
       );
 
       // Step 5: Determine final status
-      // Use lower threshold for PDFs since they're typically cleaner and more machine-readable
-      const isPdf = mimeType === "application/pdf";
-      const confidenceThreshold = isPdf ? PDF_HIGH_CONFIDENCE_THRESHOLD : HIGH_CONFIDENCE_THRESHOLD;
-
-      // Calculate a weighted confidence score that prioritizes the total amount field
-      // Total amount is the MOST IMPORTANT field - if we have it with good confidence, we should auto-approve
-      const hasTotalAmount = extraction.totalAmount?.value !== undefined;
-      const totalConfidence = extraction.totalAmount?.confidence || 0;
+      // Be lenient - if we have a total amount, approve it
+      const hasTotalAmount = extraction.totalAmount?.value !== undefined && extraction.totalAmount.value > 0;
       const hasMerchant = extraction.supplierName?.value !== undefined;
-      const hasDate = extraction.date?.value !== undefined;
 
-      // For PDFs: if we have total amount with any reasonable confidence, mark as final
-      // Total amount is critical - merchant and date are nice-to-have
-      let shouldAutoApprove = false;
-      if (isPdf) {
-        // PDF with total amount: auto-approve if total confidence is decent (>= 0.6)
-        if (hasTotalAmount && totalConfidence >= 0.6) {
-          shouldAutoApprove = true;
-          logger.info("Auto-approving PDF with total amount", {
-            totalAmount: extraction.totalAmount?.value,
-            totalConfidence,
-            hasMerchant,
-            hasDate
-          });
-        }
+      // Auto-approve if we have a total amount - this is the most important field
+      // Users can always edit merchant/date later, but having SOME data is better than needs_review
+      let status: string;
+      if (hasTotalAmount) {
+        status = "final";
+        logger.info("Auto-approving receipt with total amount", {
+          totalAmount: extraction.totalAmount?.value,
+          merchant: extraction.supplierName?.value,
+          hasMerchant,
+          confidence: extraction.overallConfidence
+        });
       } else {
-        // For images: require higher overall confidence OR strong total + merchant
-        if (hasTotalAmount && hasMerchant && totalConfidence >= 0.7) {
-          shouldAutoApprove = true;
-          logger.info("Auto-approving image with strong total and merchant", {
-            totalAmount: extraction.totalAmount?.value,
-            totalConfidence,
-            merchant: extraction.supplierName?.value
-          });
-        }
+        status = "needs_review";
+        logger.warn("No total amount extracted, marking for review", {
+          merchant: extraction.supplierName?.value,
+          confidence: extraction.overallConfidence
+        });
       }
-
-      const status = (shouldAutoApprove || extraction.overallConfidence >= confidenceThreshold)
-        ? "final"
-        : "needs_review";
 
       // Step 6: Update receipt with extraction results
       const updateData: Record<string, unknown> = {
@@ -357,385 +475,6 @@ export const processReceipt = onDocumentCreated(
     }
   }
 );
-
-/**
- * Focused extraction to get just the merchant name using Gemini
- * Used as a fallback when the main extraction doesn't find a merchant
- */
-async function extractMerchantNameOnly(
-  fileBuffer: Buffer,
-  mimeType: string
-): Promise<string | null> {
-  const vertexAI = new VertexAI({
-    project: PROJECT_ID,
-    location: VERTEX_LOCATION,
-  });
-
-  const model = vertexAI.getGenerativeModel({
-    model: "gemini-3-flash-preview",
-    generationConfig: {
-      temperature: 0.1,
-      maxOutputTokens: 256,
-      responseMimeType: "application/json",
-    },
-  });
-
-  // Gemini only supports these image mimeTypes
-  const supportedMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-  let geminiMimeType = mimeType;
-  if (!supportedMimeTypes.includes(mimeType)) {
-    geminiMimeType = "image/jpeg";
-  }
-
-  const prompt = `You are analyzing a receipt image. Your ONLY task is to identify the merchant/store/business name.
-
-Look for:
-- The largest text at the TOP of the receipt
-- Company logos or branding
-- Store name in the header
-- Business name before the itemized list
-
-Common examples: "WALMART", "TARGET", "STARBUCKS", "CVS PHARMACY", "WHOLE FOODS MARKET", "MCDONALD'S", etc.
-
-Return ONLY a JSON object with this format:
-{
-  "merchant": "Store Name Here"
-}
-
-Make your best effort. Even a partial name is better than nothing. Only return null if the image is completely illegible.`;
-
-  const base64Image = fileBuffer.toString("base64");
-
-  const result = await model.generateContent({
-    contents: [
-      {
-        role: "user",
-        parts: [
-          {
-            inlineData: {
-              mimeType: geminiMimeType,
-              data: base64Image,
-            },
-          },
-          { text: prompt },
-        ],
-      },
-    ],
-  });
-
-  const response = result.response;
-  const text = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
-
-  try {
-    const parsed = JSON.parse(text);
-    const merchantName = parsed.merchant;
-
-    if (merchantName && typeof merchantName === 'string') {
-      const trimmed = merchantName.trim();
-      if (trimmed.length > 0 && !["null", "unknown", "n/a", "none"].includes(trimmed.toLowerCase())) {
-        return trimmed;
-      }
-    }
-  } catch (error) {
-    logger.warn("Failed to parse merchant-only extraction", { error, text });
-  }
-
-  return null;
-}
-
-/**
- * Extract receipt data using Google Document AI
- */
-async function extractWithDocumentAI(
-  fileBuffer: Buffer,
-  mimeType: string
-): Promise<ExtractionResult> {
-  const client = new DocumentProcessorServiceClient();
-
-  const name = `projects/${PROJECT_ID}/locations/${LOCATION}/processors/${PROCESSOR_ID}`;
-
-  const request = {
-    name,
-    rawDocument: {
-      content: fileBuffer.toString("base64"),
-      mimeType,
-    },
-  };
-
-  const [result] = await client.processDocument(request);
-  const document = result.document;
-
-  if (!document) {
-    throw new Error("No document returned from Document AI");
-  }
-
-  // Extract entities from the document
-  const entities = document.entities || [];
-  let totalAmount: ExtractedField<number> | undefined;
-  let currency: ExtractedField<string> | undefined;
-  let date: ExtractedField<string> | undefined;
-  let supplierName: ExtractedField<string> | undefined;
-  let confidenceSum = 0;
-  let confidenceCount = 0;
-
-  for (const entity of entities) {
-    const type = entity.type?.toLowerCase() || "";
-    const value = entity.mentionText || "";
-    const confidence = entity.confidence || 0;
-
-    confidenceSum += confidence;
-    confidenceCount++;
-
-    if (type.includes("total") || type.includes("amount")) {
-      const numericValue = parseFloat(value.replace(/[^0-9.-]/g, ""));
-      if (!isNaN(numericValue)) {
-        totalAmount = { value: numericValue, confidence, rawText: value };
-      }
-    }
-
-    if (type.includes("currency")) {
-      currency = { value: value.toUpperCase(), confidence, rawText: value };
-    }
-
-    if (type.includes("date") || type.includes("receipt_date")) {
-      const parsedDate = parseDate(value);
-      if (parsedDate) {
-        date = { value: parsedDate, confidence, rawText: value };
-      }
-    }
-
-    if (type.includes("supplier") || type.includes("vendor") || type.includes("merchant")) {
-      supplierName = { value: value.trim(), confidence, rawText: value };
-    }
-  }
-
-  // Default currency to USD if not found
-  if (!currency && totalAmount) {
-    currency = { value: "USD", confidence: 0.5 };
-  }
-
-  const overallConfidence = confidenceCount > 0 ? confidenceSum / confidenceCount : 0;
-
-  return {
-    source: "document_ai",
-    processedAt: admin.firestore.FieldValue.serverTimestamp(),
-    totalAmount,
-    currency,
-    date,
-    supplierName,
-    overallConfidence,
-  };
-}
-
-/**
- * Extract receipt data using Gemini 2.5
- */
-async function extractWithGemini(
-  fileBuffer: Buffer,
-  mimeType: string
-): Promise<ExtractionResult> {
-  const vertexAI = new VertexAI({
-    project: PROJECT_ID,
-    location: VERTEX_LOCATION,
-  });
-
-  const model = vertexAI.getGenerativeModel({
-    model: "gemini-3-flash-preview", // Gemini 2.5 Flash - better accuracy for receipts
-    generationConfig: {
-      temperature: 0.1, // Low temperature for more consistent extraction
-      maxOutputTokens: 1024,
-      responseMimeType: "application/json", // Force JSON output
-    },
-  });
-
-  // Gemini only supports these image mimeTypes: jpeg, png, gif, webp
-  // Map unsupported types to jpeg (the data will still be what it is, but Gemini might handle it)
-  const supportedMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-  let geminiMimeType = mimeType;
-  if (!supportedMimeTypes.includes(mimeType)) {
-    logger.info(`Unsupported mimeType ${mimeType} for Gemini, using image/jpeg`);
-    geminiMimeType = "image/jpeg";
-  }
-
-  const prompt = `You are an expert receipt parser. Analyze this receipt image carefully and extract the key information.
-
-CRITICAL INSTRUCTIONS - PRIORITY ORDER:
-
-1. TOTAL AMOUNT (HIGHEST PRIORITY): This is the MOST CRITICAL field. Look very carefully for:
-   - The FINAL TOTAL - usually labeled as "Total", "Grand Total", "Amount Due", "Balance Due", or similar
-   - It's typically the LARGEST number on the receipt, often at the bottom
-   - Do NOT use subtotals, tax amounts, or individual item prices
-   - Common patterns: "TOTAL $45.67", "Grand Total 123.45", "Amount Due: $89.00"
-   - Extract ONLY the numeric value (e.g., from "$45.67" extract 45.67)
-   - This field is MANDATORY - you must extract it accurately
-
-2. MERCHANT NAME (IMPORTANT): Look very carefully for:
-   - The business/store name printed at the TOP of the receipt (usually largest text)
-   - Company logos or branding
-   - Header text before the itemized list
-   - Store location or branch name
-   - Common patterns: "WALMART", "TARGET", "STARBUCKS", "CVS", "WHOLE FOODS", etc.
-   - DO NOT return null for merchant unless the receipt is completely illegible
-   - If unsure, provide your best guess based on any visible text or logos
-
-3. DATE and CURRENCY: Extract if visible, but these are less critical than total and merchant.
-
-Return a JSON object with these exact fields:
-{
-  "merchant": "The store or business name",
-  "total": 0.00,
-  "currency": "USD",
-  "date": "YYYY-MM-DD",
-  "confidence": 0.95
-}
-
-Field requirements (IN ORDER OF IMPORTANCE):
-- "total": (MOST IMPORTANT) A NUMBER representing the final total paid. This is MANDATORY. Parse from text like "$45.67" → 45.67. Look for "Total", "Grand Total", "Amount Due", etc. DO NOT return null.
-- "merchant": The business name. REQUIRED - make your best effort to extract this. Look at logos, headers, and any text at the top of the receipt. Even partial names are better than null.
-- "currency": The currency code (default to "USD" for US receipts)
-- "date": The transaction date in YYYY-MM-DD format
-- "confidence": Your confidence in the extraction (0.0 to 1.0). Use HIGH confidence (0.9+) if you successfully extracted the total amount from a clear receipt.
-
-IMPORTANT: The total amount is the MOST CRITICAL field. If you extract it correctly, set high confidence even if other fields are missing.
-
-Return ONLY the JSON object.`;
-
-  const base64Image = fileBuffer.toString("base64");
-
-  logger.info("Calling Gemini 2.5 Flash for receipt extraction", {
-    originalMimeType: mimeType,
-    geminiMimeType,
-    bufferSize: fileBuffer.length,
-  });
-
-  const result = await model.generateContent({
-    contents: [
-      {
-        role: "user",
-        parts: [
-          {
-            inlineData: {
-              mimeType: geminiMimeType,
-              data: base64Image,
-            },
-          },
-          { text: prompt },
-        ],
-      },
-    ],
-  });
-
-  const response = result.response;
-  const text = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
-
-  logger.info("Gemini raw response", { text: text.substring(0, 500) });
-
-  // Parse JSON from response - with responseMimeType set, the response should be clean JSON
-  let parsed: Record<string, unknown>;
-  try {
-    // First try direct parse (should work with responseMimeType: "application/json")
-    parsed = JSON.parse(text);
-  } catch {
-    // Fallback: extract JSON from markdown code blocks or text
-    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      logger.error("Could not parse JSON from Gemini response", { text });
-      throw new Error("Could not parse JSON from Gemini response");
-    }
-    const jsonStr = jsonMatch[1] || jsonMatch[0];
-    parsed = JSON.parse(jsonStr);
-  }
-
-  logger.info("Gemini parsed response", {
-    merchant: parsed.merchant,
-    total: parsed.total,
-    totalType: typeof parsed.total,
-    date: parsed.date,
-    confidence: parsed.confidence,
-  });
-
-  let confidence = (typeof parsed.confidence === 'number' ? parsed.confidence : 0.7);
-
-  // Parse total amount - handle both number and string values
-  let totalAmountValue: number | undefined;
-  if (parsed.total != null) {
-    const rawTotal = parsed.total;
-    const numValue = typeof rawTotal === 'string'
-      ? parseFloat(String(rawTotal).replace(/[^0-9.-]/g, ''))
-      : Number(rawTotal);
-    if (!isNaN(numValue) && numValue > 0) {
-      totalAmountValue = numValue;
-      logger.info("Parsed total amount", { raw: rawTotal, parsed: numValue });
-    } else {
-      logger.warn("Failed to parse total amount", { raw: rawTotal, parsed: numValue });
-    }
-  } else {
-    logger.warn("No total found in Gemini response");
-  }
-
-  // Parse merchant name - be more robust in handling empty/null values
-  let merchantValue: string | undefined;
-  if (parsed.merchant != null) {
-    const trimmed = String(parsed.merchant).trim();
-    // Only accept non-empty strings that aren't just "null", "unknown", etc.
-    if (trimmed.length > 0 &&
-        !["null", "unknown", "n/a", "none", ""].includes(trimmed.toLowerCase())) {
-      merchantValue = trimmed;
-    }
-  }
-
-  // Log merchant extraction for debugging
-  logger.info("Merchant extraction from Gemini", {
-    raw: parsed.merchant,
-    parsed: merchantValue,
-    wasNull: parsed.merchant == null,
-    wasEmpty: !merchantValue
-  });
-
-  // Boost confidence for PDFs when critical fields are successfully extracted
-  const isPdf = mimeType === "application/pdf";
-  const hasCriticalFields = totalAmountValue !== undefined;
-  const hasAllCriticalFields = totalAmountValue !== undefined && merchantValue && parsed.date;
-
-  if (isPdf) {
-    if (hasAllCriticalFields && confidence < 0.85) {
-      // PDFs with all fields: boost confidence to 0.85
-      confidence = Math.max(confidence, 0.85);
-      logger.info("Boosted confidence for complete PDF extraction", {
-        originalConfidence: parsed.confidence,
-        boostedConfidence: confidence,
-        total: totalAmountValue,
-        merchant: merchantValue
-      });
-    } else if (hasCriticalFields && confidence < 0.75) {
-      // PDFs with just total (most important field): boost confidence to 0.75
-      confidence = Math.max(confidence, 0.75);
-      logger.info("Boosted confidence for PDF with total amount", {
-        originalConfidence: parsed.confidence,
-        boostedConfidence: confidence,
-        total: totalAmountValue
-      });
-    }
-  }
-
-  return {
-    source: "gemini",
-    processedAt: admin.firestore.FieldValue.serverTimestamp(),
-    totalAmount: totalAmountValue !== undefined
-      ? { value: totalAmountValue, confidence, rawText: String(parsed.total) }
-      : undefined,
-    currency: parsed.currency
-      ? { value: String(parsed.currency), confidence }
-      : { value: "USD", confidence: 0.5 },
-    date: parsed.date
-      ? { value: String(parsed.date), confidence }
-      : undefined,
-    supplierName: merchantValue
-      ? { value: merchantValue, confidence, rawText: merchantValue }
-      : undefined,
-    overallConfidence: confidence,
-  };
-}
 
 /**
  * Normalize merchant name and match to existing merchants
