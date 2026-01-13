@@ -8,11 +8,6 @@ const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
 const appBaseUrl = defineSecret("APP_BASE_URL");
 const fromEmail = "info@receipt-nest.com";
 
-const getSafeText = (value: unknown, fallback: string) => {
-  const text = String(value ?? "").trim();
-  return text || fallback;
-};
-
 const escapeHtml = (value: string) =>
   value
     .replace(/&/g, "&amp;")
