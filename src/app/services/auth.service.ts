@@ -87,7 +87,8 @@ export class AuthService {
     const snapshot = await getDoc(userRef);
 
     if (snapshot.exists()) {
-      return snapshot.data() as UserProfile;
+      const data = snapshot.data() as UserProfile;
+      return { ...data, id: uid };
     }
 
     const profile: UserProfile = {
@@ -95,6 +96,7 @@ export class AuthService {
       firstName: '',
       lastName: '',
       email,
+      role: 'user',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
@@ -117,6 +119,7 @@ export class AuthService {
       firstName: form.firstName,
       lastName: form.lastName,
       email: form.email,
+      role: 'user',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
@@ -186,5 +189,4 @@ export class AuthService {
     return this.authStateReady;
   }
 }
-
 

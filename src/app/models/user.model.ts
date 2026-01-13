@@ -5,6 +5,7 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   email: string;
+  role?: 'admin' | 'user';
   subscriptionPlan?: 'free' | 'pro';
   subscriptionStatus?: string;
   subscriptionInterval?: 'monthly' | 'annual';
@@ -16,5 +17,4 @@ export interface UserProfile {
   createdAt?: Timestamp | ReturnType<typeof serverTimestamp>;
   updatedAt?: Timestamp | ReturnType<typeof serverTimestamp>;
 }
-
 

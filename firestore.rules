@@ -7,6 +7,11 @@ service cloud.firestore {
     function isAuthenticated() {
       return request.auth != null;
     }
+
+    function isAdmin() {
+      return isAuthenticated()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
     
     // Helper function to check if user owns the document
     function isOwner(userId) {
@@ -15,7 +20,14 @@ service cloud.firestore {
     
     // User profiles
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && (!('role' in request.resource.data) || request.resource.data.role == 'user');
+      allow update: if isOwner(userId)
+        && (
+          request.resource.data.role == resource.data.role
+          || (!('role' in resource.data) && request.resource.data.role == 'user')
+        );
+      allow delete: if isOwner(userId);
       
       // User's receipts subcollection
       match /receipts/{receiptId} {

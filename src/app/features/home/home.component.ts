@@ -93,6 +93,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     return name || profile.email;
   });
 
+  readonly isAdmin = computed(() => this.user()?.role === 'admin');
+
   readonly userInitials = computed(() => {
     const profile = this.user();
     if (!profile) {
