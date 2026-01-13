@@ -62,6 +62,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly shareCopied = signal(false);
   readonly downloadingMonthKey = signal<string | null>(null);
   readonly monthDownloadError = signal<{ key: string; message: string } | null>(null);
+  readonly downloadingCsvKey = signal<string | null>(null);
+  readonly monthCsvError = signal<{ key: string; message: string } | null>(null);
   readonly billingPortalError = signal<string | null>(null);
   readonly billingPortalLoading = signal(false);
 
@@ -539,6 +541,71 @@ export class HomeComponent implements OnInit, OnDestroy {
     return `${group.year}-${group.month}`;
   }
 
+  downloadMonthCsv(monthGroup: MonthGroup): void {
+    if (this.downloadingCsvKey()) {
+      return;
+    }
+
+    const key = this.getMonthGroupKey(monthGroup);
+    this.downloadingCsvKey.set(key);
+    this.monthCsvError.set(null);
+
+    try {
+      if (!monthGroup.receipts.length) {
+        throw new Error('No receipts available for this month yet.');
+      }
+
+      const rows: string[] = [];
+      rows.push(['Merchant', 'Date', 'Amount'].map(this.escapeCsvValue).join(','));
+
+      let total = 0;
+
+      for (const receipt of monthGroup.receipts) {
+        const merchant = receipt.merchant?.canonicalName
+          || receipt.merchant?.rawName
+          || receipt.extraction?.supplierName?.value
+          || 'Unknown';
+        const date = receipt.date || receipt.extraction?.date?.value || '';
+        const amountValue = receipt.totalAmount ?? receipt.extraction?.totalAmount?.value;
+        const amount = typeof amountValue === 'number' ? amountValue : null;
+        if (amount !== null) {
+          total += amount;
+        }
+
+        rows.push([
+          merchant,
+          date,
+          amount !== null ? amount.toFixed(2) : ''
+        ].map(this.escapeCsvValue).join(','));
+      }
+
+      rows.push([
+        'Total',
+        '',
+        total.toFixed(2)
+      ].map(this.escapeCsvValue).join(','));
+
+      const csvBlob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const downloadUrl = URL.createObjectURL(csvBlob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      const safeLabel = monthGroup.label.replace(/\\s+/g, '-');
+      link.download = `${safeLabel}-receipts.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(downloadUrl), 250);
+    } catch (error: any) {
+      console.error('CSV download failed', error);
+      this.monthCsvError.set({
+        key,
+        message: error?.message || 'Failed to download CSV. Please try again.'
+      });
+    } finally {
+      this.downloadingCsvKey.set(null);
+    }
+  }
+
   async downloadMonthReceipts(monthGroup: MonthGroup): Promise<void> {
     if (this.downloadingMonthKey()) {
       return;
@@ -692,6 +759,10 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.menuOpen.set(false);
       this.router.navigate(['/app/pricing'], { queryParams: { limit: 'free' } });
     }
+  }
+
+  private escapeCsvValue(value: string): string {
+    return `"${value.replace(/"/g, '""')}"`;
   }
 
   async deleteReceipt(receipt: Receipt, event: Event) {
