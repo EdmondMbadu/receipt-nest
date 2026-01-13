@@ -64,6 +64,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly monthDownloadError = signal<{ key: string; message: string } | null>(null);
   readonly downloadingCsvKey = signal<string | null>(null);
   readonly monthCsvError = signal<{ key: string; message: string } | null>(null);
+  readonly downloadMenuOpenKey = signal<string | null>(null);
   readonly billingPortalError = signal<string | null>(null);
   readonly billingPortalLoading = signal(false);
 
@@ -541,6 +542,15 @@ export class HomeComponent implements OnInit, OnDestroy {
     return `${group.year}-${group.month}`;
   }
 
+  toggleDownloadMenu(group: MonthGroup): void {
+    const key = this.getMonthGroupKey(group);
+    this.downloadMenuOpenKey.update((openKey) => (openKey === key ? null : key));
+  }
+
+  closeDownloadMenu(): void {
+    this.downloadMenuOpenKey.set(null);
+  }
+
   downloadMonthCsv(monthGroup: MonthGroup): void {
     if (this.downloadingCsvKey()) {
       return;
@@ -603,6 +613,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       });
     } finally {
       this.downloadingCsvKey.set(null);
+      this.closeDownloadMenu();
     }
   }
 
@@ -703,6 +714,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       });
     } finally {
       this.downloadingMonthKey.set(null);
+      this.closeDownloadMenu();
     }
   }
 
