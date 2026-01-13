@@ -10,7 +10,11 @@ service cloud.firestore {
 
     function isAdmin() {
       return isAuthenticated()
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+        && (
+          request.auth.token.admin == true
+          || request.auth.token.role == 'admin'
+          || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        );
     }
     
     // Helper function to check if user owns the document
