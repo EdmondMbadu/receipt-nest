@@ -22,3 +22,4 @@ setGlobalOptions({ maxInstances: 10 });
 export { processReceipt } from "./receipt-processor";
 export { createCheckoutSession, createPortalSession, stripeWebhook } from "./billing";
 export { generateAiInsights } from "./ai-insights";
+export { sendTestEmail } from "./admin";
