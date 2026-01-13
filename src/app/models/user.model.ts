@@ -14,7 +14,8 @@ export interface UserProfile {
   subscriptionCancelAtPeriodEnd?: boolean;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
+  welcomeEmailSent?: boolean;
+  welcomeEmailSentAt?: Timestamp | ReturnType<typeof serverTimestamp>;
   createdAt?: Timestamp | ReturnType<typeof serverTimestamp>;
   updatedAt?: Timestamp | ReturnType<typeof serverTimestamp>;
 }
-

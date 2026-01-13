@@ -23,3 +23,4 @@ export { processReceipt } from "./receipt-processor";
 export { createCheckoutSession, createPortalSession, stripeWebhook } from "./billing";
 export { generateAiInsights } from "./ai-insights";
 export { sendTestEmail } from "./admin";
+export { sendVerificationEmail, sendWelcomeEmail } from "./email";

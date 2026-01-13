@@ -9,8 +9,7 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
-  signOut,
-  sendEmailVerification
+  signOut
 } from 'firebase/auth';
 import {
   Firestore,
@@ -20,6 +19,7 @@ import {
   serverTimestamp,
   setDoc
 } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 import { app } from '../../../environments/environments';
 import { UserProfile } from '../models/user.model';
@@ -30,6 +30,7 @@ import { UserProfile } from '../models/user.model';
 export class AuthService {
   private readonly auth: Auth = getAuth(app);
   private readonly db: Firestore = getFirestore(app);
+  private readonly functions = getFunctions(app);
 
   private initialized = false;
   private readonly initPromise: Promise<void>;
@@ -56,6 +57,9 @@ export class AuthService {
 
           const userProfile = await this.loadOrCreateUserProfile(firebaseUser.uid, firebaseUser.email ?? '');
           this.user.set(userProfile);
+          if (firebaseUser.emailVerified) {
+            await this.sendWelcomeEmailIfNeeded();
+          }
         } catch (error) {
           console.error('Failed to load auth state', error);
           this.user.set(null);
@@ -125,7 +129,7 @@ export class AuthService {
     };
 
     await setDoc(doc(this.db, 'users', credential.user.uid), profile);
-    await sendEmailVerification(credential.user);
+    await this.sendVerificationEmail();
     await signOut(this.auth);
     this.user.set(null);
     this.resolveAuthStateReady?.();
@@ -140,7 +144,7 @@ export class AuthService {
     const user = credential.user;
 
     if (!user.emailVerified) {
-      await sendEmailVerification(user);
+      await this.sendVerificationEmail();
       await signOut(this.auth);
       this.user.set(null);
       const error: any = new Error('Email not verified');
@@ -163,7 +167,9 @@ export class AuthService {
       error.code = 'auth/no-current-user';
       throw error;
     }
-    await sendEmailVerification(user);
+
+    const callable = httpsCallable(this.functions, 'sendVerificationEmail');
+    await callable({});
   }
 
   async sendPasswordReset(email: string): Promise<void> {
@@ -188,5 +194,13 @@ export class AuthService {
   async waitForAuthState(): Promise<void> {
     return this.authStateReady;
   }
-}
 
+  private async sendWelcomeEmailIfNeeded(): Promise<void> {
+    try {
+      const callable = httpsCallable(this.functions, 'sendWelcomeEmail');
+      await callable({});
+    } catch (error) {
+      console.error('Failed to send welcome email', error);
+    }
+  }
+}
