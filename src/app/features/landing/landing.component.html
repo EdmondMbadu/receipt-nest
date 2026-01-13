@@ -218,7 +218,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
               </svg>
             </a>
-            <button
+            <button type="button" (click)="openDemo()"
               class="group inline-flex items-center justify-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 px-8 py-4 text-base font-semibold text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-white dark:hover:bg-slate-800 transition-all duration-200">
               <span
                 class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
@@ -923,9 +923,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
               </svg>
             </a>
-            <button
+            <button type="button" (click)="openDemo()"
               class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-600 hover:border-slate-500 bg-transparent px-8 py-4 text-base font-semibold text-white hover:bg-slate-800/50 transition-all duration-200">
-              Book a demo
+              Demo
             </button>
           </div>
         </div>
@@ -958,4 +958,27 @@
       </div>
     </div>
   </footer>
+
+  <div *ngIf="isDemoOpen()" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
+    <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" (click)="closeDemo()"></div>
+    <div class="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-4 py-3">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Demo</p>
+          <h3 class="text-sm font-semibold text-slate-900 dark:text-white">ReceiptNest in 60 seconds</h3>
+        </div>
+        <button type="button" (click)="closeDemo()"
+          class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="bg-black max-h-[70vh]">
+        <video controls playsinline
+          class="w-full h-full max-h-[70vh] object-contain"
+          src="https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/receipt-nest-intro.mp4?alt=media&token=8851c8a5-8822-4ba0-a0f7-ead929716d3d"></video>
+      </div>
+    </div>
+  </div>
 </div>

@@ -24,6 +24,7 @@ export class LandingComponent {
   readonly isDarkMode = this.theme.isDarkMode;
   readonly currentYear = new Date().getFullYear();
   readonly isMobileMenuOpen = signal(false);
+  readonly isDemoOpen = signal(false);
 
   readonly displayName = computed(() => {
     const profile = this.user();
@@ -55,7 +56,14 @@ export class LandingComponent {
   toggleMobileMenu() {
     this.isMobileMenuOpen.update(isOpen => !isOpen);
   }
-}
 
+  openDemo() {
+    this.isDemoOpen.set(true);
+  }
+
+  closeDemo() {
+    this.isDemoOpen.set(false);
+  }
+}
 
 
