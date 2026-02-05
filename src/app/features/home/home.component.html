@@ -48,7 +48,7 @@
             </svg>
             <span>Add Receipt</span>
           </button>
-          <a *ngIf="hasAiAccess()" routerLink="/app/insights" (click)="toggleMenu()"
+          <a routerLink="/app/insights" (click)="toggleMenu()"
             class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-emerald-700 dark:text-emerald-300 transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
             <svg class="h-5 w-5 glow-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round"
@@ -130,7 +130,7 @@
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-2">
           <!-- Premium AI Insights Link -->
-          <a *ngIf="hasAiAccess()" routerLink="/app/insights"
+          <a routerLink="/app/insights"
             class="relative group overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-500/20 dark:border-emerald-400/20 bg-emerald-500/5 dark:bg-emerald-400/5 px-4 py-2.5 text-sm font-semibold text-emerald-700 dark:text-emerald-300 shadow-sm transition-all hover:bg-emerald-500/10 dark:hover:bg-emerald-400/10 hover:scale-[1.02] hover:shadow-emerald-500/10">
             <div
               class="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">

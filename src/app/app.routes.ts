@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
-import { aiInsightsGuard } from './guards/ai-insights.guard';
 
 export const routes: Routes = [
   {
@@ -21,7 +20,7 @@ export const routes: Routes = [
   },
   {
     path: 'app/insights',
-    canActivate: [aiInsightsGuard],
+    canActivate: [authGuard],
     loadComponent: () => import('./features/ai-insights/ai-insights.component').then((m) => m.AiInsightsComponent)
   },
   {
