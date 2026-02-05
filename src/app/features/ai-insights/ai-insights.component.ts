@@ -47,6 +47,8 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
 
   // Computed
   readonly isPro = computed(() => this.subscriptionPlan() === 'pro');
+  readonly isAdmin = computed(() => this.user()?.role === 'admin');
+  readonly hasAiAccess = computed(() => this.isAdmin() || this.isPro());
   readonly suggestedQuestions = this.aiService.getSuggestedQuestions();
   readonly monthLabel = this.receiptService.selectedMonthLabel;
   readonly totalSpend = this.receiptService.selectedMonthSpend;
@@ -78,7 +80,7 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
     }
 
     // Generate initial insights if user is pro
-    if (this.isPro() && this.insights().length === 0) {
+    if (this.hasAiAccess() && this.insights().length === 0) {
       this.aiService.generateInsights();
     }
   }
@@ -95,7 +97,7 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
 
   async sendMessage(): Promise<void> {
     const text = this.messageText().trim();
-    if (!text || this.isLoading()) return;
+    if (!text || this.isLoading() || !this.hasAiAccess()) return;
 
     this.messageText.set('');
     this.showSuggestions.set(false);
@@ -113,6 +115,9 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
   }
 
   refreshInsights(): void {
+    if (!this.hasAiAccess()) {
+      return;
+    }
     this.aiService.generateInsights();
   }
 

@@ -101,6 +101,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   });
 
   readonly isAdmin = computed(() => this.user()?.role === 'admin');
+  readonly hasAiAccess = computed(() => this.isAdmin() || this.user()?.subscriptionPlan === 'pro');
 
   readonly userInitials = computed(() => {
     const profile = this.user();
