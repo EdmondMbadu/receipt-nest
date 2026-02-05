@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, computed, inject, signal, effect } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, computed, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -29,7 +29,7 @@ interface MonthGroup {
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
-export class HomeComponent implements OnInit, OnDestroy {
+export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private pdfLibPromise: Promise<typeof import('pdf-lib')> | null = null;
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
@@ -67,6 +67,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly downloadMenuOpenKey = signal<string | null>(null);
   readonly billingPortalError = signal<string | null>(null);
   readonly billingPortalLoading = signal(false);
+  readonly showDesktopFab = signal(false);
+
+  @ViewChild('addReceiptButton') addReceiptButton?: ElementRef<HTMLElement>;
+  private addReceiptObserver?: IntersectionObserver;
 
   // Expose Math for template
   readonly Math = Math;
@@ -404,6 +408,22 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.receiptService.unsubscribeFromReceipts();
+    this.addReceiptObserver?.disconnect();
+  }
+
+  ngAfterViewInit(): void {
+    const target = this.addReceiptButton?.nativeElement;
+    if (!target || typeof IntersectionObserver === 'undefined') {
+      this.showDesktopFab.set(true);
+      return;
+    }
+
+    this.addReceiptObserver = new IntersectionObserver(entries => {
+      const entry = entries[0];
+      this.showDesktopFab.set(!entry.isIntersecting);
+    }, { threshold: 0.1 });
+
+    this.addReceiptObserver.observe(target);
   }
 
   // Load image URLs for visible month groups
