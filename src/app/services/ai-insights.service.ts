@@ -116,6 +116,10 @@ export class AiInsightsService {
   readonly insights = signal<string[]>([]);
   readonly insightsLoading = signal(false);
 
+  // File upload state
+  readonly isUploading = signal(false);
+  readonly uploadProgress = signal(0);
+
   // Telegram state
   readonly telegramLinked = signal(false);
   readonly telegramLinkLoading = signal(false);
@@ -265,6 +269,113 @@ export class AiInsightsService {
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  /**
+   * Upload a receipt file from the chat interface.
+   * Shows progress in the chat and triggers the same backend processing pipeline.
+   */
+  async uploadReceiptFromChat(file: File): Promise<void> {
+    await this.initializeChatState();
+    this.isUploading.set(true);
+    this.uploadProgress.set(0);
+    this.error.set(null);
+
+    // Create a user message showing the attachment
+    const fileName = file.name;
+    const isImage = file.type.startsWith('image/');
+    let thumbnailDataUrl: string | null = null;
+
+    // Generate a thumbnail preview for images
+    if (isImage) {
+      try {
+        thumbnailDataUrl = await this.createThumbnailDataUrl(file);
+      } catch {
+        // Silently fail -- just won't show a preview
+      }
+    }
+
+    const attachLabel = isImage ? 'Receipt image' : 'Receipt document';
+    const userMessageContent = thumbnailDataUrl
+      ? `[attachment:image]${thumbnailDataUrl}[/attachment]\n${attachLabel}: ${fileName}`
+      : `${attachLabel}: ${fileName}`;
+
+    const userMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: 'user',
+      content: userMessageContent,
+      timestamp: new Date()
+    };
+    this.messages.update(msgs => [...msgs, userMessage]);
+
+    try {
+      const chatId = await this.ensureActiveChat();
+      await this.persistChat(chatId);
+
+      // Use the receipt service to upload (handles storage + Firestore doc creation)
+      await this.receiptService.uploadReceipt(file, (progress) => {
+        this.uploadProgress.set(Math.round(progress.progress));
+      });
+
+      // Add assistant confirmation
+      const assistantMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: `Receipt uploaded successfully! "${fileName}" is now being processed. ` +
+          `I'll extract the merchant, amount, and date automatically. ` +
+          `You'll see it in your receipts shortly.`,
+        timestamp: new Date()
+      };
+      this.messages.update(msgs => [...msgs, assistantMessage]);
+      await this.persistChat(chatId);
+    } catch (err: any) {
+      console.error('Failed to upload receipt from chat:', err);
+      const errorContent = err?.message === 'FREE_PLAN_LIMIT_REACHED'
+        ? 'You\'ve reached the free plan limit of 200 receipts. Upgrade to Pro for unlimited uploads.'
+        : `Sorry, I had trouble uploading that file. ${err?.message || 'Please try again.'}`;
+
+      const errorMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: errorContent,
+        timestamp: new Date()
+      };
+      this.messages.update(msgs => [...msgs, errorMessage]);
+
+      const chatId = this.activeChatId();
+      if (chatId) {
+        await this.persistChat(chatId);
+      }
+    } finally {
+      this.isUploading.set(false);
+      this.uploadProgress.set(0);
+    }
+  }
+
+  /**
+   * Create a thumbnail data URL from an image File for chat preview.
+   */
+  private createThumbnailDataUrl(file: File, maxSize = 200): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) { reject(new Error('No canvas context')); return; }
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', 0.7));
+        };
+        img.onerror = reject;
+        img.src = reader.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   }
 
   /**

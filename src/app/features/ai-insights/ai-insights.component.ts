@@ -21,6 +21,7 @@ import { app } from '../../../../environments/environments';
 export class AiInsightsComponent implements OnInit, OnDestroy {
   @ViewChild('chatContainer') chatContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('messageInput') messageInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   private readonly auth = inject(AuthService);
   private readonly theme = inject(ThemeService);
@@ -55,6 +56,10 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
   readonly monthLabel = this.receiptService.selectedMonthLabel;
   readonly totalSpend = this.receiptService.selectedMonthSpend;
   readonly receiptCount = computed(() => this.receiptService.selectedMonthReceipts().length);
+
+  // Upload state
+  readonly isUploading = this.aiService.isUploading;
+  readonly uploadProgress = this.aiService.uploadProgress;
 
   // Telegram state
   readonly telegramLinked = this.aiService.telegramLinked;
@@ -136,6 +141,17 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
     }
   }
 
+  async onFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file || !this.hasAiAccess()) return;
+
+    // Reset the input so the same file can be re-selected
+    input.value = '';
+
+    await this.aiService.uploadReceiptFromChat(file);
+  }
+
   private scrollToBottom(): void {
     if (this.chatContainer?.nativeElement) {
       const container = this.chatContainer.nativeElement;
@@ -164,6 +180,21 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
 
   goToPricing(): void {
     this.router.navigate(['/app/pricing']);
+  }
+
+  /**
+   * Extract an embedded attachment data URL from a message, if present.
+   */
+  getAttachmentUrl(content: string): string | null {
+    const match = content.match(/\[attachment:image\](.*?)\[\/attachment\]/);
+    return match ? match[1] : null;
+  }
+
+  /**
+   * Remove the attachment tag from message content for text rendering.
+   */
+  stripAttachment(content: string): string {
+    return content.replace(/\[attachment:image\].*?\[\/attachment\]\n?/, '').trim();
   }
 
   formatMessage(content: string): SafeHtml {
