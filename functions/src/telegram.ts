@@ -518,6 +518,18 @@ async function handleStartCommand(
 
 // ─── AI Chat Flow ───────────────────────────────────────────────────────────
 
+/** Well-known document ID for the Telegram chat session.
+ *  Using a fixed ID avoids the need for a composite index query. */
+const TELEGRAM_CHAT_DOC_ID = "_telegram";
+
+/** Stored message shape (same format as the web app uses) */
+interface StoredMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: string; // ISO-8601
+}
+
 async function handleTextMessage(
   token: string,
   message: TelegramMessage,
@@ -536,20 +548,15 @@ async function handleTextMessage(
     // Build expense data server-side
     const insightData = await buildServerInsightData(userId);
 
-    // Load or create a Telegram-specific chat session
-    const chatsRef = db.collection(`users/${userId}/aiChats`);
-    let telegramChatDoc = await chatsRef
-      .where("source", "==", "telegram")
-      .orderBy("updatedAt", "desc")
-      .limit(1)
-      .get();
+    // Use a well-known doc ID so we never need a composite-index query
+    const chatRef = db.doc(`users/${userId}/aiChats/${TELEGRAM_CHAT_DOC_ID}`);
+    const chatSnap = await chatRef.get();
 
-    let chatDocId: string;
-    let history: ChatMessage[] = [];
+    let storedMessages: StoredMessage[] = [];
 
-    if (telegramChatDoc.empty) {
-      // Create a new chat session for Telegram
-      const newDoc = await chatsRef.add({
+    if (!chatSnap.exists) {
+      // Create the Telegram chat doc for the first time
+      await chatRef.set({
         title: "Telegram Chat",
         source: "telegram",
         messages: [],
@@ -558,51 +565,49 @@ async function handleTextMessage(
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         lastMessageAt: admin.firestore.FieldValue.serverTimestamp(),
       });
-      chatDocId = newDoc.id;
     } else {
-      const doc = telegramChatDoc.docs[0];
-      chatDocId = doc.id;
-      const data = doc.data();
-      const storedMessages = data.messages || [];
-      history = storedMessages.map((m: any) => ({
-        role: m.role as "user" | "assistant",
-        content: m.content,
-      }));
+      storedMessages = (chatSnap.data()?.messages || []) as StoredMessage[];
     }
 
-    // Use last 10 messages for context
-    const recentHistory = history.slice(-10);
+    // Build ChatMessage history for the AI (last 10 messages for context)
+    const recentHistory: ChatMessage[] = storedMessages.slice(-10).map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
 
     // Call the shared AI handler
     const aiResponse = await handleChat(userText, recentHistory, insightData);
 
-    // Persist both messages
+    // Append the new pair, preserving all existing messages as-is
     const now = new Date().toISOString();
-    const userMsg = {
+    const userMsg: StoredMessage = {
       id: crypto.randomUUID(),
       role: "user",
       content: userText,
       timestamp: now,
     };
-    const assistantMsg = {
+    const assistantMsg: StoredMessage = {
       id: crypto.randomUUID(),
       role: "assistant",
       content: aiResponse,
-      timestamp: now,
+      timestamp: new Date().toISOString(),
     };
 
-    const updatedMessages = [...history.map((m, i) => ({
-      id: `hist-${i}`,
-      role: m.role,
-      content: m.content,
-      timestamp: now,
-    })), userMsg, assistantMsg];
+    const updatedMessages = [...storedMessages, userMsg, assistantMsg];
 
     // Keep only last 50 messages to avoid document size issues
     const trimmedMessages = updatedMessages.slice(-50);
 
-    await db.doc(`users/${userId}/aiChats/${chatDocId}`).update({
-      title: userText.length > 56 ? userText.slice(0, 56) + "..." : userText,
+    // Derive a title from the first user message in the conversation
+    const firstUserMsg = trimmedMessages.find((m) => m.role === "user");
+    const title = firstUserMsg
+      ? firstUserMsg.content.length > 56
+        ? firstUserMsg.content.slice(0, 56) + "..."
+        : firstUserMsg.content
+      : "Telegram Chat";
+
+    await chatRef.update({
+      title,
       messages: trimmedMessages,
       messageCount: trimmedMessages.length,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -911,13 +916,10 @@ export const telegramWebhook = onRequest(
     memory: "512MiB",
     timeoutSeconds: 120,
     secrets: [telegramBotToken],
+    // Allow Telegram servers to call this without auth
+    invoker: "public",
   },
   async (req, res) => {
-    if (req.method !== "POST") {
-      res.status(405).send("Method Not Allowed");
-      return;
-    }
-
     const token = telegramBotToken.value();
     if (!token) {
       logger.error("TELEGRAM_BOT_TOKEN secret is not set");
@@ -925,7 +927,40 @@ export const telegramWebhook = onRequest(
       return;
     }
 
+    // ── GET = self-register the webhook with Telegram ──────────────────
+    // Visit this function's URL in a browser to auto-register the webhook.
+    // This avoids the v1-vs-v2 URL mismatch problem entirely.
+    if (req.method === "GET") {
+      const protocol = req.headers["x-forwarded-proto"] || req.protocol || "https";
+      const host = req.headers["x-forwarded-host"] || req.headers.host || "";
+      // Build the canonical URL that Telegram should POST to
+      const webhookUrl = `${protocol}://${host}${req.originalUrl}`.split("?")[0];
+
+      logger.info("Self-registering Telegram webhook", { webhookUrl });
+
+      const result = await telegramApi(token, "setWebhook", {
+        url: webhookUrl,
+        allowed_updates: ["message"],
+      });
+
+      logger.info("setWebhook result", result);
+      res.status(200).send(
+        `Webhook registered!\n\nURL: ${webhookUrl}\nResult: ${JSON.stringify(result, null, 2)}`
+      );
+      return;
+    }
+
+    if (req.method !== "POST") {
+      res.status(405).send("Method Not Allowed");
+      return;
+    }
+
     const update: TelegramUpdate = req.body;
+    logger.info("Received Telegram update", {
+      update_id: update.update_id,
+      has_message: !!update.message,
+      text: update.message?.text?.substring(0, 50),
+    });
 
     if (!update.message) {
       // Could be an edited_message, callback_query, etc. -- ignore for now.
@@ -1046,7 +1081,15 @@ export const generateTelegramLinkToken = onCall(
   }
 );
 
-// ─── Setup Telegram Webhook (admin one-time setup) ──────────────────────────
+// ─── Setup Telegram Webhook (admin callable – fallback method) ──────────────
+// The *preferred* way to register the webhook is to simply open the
+// telegramWebhook function URL in a browser (GET request).  That path
+// auto-detects its own Cloud Run URL and calls setWebhook for you.
+//
+// This callable is kept as a fallback for programmatic use.  Pass
+// { webhookUrl: "https://..." } if you know the URL, otherwise it will
+// attempt the legacy v1-style URL (which only works if you haven't
+// migrated fully to v2).
 
 export const setupTelegramWebhook = onCall(
   {
@@ -1073,14 +1116,17 @@ export const setupTelegramWebhook = onCall(
       throw new HttpsError("failed-precondition", "Bot token not configured");
     }
 
-    const webhookUrl = `https://us-central1-receipt-nest.cloudfunctions.net/telegramWebhook`;
+    // Allow caller to pass the correct URL (from deployment output)
+    const webhookUrl: string =
+      (request.data as any)?.webhookUrl ||
+      `https://us-central1-receipt-nest.cloudfunctions.net/telegramWebhook`;
 
     const result = await telegramApi(token, "setWebhook", {
       url: webhookUrl,
       allowed_updates: ["message"],
     });
 
-    logger.info("Telegram webhook setup result", result);
+    logger.info("Telegram webhook setup result", { webhookUrl, result });
 
     return { success: true, webhookUrl, result };
   }

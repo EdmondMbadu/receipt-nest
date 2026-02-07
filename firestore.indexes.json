@@ -120,21 +120,6 @@
       ],
       "density": "SPARSE_ALL"
     }
-    ,
-    {
-      "collectionGroup": "aiChats",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "source",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "updatedAt",
-          "order": "DESCENDING"
-        }
-      ]
-    }
   ],
   "fieldOverrides": []
 }
