@@ -16,6 +16,8 @@ export interface UserProfile {
   stripeSubscriptionId?: string;
   welcomeEmailSent?: boolean;
   welcomeEmailSentAt?: Timestamp | ReturnType<typeof serverTimestamp>;
+  telegramChatId?: number;
+  telegramLinkedAt?: Timestamp | ReturnType<typeof serverTimestamp>;
   createdAt?: Timestamp | ReturnType<typeof serverTimestamp>;
   updatedAt?: Timestamp | ReturnType<typeof serverTimestamp>;
 }

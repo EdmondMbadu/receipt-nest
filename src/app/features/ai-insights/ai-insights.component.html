@@ -41,6 +41,34 @@
             </div>
           </div>
           <div class="flex items-center gap-2">
+            <!-- Telegram Connect Button -->
+            <button type="button" (click)="openTelegramDialog()"
+              class="relative inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-medium shadow-sm transition-all"
+              [class.border-sky-300]="telegramLinked()"
+              [class.dark:border-sky-600]="telegramLinked()"
+              [class.bg-sky-50]="telegramLinked()"
+              [class.dark:bg-sky-900/20]="telegramLinked()"
+              [class.text-sky-700]="telegramLinked()"
+              [class.dark:text-sky-300]="telegramLinked()"
+              [class.border-slate-200]="!telegramLinked()"
+              [class.dark:border-slate-700]="!telegramLinked()"
+              [class.bg-white]="!telegramLinked()"
+              [class.dark:bg-slate-900]="!telegramLinked()"
+              [class.text-slate-600]="!telegramLinked()"
+              [class.dark:text-slate-300]="!telegramLinked()"
+              [class.hover:bg-slate-50]="!telegramLinked()"
+              [class.dark:hover:bg-slate-800]="!telegramLinked()">
+              <!-- Telegram SVG Icon -->
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+              </svg>
+              @if (telegramLinked()) {
+                Telegram
+                <span class="flex h-2 w-2 rounded-full bg-emerald-500"></span>
+              } @else {
+                Connect Telegram
+              }
+            </button>
             <button type="button" (click)="clearChat()"
               class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800">
               <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -328,6 +356,139 @@
       <p class="text-xs text-slate-400 dark:text-slate-500 mt-4">
         Starting at just $4.99/month. Cancel anytime.
       </p>
+    </div>
+  </div>
+  }
+
+  <!-- Telegram Link Dialog Modal -->
+  @if (telegramDialogOpen()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" (click)="closeTelegramDialog()"></div>
+
+    <!-- Modal -->
+    <div
+      class="relative w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl">
+      <!-- Close button -->
+      <button type="button" (click)="closeTelegramDialog()"
+        class="absolute top-4 right-4 inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      @if (telegramLinked()) {
+        <!-- Already Linked State -->
+        <div class="text-center">
+          <div
+            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/30">
+            <svg class="h-8 w-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Telegram Connected</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+            Your Telegram account is linked. You can chat with your AI assistant and upload receipts directly on Telegram.
+          </p>
+          <button type="button" (click)="unlinkTelegram()"
+            class="inline-flex items-center gap-2 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 transition-all hover:bg-red-100 dark:hover:bg-red-900/30">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M13.181 8.68a4.503 4.503 0 011.903 6.405m-9.768-2.782L3.56 14.06a4.5 4.5 0 006.364 6.365l.164-.163m-2.193-7.378a4.5 4.5 0 016.364 0M12 12h.008v.008H12V12z" />
+            </svg>
+            Disconnect Telegram
+          </button>
+        </div>
+      } @else {
+        <!-- Link Flow -->
+        <div class="text-center">
+          <!-- Telegram Icon -->
+          <div
+            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-sky-100 dark:bg-sky-900/30">
+            <svg class="h-8 w-8 text-sky-600 dark:text-sky-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+            </svg>
+          </div>
+
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Connect to Telegram</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+            Scan the QR code below with Telegram to link your account. You can then chat with your AI assistant and upload receipts directly on Telegram.
+          </p>
+
+          @if (telegramLinkLoading()) {
+            <!-- Loading state -->
+            <div class="flex flex-col items-center gap-3 py-8">
+              <div class="h-8 w-8 animate-spin rounded-full border-2 border-sky-500 border-t-transparent"></div>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Generating link...</p>
+            </div>
+          } @else if (telegramLinkError()) {
+            <!-- Error state -->
+            <div class="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 mb-4">
+              <p class="text-sm text-red-600 dark:text-red-400">{{ telegramLinkError() }}</p>
+            </div>
+            <button type="button" (click)="openTelegramDialog()"
+              class="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg transition-all hover:bg-sky-700">
+              Try Again
+            </button>
+          } @else if (telegramQrDataUrl()) {
+            <!-- QR Code -->
+            <div class="flex flex-col items-center gap-4">
+              <div class="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white p-3">
+                <img [src]="telegramQrDataUrl()" alt="Telegram QR Code" class="h-52 w-52" />
+              </div>
+
+              <p class="text-xs text-slate-400 dark:text-slate-500">
+                Or tap the link below on mobile:
+              </p>
+
+              <a [href]="telegramDeepLink()" target="_blank" rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg transition-all hover:bg-sky-700 hover:scale-[1.02]">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                </svg>
+                Open in Telegram
+              </a>
+
+              <div class="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
+                <div class="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse"></div>
+                Waiting for you to scan...
+              </div>
+            </div>
+          }
+
+          <!-- Features list -->
+          <div class="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800">
+            <h4 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">What you can do on Telegram</h4>
+            <div class="grid grid-cols-1 gap-2 text-left">
+              <div class="flex items-center gap-2.5">
+                <div class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+                  <svg class="h-3 w-3 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <span class="text-xs text-slate-600 dark:text-slate-400">Chat with your AI financial assistant</span>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <div class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+                  <svg class="h-3 w-3 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <span class="text-xs text-slate-600 dark:text-slate-400">Send receipt photos to add them instantly</span>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <div class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+                  <svg class="h-3 w-3 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <span class="text-xs text-slate-600 dark:text-slate-400">Conversations sync with this app</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   </div>
   }

@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import {
   addDoc,
@@ -10,6 +10,7 @@ import {
   getDocs,
   getFirestore,
   limit,
+  onSnapshot,
   orderBy,
   query,
   QueryDocumentSnapshot,
@@ -114,6 +115,15 @@ export class AiInsightsService {
   // Pre-built insights
   readonly insights = signal<string[]>([]);
   readonly insightsLoading = signal(false);
+
+  // Telegram state
+  readonly telegramLinked = signal(false);
+  readonly telegramLinkLoading = signal(false);
+  readonly telegramDeepLink = signal<string | null>(null);
+  readonly telegramQrDataUrl = signal<string | null>(null);
+  readonly telegramLinkError = signal<string | null>(null);
+  readonly telegramDialogOpen = signal(false);
+  private telegramLinkUnsubscribe: (() => void) | null = null;
 
   /**
    * Generate initial insights based on user's expense data
@@ -730,5 +740,126 @@ export class AiInsightsService {
     this.historyLoadingMore.set(false);
     this.historyCursor = null;
     this.initializedHistoryForUser = null;
+  }
+
+  // ── Telegram Integration ────────────────────────────────────────────────
+
+  /**
+   * Check the current user's Telegram link status from their profile.
+   */
+  checkTelegramStatus(): void {
+    const userId = this.auth.user()?.id;
+    if (!userId) {
+      this.telegramLinked.set(false);
+      return;
+    }
+
+    // Listen for real-time updates on the user doc to detect when linking completes
+    if (this.telegramLinkUnsubscribe) {
+      this.telegramLinkUnsubscribe();
+    }
+
+    const userRef = doc(this.db, 'users', userId);
+    this.telegramLinkUnsubscribe = onSnapshot(userRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        const linked = !!data['telegramChatId'];
+        this.telegramLinked.set(linked);
+
+        // If just linked while dialog is open, close after a short delay
+        if (linked && this.telegramDialogOpen()) {
+          setTimeout(() => {
+            this.telegramDialogOpen.set(false);
+            this.telegramDeepLink.set(null);
+            this.telegramQrDataUrl.set(null);
+          }, 2000);
+        }
+      }
+    });
+  }
+
+  /**
+   * Generate a Telegram deep-link token and QR code.
+   */
+  async generateTelegramLink(): Promise<void> {
+    this.telegramLinkLoading.set(true);
+    this.telegramLinkError.set(null);
+    this.telegramDeepLink.set(null);
+    this.telegramQrDataUrl.set(null);
+
+    try {
+      const fn = httpsCallable(this.functions, 'generateTelegramLinkToken');
+      const response = await fn({});
+      const result = response.data as {
+        deepLink: string;
+        token: string;
+        botUsername: string;
+      };
+
+      this.telegramDeepLink.set(result.deepLink);
+
+      // Generate QR code as data URL
+      const QRCode = await import('qrcode');
+      const qrDataUrl = await QRCode.toDataURL(result.deepLink, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#ffffff',
+        },
+      });
+      this.telegramQrDataUrl.set(qrDataUrl);
+      this.telegramDialogOpen.set(true);
+
+      // Start listening for link completion
+      this.checkTelegramStatus();
+    } catch (err: any) {
+      console.error('Failed to generate Telegram link:', err);
+      this.telegramLinkError.set(
+        err?.message || 'Failed to generate Telegram link. Please try again.'
+      );
+    } finally {
+      this.telegramLinkLoading.set(false);
+    }
+  }
+
+  /**
+   * Unlink the user's Telegram account.
+   */
+  async unlinkTelegram(): Promise<void> {
+    const userId = this.auth.user()?.id;
+    if (!userId) return;
+
+    try {
+      const userRef = doc(this.db, 'users', userId);
+      await updateDoc(userRef, {
+        telegramChatId: null,
+        telegramLinkedAt: null,
+        updatedAt: serverTimestamp(),
+      });
+      this.telegramLinked.set(false);
+    } catch (err: any) {
+      console.error('Failed to unlink Telegram:', err);
+    }
+  }
+
+  /**
+   * Close the Telegram link dialog.
+   */
+  closeTelegramDialog(): void {
+    this.telegramDialogOpen.set(false);
+    this.telegramDeepLink.set(null);
+    this.telegramQrDataUrl.set(null);
+    this.telegramLinkError.set(null);
+  }
+
+  /**
+   * Clean up Telegram listener.
+   */
+  destroyTelegramListener(): void {
+    if (this.telegramLinkUnsubscribe) {
+      this.telegramLinkUnsubscribe();
+      this.telegramLinkUnsubscribe = null;
+    }
   }
 }

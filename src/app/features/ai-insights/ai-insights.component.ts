@@ -56,6 +56,14 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
   readonly totalSpend = this.receiptService.selectedMonthSpend;
   readonly receiptCount = computed(() => this.receiptService.selectedMonthReceipts().length);
 
+  // Telegram state
+  readonly telegramLinked = this.aiService.telegramLinked;
+  readonly telegramDialogOpen = this.aiService.telegramDialogOpen;
+  readonly telegramQrDataUrl = this.aiService.telegramQrDataUrl;
+  readonly telegramDeepLink = this.aiService.telegramDeepLink;
+  readonly telegramLinkLoading = this.aiService.telegramLinkLoading;
+  readonly telegramLinkError = this.aiService.telegramLinkError;
+
   // Scroll effect
   private scrollEffect = effect(() => {
     const messages = this.messages();
@@ -83,12 +91,14 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
     }
 
     this.initializeAiData();
+    this.aiService.checkTelegramStatus();
   }
 
   ngOnDestroy(): void {
     if (this.userSubscriptionCleanup) {
       this.userSubscriptionCleanup();
     }
+    this.aiService.destroyTelegramListener();
   }
 
   toggleTheme(): void {
@@ -222,6 +232,24 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
 
     closeLists();
     return this.sanitizer.bypassSecurityTrustHtml(parts.join(''));
+  }
+
+  // ── Telegram Methods ───────────────────────────────────────────────────
+
+  openTelegramDialog(): void {
+    if (this.telegramLinked()) {
+      // Already linked - could show status or unlink option
+      return;
+    }
+    this.aiService.generateTelegramLink();
+  }
+
+  closeTelegramDialog(): void {
+    this.aiService.closeTelegramDialog();
+  }
+
+  unlinkTelegram(): void {
+    this.aiService.unlinkTelegram();
   }
 
   private initializeAiData(): void {

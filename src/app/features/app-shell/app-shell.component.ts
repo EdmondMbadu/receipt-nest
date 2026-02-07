@@ -46,6 +46,7 @@ export class AppShellComponent {
   readonly shareError = signal<string | null>(null);
   readonly shareCopied = signal(false);
   readonly shareLoading = signal(false);
+  readonly telegramLinked = this.aiService.telegramLinked;
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -237,6 +238,21 @@ export class AppShellComponent {
       month: 'short',
       day: 'numeric'
     }).format(date);
+  }
+
+  async openTelegramConnect(): Promise<void> {
+    if (!this.isInsightsRoute()) {
+      await this.router.navigate(['/app/insights']);
+    }
+    // Small delay to ensure component is loaded
+    setTimeout(() => {
+      this.aiService.generateTelegramLink();
+    }, 200);
+    this.closeSidebar();
+  }
+
+  async unlinkTelegram(): Promise<void> {
+    await this.aiService.unlinkTelegram();
   }
 
   private buildShareUrl(shareId: string): string {

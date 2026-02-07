@@ -47,6 +47,13 @@ service cloud.firestore {
       }
     }
     
+    // Telegram account linking tokens (short-lived)
+    match /telegramLinks/{token} {
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
+      allow read: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      allow update, delete: if false; // Only Cloud Functions (Admin SDK) can update/delete
+    }
+
     // Global categories (read-only for authenticated users)
     match /categories/{categoryId} {
       allow read: if isAuthenticated();

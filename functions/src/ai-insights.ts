@@ -15,7 +15,7 @@ const PROJECT_ID = process.env.GCLOUD_PROJECT || "receipt-nest";
 const VERTEX_LOCATION = "us-central1";
 
 // Types
-interface InsightData {
+export interface InsightData {
   // Selected month (current UI context)
   totalSpend: number;
   receiptCount: number;
@@ -60,7 +60,7 @@ interface InsightData {
   }[];
 }
 
-interface ChatMessage {
+export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
 }
@@ -75,7 +75,7 @@ interface InsightsRequest {
 /**
  * Format currency for display in prompts
  */
-function formatCurrency(amount: number): string {
+export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -85,7 +85,7 @@ function formatCurrency(amount: number): string {
 /**
  * Build context string from expense data
  */
-function buildExpenseContext(data: InsightData): string {
+export function buildExpenseContext(data: InsightData): string {
   const parts: string[] = [];
 
   parts.push("## Data Coverage");
@@ -224,7 +224,7 @@ Focus on being helpful and providing value. Do NOT be generic - make each insigh
 /**
  * Handle chat messages about expenses
  */
-async function handleChat(
+export async function handleChat(
   message: string,
   history: ChatMessage[],
   data: InsightData
