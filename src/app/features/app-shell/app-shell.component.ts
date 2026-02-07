@@ -32,7 +32,9 @@ export class AppShellComponent {
   readonly historyLoading = this.aiService.historyLoading;
   readonly historyLoadingMore = this.aiService.historyLoadingMore;
   readonly historyHasMore = this.aiService.historyHasMore;
-  readonly openHistoryMenuId = signal<string | null>(null);
+  readonly chatActionsModalOpen = signal(false);
+  readonly chatActionsChatId = signal<string | null>(null);
+  readonly chatActionsChatTitle = signal('');
   readonly deleteConfirmChatId = signal<string | null>(null);
   readonly deleteConfirmChatTitle = signal<string>('');
   readonly shareModalOpen = signal(false);
@@ -101,18 +103,21 @@ export class AppShellComponent {
     this.closeSidebar();
   }
 
-  toggleHistoryMenu(event: MouseEvent, chatId: string): void {
+  openChatActionsModal(event: MouseEvent, chatId: string, title: string): void {
     event.stopPropagation();
-    this.openHistoryMenuId.update((current) => current === chatId ? null : chatId);
+    this.chatActionsModalOpen.set(true);
+    this.chatActionsChatId.set(chatId);
+    this.chatActionsChatTitle.set(title);
   }
 
-  closeHistoryMenu(): void {
-    this.openHistoryMenuId.set(null);
+  closeChatActionsModal(): void {
+    this.chatActionsModalOpen.set(false);
+    this.chatActionsChatId.set(null);
+    this.chatActionsChatTitle.set('');
   }
 
-  openDeleteChatModal(event: MouseEvent, chatId: string, title: string): void {
-    event.stopPropagation();
-    this.openHistoryMenuId.set(null);
+  openDeleteChatModal(chatId: string, title: string): void {
+    this.closeChatActionsModal();
     this.deleteConfirmChatId.set(chatId);
     this.deleteConfirmChatTitle.set(title);
   }
@@ -132,9 +137,8 @@ export class AppShellComponent {
     this.closeDeleteChatModal();
   }
 
-  async openShareChatModal(event: MouseEvent, chatId: string, title: string): Promise<void> {
-    event.stopPropagation();
-    this.openHistoryMenuId.set(null);
+  async openShareChatModal(chatId: string, title: string): Promise<void> {
+    this.closeChatActionsModal();
     this.shareModalOpen.set(true);
     this.shareSourceChatId.set(chatId);
     this.shareSourceChatTitle.set(title);
