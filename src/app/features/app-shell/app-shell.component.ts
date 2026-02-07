@@ -24,6 +24,7 @@ export class AppShellComponent {
   readonly user = this.auth.user;
   readonly isDarkMode = this.theme.isDarkMode;
   readonly sidebarOpen = signal(false);
+  readonly historyExpanded = signal(true);
   readonly activeChatId = this.aiService.activeChatId;
   readonly chatHistory = this.aiService.chatHistory;
   readonly historyLoading = this.aiService.historyLoading;
@@ -67,6 +68,10 @@ export class AppShellComponent {
     this.sidebarOpen.update((open) => !open);
   }
 
+  toggleHistoryExpanded(): void {
+    this.historyExpanded.update((expanded) => !expanded);
+  }
+
   toggleTheme(): void {
     this.theme.toggleTheme();
   }
@@ -90,7 +95,7 @@ export class AppShellComponent {
   }
 
   async loadMoreHistory(): Promise<void> {
-    await this.aiService.loadMoreHistory(20);
+    await this.aiService.loadMoreHistory(10);
   }
 
   onHistoryScroll(event: Event): void {

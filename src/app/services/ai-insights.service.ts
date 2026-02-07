@@ -337,7 +337,7 @@ export class AiInsightsService {
     }
   }
 
-  async loadMoreHistory(batchSize = 20): Promise<void> {
+  async loadMoreHistory(batchSize = 10): Promise<void> {
     if (this.historyLoadingMore() || this.historyLoading() || !this.historyHasMore()) {
       return;
     }
