@@ -169,14 +169,13 @@
           <div class="flex" [class.justify-end]="message.role === 'user'"
             [class.justify-start]="message.role === 'assistant'">
             <div class="max-w-[85%] sm:max-w-[75%]">
-              <div class="rounded-2xl px-4 py-3 shadow-sm" [class.bg-emerald-600]="message.role === 'user'"
-                [class.text-white]="message.role === 'user'" [class.bg-white]="message.role === 'assistant'"
-                [class.dark:bg-slate-900]="message.role === 'assistant'" [class.border]="message.role === 'assistant'"
-                [class.border-slate-200]="message.role === 'assistant'"
-                [class.dark:border-slate-800]="message.role === 'assistant'"
+              <div class="chat-bubble rounded-2xl px-4 py-3 shadow-sm"
+                [class.chat-bubble--user]="message.role === 'user'"
+                [class.chat-bubble--assistant]="message.role === 'assistant'"
+                [class.text-white]="message.role === 'user'"
                 [class.text-slate-700]="message.role === 'assistant'"
                 [class.dark:text-slate-300]="message.role === 'assistant'">
-                <p class="text-sm leading-relaxed whitespace-pre-wrap">{{ message.content }}</p>
+                <div class="ai-message text-sm leading-relaxed" [innerHTML]="formatMessage(message.content)"></div>
               </div>
               <p class="text-[10px] text-slate-400 mt-1 px-2" [class.text-right]="message.role === 'user'">
                 {{ formatTime(message.timestamp) }}

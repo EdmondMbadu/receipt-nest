@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, inject, signal, computed, effect, Element
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { doc, getFirestore, onSnapshot, Timestamp } from 'firebase/firestore';
 
 import { AuthService } from '../../services/auth.service';
@@ -27,6 +28,7 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
   private readonly receiptService = inject(ReceiptService);
   readonly aiService = inject(AiInsightsService);
   private readonly db = getFirestore(app);
+  private readonly sanitizer = inject(DomSanitizer);
 
   readonly user = this.auth.user;
   readonly isDarkMode = this.theme.isDarkMode;
@@ -156,5 +158,73 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
 
   goToPricing(): void {
     this.router.navigate(['/app/pricing']);
+  }
+
+  formatMessage(content: string): SafeHtml {
+    const escaped = content
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    const lines = escaped.split(/\r?\n/);
+    const parts: string[] = [];
+    let inOl = false;
+    let inUl = false;
+
+    const closeLists = () => {
+      if (inOl) {
+        parts.push('</ol>');
+        inOl = false;
+      }
+      if (inUl) {
+        parts.push('</ul>');
+        inUl = false;
+      }
+    };
+
+    const formatInline = (text: string) => {
+      let out = text;
+      out = out.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      out = out.replace(/__(.+?)__/g, '<strong>$1</strong>');
+      out = out.replace(/`([^`]+)`/g, '<code>$1</code>');
+      return out;
+    };
+
+    for (const rawLine of lines) {
+      const line = rawLine.trim();
+      if (!line) {
+        closeLists();
+        parts.push('<div class="ai-spacer"></div>');
+        continue;
+      }
+
+      const olMatch = line.match(/^(\d+)\.\s+(.*)$/);
+      if (olMatch) {
+        if (!inOl) {
+          closeLists();
+          parts.push('<ol>');
+          inOl = true;
+        }
+        parts.push(`<li>${formatInline(olMatch[2])}</li>`);
+        continue;
+      }
+
+      const ulMatch = line.match(/^-+\s+(.*)$/);
+      if (ulMatch) {
+        if (!inUl) {
+          closeLists();
+          parts.push('<ul>');
+          inUl = true;
+        }
+        parts.push(`<li>${formatInline(ulMatch[1])}</li>`);
+        continue;
+      }
+
+      closeLists();
+      parts.push(`<p>${formatInline(line)}</p>`);
+    }
+
+    closeLists();
+    return this.sanitizer.bypassSecurityTrustHtml(parts.join(''));
   }
 }

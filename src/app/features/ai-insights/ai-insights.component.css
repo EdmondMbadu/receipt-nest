@@ -1,4 +1,75 @@
 /* AI Insights Component Styles */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Space+Grotesk:wght@400;500;600&display=swap');
+
+:host {
+  font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+}
+
+:host ::ng-deep h1,
+:host ::ng-deep h2,
+:host ::ng-deep h3 {
+  font-family: "Fraunces", ui-serif, Georgia, serif;
+  letter-spacing: 0.2px;
+}
+
+:host ::ng-deep .ai-message p {
+  margin: 0;
+}
+
+:host ::ng-deep .ai-message p + p {
+  margin-top: 0.5rem;
+}
+
+:host ::ng-deep .ai-message .ai-spacer {
+  height: 0.5rem;
+}
+
+:host ::ng-deep .ai-message ol,
+:host ::ng-deep .ai-message ul {
+  margin: 0.5rem 0 0.5rem 1.25rem;
+  padding: 0;
+}
+
+:host ::ng-deep .ai-message li {
+  margin: 0.35rem 0;
+}
+
+:host ::ng-deep .ai-message strong {
+  color: inherit;
+  font-weight: 600;
+}
+
+:host ::ng-deep .ai-message code {
+  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.85em;
+  background: rgba(15, 23, 42, 0.08);
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.4rem;
+}
+
+:host-context(.dark) ::ng-deep .ai-message code {
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.chat-bubble {
+  position: relative;
+  backdrop-filter: blur(10px);
+}
+
+.chat-bubble--assistant {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 0.9));
+}
+
+:host-context(.dark) .chat-bubble--assistant {
+  border: 1px solid rgba(71, 85, 105, 0.45);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.9));
+}
+
+.chat-bubble--user {
+  background: linear-gradient(135deg, #0f766e, #059669);
+  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.25);
+}
 
 /* Bounce animation for typing indicator */
 @keyframes bounce {
