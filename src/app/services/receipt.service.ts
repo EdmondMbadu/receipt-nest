@@ -13,7 +13,7 @@ import {
   where,
   orderBy,
   limit,
-  FieldPath,
+  documentId,
   onSnapshot,
   serverTimestamp,
   getFirestore,
@@ -395,9 +395,9 @@ export class ReceiptService {
     if (!userId) throw new Error('User not authenticated');
 
     const summariesRef = collection(this.db, `users/${userId}/monthlySummaries`);
-    let q = query(summariesRef, orderBy(FieldPath.documentId(), 'asc'));
+    let q = query(summariesRef, orderBy(documentId(), 'asc'));
     if (limitCount && limitCount > 0) {
-      q = query(summariesRef, orderBy(FieldPath.documentId(), 'asc'), limit(limitCount));
+      q = query(summariesRef, orderBy(documentId(), 'asc'), limit(limitCount));
     }
 
     const snapshot = await getDocs(q);
