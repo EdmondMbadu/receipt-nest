@@ -70,10 +70,36 @@
                     <p class="truncate text-xs font-medium text-slate-700 dark:text-slate-200">{{ chat.title }}</p>
                     <p class="text-[10px] text-slate-400">{{ formatHistoryDate(chat.updatedAt) }}</p>
                   </div>
-                  <button type="button" (click)="deleteHistoryChat($event, chat.id)"
-                    class="rounded px-1.5 py-0.5 text-[10px] font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40">
-                    Del
-                  </button>
+                  <div class="relative">
+                    <button type="button" (click)="toggleHistoryMenu($event, chat.id)"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                      aria-label="Open chat actions">
+                      <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="5" r="1.8"></circle>
+                        <circle cx="12" cy="12" r="1.8"></circle>
+                        <circle cx="12" cy="19" r="1.8"></circle>
+                      </svg>
+                    </button>
+                    @if (openHistoryMenuId() === chat.id) {
+                    <div (click)="$event.stopPropagation()"
+                      class="absolute right-0 top-7 z-40 w-36 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg dark:border-slate-700 dark:bg-slate-900">
+                      <button type="button" (click)="openShareChatModal($event, chat.id, chat.title)"
+                        class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 113.182-3.182L18 15.326a2.25 2.25 0 11-3.182 3.182l-1.3-1.3m-3.036-3.036l3.036 3.036m-3.036-3.036L7.2 10.9" />
+                        </svg>
+                        Share
+                      </button>
+                      <button type="button" (click)="openDeleteChatModal($event, chat.id, chat.title)"
+                        class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs font-medium text-rose-600 transition hover:bg-rose-50 dark:hover:bg-rose-950/40">
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-9 0V6a1.5 1.5 0 011.5-1.5h3A1.5 1.5 0 0115 6v1.5m-6 0v10.125A1.875 1.875 0 0010.875 19.5h2.25A1.875 1.875 0 0015 17.625V7.5" />
+                        </svg>
+                        Delete
+                      </button>
+                    </div>
+                    }
+                  </div>
                 </div>
               </div>
               }
@@ -217,10 +243,36 @@
               <p class="truncate text-xs font-medium text-slate-700 dark:text-slate-200">{{ chat.title }}</p>
               <p class="text-[10px] text-slate-400">{{ formatHistoryDate(chat.updatedAt) }}</p>
             </div>
-            <button type="button" (click)="deleteHistoryChat($event, chat.id)"
-              class="rounded px-1.5 py-0.5 text-[10px] font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40">
-              Del
-            </button>
+            <div class="relative">
+              <button type="button" (click)="toggleHistoryMenu($event, chat.id)"
+                class="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                aria-label="Open chat actions">
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="5" r="1.8"></circle>
+                  <circle cx="12" cy="12" r="1.8"></circle>
+                  <circle cx="12" cy="19" r="1.8"></circle>
+                </svg>
+              </button>
+              @if (openHistoryMenuId() === chat.id) {
+              <div (click)="$event.stopPropagation()"
+                class="absolute right-0 top-7 z-40 w-36 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg dark:border-slate-700 dark:bg-slate-900">
+                <button type="button" (click)="openShareChatModal($event, chat.id, chat.title)"
+                  class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                  <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 113.182-3.182L18 15.326a2.25 2.25 0 11-3.182 3.182l-1.3-1.3m-3.036-3.036l3.036 3.036m-3.036-3.036L7.2 10.9" />
+                  </svg>
+                  Share
+                </button>
+                <button type="button" (click)="openDeleteChatModal($event, chat.id, chat.title)"
+                  class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs font-medium text-rose-600 transition hover:bg-rose-50 dark:hover:bg-rose-950/40">
+                  <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-9 0V6a1.5 1.5 0 011.5-1.5h3A1.5 1.5 0 0115 6v1.5m-6 0v10.125A1.875 1.875 0 0010.875 19.5h2.25A1.875 1.875 0 0015 17.625V7.5" />
+                  </svg>
+                  Delete
+                </button>
+              </div>
+              }
+            </div>
           </div>
         </div>
         }
@@ -238,4 +290,76 @@
     }
     </div>
   </aside>
+
+  @if (openHistoryMenuId()) {
+  <div class="fixed inset-0 z-30" (click)="closeHistoryMenu()"></div>
+  }
+
+  @if (deleteConfirmChatId()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 backdrop-blur-sm"
+    (click)="closeDeleteChatModal()">
+    <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+      (click)="$event.stopPropagation()">
+      <h3 class="text-base font-semibold text-slate-900 dark:text-white">Delete conversation?</h3>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+        This will permanently delete
+        <span class="font-medium text-slate-900 dark:text-white">"{{ deleteConfirmChatTitle() }}"</span>.
+      </p>
+      <div class="mt-5 flex justify-end gap-2">
+        <button type="button" (click)="closeDeleteChatModal()"
+          class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+          Cancel
+        </button>
+        <button type="button" (click)="confirmDeleteChat()"
+          class="rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-rose-700">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+
+  @if (shareModalOpen()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 backdrop-blur-sm"
+    (click)="closeShareChatModal()">
+    <div class="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+      (click)="$event.stopPropagation()">
+      <h3 class="text-base font-semibold text-slate-900 dark:text-white">Share conversation</h3>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+        This creates a public, view-only link for
+        <span class="font-medium text-slate-900 dark:text-white">"{{ shareSourceChatTitle() }}"</span>.
+      </p>
+
+      @if (shareLoading()) {
+      <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">Generating secure link...</p>
+      } @else if (shareError()) {
+      <p class="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:bg-rose-950/40 dark:text-rose-300">
+        {{ shareError() }}
+      </p>
+      } @else if (shareLink()) {
+      <div class="mt-4 space-y-3">
+        <input type="text" [value]="shareLink()" readonly
+          class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200" />
+        <div class="flex flex-wrap justify-end gap-2">
+          <button type="button" (click)="copyShareLink()"
+            class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+            {{ shareCopied() ? 'Copied!' : 'Copy link' }}
+          </button>
+          <a [href]="shareLink()" target="_blank" rel="noopener"
+            class="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700">
+            Open link
+          </a>
+        </div>
+      </div>
+      }
+
+      <div class="mt-5 flex justify-end">
+        <button type="button" (click)="closeShareChatModal()"
+          class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+  }
 </div>

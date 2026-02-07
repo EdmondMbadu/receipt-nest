@@ -7,6 +7,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 import { AiInsightsService } from '../../services/ai-insights.service';
+import { ShareService } from '../../services/share.service';
 
 @Component({
   selector: 'app-shell',
@@ -20,6 +21,7 @@ export class AppShellComponent {
   private readonly theme = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly aiService = inject(AiInsightsService);
+  private readonly shareService = inject(ShareService);
 
   readonly user = this.auth.user;
   readonly isDarkMode = this.theme.isDarkMode;
@@ -30,6 +32,16 @@ export class AppShellComponent {
   readonly historyLoading = this.aiService.historyLoading;
   readonly historyLoadingMore = this.aiService.historyLoadingMore;
   readonly historyHasMore = this.aiService.historyHasMore;
+  readonly openHistoryMenuId = signal<string | null>(null);
+  readonly deleteConfirmChatId = signal<string | null>(null);
+  readonly deleteConfirmChatTitle = signal<string>('');
+  readonly shareModalOpen = signal(false);
+  readonly shareSourceChatId = signal<string | null>(null);
+  readonly shareSourceChatTitle = signal<string>('');
+  readonly shareLink = signal<string | null>(null);
+  readonly shareError = signal<string | null>(null);
+  readonly shareCopied = signal(false);
+  readonly shareLoading = signal(false);
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -89,9 +101,94 @@ export class AppShellComponent {
     this.closeSidebar();
   }
 
-  async deleteHistoryChat(event: MouseEvent, chatId: string): Promise<void> {
+  toggleHistoryMenu(event: MouseEvent, chatId: string): void {
     event.stopPropagation();
+    this.openHistoryMenuId.update((current) => current === chatId ? null : chatId);
+  }
+
+  closeHistoryMenu(): void {
+    this.openHistoryMenuId.set(null);
+  }
+
+  openDeleteChatModal(event: MouseEvent, chatId: string, title: string): void {
+    event.stopPropagation();
+    this.openHistoryMenuId.set(null);
+    this.deleteConfirmChatId.set(chatId);
+    this.deleteConfirmChatTitle.set(title);
+  }
+
+  closeDeleteChatModal(): void {
+    this.deleteConfirmChatId.set(null);
+    this.deleteConfirmChatTitle.set('');
+  }
+
+  async confirmDeleteChat(): Promise<void> {
+    const chatId = this.deleteConfirmChatId();
+    if (!chatId) {
+      return;
+    }
+
     await this.aiService.deleteChat(chatId);
+    this.closeDeleteChatModal();
+  }
+
+  async openShareChatModal(event: MouseEvent, chatId: string, title: string): Promise<void> {
+    event.stopPropagation();
+    this.openHistoryMenuId.set(null);
+    this.shareModalOpen.set(true);
+    this.shareSourceChatId.set(chatId);
+    this.shareSourceChatTitle.set(title);
+    this.shareError.set(null);
+    this.shareCopied.set(false);
+    this.shareLink.set(null);
+    this.shareLoading.set(true);
+
+    try {
+      const share = await this.shareService.createChatShare(chatId);
+      this.shareLink.set(this.buildShareUrl(share.id));
+    } catch (error: any) {
+      const message = error?.message || 'Unable to create share link right now.';
+      this.shareError.set(message);
+    } finally {
+      this.shareLoading.set(false);
+    }
+  }
+
+  closeShareChatModal(): void {
+    this.shareModalOpen.set(false);
+    this.shareSourceChatId.set(null);
+    this.shareSourceChatTitle.set('');
+    this.shareLink.set(null);
+    this.shareError.set(null);
+    this.shareCopied.set(false);
+    this.shareLoading.set(false);
+  }
+
+  async copyShareLink(): Promise<void> {
+    const link = this.shareLink();
+    if (!link) {
+      return;
+    }
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = link;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      this.shareCopied.set(true);
+      setTimeout(() => this.shareCopied.set(false), 2500);
+    } catch (error) {
+      this.shareError.set('Unable to copy link. Please copy it manually.');
+    }
   }
 
   async loadMoreHistory(): Promise<void> {
@@ -112,5 +209,12 @@ export class AppShellComponent {
       month: 'short',
       day: 'numeric'
     }).format(date);
+  }
+
+  private buildShareUrl(shareId: string): string {
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}/share/${shareId}`;
+    }
+    return `/share/${shareId}`;
   }
 }

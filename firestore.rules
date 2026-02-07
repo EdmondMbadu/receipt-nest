@@ -58,5 +58,12 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
     }
+
+    // Public AI chat share links (view-only for anyone with link)
+    match /chatShares/{shareId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
   }
 }

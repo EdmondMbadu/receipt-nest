@@ -21,6 +21,27 @@ export interface GraphShare {
   createdAt: Timestamp | ReturnType<typeof serverTimestamp>;
 }
 
+export interface ChatShareMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
+
+export interface ChatShare {
+  id: string;
+  userId: string;
+  chatId: string;
+  title: string;
+  messages: ChatShareMessage[];
+  messageCount: number;
+  createdAt: Timestamp | ReturnType<typeof serverTimestamp>;
+}
+
+export type PublicShare =
+  | (GraphShare & { shareType: 'graph' })
+  | (ChatShare & { shareType: 'chat' });
+
 export interface CreateGraphShareRequest {
   month: number;
   year: number;
@@ -32,4 +53,3 @@ export interface CreateGraphShareRequest {
   ownerName?: string;
   ownerEmail?: string;
 }
-

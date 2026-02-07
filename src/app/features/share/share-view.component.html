@@ -46,9 +46,9 @@
         </a>
       </div>
 
-      <ng-container *ngIf="!isLoading() && !error() && share() as graph">
+      <ng-container *ngIf="!isLoading() && !error() && share() as publicShare">
         <div class="space-y-6">
-          <div>
+          <div *ngIf="isGraphShare()">
             <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Spending snapshot</p>
             <h1 class="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">{{ monthLabel() }}</h1>
             <p class="text-lg text-slate-500 dark:text-slate-400">Total spent:
@@ -57,15 +57,23 @@
             <div class="mt-2 text-sm text-slate-500 dark:text-slate-400 space-y-1" *ngIf="includeName() || includeEmail()">
               <p *ngIf="includeName()">
                 Shared by
-                <span class="font-medium text-slate-900 dark:text-white">{{ graph.ownerName }}</span>
+                <span class="font-medium text-slate-900 dark:text-white">{{ publicShare.shareType === 'graph' ? publicShare.ownerName : '' }}</span>
               </p>
               <p *ngIf="includeEmail()">
-                Contact <a [href]="'mailto:' + graph.ownerEmail" class="text-emerald-600 hover:underline">{{ graph.ownerEmail }}</a>
+                Contact <a [href]="'mailto:' + (publicShare.shareType === 'graph' ? publicShare.ownerEmail : '')" class="text-emerald-600 hover:underline">{{ publicShare.shareType === 'graph' ? publicShare.ownerEmail : '' }}</a>
               </p>
             </div>
           </div>
 
-          <div
+          <div *ngIf="isChatShare()">
+            <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Shared conversation</p>
+            <h1 class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ chatTitle() }}</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+              View-only chat transcript
+            </p>
+          </div>
+
+          <div *ngIf="isGraphShare()"
             class="rounded-2xl border border-slate-200 bg-gradient-to-b from-white via-white to-slate-50 p-5 dark:border-slate-800 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950">
             <div class="flex flex-col gap-1">
               <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Monthly total</p>
@@ -110,6 +118,35 @@
               <ng-template #totalLabel>
                 <p>This chart includes {{ dailyData().length }} days of spending data.</p>
               </ng-template>
+            </div>
+          </div>
+
+          <div *ngIf="isChatShare()"
+            class="rounded-2xl border border-slate-200 bg-gradient-to-b from-white via-white to-slate-50 p-5 dark:border-slate-800 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950">
+            <div class="space-y-3">
+              <div *ngFor="let message of chatMessages()"
+                class="flex"
+                [class.justify-end]="message.role === 'user'"
+                [class.justify-start]="message.role === 'assistant'">
+                <div class="max-w-[85%] sm:max-w-[75%]">
+                  <div
+                    class="rounded-2xl px-4 py-3 text-sm shadow-sm"
+                    [class.bg-emerald-600]="message.role === 'user'"
+                    [class.text-white]="message.role === 'user'"
+                    [class.border]="message.role === 'assistant'"
+                    [class.border-slate-200]="message.role === 'assistant'"
+                    [class.bg-white]="message.role === 'assistant'"
+                    [class.text-slate-700]="message.role === 'assistant'"
+                    [class.dark:border-slate-700]="message.role === 'assistant'"
+                    [class.dark:bg-slate-900]="message.role === 'assistant'"
+                    [class.dark:text-slate-200]="message.role === 'assistant'">
+                    <p class="whitespace-pre-wrap">{{ message.content }}</p>
+                  </div>
+                  <p class="mt-1 px-2 text-[10px] text-slate-400" [class.text-right]="message.role === 'user'">
+                    {{ formatChatTime(message.timestamp) }}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 

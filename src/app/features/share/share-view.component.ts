@@ -3,7 +3,7 @@ import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { GraphShare, GraphSharePoint } from '../../models/share-link.model';
+import { ChatShareMessage, GraphSharePoint, PublicShare } from '../../models/share-link.model';
 import { ShareService } from '../../services/share.service';
 import { ThemeService } from '../../services/theme.service';
 
@@ -22,16 +22,41 @@ export class ShareViewComponent implements OnInit, OnDestroy {
 
   readonly isLoading = signal(true);
   readonly error = signal<string | null>(null);
-  readonly share = signal<GraphShare | null>(null);
+  readonly share = signal<PublicShare | null>(null);
   readonly hoveredDay = signal<GraphSharePoint | null>(null);
   readonly Math = Math;
   readonly isDarkMode = this.theme.isDarkMode;
+  readonly isGraphShare = computed(() => this.share()?.shareType === 'graph');
+  readonly isChatShare = computed(() => this.share()?.shareType === 'chat');
 
-  readonly dailyData = computed(() => this.share()?.dailyData ?? []);
-  readonly monthLabel = computed(() => this.share()?.monthLabel ?? '');
-  readonly totalSpend = computed(() => this.share()?.totalSpend ?? 0);
-  readonly includeName = computed(() => !!this.share()?.includeName && !!this.share()?.ownerName);
-  readonly includeEmail = computed(() => !!this.share()?.includeEmail && !!this.share()?.ownerEmail);
+  readonly dailyData = computed<GraphSharePoint[]>(() => {
+    const currentShare = this.share();
+    return currentShare?.shareType === 'graph' ? currentShare.dailyData : [];
+  });
+  readonly monthLabel = computed(() => {
+    const currentShare = this.share();
+    return currentShare?.shareType === 'graph' ? currentShare.monthLabel : '';
+  });
+  readonly totalSpend = computed(() => {
+    const currentShare = this.share();
+    return currentShare?.shareType === 'graph' ? currentShare.totalSpend : 0;
+  });
+  readonly includeName = computed(() => {
+    const currentShare = this.share();
+    return currentShare?.shareType === 'graph' && !!currentShare.includeName && !!currentShare.ownerName;
+  });
+  readonly includeEmail = computed(() => {
+    const currentShare = this.share();
+    return currentShare?.shareType === 'graph' && !!currentShare.includeEmail && !!currentShare.ownerEmail;
+  });
+  readonly chatTitle = computed(() => {
+    const currentShare = this.share();
+    return currentShare?.shareType === 'chat' ? currentShare.title : '';
+  });
+  readonly chatMessages = computed<ChatShareMessage[]>(() => {
+    const currentShare = this.share();
+    return currentShare?.shareType === 'chat' ? currentShare.messages : [];
+  });
 
   readonly chartPathData = computed(() => {
     const data = this.dailyData();
@@ -44,13 +69,13 @@ export class ShareViewComponent implements OnInit, OnDestroy {
       };
     }
 
-    const maxValue = Math.max(...data.map(d => d.amount), 1);
+    const maxValue = Math.max(...data.map((d: GraphSharePoint) => d.amount), 1);
     const width = 200;
     const height = 100;
     const padding = 5;
     const chartHeight = height - padding * 2;
 
-    const points = data.map((d, index) => ({
+    const points = data.map((d: GraphSharePoint, index: number) => ({
       x: data.length > 1 ? (index / (data.length - 1)) * width : width / 2,
       y: padding + chartHeight - (d.amount / maxValue) * chartHeight
     }));
@@ -95,7 +120,7 @@ export class ShareViewComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      const share = await this.shareService.getGraphShare(shareId);
+      const share = await this.shareService.getPublicShare(shareId);
       if (!share) {
         this.error.set('This share link no longer exists or has been removed.');
         this.share.set(null);
@@ -125,7 +150,7 @@ export class ShareViewComponent implements OnInit, OnDestroy {
   getChartX(day: number): number {
     const data = this.dailyData();
     if (!data.length) return 0;
-    const index = data.findIndex(d => d.day === day);
+    const index = data.findIndex((d: GraphSharePoint) => d.day === day);
     if (index === -1) return 0;
     if (data.length <= 1) return 100;
     return (index / (data.length - 1)) * 200;
@@ -134,7 +159,7 @@ export class ShareViewComponent implements OnInit, OnDestroy {
   getChartY(amount: number): number {
     const data = this.dailyData();
     if (!data.length) return 95;
-    const maxValue = Math.max(...data.map(d => d.amount), 1);
+    const maxValue = Math.max(...data.map((d: GraphSharePoint) => d.amount), 1);
     const height = 100;
     const padding = 5;
     const chartHeight = height - padding * 2;
@@ -144,6 +169,19 @@ export class ShareViewComponent implements OnInit, OnDestroy {
   axisLabel(value: number): number {
     const totalDays = this.dailyData().length || 1;
     return Math.min(totalDays, Math.max(1, value));
+  }
+
+  formatChatTime(isoValue: string): string {
+    const date = new Date(isoValue);
+    if (isNaN(date.getTime())) {
+      return '';
+    }
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    }).format(date);
   }
 
   toggleTheme(): void {
