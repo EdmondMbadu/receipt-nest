@@ -17,6 +17,7 @@ import { ShareService } from '../../services/share.service';
   styleUrl: './app-shell.component.css'
 })
 export class AppShellComponent {
+  private readonly desktopSidebarStorageKey = 'appShellDesktopSidebarExpanded';
   private readonly auth = inject(AuthService);
   private readonly theme = inject(ThemeService);
   private readonly router = inject(Router);
@@ -26,6 +27,7 @@ export class AppShellComponent {
   readonly user = this.auth.user;
   readonly isDarkMode = this.theme.isDarkMode;
   readonly sidebarOpen = signal(false);
+  readonly desktopSidebarExpanded = signal(true);
   readonly historyExpanded = signal(true);
   readonly activeChatId = this.aiService.activeChatId;
   readonly chatHistory = this.aiService.chatHistory;
@@ -69,6 +71,19 @@ export class AppShellComponent {
     return profile.email?.[0]?.toUpperCase() || '?';
   });
 
+  constructor() {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+
+    const stored = localStorage.getItem(this.desktopSidebarStorageKey);
+    if (stored === '0') {
+      this.desktopSidebarExpanded.set(false);
+    } else {
+      this.desktopSidebarExpanded.set(true);
+    }
+  }
+
   private readonly loadInsightsSidebarHistory = effect(() => {
     if (!this.isInsightsRoute()) return;
     this.aiService.initializeChatState(5);
@@ -80,6 +95,15 @@ export class AppShellComponent {
 
   toggleSidebar(): void {
     this.sidebarOpen.update((open) => !open);
+  }
+
+  toggleDesktopSidebar(): void {
+    const next = !this.desktopSidebarExpanded();
+    this.desktopSidebarExpanded.set(next);
+
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(this.desktopSidebarStorageKey, next ? '1' : '0');
+    }
   }
 
   toggleHistoryExpanded(): void {
