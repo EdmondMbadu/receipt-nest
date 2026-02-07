@@ -1,5 +1,23 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  DocumentData,
+  getDoc,
+  getDocs,
+  getFirestore,
+  limit,
+  orderBy,
+  query,
+  QueryDocumentSnapshot,
+  serverTimestamp,
+  startAfter,
+  Timestamp,
+  updateDoc
+} from 'firebase/firestore';
 import { app } from '../../../environments/environments';
 import { AuthService } from './auth.service';
 import { ReceiptService } from './receipt.service';
@@ -56,18 +74,42 @@ export interface InsightData {
   }[];
 }
 
+export interface ChatHistoryItem {
+  id: string;
+  title: string;
+  createdAt: Date;
+  updatedAt: Date;
+  messageCount: number;
+}
+
+interface StoredChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AiInsightsService {
   private readonly functions = getFunctions(app);
+  private readonly db = getFirestore(app);
   private readonly auth = inject(AuthService);
   private readonly receiptService = inject(ReceiptService);
+  private readonly activeChatStorageKey = 'aiInsightsActiveChatId';
+  private initializedHistoryForUser: string | null = null;
+  private historyCursor: QueryDocumentSnapshot<DocumentData> | null = null;
 
   // Chat state
   readonly messages = signal<ChatMessage[]>([]);
   readonly isLoading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly activeChatId = signal<string | null>(null);
+  readonly chatHistory = signal<ChatHistoryItem[]>([]);
+  readonly historyLoading = signal(false);
+  readonly historyLoadingMore = signal(false);
+  readonly historyHasMore = signal(false);
 
   // Pre-built insights
   readonly insights = signal<string[]>([]);
@@ -104,11 +146,46 @@ export class AiInsightsService {
     }
   }
 
+  async initializeChatState(): Promise<void> {
+    const userId = this.auth.user()?.id;
+    if (!userId) {
+      this.resetChatState();
+      return;
+    }
+
+    if (this.initializedHistoryForUser === userId) {
+      return;
+    }
+
+    this.initializedHistoryForUser = userId;
+    this.historyCursor = null;
+    this.messages.set([]);
+    this.activeChatId.set(null);
+    this.chatHistory.set([]);
+
+    await this.loadHistoryBatch(10, false);
+
+    const preferredChatId = this.readStoredActiveChatId(userId);
+    if (preferredChatId) {
+      const found = await this.openChat(preferredChatId, false);
+      if (found) return;
+    }
+
+    const latest = this.chatHistory()[0];
+    if (latest) {
+      await this.openChat(latest.id, true);
+      return;
+    }
+
+    this.startNewChat();
+  }
+
   /**
    * Send a chat message and get AI response
    */
   async sendMessage(content: string): Promise<void> {
     if (!content.trim()) return;
+    await this.initializeChatState();
 
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
@@ -123,6 +200,8 @@ export class AiInsightsService {
     this.error.set(null);
 
     try {
+      const chatId = await this.ensureActiveChat();
+      await this.persistChat(chatId);
       const insightData = await this.prepareInsightData();
 
       // Get conversation history for context
@@ -149,6 +228,7 @@ export class AiInsightsService {
       };
 
       this.messages.update(msgs => [...msgs, assistantMessage]);
+      await this.persistChat(chatId);
     } catch (err: any) {
       console.error('Failed to send message:', err);
       const message = `${err?.message || ''}`;
@@ -168,6 +248,10 @@ export class AiInsightsService {
         timestamp: new Date()
       };
       this.messages.update(msgs => [...msgs, errorMessage]);
+      const chatId = this.activeChatId();
+      if (chatId) {
+        await this.persistChat(chatId);
+      }
     } finally {
       this.isLoading.set(false);
     }
@@ -177,8 +261,87 @@ export class AiInsightsService {
    * Clear chat history
    */
   clearChat(): void {
+    this.startNewChat();
+  }
+
+  startNewChat(): void {
     this.messages.set([]);
     this.error.set(null);
+    this.activeChatId.set(null);
+    this.storeActiveChatId(null);
+  }
+
+  async openChat(chatId: string, persistSelection = true): Promise<boolean> {
+    const userId = this.auth.user()?.id;
+    if (!userId) return false;
+
+    const chatRef = doc(this.db, this.getChatsPath(userId), chatId);
+    const snapshot = await getDoc(chatRef);
+    if (!snapshot.exists()) {
+      return false;
+    }
+
+    const data = snapshot.data() as {
+      messages?: StoredChatMessage[];
+      title?: string;
+      createdAt?: Timestamp;
+      updatedAt?: Timestamp;
+      messageCount?: number;
+    };
+
+    const messages = (data.messages || []).map((message) => ({
+      id: message.id,
+      role: message.role,
+      content: message.content,
+      timestamp: new Date(message.timestamp)
+    }));
+
+    this.messages.set(messages);
+    this.activeChatId.set(chatId);
+    this.error.set(null);
+
+    if (persistSelection) {
+      this.storeActiveChatId(chatId);
+    }
+
+    const now = new Date();
+    const createdAt = this.toDate(data.createdAt, now);
+    const updatedAt = this.toDate(data.updatedAt, now);
+    const title = data.title || this.getFallbackTitle(messages);
+    const messageCount = typeof data.messageCount === 'number' ? data.messageCount : messages.length;
+    this.upsertHistoryItem({
+      id: chatId,
+      title,
+      createdAt,
+      updatedAt,
+      messageCount
+    });
+
+    return true;
+  }
+
+  async deleteChat(chatId: string): Promise<void> {
+    const userId = this.auth.user()?.id;
+    if (!userId) return;
+
+    await deleteDoc(doc(this.db, this.getChatsPath(userId), chatId));
+    this.chatHistory.update(items => items.filter(item => item.id !== chatId));
+
+    if (this.activeChatId() === chatId) {
+      const next = this.chatHistory()[0];
+      if (next) {
+        await this.openChat(next.id, true);
+      } else {
+        this.startNewChat();
+      }
+    }
+  }
+
+  async loadMoreHistory(): Promise<void> {
+    if (this.historyLoadingMore() || this.historyLoading() || !this.historyHasMore()) {
+      return;
+    }
+    await this.loadHistoryBatch(20, true);
   }
 
   /**
@@ -357,5 +520,215 @@ export class AiInsightsService {
       'What patterns do you see in my spending?',
       'How much am I spending on dining out?'
     ];
+  }
+
+  private async loadHistoryBatch(batchSize: number, append: boolean): Promise<void> {
+    const userId = this.auth.user()?.id;
+    if (!userId) return;
+
+    if (append) {
+      this.historyLoadingMore.set(true);
+    } else {
+      this.historyLoading.set(true);
+    }
+
+    try {
+      const chatsRef = collection(this.db, this.getChatsPath(userId));
+      let chatQuery = query(chatsRef, orderBy('updatedAt', 'desc'), limit(batchSize));
+
+      if (append && this.historyCursor) {
+        chatQuery = query(chatsRef, orderBy('updatedAt', 'desc'), startAfter(this.historyCursor), limit(batchSize));
+      }
+
+      const snapshot = await getDocs(chatQuery);
+      const items = snapshot.docs.map(docSnapshot => this.mapHistoryItem(docSnapshot));
+
+      if (append) {
+        this.chatHistory.update(existing => {
+          const existingIds = new Set(existing.map(item => item.id));
+          const additions = items.filter(item => !existingIds.has(item.id));
+          return [...existing, ...additions];
+        });
+      } else {
+        this.chatHistory.set(items);
+      }
+
+      this.historyCursor = snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1] : this.historyCursor;
+      this.historyHasMore.set(snapshot.docs.length === batchSize);
+    } catch (err) {
+      console.error('Failed to load chat history:', err);
+    } finally {
+      if (append) {
+        this.historyLoadingMore.set(false);
+      } else {
+        this.historyLoading.set(false);
+      }
+    }
+  }
+
+  private mapHistoryItem(docSnapshot: QueryDocumentSnapshot<DocumentData>): ChatHistoryItem {
+    const data = docSnapshot.data() as {
+      title?: string;
+      createdAt?: Timestamp;
+      updatedAt?: Timestamp;
+      messageCount?: number;
+      messages?: StoredChatMessage[];
+    };
+
+    const now = new Date();
+    const createdAt = this.toDate(data.createdAt, now);
+    const updatedAt = this.toDate(data.updatedAt, createdAt);
+    const messageCount = typeof data.messageCount === 'number' ? data.messageCount : (data.messages || []).length;
+    const title = data.title || this.getFallbackTitle((data.messages || []).map(message => ({
+      id: message.id,
+      role: message.role,
+      content: message.content,
+      timestamp: new Date(message.timestamp)
+    })));
+
+    return {
+      id: docSnapshot.id,
+      title,
+      createdAt,
+      updatedAt,
+      messageCount
+    };
+  }
+
+  private upsertHistoryItem(item: ChatHistoryItem): void {
+    this.chatHistory.update(items => {
+      const filtered = items.filter(existing => existing.id !== item.id);
+      filtered.unshift(item);
+      return filtered.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+    });
+  }
+
+  private async ensureActiveChat(): Promise<string> {
+    const existing = this.activeChatId();
+    if (existing) return existing;
+
+    const userId = this.auth.user()?.id;
+    if (!userId) throw new Error('User not authenticated');
+
+    const now = new Date();
+    const docRef = await addDoc(collection(this.db, this.getChatsPath(userId)), {
+      title: 'New chat',
+      messages: [],
+      messageCount: 0,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      lastMessageAt: serverTimestamp()
+    });
+
+    this.activeChatId.set(docRef.id);
+    this.storeActiveChatId(docRef.id);
+    this.upsertHistoryItem({
+      id: docRef.id,
+      title: 'New chat',
+      createdAt: now,
+      updatedAt: now,
+      messageCount: 0
+    });
+
+    return docRef.id;
+  }
+
+  private async persistChat(chatId: string): Promise<void> {
+    const userId = this.auth.user()?.id;
+    if (!userId) return;
+
+    const messages = this.messages();
+    const serializedMessages: StoredChatMessage[] = messages.map(message => ({
+      id: message.id,
+      role: message.role,
+      content: message.content,
+      timestamp: message.timestamp.toISOString()
+    }));
+
+    const title = this.buildTitle(messages);
+    const now = new Date();
+    const chatRef = doc(this.db, this.getChatsPath(userId), chatId);
+
+    await updateDoc(chatRef, {
+      title,
+      messages: serializedMessages,
+      messageCount: messages.length,
+      updatedAt: serverTimestamp(),
+      lastMessageAt: serverTimestamp()
+    });
+
+    const existingItem = this.chatHistory().find(item => item.id === chatId);
+    this.upsertHistoryItem({
+      id: chatId,
+      title,
+      createdAt: existingItem?.createdAt || now,
+      updatedAt: now,
+      messageCount: messages.length
+    });
+  }
+
+  private buildTitle(messages: ChatMessage[]): string {
+    const firstUserMessage = messages.find(message => message.role === 'user');
+    if (!firstUserMessage || !firstUserMessage.content.trim()) {
+      return 'New chat';
+    }
+
+    const normalized = firstUserMessage.content.trim().replace(/\s+/g, ' ');
+    if (normalized.length <= 56) {
+      return normalized;
+    }
+    return `${normalized.slice(0, 56)}...`;
+  }
+
+  private getFallbackTitle(messages: ChatMessage[]): string {
+    return this.buildTitle(messages);
+  }
+
+  private getChatsPath(userId: string): string {
+    return `users/${userId}/aiChats`;
+  }
+
+  private toDate(value: unknown, fallback: Date): Date {
+    if (value instanceof Timestamp) {
+      return value.toDate();
+    }
+    if (value && typeof value === 'object' && 'toDate' in value && typeof (value as any).toDate === 'function') {
+      return (value as any).toDate();
+    }
+    return fallback;
+  }
+
+  private readStoredActiveChatId(userId: string): string | null {
+    if (typeof localStorage === 'undefined') return null;
+    const raw = localStorage.getItem(this.activeChatStorageKey);
+    if (!raw) return null;
+
+    const [storedUserId, chatId] = raw.split(':');
+    if (storedUserId !== userId || !chatId) {
+      return null;
+    }
+    return chatId;
+  }
+
+  private storeActiveChatId(chatId: string | null): void {
+    const userId = this.auth.user()?.id;
+    if (typeof localStorage === 'undefined') return;
+    if (!userId || !chatId) {
+      localStorage.removeItem(this.activeChatStorageKey);
+      return;
+    }
+    localStorage.setItem(this.activeChatStorageKey, `${userId}:${chatId}`);
+  }
+
+  private resetChatState(): void {
+    this.messages.set([]);
+    this.error.set(null);
+    this.activeChatId.set(null);
+    this.chatHistory.set([]);
+    this.historyHasMore.set(false);
+    this.historyLoading.set(false);
+    this.historyLoadingMore.set(false);
+    this.historyCursor = null;
+    this.initializedHistoryForUser = null;
   }
 }

@@ -40,6 +40,11 @@ service cloud.firestore {
       match /monthlySummaries/{summaryId} {
         allow read, write: if isOwner(userId) || isAdmin();
       }
+
+      // User's AI chat sessions
+      match /aiChats/{chatId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
     }
     
     // Global categories (read-only for authenticated users)

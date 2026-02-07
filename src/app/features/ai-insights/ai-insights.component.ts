@@ -3,12 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { doc, getFirestore, onSnapshot, Timestamp } from 'firebase/firestore';
+import { doc, getFirestore, onSnapshot } from 'firebase/firestore';
 
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 import { ReceiptService } from '../../services/receipt.service';
-import { AiInsightsService, ChatMessage } from '../../services/ai-insights.service';
+import { AiInsightsService } from '../../services/ai-insights.service';
 import { app } from '../../../../environments/environments';
 
 @Component({
@@ -37,6 +37,11 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
   readonly insights = this.aiService.insights;
   readonly insightsLoading = this.aiService.insightsLoading;
   readonly error = this.aiService.error;
+  readonly activeChatId = this.aiService.activeChatId;
+  readonly chatHistory = this.aiService.chatHistory;
+  readonly historyLoading = this.aiService.historyLoading;
+  readonly historyLoadingMore = this.aiService.historyLoadingMore;
+  readonly historyHasMore = this.aiService.historyHasMore;
 
   // Subscription state
   readonly subscriptionPlan = signal<'free' | 'pro'>('free');
@@ -45,12 +50,12 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
 
   // Input state
   readonly messageText = signal('');
-  readonly showSuggestions = signal(true);
 
   // Computed
   readonly isPro = computed(() => this.subscriptionPlan() === 'pro');
   readonly isAdmin = computed(() => this.user()?.role === 'admin');
   readonly hasAiAccess = computed(() => this.isAdmin() || this.isPro());
+  readonly showSuggestions = computed(() => this.messages().length === 0);
   readonly suggestedQuestions = this.aiService.getSuggestedQuestions();
   readonly monthLabel = this.receiptService.selectedMonthLabel;
   readonly totalSpend = this.receiptService.selectedMonthSpend;
@@ -77,14 +82,12 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
           const data = snapshot.data();
           this.subscriptionPlan.set((data['subscriptionPlan'] as 'free' | 'pro') || 'free');
           this.subscriptionStatus.set(String(data['subscriptionStatus'] || 'inactive'));
+          this.initializeAiData();
         }
       });
     }
 
-    // Generate initial insights if user is pro
-    if (this.hasAiAccess() && this.insights().length === 0) {
-      this.aiService.generateInsights();
-    }
+    this.initializeAiData();
   }
 
   ngOnDestroy(): void {
@@ -102,7 +105,6 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
     if (!text || this.isLoading() || !this.hasAiAccess()) return;
 
     this.messageText.set('');
-    this.showSuggestions.set(false);
     await this.aiService.sendMessage(text);
   }
 
@@ -112,8 +114,20 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
   }
 
   clearChat(): void {
-    this.aiService.clearChat();
-    this.showSuggestions.set(true);
+    this.aiService.startNewChat();
+  }
+
+  async openChat(chatId: string): Promise<void> {
+    await this.aiService.openChat(chatId, true);
+  }
+
+  async deleteChat(event: MouseEvent, chatId: string): Promise<void> {
+    event.stopPropagation();
+    await this.aiService.deleteChat(chatId);
+  }
+
+  async loadMoreHistory(): Promise<void> {
+    await this.aiService.loadMoreHistory();
   }
 
   refreshInsights(): void {
@@ -149,6 +163,14 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
+    }).format(date);
+  }
+
+  formatHistoryDate(date: Date): string {
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
     }).format(date);
   }
 
@@ -226,5 +248,14 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
 
     closeLists();
     return this.sanitizer.bypassSecurityTrustHtml(parts.join(''));
+  }
+
+  private initializeAiData(): void {
+    if (!this.hasAiAccess()) return;
+
+    this.aiService.initializeChatState();
+    if (this.insights().length === 0 && !this.insightsLoading()) {
+      this.aiService.generateInsights();
+    }
   }
 }
