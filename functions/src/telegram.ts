@@ -935,8 +935,16 @@ export const telegramWebhook = onRequest(
     if (req.method === "GET") {
       const protocol = req.headers["x-forwarded-proto"] || req.protocol || "https";
       const host = req.headers["x-forwarded-host"] || req.headers.host || "";
-      // Build the canonical URL that Telegram should POST to
-      const webhookUrl = `${protocol}://${host}${req.originalUrl}`.split("?")[0];
+      // Build the canonical URL that Telegram should POST to.
+      // Firebase Functions v2 strips the function name from req.originalUrl
+      // when routing through cloudfunctions.net, so we must detect this and
+      // append the function name explicitly.
+      let webhookUrl = `${protocol}://${host}${req.originalUrl}`.split("?")[0];
+
+      // If accessed via cloudfunctions.net and path is just "/", append the function name
+      if (String(host).includes("cloudfunctions.net") && (req.originalUrl === "/" || req.originalUrl === "")) {
+        webhookUrl = `${protocol}://${host}/telegramWebhook`;
+      }
 
       logger.info("Self-registering Telegram webhook", { webhookUrl });
 
