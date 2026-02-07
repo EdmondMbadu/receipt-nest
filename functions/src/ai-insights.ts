@@ -101,7 +101,7 @@ async function generateInitialInsights(data: InsightData): Promise<string[]> {
   });
 
   const model = vertexAI.getGenerativeModel({
-    model: "gemini-3-flash-preview",
+    model: "gemini-2.5-flash",
     generationConfig: {
       temperature: 0.7,
       maxOutputTokens: 1024,
@@ -169,7 +169,7 @@ async function handleChat(
   });
 
   const model = vertexAI.getGenerativeModel({
-    model: "gemini-3-flash-preview",
+    model: "gemini-2.5-flash",
     generationConfig: {
       temperature: 0.7,
       maxOutputTokens: 1024,
