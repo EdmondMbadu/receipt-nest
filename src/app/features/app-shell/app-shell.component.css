@@ -1,14 +1,12 @@
 @reference "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap');
-
 :host {
   display: block;
-  font-family: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  font-family: ui-sans-serif, system-ui, sans-serif;
 }
 
 .app-shell h1 {
-  font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  font-family: ui-sans-serif, system-ui, sans-serif;
 }
 
 .nav-item {
