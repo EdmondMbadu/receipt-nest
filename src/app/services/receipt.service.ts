@@ -13,6 +13,7 @@ import {
   where,
   orderBy,
   limit,
+  FieldPath,
   onSnapshot,
   serverTimestamp,
   getFirestore,
@@ -386,6 +387,26 @@ export class ReceiptService {
     return { id: snapshot.id, ...snapshot.data() } as MonthlySummary;
   }
 
+  /**
+   * Get all monthly summaries for the current user
+   */
+  async getMonthlySummaries(limitCount?: number): Promise<MonthlySummary[]> {
+    const userId = this.auth.user()?.id;
+    if (!userId) throw new Error('User not authenticated');
+
+    const summariesRef = collection(this.db, `users/${userId}/monthlySummaries`);
+    let q = query(summariesRef, orderBy(FieldPath.documentId(), 'asc'));
+    if (limitCount && limitCount > 0) {
+      q = query(summariesRef, orderBy(FieldPath.documentId(), 'asc'), limit(limitCount));
+    }
+
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as MonthlySummary[];
+  }
+
   // Selected month for filtering (default: current month)
   readonly selectedMonth = signal(new Date().getMonth());
   readonly selectedYear = signal(new Date().getFullYear());
@@ -698,4 +719,3 @@ export class ReceiptService {
     return grouped;
   });
 }
-

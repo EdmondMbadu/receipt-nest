@@ -12,6 +12,7 @@ export interface ChatMessage {
 }
 
 export interface InsightData {
+  // Selected month (current UI context)
   totalSpend: number;
   receiptCount: number;
   monthLabel: string;
@@ -20,6 +21,34 @@ export interface InsightData {
   highestSpendDay: { day: number; amount: number } | null;
   monthOverMonthChange: { percent: number; isIncrease: boolean } | null;
   receipts: {
+    merchant: string;
+    amount: number;
+    date: string;
+    category: string;
+  }[];
+
+  // All-time coverage
+  allTime: {
+    totalSpend: number;
+    receiptCount: number;
+    topCategories: { name: string; total: number; percentage: number }[];
+    topMerchants: { name: string; total: number; percentage: number }[];
+    firstMonth: string | null;
+    lastMonth: string | null;
+    monthsCount: number;
+  };
+
+  // Monthly summaries for all available months
+  monthlySummaries: {
+    monthId: string;
+    totalSpend: number;
+    receiptCount: number;
+    topCategories: { name: string; total: number; percentage: number }[];
+    topMerchants: { name: string; total: number; percentage: number }[];
+  }[];
+
+  // Recent receipts for detail (limited)
+  recentReceipts: {
     merchant: string;
     amount: number;
     date: string;
@@ -52,7 +81,7 @@ export class AiInsightsService {
     this.error.set(null);
 
     try {
-      const insightData = this.prepareInsightData();
+      const insightData = await this.prepareInsightData();
 
       const generateInsightsFn = httpsCallable(this.functions, 'generateAiInsights');
       const response = await generateInsightsFn({
@@ -94,7 +123,7 @@ export class AiInsightsService {
     this.error.set(null);
 
     try {
-      const insightData = this.prepareInsightData();
+      const insightData = await this.prepareInsightData();
 
       // Get conversation history for context
       const history = this.messages().map(m => ({
@@ -155,12 +184,14 @@ export class AiInsightsService {
   /**
    * Prepare expense data for AI analysis
    */
-  private prepareInsightData(): InsightData {
+  private async prepareInsightData(): Promise<InsightData> {
     const receipts = this.receiptService.selectedMonthReceipts();
     const totalSpend = this.receiptService.selectedMonthSpend();
     const monthLabel = this.receiptService.selectedMonthLabel();
     const dailyData = this.receiptService.dailySpendingData();
     const monthChange = this.receiptService.monthOverMonthChange();
+    const allReceipts = this.receiptService.receipts();
+    const monthlySummaries = await this.receiptService.getMonthlySummaries();
 
     // Calculate category spending
     const categoryTotals: Record<string, number> = {};
@@ -196,6 +227,101 @@ export class AiInsightsService {
       category: r.category?.name || 'Other'
     }));
 
+    // Build monthly summaries with top categories/merchants
+    const monthlySummariesData = monthlySummaries.map(ms => {
+      const categories = Object.values(ms.byCategory || {});
+      const merchants = Object.values(ms.byMerchant || {});
+
+      const total = ms.totalSpend || 0;
+      const topCategories = categories
+        .map(c => ({
+          name: c.categoryName,
+          total: c.total,
+          percentage: total > 0 ? Math.round((c.total / total) * 100) : 0
+        }))
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 5);
+
+      const topMerchants = merchants
+        .map(m => ({
+          name: m.merchantName,
+          total: m.total,
+          percentage: total > 0 ? Math.round((m.total / total) * 100) : 0
+        }))
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 5);
+
+      return {
+        monthId: ms.id,
+        totalSpend: ms.totalSpend || 0,
+        receiptCount: ms.receiptCount || 0,
+        topCategories,
+        topMerchants
+      };
+    });
+
+    // All-time aggregation from monthly summaries (preferred)
+    let allTimeTotal = 0;
+    let allTimeCount = 0;
+    const allCategoryTotals: Record<string, number> = {};
+    const allMerchantTotals: Record<string, number> = {};
+
+    for (const ms of monthlySummaries) {
+      allTimeTotal += ms.totalSpend || 0;
+      allTimeCount += ms.receiptCount || 0;
+
+      for (const c of Object.values(ms.byCategory || {})) {
+        allCategoryTotals[c.categoryName] = (allCategoryTotals[c.categoryName] || 0) + (c.total || 0);
+      }
+
+      for (const m of Object.values(ms.byMerchant || {})) {
+        allMerchantTotals[m.merchantName] = (allMerchantTotals[m.merchantName] || 0) + (m.total || 0);
+      }
+    }
+
+    // Fallback to receipts if monthly summaries are missing
+    if (monthlySummaries.length === 0) {
+      for (const r of allReceipts) {
+        allTimeTotal += r.totalAmount || 0;
+        allTimeCount += 1;
+        const cat = r.category?.name || 'Other';
+        allCategoryTotals[cat] = (allCategoryTotals[cat] || 0) + (r.totalAmount || 0);
+        const merchant = r.merchant?.canonicalName || r.merchant?.rawName || 'Unknown';
+        allMerchantTotals[merchant] = (allMerchantTotals[merchant] || 0) + (r.totalAmount || 0);
+      }
+    }
+
+    const allTimeTopCategories = Object.entries(allCategoryTotals)
+      .map(([name, total]) => ({
+        name,
+        total,
+        percentage: allTimeTotal > 0 ? Math.round((total / allTimeTotal) * 100) : 0
+      }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
+
+    const allTimeTopMerchants = Object.entries(allMerchantTotals)
+      .map(([name, total]) => ({
+        name,
+        total,
+        percentage: allTimeTotal > 0 ? Math.round((total / allTimeTotal) * 100) : 0
+      }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
+
+    const monthsSorted = [...monthlySummariesData].sort((a, b) => a.monthId.localeCompare(b.monthId));
+    const firstMonth = monthsSorted.length > 0 ? monthsSorted[0].monthId : null;
+    const lastMonth = monthsSorted.length > 0 ? monthsSorted[monthsSorted.length - 1].monthId : null;
+
+    const recentReceipts = [...allReceipts]
+      .slice(0, 50)
+      .map(r => ({
+        merchant: r.merchant?.canonicalName || r.merchant?.rawName || 'Unknown',
+        amount: r.totalAmount || 0,
+        date: r.date || '',
+        category: r.category?.name || 'Other'
+      }));
+
     return {
       totalSpend,
       receiptCount: receipts.length,
@@ -204,7 +330,18 @@ export class AiInsightsService {
       dailyAverage,
       highestSpendDay,
       monthOverMonthChange: monthChange,
-      receipts: receiptSummaries
+      receipts: receiptSummaries,
+      allTime: {
+        totalSpend: allTimeTotal,
+        receiptCount: allTimeCount,
+        topCategories: allTimeTopCategories,
+        topMerchants: allTimeTopMerchants,
+        firstMonth,
+        lastMonth,
+        monthsCount: monthlySummariesData.length
+      },
+      monthlySummaries: monthsSorted,
+      recentReceipts
     };
   }
 

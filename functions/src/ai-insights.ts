@@ -16,6 +16,7 @@ const VERTEX_LOCATION = "us-central1";
 
 // Types
 interface InsightData {
+  // Selected month (current UI context)
   totalSpend: number;
   receiptCount: number;
   monthLabel: string;
@@ -24,6 +25,34 @@ interface InsightData {
   highestSpendDay: { day: number; amount: number } | null;
   monthOverMonthChange: { percent: number; isIncrease: boolean } | null;
   receipts: {
+    merchant: string;
+    amount: number;
+    date: string;
+    category: string;
+  }[];
+
+  // All-time coverage
+  allTime: {
+    totalSpend: number;
+    receiptCount: number;
+    topCategories: { name: string; total: number; percentage: number }[];
+    topMerchants: { name: string; total: number; percentage: number }[];
+    firstMonth: string | null;
+    lastMonth: string | null;
+    monthsCount: number;
+  };
+
+  // Monthly summaries for all available months
+  monthlySummaries: {
+    monthId: string;
+    totalSpend: number;
+    receiptCount: number;
+    topCategories: { name: string; total: number; percentage: number }[];
+    topMerchants: { name: string; total: number; percentage: number }[];
+  }[];
+
+  // Recent receipts for detail (limited)
+  recentReceipts: {
     merchant: string;
     amount: number;
     date: string;
@@ -59,6 +88,28 @@ function formatCurrency(amount: number): string {
 function buildExpenseContext(data: InsightData): string {
   const parts: string[] = [];
 
+  parts.push("## Data Coverage");
+  if (data.allTime.firstMonth && data.allTime.lastMonth) {
+    parts.push(`- **Months Available**: ${data.allTime.monthsCount} (${data.allTime.firstMonth} to ${data.allTime.lastMonth})`);
+  } else {
+    parts.push(`- **Months Available**: ${data.allTime.monthsCount}`);
+  }
+  parts.push(`- **All-Time Spending**: ${formatCurrency(data.allTime.totalSpend)} across ${data.allTime.receiptCount} receipts`);
+
+  if (data.allTime.topCategories.length > 0) {
+    parts.push("\n## All-Time Top Categories");
+    for (const cat of data.allTime.topCategories) {
+      parts.push(`- **${cat.name}**: ${formatCurrency(cat.total)} (${cat.percentage}%)`);
+    }
+  }
+
+  if (data.allTime.topMerchants.length > 0) {
+    parts.push("\n## All-Time Top Merchants");
+    for (const merchant of data.allTime.topMerchants) {
+      parts.push(`- **${merchant.name}**: ${formatCurrency(merchant.total)} (${merchant.percentage}%)`);
+    }
+  }
+
   parts.push(`## Monthly Expense Summary for ${data.monthLabel}`);
   parts.push(`- **Total Spending**: ${formatCurrency(data.totalSpend)}`);
   parts.push(`- **Number of Receipts**: ${data.receiptCount}`);
@@ -80,9 +131,24 @@ function buildExpenseContext(data: InsightData): string {
     }
   }
 
-  if (data.receipts.length > 0) {
-    parts.push("\n## Recent Transactions (up to 20)");
-    const recentReceipts = data.receipts.slice(0, 20);
+  if (data.monthlySummaries.length > 0) {
+    parts.push("\n## Monthly Summaries (All Available Months)");
+    for (const month of data.monthlySummaries) {
+      const topCats = month.topCategories.slice(0, 3).map(c => `${c.name} ${formatCurrency(c.total)}`).join("; ");
+      const topMerchants = month.topMerchants.slice(0, 3).map(m => `${m.name} ${formatCurrency(m.total)}`).join("; ");
+      parts.push(`- **${month.monthId}**: ${formatCurrency(month.totalSpend)} across ${month.receiptCount} receipts`);
+      if (topCats) {
+        parts.push(`  - Top Categories: ${topCats}`);
+      }
+      if (topMerchants) {
+        parts.push(`  - Top Merchants: ${topMerchants}`);
+      }
+    }
+  }
+
+  if (data.recentReceipts.length > 0) {
+    parts.push("\n## Recent Transactions (up to 50)");
+    const recentReceipts = data.recentReceipts.slice(0, 50);
     for (const receipt of recentReceipts) {
       parts.push(`- ${receipt.merchant}: ${formatCurrency(receipt.amount)} on ${receipt.date} (${receipt.category})`);
     }
