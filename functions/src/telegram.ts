@@ -9,6 +9,7 @@
 
 import { onRequest } from "firebase-functions/v2/https";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
@@ -915,6 +916,7 @@ export const telegramWebhook = onRequest(
     region: "us-central1",
     memory: "512MiB",
     timeoutSeconds: 120,
+    minInstances: 0,
     secrets: [telegramBotToken],
     // Allow Telegram servers to call this without auth
     invoker: "public",
@@ -1129,5 +1131,104 @@ export const setupTelegramWebhook = onCall(
     logger.info("Telegram webhook setup result", { webhookUrl, result });
 
     return { success: true, webhookUrl, result };
+  }
+);
+
+// ─── Receipt Processing Notification ────────────────────────────────────────
+// Watches for receipt status changes. When a Telegram-sourced receipt finishes
+// processing (status goes from "processing" → "final" or "needs_review"),
+// send a Telegram notification so the user gets instant feedback even when
+// they are away from the web app.
+
+export const onTelegramReceiptProcessed = onDocumentUpdated(
+  {
+    document: "users/{userId}/receipts/{receiptId}",
+    region: "us-central1",
+    memory: "256MiB",
+    timeoutSeconds: 30,
+    secrets: [telegramBotToken],
+  },
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    if (!before || !after) return;
+
+    // Only care about Telegram-sourced receipts
+    if (after.source !== "telegram") return;
+
+    // Only fire when status transitions away from "processing" or "uploaded"
+    const pendingStatuses = ["uploaded", "processing"];
+    if (!pendingStatuses.includes(before.status)) return;
+    if (pendingStatuses.includes(after.status)) return;
+
+    const { userId } = event.params;
+
+    // Look up the user's Telegram chatId
+    const db = admin.firestore();
+    const userDoc = await db.doc(`users/${userId}`).get();
+    const telegramChatId = userDoc.data()?.telegramChatId;
+    if (!telegramChatId) return; // user unlinked Telegram
+
+    const token = telegramBotToken.value();
+    if (!token) {
+      logger.error("TELEGRAM_BOT_TOKEN not set, cannot send receipt notification");
+      return;
+    }
+
+    const status = after.status;
+
+    if (status === "final") {
+      // Successfully processed
+      const merchant = after.merchant?.canonicalName || after.merchant?.rawName || "Unknown";
+      const amount = after.totalAmount;
+      const currency = after.currency || "USD";
+      const date = after.date || "Unknown date";
+
+      const amountStr = amount !== undefined
+        ? formatCurrency(amount)
+        : "amount not detected";
+
+      await sendTelegramMessage(
+        token,
+        telegramChatId,
+        `Receipt processed!\n\n` +
+        `Store: ${merchant}\n` +
+        `Amount: ${amountStr} ${currency}\n` +
+        `Date: ${date}\n\n` +
+        `It has been added to your account automatically.`
+      );
+
+      logger.info("Telegram receipt notification sent (success)", {
+        userId,
+        receiptId: event.params.receiptId,
+        merchant,
+        amount,
+      });
+    } else if (status === "needs_review") {
+      // Extraction partially failed
+      await sendTelegramMessage(
+        token,
+        telegramChatId,
+        `Your receipt has been uploaded but I couldn't fully read it. ` +
+        `Open the app to review and fill in any missing details.`
+      );
+
+      logger.info("Telegram receipt notification sent (needs_review)", {
+        userId,
+        receiptId: event.params.receiptId,
+      });
+    } else if (status === "error") {
+      await sendTelegramMessage(
+        token,
+        telegramChatId,
+        `Sorry, I had trouble processing that receipt. ` +
+        `Please try taking a clearer photo, or upload it through the app.`
+      );
+
+      logger.info("Telegram receipt notification sent (error)", {
+        userId,
+        receiptId: event.params.receiptId,
+      });
+    }
   }
 );
