@@ -2,27 +2,38 @@ rules_version = '2';
 // Firebase Storage Security Rules for ReceiptNest
 service firebase.storage {
   match /b/{bucket}/o {
+    function isAdmin() {
+      return request.auth != null
+        && (
+          request.auth.token.admin == true
+          || request.auth.token.role == 'admin'
+          || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        );
+    }
     
     // User-specific receipt storage
     // Path: users/{userId}/receipts/{fileName}
     match /users/{userId}/receipts/{fileName} {
       // Allow read only if the user owns the file
-      allow read: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
       
       // Allow write only if:
       // 1. User is authenticated and owns the path
       // 2. File size is under 10MB
       // 3. File type is allowed (images or PDF)
-      allow write: if request.auth != null 
-        && request.auth.uid == userId
-        && request.resource.size < 10 * 1024 * 1024
-        && (
-          request.resource.contentType.matches('image/.*') ||
-          request.resource.contentType == 'application/pdf'
+      allow write: if isAdmin()
+        || (
+          request.auth != null 
+          && request.auth.uid == userId
+          && request.resource.size < 10 * 1024 * 1024
+          && (
+            request.resource.contentType.matches('image/.*') ||
+            request.resource.contentType == 'application/pdf'
+          )
         );
       
       // Allow delete only if user owns the file
-      allow delete: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && (request.auth.uid == userId || isAdmin());
     }
     
     // Deny all other paths by default

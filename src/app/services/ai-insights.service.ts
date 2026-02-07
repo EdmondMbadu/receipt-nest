@@ -64,7 +64,12 @@ export class AiInsightsService {
       this.insights.set(result.insights || []);
     } catch (err: any) {
       console.error('Failed to generate insights:', err);
-      this.error.set('Unable to generate insights. Please try again.');
+      const message = `${err?.message || ''}`;
+      if (message.includes('AI Insights is a Pro feature')) {
+        this.error.set('AI Insights is a Pro feature. Please upgrade your plan to access it.');
+      } else {
+        this.error.set('Unable to generate insights. Please try again.');
+      }
     } finally {
       this.insightsLoading.set(false);
     }
@@ -117,13 +122,20 @@ export class AiInsightsService {
       this.messages.update(msgs => [...msgs, assistantMessage]);
     } catch (err: any) {
       console.error('Failed to send message:', err);
-      this.error.set('Unable to get a response. Please try again.');
+      const message = `${err?.message || ''}`;
+      if (message.includes('AI Insights is a Pro feature')) {
+        this.error.set('AI Insights is a Pro feature. Please upgrade your plan to access it.');
+      } else {
+        this.error.set('Unable to get a response. Please try again.');
+      }
 
       // Add error message
       const errorMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: 'I apologize, but I encountered an error processing your request. Please try again.',
+        content: message.includes('AI Insights is a Pro feature')
+          ? 'AI Insights is a Pro feature. Please upgrade your plan to access it.'
+          : 'I apologize, but I encountered an error processing your request. Please try again.',
         timestamp: new Date()
       };
       this.messages.update(msgs => [...msgs, errorMessage]);

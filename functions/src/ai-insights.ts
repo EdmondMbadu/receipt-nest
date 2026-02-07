@@ -262,15 +262,7 @@ export const generateAiInsights = onCall(
       throw new HttpsError("not-found", "User profile not found");
     }
 
-    const userData = userDoc.data();
-    const subscriptionPlan = userData?.subscriptionPlan || "free";
-
-    if (subscriptionPlan !== "pro") {
-      throw new HttpsError(
-        "permission-denied",
-        "AI Insights is a Pro feature. Please upgrade your plan to access this feature."
-      );
-    }
+    // Full access: disable subscription gating for AI Insights.
 
     logger.info("Processing AI Insights request", { type, userId });
 

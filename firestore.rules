@@ -24,30 +24,21 @@ service cloud.firestore {
     
     // User profiles
     match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId) && (!('role' in request.resource.data) || request.resource.data.role == 'user');
-      allow update: if isOwner(userId)
-        && (
-          request.resource.data.role == resource.data.role
-          || (!('role' in resource.data) && request.resource.data.role == 'user')
-        );
-      allow delete: if isOwner(userId);
+      allow read, write: if isOwner(userId) || isAdmin();
       
       // User's receipts subcollection
       match /receipts/{receiptId} {
-        allow read, write: if isOwner(userId);
+        allow read, write: if isOwner(userId) || isAdmin();
       }
       
       // User's merchants subcollection
       match /merchants/{merchantId} {
-        allow read, write: if isOwner(userId);
+        allow read, write: if isOwner(userId) || isAdmin();
       }
       
       // User's monthly summaries subcollection
       match /monthlySummaries/{summaryId} {
-        allow read: if isOwner(userId);
-        // Write is handled by Cloud Functions only
-        allow write: if isOwner(userId);
+        allow read, write: if isOwner(userId) || isAdmin();
       }
     }
     
