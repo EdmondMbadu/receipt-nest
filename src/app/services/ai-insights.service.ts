@@ -146,7 +146,7 @@ export class AiInsightsService {
     }
   }
 
-  async initializeChatState(): Promise<void> {
+  async initializeChatState(initialBatchSize = 10): Promise<void> {
     const userId = this.auth.user()?.id;
     if (!userId) {
       this.resetChatState();
@@ -163,7 +163,7 @@ export class AiInsightsService {
     this.activeChatId.set(null);
     this.chatHistory.set([]);
 
-    await this.loadHistoryBatch(10, false);
+    await this.loadHistoryBatch(initialBatchSize, false);
 
     const preferredChatId = this.readStoredActiveChatId(userId);
     if (preferredChatId) {
@@ -337,11 +337,11 @@ export class AiInsightsService {
     }
   }
 
-  async loadMoreHistory(): Promise<void> {
+  async loadMoreHistory(batchSize = 20): Promise<void> {
     if (this.historyLoadingMore() || this.historyLoading() || !this.historyHasMore()) {
       return;
     }
-    await this.loadHistoryBatch(20, true);
+    await this.loadHistoryBatch(batchSize, true);
   }
 
   /**

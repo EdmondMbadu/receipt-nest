@@ -37,11 +37,6 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
   readonly insights = this.aiService.insights;
   readonly insightsLoading = this.aiService.insightsLoading;
   readonly error = this.aiService.error;
-  readonly activeChatId = this.aiService.activeChatId;
-  readonly chatHistory = this.aiService.chatHistory;
-  readonly historyLoading = this.aiService.historyLoading;
-  readonly historyLoadingMore = this.aiService.historyLoadingMore;
-  readonly historyHasMore = this.aiService.historyHasMore;
 
   // Subscription state
   readonly subscriptionPlan = signal<'free' | 'pro'>('free');
@@ -117,19 +112,6 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
     this.aiService.startNewChat();
   }
 
-  async openChat(chatId: string): Promise<void> {
-    await this.aiService.openChat(chatId, true);
-  }
-
-  async deleteChat(event: MouseEvent, chatId: string): Promise<void> {
-    event.stopPropagation();
-    await this.aiService.deleteChat(chatId);
-  }
-
-  async loadMoreHistory(): Promise<void> {
-    await this.aiService.loadMoreHistory();
-  }
-
   refreshInsights(): void {
     if (!this.hasAiAccess()) {
       return;
@@ -163,14 +145,6 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
-    }).format(date);
-  }
-
-  formatHistoryDate(date: Date): string {
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
     }).format(date);
   }
 
