@@ -313,7 +313,7 @@ export class AiInsightsService {
       await this.persistChat(chatId);
 
       // Use the receipt service to upload (handles storage + Firestore doc creation)
-      await this.receiptService.uploadReceipt(file, (progress) => {
+      const receipt = await this.receiptService.uploadReceipt(file, (progress) => {
         this.uploadProgress.set(Math.round(progress.progress));
       });
 
@@ -321,13 +321,14 @@ export class AiInsightsService {
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: `Receipt uploaded successfully! "${fileName}" is now being processed. ` +
-          `I'll extract the merchant, amount, and date automatically. ` +
-          `You'll see it in your receipts shortly.`,
+        content: `Receipt uploaded! "${fileName}" is now being processed. I'll let you know when it's done.`,
         timestamp: new Date()
       };
       this.messages.update(msgs => [...msgs, assistantMessage]);
       await this.persistChat(chatId);
+
+      // Listen for processing completion on this specific receipt
+      this.watchReceiptProcessing(receipt.id, chatId);
     } catch (err: any) {
       console.error('Failed to upload receipt from chat:', err);
       const errorContent = err?.message === 'FREE_PLAN_LIMIT_REACHED'
@@ -375,6 +376,68 @@ export class AiInsightsService {
       };
       reader.onerror = reject;
       reader.readAsDataURL(file);
+    });
+  }
+
+  /**
+   * Watch a receipt document for processing completion and add a follow-up chat message.
+   */
+  private watchReceiptProcessing(receiptId: string, chatId: string): void {
+    const userId = this.auth.user()?.id;
+    if (!userId) return;
+
+    const receiptRef = doc(this.db, `users/${userId}/receipts`, receiptId);
+    const unsubscribe = onSnapshot(receiptRef, async (snap) => {
+      if (!snap.exists()) return;
+      const data = snap.data();
+      const status = data['status'] as string;
+
+      // Still processing -- wait
+      if (status === 'uploaded' || status === 'processing') return;
+
+      // Done -- stop listening
+      unsubscribe();
+
+      let followUp = '';
+
+      if (status === 'final') {
+        const merchant = data['merchant']?.['canonicalName'] || data['merchant']?.['rawName'] || 'Unknown';
+        const amount = data['totalAmount'];
+        const currency = data['currency'] || 'USD';
+        const date = data['date'] || 'Unknown date';
+
+        const amountStr = amount !== undefined
+          ? new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount)
+          : 'amount not detected';
+
+        followUp =
+          `Receipt processed!\n\n` +
+          `Store: ${merchant}\n` +
+          `Amount: ${amountStr}\n` +
+          `Date: ${date}\n\n` +
+          `It has been added to your account automatically.`;
+      } else if (status === 'needs_review') {
+        followUp =
+          `Your receipt has been uploaded but I couldn't fully read it. ` +
+          `Check your receipts to review and fill in any missing details.`;
+      } else {
+        followUp =
+          `Sorry, I had trouble processing that receipt. ` +
+          `Please try taking a clearer photo or uploading it again.`;
+      }
+
+      const followUpMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: followUp,
+        timestamp: new Date()
+      };
+      this.messages.update(msgs => [...msgs, followUpMessage]);
+
+      // Persist the follow-up to the chat document
+      if (this.activeChatId() === chatId) {
+        await this.persistChat(chatId);
+      }
     });
   }
 

@@ -531,6 +531,52 @@ interface StoredMessage {
   timestamp: string; // ISO-8601
 }
 
+/**
+ * Append one or more messages to the _telegram chat document.
+ * Creates the document if it doesn't exist yet.
+ */
+async function appendToTelegramChat(
+  userId: string,
+  newMessages: StoredMessage[]
+): Promise<void> {
+  const db = admin.firestore();
+  const chatRef = db.doc(`users/${userId}/aiChats/${TELEGRAM_CHAT_DOC_ID}`);
+  const chatSnap = await chatRef.get();
+
+  let existing: StoredMessage[] = [];
+
+  if (!chatSnap.exists) {
+    await chatRef.set({
+      title: "Telegram Chat",
+      source: "telegram",
+      messages: [],
+      messageCount: 0,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      lastMessageAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  } else {
+    existing = (chatSnap.data()?.messages || []) as StoredMessage[];
+  }
+
+  const updated = [...existing, ...newMessages].slice(-50);
+
+  const firstUserMsg = updated.find((m) => m.role === "user");
+  const title = firstUserMsg
+    ? firstUserMsg.content.length > 56
+      ? firstUserMsg.content.slice(0, 56) + "..."
+      : firstUserMsg.content
+    : "Telegram Chat";
+
+  await chatRef.update({
+    title,
+    messages: updated,
+    messageCount: updated.length,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    lastMessageAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
 async function handleTextMessage(
   token: string,
   message: TelegramMessage,
@@ -549,26 +595,12 @@ async function handleTextMessage(
     // Build expense data server-side
     const insightData = await buildServerInsightData(userId);
 
-    // Use a well-known doc ID so we never need a composite-index query
+    // Read existing messages for AI context
     const chatRef = db.doc(`users/${userId}/aiChats/${TELEGRAM_CHAT_DOC_ID}`);
     const chatSnap = await chatRef.get();
-
-    let storedMessages: StoredMessage[] = [];
-
-    if (!chatSnap.exists) {
-      // Create the Telegram chat doc for the first time
-      await chatRef.set({
-        title: "Telegram Chat",
-        source: "telegram",
-        messages: [],
-        messageCount: 0,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        lastMessageAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
-    } else {
-      storedMessages = (chatSnap.data()?.messages || []) as StoredMessage[];
-    }
+    const storedMessages: StoredMessage[] = chatSnap.exists
+      ? ((chatSnap.data()?.messages || []) as StoredMessage[])
+      : [];
 
     // Build ChatMessage history for the AI (last 10 messages for context)
     const recentHistory: ChatMessage[] = storedMessages.slice(-10).map((m) => ({
@@ -579,44 +611,14 @@ async function handleTextMessage(
     // Call the shared AI handler
     const aiResponse = await handleChat(userText, recentHistory, insightData);
 
-    // Append the new pair, preserving all existing messages as-is
+    // Save both messages to the chat document
     const now = new Date().toISOString();
-    const userMsg: StoredMessage = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: userText,
-      timestamp: now,
-    };
-    const assistantMsg: StoredMessage = {
-      id: crypto.randomUUID(),
-      role: "assistant",
-      content: aiResponse,
-      timestamp: new Date().toISOString(),
-    };
-
-    const updatedMessages = [...storedMessages, userMsg, assistantMsg];
-
-    // Keep only last 50 messages to avoid document size issues
-    const trimmedMessages = updatedMessages.slice(-50);
-
-    // Derive a title from the first user message in the conversation
-    const firstUserMsg = trimmedMessages.find((m) => m.role === "user");
-    const title = firstUserMsg
-      ? firstUserMsg.content.length > 56
-        ? firstUserMsg.content.slice(0, 56) + "..."
-        : firstUserMsg.content
-      : "Telegram Chat";
-
-    await chatRef.update({
-      title,
-      messages: trimmedMessages,
-      messageCount: trimmedMessages.length,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      lastMessageAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    await appendToTelegramChat(userId, [
+      { id: crypto.randomUUID(), role: "user", content: userText, timestamp: now },
+      { id: crypto.randomUUID(), role: "assistant", content: aiResponse, timestamp: new Date().toISOString() },
+    ]);
 
     // Send AI response back to Telegram
-    // Truncate if over Telegram's 4096 character limit
     const responseText =
       aiResponse.length > 4000
         ? aiResponse.slice(0, 4000) + "\n\n(Message truncated)"
@@ -713,11 +715,16 @@ async function handlePhotoMessage(
     // Update with document ID
     await receiptRef.update({ id: receiptRef.id });
 
-    await sendTelegramMessage(
-      token,
-      chatId,
-      "Your receipt has been uploaded and is being processed. You'll see it in the app shortly!"
-    );
+    const confirmMsg = "Your receipt has been uploaded and is being processed. You'll see it in the app shortly!";
+
+    // Save the exchange to the Telegram chat document so it's visible in the web app
+    const now = new Date().toISOString();
+    await appendToTelegramChat(userId, [
+      { id: crypto.randomUUID(), role: "user", content: `Receipt image: ${fileName}`, timestamp: now },
+      { id: crypto.randomUUID(), role: "assistant", content: confirmMsg, timestamp: new Date().toISOString() },
+    ]);
+
+    await sendTelegramMessage(token, chatId, confirmMsg);
 
     logger.info("Receipt uploaded via Telegram", {
       userId,
@@ -820,11 +827,16 @@ async function handleDocumentMessage(
 
     await receiptRef.update({ id: receiptRef.id });
 
-    await sendTelegramMessage(
-      token,
-      chatId,
-      "Your receipt has been uploaded and is being processed. You'll see it in the app shortly!"
-    );
+    const confirmMsg = "Your receipt document has been uploaded and is being processed. You'll see it in the app shortly!";
+
+    // Save the exchange to the Telegram chat document so it's visible in the web app
+    const now = new Date().toISOString();
+    await appendToTelegramChat(userId, [
+      { id: crypto.randomUUID(), role: "user", content: `Receipt document: ${originalName}`, timestamp: now },
+      { id: crypto.randomUUID(), role: "assistant", content: confirmMsg, timestamp: new Date().toISOString() },
+    ]);
+
+    await sendTelegramMessage(token, chatId, confirmMsg);
 
     logger.info("Receipt document uploaded via Telegram", {
       userId,
@@ -1185,55 +1197,41 @@ export const onTelegramReceiptProcessed = onDocumentUpdated(
 
     const status = after.status;
 
+    let notificationMsg = "";
+
     if (status === "final") {
-      // Successfully processed
       const merchant = after.merchant?.canonicalName || after.merchant?.rawName || "Unknown";
       const amount = after.totalAmount;
       const currency = after.currency || "USD";
       const date = after.date || "Unknown date";
+      const amountStr = amount !== undefined ? formatCurrency(amount) : "amount not detected";
 
-      const amountStr = amount !== undefined
-        ? formatCurrency(amount)
-        : "amount not detected";
-
-      await sendTelegramMessage(
-        token,
-        telegramChatId,
+      notificationMsg =
         `Receipt processed!\n\n` +
         `Store: ${merchant}\n` +
         `Amount: ${amountStr} ${currency}\n` +
         `Date: ${date}\n\n` +
-        `It has been added to your account automatically.`
-      );
-
-      logger.info("Telegram receipt notification sent (success)", {
-        userId,
-        receiptId: event.params.receiptId,
-        merchant,
-        amount,
-      });
+        `It has been added to your account automatically.`;
     } else if (status === "needs_review") {
-      // Extraction partially failed
-      await sendTelegramMessage(
-        token,
-        telegramChatId,
+      notificationMsg =
         `Your receipt has been uploaded but I couldn't fully read it. ` +
-        `Open the app to review and fill in any missing details.`
-      );
-
-      logger.info("Telegram receipt notification sent (needs_review)", {
-        userId,
-        receiptId: event.params.receiptId,
-      });
+        `Open the app to review and fill in any missing details.`;
     } else if (status === "error") {
-      await sendTelegramMessage(
-        token,
-        telegramChatId,
+      notificationMsg =
         `Sorry, I had trouble processing that receipt. ` +
-        `Please try taking a clearer photo, or upload it through the app.`
-      );
+        `Please try taking a clearer photo, or upload it through the app.`;
+    }
 
-      logger.info("Telegram receipt notification sent (error)", {
+    if (notificationMsg) {
+      // Send to Telegram
+      await sendTelegramMessage(token, telegramChatId, notificationMsg);
+
+      // Also save to the _telegram chat doc so it's visible in the web app
+      await appendToTelegramChat(userId, [
+        { id: crypto.randomUUID(), role: "assistant", content: notificationMsg, timestamp: new Date().toISOString() },
+      ]);
+
+      logger.info(`Telegram receipt notification sent (${status})`, {
         userId,
         receiptId: event.params.receiptId,
       });
