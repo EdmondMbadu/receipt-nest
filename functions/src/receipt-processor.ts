@@ -5,7 +5,7 @@
  * Uses a two-pass Gemini extraction for accurate receipt parsing.
  */
 
-import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import { VertexAI } from "@google-cloud/vertexai";
@@ -43,6 +43,21 @@ interface ReceiptCategory {
   name: string;
   confidence: number;
   assignedBy: "ai" | "user" | "rule" | "default";
+}
+
+interface ReceiptDoc {
+  status?: string;
+  notes?: string;
+  totalAmount?: number;
+  currency?: string;
+  date?: string;
+  merchant?: {
+    canonicalName?: string;
+    rawName?: string;
+  };
+  category?: {
+    name?: string;
+  };
 }
 
 // Configuration
@@ -477,6 +492,61 @@ export const processReceipt = onDocumentCreated(
 );
 
 /**
+ * Background note generation.
+ * Runs after receipt updates and only fills notes when empty.
+ * This is intentionally lightweight so it does not affect upload latency.
+ */
+export const generateReceiptNote = onDocumentUpdated(
+  {
+    document: "users/{userId}/receipts/{receiptId}",
+    region: "us-central1",
+    memory: "256MiB",
+    timeoutSeconds: 60,
+  },
+  async (event) => {
+    const after = event.data?.after.data() as ReceiptDoc | undefined;
+    const before = event.data?.before.data() as ReceiptDoc | undefined;
+    if (!after) {
+      return;
+    }
+
+    // Only run once receipt processing is complete.
+    if (after.status !== "final") {
+      return;
+    }
+
+    // Never overwrite user-entered notes.
+    if (after.notes && after.notes.trim().length > 0) {
+      return;
+    }
+
+    // Skip if this update already had final+empty notes before, to reduce duplicate work.
+    if (
+      before?.status === "final" &&
+      (!before.notes || before.notes.trim().length === 0)
+    ) {
+      return;
+    }
+
+    const note = buildAutoReceiptNote(after);
+    if (!note) {
+      return;
+    }
+
+    const { userId, receiptId } = event.params;
+    const db = admin.firestore();
+    const receiptRef = db.doc(`users/${userId}/receipts/${receiptId}`);
+
+    await receiptRef.update({
+      notes: note,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    logger.info(`Generated note for receipt: ${receiptId}`, { note });
+  }
+);
+
+/**
  * Normalize merchant name and match to existing merchants
  */
 async function normalizeMerchant(
@@ -628,4 +698,65 @@ function parseDate(dateStr: string): string | null {
   return null;
 }
 
+/**
+ * Build a short human-readable note from extracted receipt metadata.
+ */
+function buildAutoReceiptNote(receipt: ReceiptDoc): string {
+  const merchant =
+    receipt.merchant?.canonicalName ||
+    receipt.merchant?.rawName ||
+    "Unknown merchant";
+  const category = receipt.category?.name || "general purchase";
+  const amountText = formatAmount(receipt.totalAmount, receipt.currency);
+  const dateText = formatShortDate(receipt.date);
 
+  const segments = [
+    `${category} purchase`,
+    `at ${merchant}`,
+  ];
+
+  if (amountText) {
+    segments.push(`for ${amountText}`);
+  }
+
+  if (dateText) {
+    segments.push(`on ${dateText}`);
+  }
+
+  const note = `${segments.join(" ")}.`;
+  return note.length <= 160 ? note : note.slice(0, 157).trimEnd() + "...";
+}
+
+function formatAmount(amount?: number, currency?: string): string | null {
+  if (amount === undefined || amount === null || amount <= 0) {
+    return null;
+  }
+
+  const normalizedCurrency = currency || "USD";
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: normalizedCurrency,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return `${normalizedCurrency} ${amount.toFixed(2)}`;
+  }
+}
+
+function formatShortDate(isoDate?: string): string | null {
+  if (!isoDate) {
+    return null;
+  }
+
+  const parsed = new Date(isoDate);
+  if (isNaN(parsed.getTime())) {
+    return null;
+  }
+
+  return parsed.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
