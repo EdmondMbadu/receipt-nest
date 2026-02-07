@@ -824,6 +824,18 @@ export class AiInsightsService {
   }
 
   /**
+   * Open the Telegram chat in the web UI.
+   * Uses the well-known document ID '_telegram'.
+   */
+  async openTelegramChat(): Promise<void> {
+    const found = await this.openChat('_telegram', true);
+    if (!found) {
+      // Chat doesn't exist yet (user hasn't sent any messages on Telegram)
+      this.error.set('No Telegram messages yet. Send a message to the bot on Telegram first!');
+    }
+  }
+
+  /**
    * Unlink the user's Telegram account.
    */
   async unlinkTelegram(): Promise<void> {

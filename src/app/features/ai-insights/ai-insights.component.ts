@@ -238,7 +238,8 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
 
   openTelegramDialog(): void {
     if (this.telegramLinked()) {
-      // Already linked - could show status or unlink option
+      // Already linked - open the Telegram chat directly
+      this.aiService.openTelegramChat();
       return;
     }
     this.aiService.generateTelegramLink();

@@ -251,6 +251,17 @@ export class AppShellComponent {
     this.closeSidebar();
   }
 
+  async openTelegramChat(): Promise<void> {
+    if (!this.isInsightsRoute()) {
+      await this.router.navigate(['/app/insights']);
+    }
+    // Small delay to ensure component is loaded
+    setTimeout(() => {
+      this.aiService.openTelegramChat();
+    }, 200);
+    this.closeSidebar();
+  }
+
   async unlinkTelegram(): Promise<void> {
     await this.aiService.unlinkTelegram();
   }
