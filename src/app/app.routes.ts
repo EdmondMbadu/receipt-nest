@@ -1,7 +1,27 @@
-import { Routes } from '@angular/router';
+import { EnvironmentInjector, inject, runInInjectionContext } from '@angular/core';
+import { CanActivateFn, GuardResult, MaybeAsync, Routes } from '@angular/router';
+import { firstValueFrom, isObservable } from 'rxjs';
 
-import { authGuard } from './guards/auth.guard';
-import { adminGuard } from './guards/admin.guard';
+function toGuardResultPromise(result: MaybeAsync<GuardResult>): Promise<GuardResult> {
+  if (isObservable(result)) {
+    return firstValueFrom(result);
+  }
+  return Promise.resolve(result);
+}
+
+const lazyAuthGuard: CanActivateFn = (route, state) => {
+  const injector = inject(EnvironmentInjector);
+  return import('./guards/auth.guard')
+    .then(({ authGuard }) => runInInjectionContext(injector, () => authGuard(route, state)))
+    .then(toGuardResultPromise);
+};
+
+const lazyAdminGuard: CanActivateFn = (route, state) => {
+  const injector = inject(EnvironmentInjector);
+  return import('./guards/admin.guard')
+    .then(({ adminGuard }) => runInInjectionContext(injector, () => adminGuard(route, state)))
+    .then(toGuardResultPromise);
+};
 
 export const routes: Routes = [
   {
@@ -10,22 +30,22 @@ export const routes: Routes = [
   },
   {
     path: 'app/pricing',
-    canActivate: [authGuard],
+    canActivate: [lazyAuthGuard],
     loadComponent: () => import('./features/pricing/pricing.component').then((m) => m.PricingComponent)
   },
   {
     path: 'app/receipt/:id',
-    canActivate: [authGuard],
+    canActivate: [lazyAuthGuard],
     loadComponent: () => import('./features/receipt-detail/receipt-detail.component').then((m) => m.ReceiptDetailComponent)
   },
   {
     path: 'app/admin',
-    canActivate: [adminGuard],
+    canActivate: [lazyAdminGuard],
     loadComponent: () => import('./features/admin/admin.component').then((m) => m.AdminComponent)
   },
   {
     path: 'app',
-    canActivate: [authGuard],
+    canActivate: [lazyAuthGuard],
     loadComponent: () => import('./features/app-shell/app-shell.component').then((m) => m.AppShellComponent),
     children: [
       {
@@ -40,7 +60,7 @@ export const routes: Routes = [
   },
   {
     path: 'home',
-    canActivate: [authGuard],
+    canActivate: [lazyAuthGuard],
     loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent)
   },
   {
