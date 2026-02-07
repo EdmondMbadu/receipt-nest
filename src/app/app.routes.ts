@@ -9,19 +9,9 @@ export const routes: Routes = [
     loadComponent: () => import('./features/landing/landing.component').then((m) => m.LandingComponent)
   },
   {
-    path: 'app',
-    canActivate: [authGuard],
-    loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent)
-  },
-  {
     path: 'app/pricing',
     canActivate: [authGuard],
     loadComponent: () => import('./features/pricing/pricing.component').then((m) => m.PricingComponent)
-  },
-  {
-    path: 'app/insights',
-    canActivate: [authGuard],
-    loadComponent: () => import('./features/ai-insights/ai-insights.component').then((m) => m.AiInsightsComponent)
   },
   {
     path: 'app/receipt/:id',
@@ -32,6 +22,21 @@ export const routes: Routes = [
     path: 'app/admin',
     canActivate: [adminGuard],
     loadComponent: () => import('./features/admin/admin.component').then((m) => m.AdminComponent)
+  },
+  {
+    path: 'app',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/app-shell/app-shell.component').then((m) => m.AppShellComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent)
+      },
+      {
+        path: 'insights',
+        loadComponent: () => import('./features/ai-insights/ai-insights.component').then((m) => m.AiInsightsComponent)
+      }
+    ]
   },
   {
     path: 'home',
