@@ -316,7 +316,7 @@ export class AiInsightsService {
         this.uploadProgress.set(Math.round(progress.progress));
       });
 
-      // Get the download URL for the uploaded file
+      // Get the download URL for the uploaded file (for immediate preview)
       let downloadUrl: string | null = null;
       try {
         downloadUrl = await this.receiptService.getReceiptFileUrl(receipt.file.storagePath);
@@ -329,7 +329,15 @@ export class AiInsightsService {
         this.chatThumbnails.set(messageId, downloadUrl);
         this.messages.update(msgs =>
           msgs.map(m => m.id === messageId
-            ? { ...m, content: `${attachLabel}: ${fileName} [receipt_url:${downloadUrl}]` }
+            ? { ...m, content: `${attachLabel}: ${fileName} [receipt_path:${receipt.file.storagePath}]` }
+            : m
+          )
+        );
+      } else {
+        // Persist storage path even if URL couldn't be generated yet
+        this.messages.update(msgs =>
+          msgs.map(m => m.id === messageId
+            ? { ...m, content: `${attachLabel}: ${fileName} [receipt_path:${receipt.file.storagePath}]` }
             : m
           )
         );
@@ -497,12 +505,6 @@ export class AiInsightsService {
       // Strip legacy [attachment:image] base64 tags
       content = content.replace(/\[attachment:image\][^\[]*\[\/attachment\]\n?/g, '').trim();
 
-      // Extract [receipt_url:...] and populate the thumbnail map
-      const urlMatch = content.match(/\[receipt_url:(https?:\/\/[^\]]+)\]/);
-      if (urlMatch) {
-        this.chatThumbnails.set(message.id, urlMatch[1]);
-      }
-
       return {
         id: message.id,
         role: message.role,
@@ -510,6 +512,8 @@ export class AiInsightsService {
         timestamp: new Date(message.timestamp)
       };
     });
+
+    await this.hydrateMessageThumbnails(messages);
 
     this.messages.set(messages);
     this.activeChatId.set(chatId);
@@ -940,11 +944,84 @@ export class AiInsightsService {
     this.error.set(null);
     this.activeChatId.set(null);
     this.chatHistory.set([]);
+    this.chatThumbnails.clear();
     this.historyHasMore.set(false);
     this.historyLoading.set(false);
     this.historyLoadingMore.set(false);
     this.historyCursor = null;
     this.initializedHistoryForUser = null;
+  }
+
+  private async hydrateMessageThumbnails(messages: ChatMessage[]): Promise<void> {
+    for (const message of messages) {
+      const resolvedUrl = await this.resolveReceiptPreviewUrl(message.content);
+      if (resolvedUrl) {
+        this.chatThumbnails.set(message.id, resolvedUrl);
+      } else {
+        this.chatThumbnails.delete(message.id);
+      }
+    }
+  }
+
+  async getFreshReceiptPreviewUrl(messageId: string, content: string): Promise<string | null> {
+    const resolvedUrl = await this.resolveReceiptPreviewUrl(content);
+    if (resolvedUrl) {
+      this.chatThumbnails.set(messageId, resolvedUrl);
+      return resolvedUrl;
+    }
+    this.chatThumbnails.delete(messageId);
+    return null;
+  }
+
+  private async resolveReceiptPreviewUrl(content: string): Promise<string | null> {
+    const storagePath = this.extractReceiptPath(content);
+    if (storagePath) {
+      try {
+        return await this.receiptService.getReceiptFileUrl(storagePath);
+      } catch {
+        return null;
+      }
+    }
+
+    const legacyUrl = this.extractReceiptUrl(content);
+    if (!legacyUrl) return null;
+
+    const derivedPath = this.decodeStoragePathFromDownloadUrl(legacyUrl);
+    if (derivedPath) {
+      try {
+        return await this.receiptService.getReceiptFileUrl(derivedPath);
+      } catch {
+        return null;
+      }
+    }
+
+    return legacyUrl;
+  }
+
+  private extractReceiptPath(content: string): string | null {
+    const match = content.match(/\[receipt_path:([^\]]+)\]/);
+    return match?.[1] ?? null;
+  }
+
+  private extractReceiptUrl(content: string): string | null {
+    const match = content.match(/\[receipt_url:(https?:\/\/[^\]]+)\]/);
+    return match?.[1] ?? null;
+  }
+
+  private decodeStoragePathFromDownloadUrl(url: string): string | null {
+    const marker = '/o/';
+    const markerIndex = url.indexOf(marker);
+    if (markerIndex === -1) return null;
+
+    const encodedWithQuery = url.slice(markerIndex + marker.length);
+    const encodedPath = encodedWithQuery.split('?')[0];
+    if (!encodedPath) return null;
+
+    try {
+      return decodeURIComponent(encodedPath);
+    } catch {
+      return null;
+    }
   }
 
   // ── Telegram Integration ────────────────────────────────────────────────

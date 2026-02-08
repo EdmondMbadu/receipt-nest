@@ -68,6 +68,7 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
   readonly telegramDeepLink = this.aiService.telegramDeepLink;
   readonly telegramLinkLoading = this.aiService.telegramLinkLoading;
   readonly telegramLinkError = this.aiService.telegramLinkError;
+  readonly unavailableReceiptPreviews = signal<Record<string, boolean>>({});
 
   // Scroll effect
   private scrollEffect = effect(() => {
@@ -194,11 +195,44 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
     return this.aiService.chatThumbnails.get(messageId) ?? null;
   }
 
+  async openReceiptPreview(messageId: string, content: string): Promise<void> {
+    const freshUrl = await this.aiService.getFreshReceiptPreviewUrl(messageId, content);
+    if (!freshUrl) {
+      this.markReceiptPreviewUnavailable(messageId);
+      return;
+    }
+
+    this.unavailableReceiptPreviews.update((state) => {
+      if (!state[messageId]) return state;
+      const next = { ...state };
+      delete next[messageId];
+      return next;
+    });
+
+    window.open(freshUrl, '_blank', 'noopener,noreferrer');
+  }
+
+  onReceiptPreviewError(messageId: string): void {
+    this.markReceiptPreviewUnavailable(messageId);
+  }
+
+  isReceiptPreviewUnavailable(messageId: string): boolean {
+    return !!this.unavailableReceiptPreviews()[messageId];
+  }
+
+  private markReceiptPreviewUnavailable(messageId: string): void {
+    this.aiService.chatThumbnails.delete(messageId);
+    this.unavailableReceiptPreviews.update((state) => ({ ...state, [messageId]: true }));
+  }
+
   /**
-   * Strip the [receipt_url:...] tag from message content for display.
+   * Strip receipt metadata tags from message content for display.
    */
   stripReceiptUrl(content: string): string {
-    return content.replace(/\s*\[receipt_url:[^\]]+\]/g, '').trim();
+    return content
+      .replace(/\s*\[receipt_url:[^\]]+\]/g, '')
+      .replace(/\s*\[receipt_path:[^\]]+\]/g, '')
+      .trim();
   }
 
   formatMessage(content: string): SafeHtml {
