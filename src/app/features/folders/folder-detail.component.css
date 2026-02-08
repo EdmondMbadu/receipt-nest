@@ -107,15 +107,15 @@
 }
 
 .download-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.42rem;
+  justify-content: center;
   border-radius: 0.72rem;
   border: 1px solid rgba(148, 163, 184, 0.35);
   background: rgba(255, 255, 255, 0.92);
-  padding: 0.5rem 0.72rem;
-  font-size: 0.74rem;
-  font-weight: 700;
+  height: 2.75rem;
+  width: 2.75rem;
   color: rgb(51 65 85);
   transition: all 150ms ease;
 }
@@ -132,8 +132,8 @@
 }
 
 .download-btn--small {
-  padding: 0.38rem 0.56rem;
-  font-size: 0.7rem;
+  height: 2.3rem;
+  width: 2.3rem;
 }
 
 .download-menu {
