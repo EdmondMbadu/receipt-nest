@@ -56,6 +56,11 @@
   background: rgba(255, 251, 235, 0.95);
 }
 
+.action-icon--rename:hover {
+  border-color: rgba(37, 99, 235, 0.4);
+  background: rgba(239, 246, 255, 0.95);
+}
+
 .action-icon--delete:hover {
   border-color: rgba(244, 63, 94, 0.4);
   background: rgba(255, 241, 242, 0.95);
@@ -67,6 +72,10 @@
 
 .action-icon--remove {
   color: rgb(217 119 6);
+}
+
+.action-icon--rename {
+  color: rgb(37 99 235);
 }
 
 .action-icon--delete {
@@ -173,6 +182,10 @@
   color: rgb(251 191 36);
 }
 
+:host-context(.dark) .action-icon--rename {
+  color: rgb(96 165 250);
+}
+
 :host-context(.dark) .action-icon--delete {
   color: rgb(251 113 133);
 }
@@ -185,6 +198,11 @@
 :host-context(.dark) .action-icon--remove:hover {
   border-color: rgba(245, 158, 11, 0.55);
   background: rgba(120, 53, 15, 0.36);
+}
+
+:host-context(.dark) .action-icon--rename:hover {
+  border-color: rgba(37, 99, 235, 0.55);
+  background: rgba(30, 58, 138, 0.35);
 }
 
 :host-context(.dark) .action-icon--delete:hover {

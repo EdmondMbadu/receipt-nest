@@ -123,6 +123,19 @@ export class FolderService {
     await deleteDoc(folderRef);
   }
 
+  async renameFolder(folderId: string, name: string): Promise<void> {
+    const cleanedName = name.trim();
+    if (!cleanedName) {
+      throw new Error('Folder name is required.');
+    }
+
+    const folderRef = doc(this.db, this.getFoldersPath(), folderId);
+    await updateDoc(folderRef, {
+      name: cleanedName,
+      updatedAt: serverTimestamp()
+    });
+  }
+
   private async updateFolderReceipts(folderId: string, receiptIds: string[]): Promise<void> {
     const folderRef = doc(this.db, this.getFoldersPath(), folderId);
     await updateDoc(folderRef, {

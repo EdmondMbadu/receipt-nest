@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { Folder } from '../../models/folder.model';
@@ -19,7 +20,7 @@ interface MonthGroup {
 @Component({
   selector: 'app-folder-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './folder-detail.component.html',
   styleUrl: './folder-detail.component.css'
 })
@@ -43,6 +44,8 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
   readonly addModalOpen = signal(false);
   readonly removeModalOpen = signal(false);
   readonly deleteModalOpen = signal(false);
+  readonly renameModalOpen = signal(false);
+  readonly renameFolderName = signal('');
 
   readonly selectedReceiptIds = signal<Set<string>>(new Set());
   readonly mutationLoading = signal(false);
@@ -135,6 +138,12 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
     this.deleteModalOpen.set(true);
   }
 
+  openRenameModal(): void {
+    this.renameFolderName.set(this.folder()?.name || '');
+    this.mutationError.set(null);
+    this.renameModalOpen.set(true);
+  }
+
   toggleDownloadMenu(key: string): void {
     this.downloadMenuOpenKey.update((openKey) => (openKey === key ? null : key));
   }
@@ -147,6 +156,7 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
     this.addModalOpen.set(false);
     this.removeModalOpen.set(false);
     this.deleteModalOpen.set(false);
+    this.renameModalOpen.set(false);
     this.selectedReceiptIds.set(new Set());
     this.mutationError.set(null);
     this.mutationLoading.set(false);
@@ -243,6 +253,39 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
       await this.router.navigate(['/app/folders']);
     } catch (error: any) {
       this.mutationError.set(error?.message || 'Unable to delete folder.');
+      this.mutationLoading.set(false);
+    }
+  }
+
+  async renameFolder(): Promise<void> {
+    if (this.mutationLoading()) {
+      return;
+    }
+
+    const targetFolder = this.folder();
+    if (!targetFolder) {
+      return;
+    }
+
+    const nextName = this.renameFolderName().trim();
+    if (!nextName) {
+      this.mutationError.set('Folder name is required.');
+      return;
+    }
+
+    if (nextName === targetFolder.name) {
+      this.closeAllModals();
+      return;
+    }
+
+    this.mutationLoading.set(true);
+    this.mutationError.set(null);
+
+    try {
+      await this.folderService.renameFolder(targetFolder.id, nextName);
+      this.closeAllModals();
+    } catch (error: any) {
+      this.mutationError.set(error?.message || 'Unable to rename folder.');
       this.mutationLoading.set(false);
     }
   }
