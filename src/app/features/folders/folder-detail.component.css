@@ -19,6 +19,106 @@
   box-shadow: 0 16px 30px rgba(0, 0, 0, 0.36);
 }
 
+.action-icon {
+  position: relative;
+  display: inline-flex;
+  height: 2.5rem;
+  width: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.85rem;
+  border: 1px solid transparent;
+  color: white;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.16);
+  transition: all 160ms ease;
+}
+
+.action-icon:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 14px 26px rgba(15, 23, 42, 0.22);
+}
+
+.action-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.action-icon--add:hover {
+  filter: saturate(1.08) brightness(1.04);
+}
+
+.action-icon--remove:hover {
+  filter: saturate(1.08) brightness(1.04);
+}
+
+.action-icon--delete:hover {
+  filter: saturate(1.08) brightness(1.04);
+}
+
+.action-icon--add {
+  background: linear-gradient(145deg, rgb(16 185 129), rgb(5 150 105));
+  border-color: rgba(5, 150, 105, 0.55);
+  box-shadow: 0 12px 22px rgba(5, 150, 105, 0.32);
+}
+
+.action-icon--remove {
+  background: linear-gradient(145deg, rgb(245 158 11), rgb(217 119 6));
+  border-color: rgba(217, 119, 6, 0.55);
+  box-shadow: 0 12px 22px rgba(217, 119, 6, 0.3);
+}
+
+.action-icon--delete {
+  background: linear-gradient(145deg, rgb(244 63 94), rgb(225 29 72));
+  border-color: rgba(225, 29, 72, 0.56);
+  box-shadow: 0 12px 22px rgba(225, 29, 72, 0.3);
+}
+
+.action-tooltip {
+  pointer-events: none;
+  position: absolute;
+  bottom: -2.25rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  border-radius: 0.45rem;
+  background: rgb(2 6 23);
+  color: white;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  text-transform: uppercase;
+  padding: 0.34rem 0.52rem;
+  opacity: 0;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.group:hover .action-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+:host-context(.dark) .action-icon {
+  color: white;
+  box-shadow: 0 14px 24px rgba(2, 6, 23, 0.4);
+}
+
+:host-context(.dark) .action-icon--add:hover {
+  border-color: rgba(16, 185, 129, 0.65);
+  box-shadow: 0 16px 28px rgba(16, 185, 129, 0.34);
+}
+
+:host-context(.dark) .action-icon--remove:hover {
+  border-color: rgba(245, 158, 11, 0.65);
+  box-shadow: 0 16px 28px rgba(245, 158, 11, 0.34);
+}
+
+:host-context(.dark) .action-icon--delete:hover {
+  border-color: rgba(244, 63, 94, 0.68);
+  box-shadow: 0 16px 28px rgba(244, 63, 94, 0.34);
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
