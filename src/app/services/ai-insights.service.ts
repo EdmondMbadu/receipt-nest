@@ -119,6 +119,8 @@ export class AiInsightsService {
   // File upload state
   readonly isUploading = signal(false);
   readonly uploadProgress = signal(0);
+  /** In-memory only thumbnails for the current session (not persisted to Firestore) */
+  readonly chatThumbnails = new Map<string, string>();
 
   // Telegram state
   readonly telegramLinked = signal(false);
@@ -284,26 +286,23 @@ export class AiInsightsService {
     // Create a user message showing the attachment
     const fileName = file.name;
     const isImage = file.type.startsWith('image/');
-    let thumbnailDataUrl: string | null = null;
+    const attachLabel = isImage ? 'Receipt image' : 'Receipt document';
+    const messageId = crypto.randomUUID();
 
-    // Generate a thumbnail preview for images
+    // Generate a thumbnail preview for images (kept in memory only, NOT persisted)
     if (isImage) {
       try {
-        thumbnailDataUrl = await this.createThumbnailDataUrl(file);
+        const dataUrl = await this.createThumbnailDataUrl(file);
+        this.chatThumbnails.set(messageId, dataUrl);
       } catch {
         // Silently fail -- just won't show a preview
       }
     }
 
-    const attachLabel = isImage ? 'Receipt image' : 'Receipt document';
-    const userMessageContent = thumbnailDataUrl
-      ? `[attachment:image]${thumbnailDataUrl}[/attachment]\n${attachLabel}: ${fileName}`
-      : `${attachLabel}: ${fileName}`;
-
     const userMessage: ChatMessage = {
-      id: crypto.randomUUID(),
+      id: messageId,
       role: 'user',
-      content: userMessageContent,
+      content: `${attachLabel}: ${fileName}`,
       timestamp: new Date()
     };
     this.messages.update(msgs => [...msgs, userMessage]);
@@ -316,6 +315,25 @@ export class AiInsightsService {
       const receipt = await this.receiptService.uploadReceipt(file, (progress) => {
         this.uploadProgress.set(Math.round(progress.progress));
       });
+
+      // Get the download URL for the uploaded file
+      let downloadUrl: string | null = null;
+      try {
+        downloadUrl = await this.receiptService.getReceiptFileUrl(receipt.file.storagePath);
+      } catch {
+        // Non-critical -- receipt was uploaded, URL just not available yet
+      }
+
+      // Update the user message to include a viewable link
+      if (downloadUrl) {
+        this.chatThumbnails.set(messageId, downloadUrl);
+        this.messages.update(msgs =>
+          msgs.map(m => m.id === messageId
+            ? { ...m, content: `${attachLabel}: ${fileName} [receipt_url:${downloadUrl}]` }
+            : m
+          )
+        );
+      }
 
       // Add assistant confirmation
       const assistantMessage: ChatMessage = {
@@ -473,12 +491,25 @@ export class AiInsightsService {
       messageCount?: number;
     };
 
-    const messages = (data.messages || []).map((message) => ({
-      id: message.id,
-      role: message.role,
-      content: message.content,
-      timestamp: new Date(message.timestamp)
-    }));
+    const messages = (data.messages || []).map((message) => {
+      let content = message.content;
+
+      // Strip legacy [attachment:image] base64 tags
+      content = content.replace(/\[attachment:image\][^\[]*\[\/attachment\]\n?/g, '').trim();
+
+      // Extract [receipt_url:...] and populate the thumbnail map
+      const urlMatch = content.match(/\[receipt_url:(https?:\/\/[^\]]+)\]/);
+      if (urlMatch) {
+        this.chatThumbnails.set(message.id, urlMatch[1]);
+      }
+
+      return {
+        id: message.id,
+        role: message.role,
+        content,
+        timestamp: new Date(message.timestamp)
+      };
+    });
 
     this.messages.set(messages);
     this.activeChatId.set(chatId);

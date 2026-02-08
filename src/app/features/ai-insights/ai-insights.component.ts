@@ -183,18 +183,17 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Extract an embedded attachment data URL from a message, if present.
+   * Get a receipt image URL for a message (in-memory map, populated from download URLs).
    */
-  getAttachmentUrl(content: string): string | null {
-    const match = content.match(/\[attachment:image\](.*?)\[\/attachment\]/);
-    return match ? match[1] : null;
+  getThumbnail(messageId: string): string | null {
+    return this.aiService.chatThumbnails.get(messageId) ?? null;
   }
 
   /**
-   * Remove the attachment tag from message content for text rendering.
+   * Strip the [receipt_url:...] tag from message content for display.
    */
-  stripAttachment(content: string): string {
-    return content.replace(/\[attachment:image\].*?\[\/attachment\]\n?/, '').trim();
+  stripReceiptUrl(content: string): string {
+    return content.replace(/\s*\[receipt_url:[^\]]+\]/g, '').trim();
   }
 
   formatMessage(content: string): SafeHtml {
