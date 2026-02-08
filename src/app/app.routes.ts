@@ -55,6 +55,10 @@ export const routes: Routes = [
       {
         path: 'insights',
         loadComponent: () => import('./features/ai-insights/ai-insights.component').then((m) => m.AiInsightsComponent)
+      },
+      {
+        path: 'folders',
+        loadComponent: () => import('./features/folders/folders.component').then((m) => m.FoldersComponent)
       }
     ]
   },

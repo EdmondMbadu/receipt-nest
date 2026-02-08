@@ -41,6 +41,11 @@ service cloud.firestore {
         allow read, write: if isOwner(userId) || isAdmin();
       }
 
+      // User's folders subcollection
+      match /folders/{folderId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+
       // User's AI chat sessions
       match /aiChats/{chatId} {
         allow read, write: if isOwner(userId) || isAdmin();
