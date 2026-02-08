@@ -192,6 +192,35 @@
   background: rgba(127, 29, 29, 0.36);
 }
 
+.folder-stat {
+  min-width: 130px;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(160deg, rgba(236, 253, 245, 0.95), rgba(240, 249, 255, 0.95));
+  padding: 0.5rem 0.72rem;
+}
+
+.folder-stat--count {
+  min-width: 110px;
+  background: linear-gradient(160deg, rgba(241, 245, 249, 0.95), rgba(248, 250, 252, 0.95));
+}
+
+.folder-stat__label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgb(71 85 105);
+}
+
+.folder-stat__value {
+  margin-top: 0.1rem;
+  font-size: 1.04rem;
+  font-weight: 800;
+  color: rgb(15 23 42);
+  line-height: 1.2;
+}
+
 :host-context(.dark) .download-btn {
   border-color: rgba(100, 116, 139, 0.45);
   background: rgba(15, 23, 42, 0.88);
@@ -218,6 +247,24 @@
 :host-context(.dark) .download-menu-item:hover {
   background: rgba(20, 83, 45, 0.38);
   color: rgb(52 211 153);
+}
+
+:host-context(.dark) .folder-stat {
+  border-color: rgba(16, 185, 129, 0.35);
+  background: linear-gradient(160deg, rgba(6, 78, 59, 0.45), rgba(15, 23, 42, 0.65));
+}
+
+:host-context(.dark) .folder-stat--count {
+  border-color: rgba(100, 116, 139, 0.4);
+  background: linear-gradient(160deg, rgba(30, 41, 59, 0.75), rgba(15, 23, 42, 0.82));
+}
+
+:host-context(.dark) .folder-stat__label {
+  color: rgb(148 163 184);
+}
+
+:host-context(.dark) .folder-stat__value {
+  color: rgb(241 245 249);
 }
 
 .modal-backdrop {

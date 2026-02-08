@@ -15,12 +15,16 @@
             Folders
           </a>
           <h1 class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ folder()?.name || 'Folder' }}</h1>
-          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {{ folderReceipts().length }} receipt{{ folderReceipts().length === 1 ? '' : 's' }}
-            @if (totalAmount() > 0) {
-              · {{ formatCurrency(totalAmount()) }}
-            }
-          </p>
+          <div class="mt-3 flex flex-wrap items-center gap-2.5">
+            <div class="folder-stat">
+              <p class="folder-stat__label">Total</p>
+              <p class="folder-stat__value">{{ formatCurrency(totalAmount()) }}</p>
+            </div>
+            <div class="folder-stat folder-stat--count">
+              <p class="folder-stat__label">Receipts</p>
+              <p class="folder-stat__value">{{ folderReceipts().length }}</p>
+            </div>
+          </div>
         </div>
 
         @if (folder()) {
