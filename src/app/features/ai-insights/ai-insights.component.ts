@@ -35,8 +35,6 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
   readonly isDarkMode = this.theme.isDarkMode;
   readonly messages = this.aiService.messages;
   readonly isLoading = this.aiService.isLoading;
-  readonly insights = this.aiService.insights;
-  readonly insightsLoading = this.aiService.insightsLoading;
   readonly error = this.aiService.error;
 
   // Subscription state
@@ -53,9 +51,11 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
   readonly hasAiAccess = computed(() => this.isAdmin() || this.isPro());
   readonly showSuggestions = computed(() => this.messages().length === 0);
   readonly suggestedQuestions = this.aiService.getSuggestedQuestions();
+  readonly topSuggestedQuestions = computed(() => this.suggestedQuestions.slice(0, 3));
   readonly monthLabel = this.receiptService.selectedMonthLabel;
   readonly totalSpend = this.receiptService.selectedMonthSpend;
   readonly receiptCount = computed(() => this.receiptService.selectedMonthReceipts().length);
+  readonly isCurrentMonth = this.receiptService.isCurrentMonth;
 
   // Upload state
   readonly isUploading = this.aiService.isUploading;
@@ -127,11 +127,16 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
     this.aiService.startNewChat();
   }
 
-  refreshInsights(): void {
-    if (!this.hasAiAccess()) {
-      return;
-    }
-    this.aiService.generateInsights();
+  goToPreviousMonth(): void {
+    this.receiptService.goToPreviousMonth();
+  }
+
+  goToNextMonth(): void {
+    this.receiptService.goToNextMonth();
+  }
+
+  goToCurrentMonth(): void {
+    this.receiptService.goToCurrentMonth();
   }
 
   onKeyDown(event: KeyboardEvent): void {
@@ -287,8 +292,5 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
     if (!this.hasAiAccess()) return;
 
     this.aiService.initializeChatState();
-    if (this.insights().length === 0 && !this.insightsLoading()) {
-      this.aiService.generateInsights();
-    }
   }
 }
