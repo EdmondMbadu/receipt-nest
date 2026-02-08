@@ -168,10 +168,18 @@
                   <div class="flex" [class.justify-end]="message.role === 'user'"
                     [class.justify-start]="message.role === 'assistant'">
                     <div class="max-w-[85%] sm:max-w-[75%]">
-                      <div class="chat-bubble rounded-2xl px-4 py-3 shadow-sm"
+                      <div class="chat-bubble"
                         [class.chat-bubble--user]="message.role === 'user'"
                         [class.chat-bubble--assistant]="message.role === 'assistant'"
-                        [class.text-white]="message.role === 'user'"
+                        [class.rounded-2xl]="message.role === 'user'"
+                        [class.px-4]="message.role === 'user'"
+                        [class.py-3]="message.role === 'user'"
+                        [class.shadow-sm]="message.role === 'user'"
+                        [class.px-0]="message.role === 'assistant'"
+                        [class.py-0]="message.role === 'assistant'"
+                        [class.shadow-none]="message.role === 'assistant'"
+                        [class.text-slate-800]="message.role === 'user'"
+                        [class.dark:text-slate-100]="message.role === 'user'"
                         [class.text-slate-700]="message.role === 'assistant'"
                         [class.dark:text-slate-300]="message.role === 'assistant'">
                         <!-- Receipt image preview (clickable to open full size) -->
