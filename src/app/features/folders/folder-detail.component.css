@@ -221,6 +221,34 @@
   line-height: 1.2;
 }
 
+.month-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.42rem;
+  border-radius: 0.62rem;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  background: rgba(248, 250, 252, 0.95);
+  padding: 0.24rem 0.5rem;
+}
+
+.month-stat--count {
+  background: rgba(241, 245, 249, 0.95);
+}
+
+.month-stat__label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(100 116 139);
+}
+
+.month-stat__value {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: rgb(15 23 42);
+}
+
 :host-context(.dark) .download-btn {
   border-color: rgba(100, 116, 139, 0.45);
   background: rgba(15, 23, 42, 0.88);
@@ -264,6 +292,23 @@
 }
 
 :host-context(.dark) .folder-stat__value {
+  color: rgb(241 245 249);
+}
+
+:host-context(.dark) .month-stat {
+  border-color: rgba(100, 116, 139, 0.42);
+  background: rgba(30, 41, 59, 0.78);
+}
+
+:host-context(.dark) .month-stat--count {
+  background: rgba(15, 23, 42, 0.85);
+}
+
+:host-context(.dark) .month-stat__label {
+  color: rgb(148 163 184);
+}
+
+:host-context(.dark) .month-stat__value {
   color: rgb(241 245 249);
 }
 

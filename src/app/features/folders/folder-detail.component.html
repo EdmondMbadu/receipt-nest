@@ -120,7 +120,19 @@
       @for (group of folderReceiptsByMonth(); track trackGroup($index, group)) {
         <section class="space-y-3 rounded-3xl border border-slate-200/80 bg-white/85 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/80 sm:p-5">
           <div class="flex items-center justify-between gap-3">
-            <h2 class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">{{ group.label }}</h2>
+            <div class="space-y-2">
+              <h2 class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">{{ group.label }}</h2>
+              <div class="flex flex-wrap items-center gap-2">
+                <div class="month-stat">
+                  <span class="month-stat__label">Total</span>
+                  <span class="month-stat__value">{{ formatCurrency(getMonthTotal(group)) }}</span>
+                </div>
+                <div class="month-stat month-stat--count">
+                  <span class="month-stat__label">Receipts</span>
+                  <span class="month-stat__value">{{ group.receipts.length }}</span>
+                </div>
+              </div>
+            </div>
             <div class="relative">
               <button
                 type="button"

@@ -305,6 +305,10 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
     return receipt.id;
   }
 
+  getMonthTotal(group: MonthGroup): number {
+    return group.receipts.reduce((sum, receipt) => sum + (receipt.totalAmount || 0), 0);
+  }
+
   private groupReceiptsByMonth(receipts: Receipt[]): MonthGroup[] {
     const groups = new Map<string, MonthGroup>();
 
