@@ -14,7 +14,7 @@
   <div class="flex flex-col h-screen">
     <!-- Header -->
     <header
-      class="flex-shrink-0 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
+      class="sticky top-0 z-30 flex-shrink-0 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
       <div class="mx-auto max-w-4xl px-4 py-4 sm:px-6">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -36,8 +36,12 @@
                 </div>
                 <h1 class="text-lg font-semibold text-slate-900 dark:text-white">AI Insights</h1>
               </div>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ monthLabel() }} · {{ receiptCount() }}
-                receipts · {{ formatCurrency(totalSpend()) }}</p>
+              <div
+                class="mt-1 inline-flex items-center gap-2 rounded-full border border-emerald-200/80 bg-gradient-to-r from-white to-emerald-50 px-2.5 py-1 text-[11px] shadow-sm dark:border-emerald-700/40 dark:from-slate-900 dark:to-emerald-950/40">
+                <span class="font-semibold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-300">Total</span>
+                <span class="font-semibold text-slate-900 dark:text-white">{{ formatCurrency(totalSpend()) }}</span>
+                <span class="text-slate-500 dark:text-slate-400">{{ monthLabel() }}</span>
+              </div>
             </div>
           </div>
           <div class="flex items-center gap-2">
@@ -102,20 +106,6 @@
           class="flex min-h-0 h-full flex-col rounded-2xl border border-slate-200 bg-white/70 shadow-sm backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/60">
             <div #chatContainer class="min-h-0 flex-1 overflow-y-auto">
               <div class="mx-auto max-w-3xl px-4 py-6 sm:px-6">
-                <div
-                  class="insights-total-banner relative mb-6 overflow-hidden rounded-2xl border border-emerald-200/70 bg-gradient-to-br from-white via-emerald-50/70 to-teal-50/80 p-5 shadow-lg shadow-emerald-500/10 dark:border-emerald-700/40 dark:from-slate-900 dark:via-emerald-950/40 dark:to-teal-950/40">
-                  <div class="pointer-events-none absolute -top-10 -right-8 h-28 w-28 rounded-full bg-emerald-300/25 blur-2xl dark:bg-emerald-400/20"></div>
-                  <div class="pointer-events-none absolute -bottom-8 -left-6 h-20 w-20 rounded-full bg-teal-300/25 blur-2xl dark:bg-teal-400/20"></div>
-                  <div class="relative">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-700 dark:text-emerald-300">Spending summary</p>
-                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Total spent for the month and year is:</p>
-                    <div class="mt-3 flex flex-wrap items-end gap-x-3 gap-y-1">
-                      <p class="text-3xl font-bold text-slate-900 dark:text-white">{{ formatCurrency(totalSpend()) }}</p>
-                      <p class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ monthLabel() }}</p>
-                    </div>
-                  </div>
-                </div>
-
                 <!-- Initial Insights Cards (shown when no messages) -->
                 @if (showSuggestions()) {
                 <div class="space-y-6">
