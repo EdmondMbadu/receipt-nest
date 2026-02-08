@@ -97,6 +97,67 @@
   transform: translateX(-50%) translateY(0);
 }
 
+.download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  border-radius: 0.72rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0.5rem 0.72rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: rgb(51 65 85);
+  transition: all 150ms ease;
+}
+
+.download-btn:hover {
+  border-color: rgba(16, 185, 129, 0.45);
+  background: rgba(236, 253, 245, 0.9);
+  color: rgb(5 150 105);
+}
+
+.download-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.download-btn--small {
+  padding: 0.38rem 0.56rem;
+  font-size: 0.7rem;
+}
+
+.download-menu {
+  overflow: hidden;
+  border-radius: 0.95rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: white;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.15);
+}
+
+.download-menu-item {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  background: transparent;
+  padding: 0.62rem 0.82rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgb(51 65 85);
+  transition: all 140ms ease;
+}
+
+.download-menu-item:last-child {
+  border-bottom: 0;
+}
+
+.download-menu-item:hover {
+  background: rgba(236, 253, 245, 0.95);
+  color: rgb(5 150 105);
+}
+
 :host-context(.dark) .action-icon {
   border-color: rgba(100, 116, 139, 0.45);
   background: rgba(15, 23, 42, 0.88);
@@ -129,6 +190,34 @@
 :host-context(.dark) .action-icon--delete:hover {
   border-color: rgba(244, 63, 94, 0.55);
   background: rgba(127, 29, 29, 0.36);
+}
+
+:host-context(.dark) .download-btn {
+  border-color: rgba(100, 116, 139, 0.45);
+  background: rgba(15, 23, 42, 0.88);
+  color: rgb(226 232 240);
+}
+
+:host-context(.dark) .download-btn:hover {
+  border-color: rgba(16, 185, 129, 0.45);
+  background: rgba(20, 83, 45, 0.35);
+  color: rgb(52 211 153);
+}
+
+:host-context(.dark) .download-menu {
+  border-color: rgba(100, 116, 139, 0.5);
+  background: rgba(15, 23, 42, 0.98);
+  box-shadow: 0 20px 36px rgba(2, 6, 23, 0.5);
+}
+
+:host-context(.dark) .download-menu-item {
+  border-bottom-color: rgba(51, 65, 85, 0.8);
+  color: rgb(226 232 240);
+}
+
+:host-context(.dark) .download-menu-item:hover {
+  background: rgba(20, 83, 45, 0.38);
+  color: rgb(52 211 153);
 }
 
 .modal-backdrop {

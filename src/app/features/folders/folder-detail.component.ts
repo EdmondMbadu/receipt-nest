@@ -24,6 +24,7 @@ interface MonthGroup {
   styleUrl: './folder-detail.component.css'
 })
 export class FolderDetailComponent implements OnInit, OnDestroy {
+  private pdfLibPromise: Promise<typeof import('pdf-lib')> | null = null;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly receiptService = inject(ReceiptService);
@@ -87,6 +88,11 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
   readonly canRemovePictures = computed(() => this.selectedCount() > 0 && !this.mutationLoading());
 
   readonly totalAmount = computed(() => this.folderReceipts().reduce((sum, receipt) => sum + (receipt.totalAmount || 0), 0));
+  readonly downloadingPdfKey = signal<string | null>(null);
+  readonly downloadingCsvKey = signal<string | null>(null);
+  readonly downloadMenuOpenKey = signal<string | null>(null);
+  readonly pdfDownloadError = signal<{ key: string; message: string } | null>(null);
+  readonly csvDownloadError = signal<{ key: string; message: string } | null>(null);
 
   private readonly imageEffect = effect(() => {
     const list = this.receipts();
@@ -127,6 +133,14 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
   openDeleteModal(): void {
     this.mutationError.set(null);
     this.deleteModalOpen.set(true);
+  }
+
+  toggleDownloadMenu(key: string): void {
+    this.downloadMenuOpenKey.update((openKey) => (openKey === key ? null : key));
+  }
+
+  closeDownloadMenu(): void {
+    this.downloadMenuOpenKey.set(null);
   }
 
   closeAllModals(): void {
@@ -231,6 +245,24 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
       this.mutationError.set(error?.message || 'Unable to delete folder.');
       this.mutationLoading.set(false);
     }
+  }
+
+  downloadFolderCsv(): void {
+    const folderName = this.folder()?.name || 'Folder';
+    this.downloadReceiptsCsv(this.folderReceipts(), `${folderName} receipts`, 'folder');
+  }
+
+  async downloadFolderPdf(): Promise<void> {
+    const folderName = this.folder()?.name || 'Folder';
+    await this.downloadReceiptsPdf(this.folderReceipts(), `${folderName} receipts`, 'folder');
+  }
+
+  async downloadMonthPdf(group: MonthGroup): Promise<void> {
+    await this.downloadReceiptsPdf(group.receipts, `${group.label} receipts`, group.key);
+  }
+
+  downloadMonthCsv(group: MonthGroup): void {
+    this.downloadReceiptsCsv(group.receipts, `${group.label} receipts`, group.key);
   }
 
   getImageUrl(receipt: Receipt): string | null {
@@ -387,5 +419,317 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
 
   private getReceiptDateValue(receipt: Receipt): number {
     return this.extractReceiptDate(receipt)?.getTime() ?? 0;
+  }
+
+  private downloadReceiptsCsv(receipts: Receipt[], label: string, key: string): void {
+    if (this.downloadingCsvKey()) {
+      return;
+    }
+
+    this.downloadingCsvKey.set(key);
+    this.csvDownloadError.set(null);
+
+    try {
+      if (!receipts.length) {
+        throw new Error('No receipts available for export.');
+      }
+
+      const rows: string[] = [];
+      rows.push(['Merchant', 'Date', 'Amount'].map(this.escapeCsvValue).join(','));
+
+      let total = 0;
+      for (const receipt of receipts) {
+        const merchant = receipt.merchant?.canonicalName
+          || receipt.merchant?.rawName
+          || receipt.extraction?.supplierName?.value
+          || 'Unknown';
+        const date = receipt.date || receipt.extraction?.date?.value || '';
+        const amountValue = receipt.totalAmount ?? receipt.extraction?.totalAmount?.value;
+        const amount = typeof amountValue === 'number' ? amountValue : null;
+        if (amount !== null) {
+          total += amount;
+        }
+
+        rows.push([
+          merchant,
+          date,
+          amount !== null ? amount.toFixed(2) : ''
+        ].map(this.escapeCsvValue).join(','));
+      }
+
+      rows.push(['Total', '', total.toFixed(2)].map(this.escapeCsvValue).join(','));
+
+      const csv = rows.join('\n');
+      const csvBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const downloadUrl = URL.createObjectURL(csvBlob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${this.toSafeFileLabel(label)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(downloadUrl), 250);
+    } catch (error: any) {
+      this.csvDownloadError.set({
+        key,
+        message: error?.message || 'Failed to export CSV. Please try again.'
+      });
+    } finally {
+      this.downloadingCsvKey.set(null);
+      this.closeDownloadMenu();
+    }
+  }
+
+  private async downloadReceiptsPdf(receipts: Receipt[], label: string, key: string): Promise<void> {
+    if (this.downloadingPdfKey()) {
+      return;
+    }
+
+    this.downloadingPdfKey.set(key);
+    this.pdfDownloadError.set(null);
+
+    try {
+      if (!receipts.length) {
+        throw new Error('No receipts available for export.');
+      }
+
+      const { PDFDocument } = await this.loadPdfLib();
+      const pdfDoc = await PDFDocument.create();
+      let appendedPages = 0;
+
+      for (const receipt of receipts) {
+        try {
+          if (!receipt.file?.storagePath) {
+            continue;
+          }
+
+          const blob = await this.fetchReceiptBlob(receipt);
+          const mimeType = this.getReceiptMimeType(receipt, blob);
+
+          if (this.isPdf(receipt) || mimeType === 'application/pdf') {
+            const sourcePdf = await PDFDocument.load(await blob.arrayBuffer());
+            const copiedPages = await pdfDoc.copyPages(sourcePdf, sourcePdf.getPageIndices());
+            copiedPages.forEach((page) => pdfDoc.addPage(page));
+            appendedPages += copiedPages.length;
+          } else {
+            const { bytes, type } = await this.normalizeImageBlob(blob, receipt);
+            const embeddedImage = type === 'png'
+              ? await pdfDoc.embedPng(bytes)
+              : await pdfDoc.embedJpg(bytes);
+
+            const pageWidth = 612;
+            const pageHeight = 792;
+            const margin = 36;
+            const maxWidth = pageWidth - margin * 2;
+            const maxHeight = pageHeight - margin * 3;
+
+            const dimensions = embeddedImage.scale(1);
+            const scale = Math.min(maxWidth / dimensions.width, maxHeight / dimensions.height, 1);
+            const scaledWidth = dimensions.width * scale;
+            const scaledHeight = dimensions.height * scale;
+
+            const page = pdfDoc.addPage([pageWidth, pageHeight]);
+            page.drawImage(embeddedImage, {
+              x: (pageWidth - scaledWidth) / 2,
+              y: margin * 1.5,
+              width: scaledWidth,
+              height: scaledHeight
+            });
+
+            const caption = this.buildReceiptCaption(receipt);
+            const text = caption.length > 90 ? `${caption.slice(0, 87)}…` : caption;
+            page.drawText(text, {
+              x: margin,
+              y: margin / 2,
+              size: 12,
+              maxWidth: pageWidth - margin * 2
+            });
+
+            appendedPages += 1;
+          }
+        } catch (innerError) {
+          console.error('Failed to add receipt to export PDF', innerError);
+        }
+      }
+
+      if (appendedPages === 0) {
+        throw new Error('Unable to prepare this PDF right now. Please try again later.');
+      }
+
+      const pdfBytes = await pdfDoc.save();
+      const pdfBuffer = pdfBytes.buffer.slice(0) as ArrayBuffer;
+      const pdfBlob = new Blob([pdfBuffer], { type: 'application/pdf' });
+      const downloadUrl = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${this.toSafeFileLabel(label)}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(downloadUrl), 250);
+    } catch (error: any) {
+      this.pdfDownloadError.set({
+        key,
+        message: error?.message || 'Failed to export PDF. Please try again.'
+      });
+    } finally {
+      this.downloadingPdfKey.set(null);
+      this.closeDownloadMenu();
+    }
+  }
+
+  private escapeCsvValue(value: string): string {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+
+  private toSafeFileLabel(label: string): string {
+    return label.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'receipts';
+  }
+
+  private loadPdfLib(): Promise<typeof import('pdf-lib')> {
+    if (!this.pdfLibPromise) {
+      this.pdfLibPromise = import('pdf-lib');
+    }
+    return this.pdfLibPromise;
+  }
+
+  private buildReceiptCaption(receipt: Receipt): string {
+    const parts: string[] = [];
+
+    if (receipt.merchant?.canonicalName) {
+      parts.push(receipt.merchant.canonicalName);
+    } else if (receipt.merchant?.rawName) {
+      parts.push(receipt.merchant.rawName);
+    } else if (receipt.file?.originalName) {
+      parts.push(receipt.file.originalName);
+    }
+
+    if (receipt.totalAmount !== undefined && receipt.totalAmount !== null) {
+      parts.push(this.formatCurrency(receipt.totalAmount));
+    }
+
+    if (receipt.date) {
+      const parsed = new Date(receipt.date);
+      if (!Number.isNaN(parsed.getTime())) {
+        parts.push(parsed.toLocaleDateString('en-US'));
+      }
+    }
+
+    return parts.join(' • ') || 'Receipt';
+  }
+
+  private getReceiptMimeType(receipt: Receipt, blob: Blob): string {
+    return blob?.type || receipt.file?.mimeType || '';
+  }
+
+  private async fetchReceiptBlob(receipt: Receipt): Promise<Blob> {
+    if (!receipt.file?.storagePath) {
+      throw new Error('Missing file path for receipt.');
+    }
+
+    const url = await this.receiptService.getReceiptFileUrl(receipt.file.storagePath);
+    return this.fetchBlobWithXHR(url);
+  }
+
+  private async normalizeImageBlob(blob: Blob, receipt: Receipt): Promise<{ bytes: Uint8Array; type: 'jpg' | 'png' }> {
+    const mimeType = this.getReceiptMimeType(receipt, blob).toLowerCase();
+    const fileName = receipt.file?.originalName?.toLowerCase() || '';
+    const asUint8Array = async (b: Blob) => new Uint8Array(await b.arrayBuffer());
+
+    const isPng = mimeType.includes('png') || fileName.endsWith('.png');
+    if (isPng) {
+      return { bytes: await asUint8Array(blob), type: 'png' };
+    }
+
+    const isJpeg = mimeType.includes('jpeg') || mimeType.includes('jpg') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg');
+    if (isJpeg) {
+      return { bytes: await asUint8Array(blob), type: 'jpg' };
+    }
+
+    const isWebp = mimeType.includes('webp') || fileName.endsWith('.webp');
+    if (isWebp) {
+      const converted = await this.convertImageViaCanvas(blob, 'image/png');
+      return { bytes: await asUint8Array(converted), type: 'png' };
+    }
+
+    const isHeic = mimeType.includes('heic') || mimeType.includes('heif') || fileName.endsWith('.heic') || fileName.endsWith('.heif');
+    if (isHeic) {
+      const heic2anyModule = await import('heic2any');
+      const heic2any = (heic2anyModule as any).default ?? heic2anyModule;
+      const converted = await heic2any({
+        blob,
+        toType: 'image/jpeg',
+        quality: 0.9
+      });
+      const normalizedBlob = Array.isArray(converted) ? converted[0] : converted;
+      return { bytes: await asUint8Array(normalizedBlob), type: 'jpg' };
+    }
+
+    const fallback = await this.convertImageViaCanvas(blob, 'image/jpeg');
+    return { bytes: await asUint8Array(fallback), type: 'jpg' };
+  }
+
+  private convertImageViaCanvas(blob: Blob, outputType: 'image/png' | 'image/jpeg'): Promise<Blob> {
+    if (typeof document === 'undefined') {
+      return Promise.reject(new Error('Image conversion is not supported in this environment.'));
+    }
+
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob);
+      const image = new Image();
+      image.crossOrigin = 'anonymous';
+
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth || image.width || 0;
+        canvas.height = image.naturalHeight || image.height || 0;
+        const context = canvas.getContext('2d');
+
+        if (!context) {
+          URL.revokeObjectURL(url);
+          reject(new Error('Unable to convert image.'));
+          return;
+        }
+
+        context.drawImage(image, 0, 0);
+        canvas.toBlob((converted) => {
+          URL.revokeObjectURL(url);
+          if (converted) {
+            resolve(converted);
+          } else {
+            reject(new Error('Image conversion failed.'));
+          }
+        }, outputType, 0.95);
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Failed to load image for conversion.'));
+      };
+
+      image.src = url;
+    });
+  }
+
+  private fetchBlobWithXHR(url: string): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.responseType = 'blob';
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          resolve(xhr.response);
+        } else {
+          reject(new Error(`Failed to download receipt (${xhr.status}).`));
+        }
+      };
+
+      xhr.onerror = () => {
+        reject(new Error('Network error while downloading receipt.'));
+      };
+
+      xhr.send();
+    });
   }
 }
