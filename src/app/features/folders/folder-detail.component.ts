@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { Folder } from '../../models/folder.model';
 import { Receipt } from '../../models/receipt.model';
@@ -17,23 +16,21 @@ interface MonthGroup {
   receipts: Receipt[];
 }
 
-interface FolderListItem {
-  folder: Folder;
-  receiptCount: number;
-  totalAmount: number;
-}
-
 @Component({
-  selector: 'app-folders',
+  selector: 'app-folder-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
-  templateUrl: './folders.component.html',
-  styleUrl: './folders.component.css'
+  imports: [CommonModule, RouterLink],
+  templateUrl: './folder-detail.component.html',
+  styleUrl: './folder-detail.component.css'
 })
-export class FoldersComponent implements OnInit, OnDestroy {
+export class FolderDetailComponent implements OnInit, OnDestroy {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly receiptService = inject(ReceiptService);
   private readonly folderService = inject(FolderService);
   private readonly pdfThumbnailService = inject(PdfThumbnailService);
+
+  readonly folderId = signal<string | null>(null);
 
   readonly folders = this.folderService.folders;
   readonly foldersLoading = this.folderService.isLoading;
@@ -42,10 +39,11 @@ export class FoldersComponent implements OnInit, OnDestroy {
   readonly receipts = this.receiptService.receipts;
   readonly receiptsLoading = this.receiptService.isLoading;
 
-  readonly createModalOpen = signal(false);
-  readonly folderName = signal('');
-  readonly selectedReceiptIds = signal<Set<string>>(new Set());
+  readonly addModalOpen = signal(false);
+  readonly removeModalOpen = signal(false);
+  readonly deleteModalOpen = signal(false);
 
+  readonly selectedReceiptIds = signal<Set<string>>(new Set());
   readonly mutationLoading = signal(false);
   readonly mutationError = signal<string | null>(null);
 
@@ -60,35 +58,39 @@ export class FoldersComponent implements OnInit, OnDestroy {
     return map;
   });
 
-  readonly folderItems = computed<FolderListItem[]>(() => {
-    const map = this.receiptMap();
-
-    return this.folders().map((folder) => {
-      const receipts = folder.receiptIds
-        .map((receiptId) => map.get(receiptId))
-        .filter((receipt): receipt is Receipt => !!receipt);
-
-      return {
-        folder,
-        receiptCount: folder.receiptIds.length,
-        totalAmount: receipts.reduce((sum, receipt) => sum + (receipt.totalAmount || 0), 0)
-      };
-    });
+  readonly folder = computed<Folder | null>(() => {
+    const id = this.folderId();
+    if (!id) {
+      return null;
+    }
+    return this.folders().find((entry) => entry.id === id) ?? null;
   });
 
+  readonly folderReceipts = computed(() => {
+    const targetFolder = this.folder();
+    if (!targetFolder) {
+      return [];
+    }
+
+    const map = this.receiptMap();
+    return targetFolder.receiptIds
+      .map((receiptId) => map.get(receiptId))
+      .filter((receipt): receipt is Receipt => !!receipt)
+      .sort((a, b) => this.getReceiptDateValue(b) - this.getReceiptDateValue(a));
+  });
+
+  readonly folderReceiptsByMonth = computed(() => this.groupReceiptsByMonth(this.folderReceipts()));
   readonly allReceiptsByMonth = computed(() => this.groupReceiptsByMonth(this.receipts()));
 
-  readonly hasFolders = computed(() => this.folders().length > 0);
-
   readonly selectedCount = computed(() => this.selectedReceiptIds().size);
+  readonly canAddPictures = computed(() => this.selectedCount() > 0 && !this.mutationLoading());
+  readonly canRemovePictures = computed(() => this.selectedCount() > 0 && !this.mutationLoading());
 
-  readonly canCreateFolder = computed(() => {
-    return this.folderName().trim().length > 0 && this.selectedCount() > 0 && !this.mutationLoading();
-  });
+  readonly totalAmount = computed(() => this.folderReceipts().reduce((sum, receipt) => sum + (receipt.totalAmount || 0), 0));
 
   private readonly imageEffect = effect(() => {
-    const receipts = this.receipts();
-    for (const receipt of receipts) {
+    const list = this.receipts();
+    for (const receipt of list) {
       this.loadImageUrl(receipt);
     }
   });
@@ -96,25 +98,44 @@ export class FoldersComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.receiptService.subscribeToReceipts();
     this.folderService.subscribeToFolders();
+    this.folderId.set(this.route.snapshot.paramMap.get('id'));
+    this.paramMapSubscription = this.route.paramMap.subscribe((params) => {
+      this.folderId.set(params.get('id'));
+    });
   }
 
   ngOnDestroy(): void {
+    this.paramMapSubscription?.unsubscribe();
     this.folderService.unsubscribeFromFolders();
     this.receiptService.unsubscribeFromReceipts();
   }
 
-  openCreateModal(): void {
-    this.folderName.set('');
+  private paramMapSubscription: { unsubscribe: () => void } | null = null;
+
+  openAddModal(): void {
     this.selectedReceiptIds.set(new Set());
     this.mutationError.set(null);
-    this.createModalOpen.set(true);
+    this.addModalOpen.set(true);
   }
 
-  closeCreateModal(): void {
-    this.createModalOpen.set(false);
-    this.mutationLoading.set(false);
-    this.mutationError.set(null);
+  openRemoveModal(): void {
     this.selectedReceiptIds.set(new Set());
+    this.mutationError.set(null);
+    this.removeModalOpen.set(true);
+  }
+
+  openDeleteModal(): void {
+    this.mutationError.set(null);
+    this.deleteModalOpen.set(true);
+  }
+
+  closeAllModals(): void {
+    this.addModalOpen.set(false);
+    this.removeModalOpen.set(false);
+    this.deleteModalOpen.set(false);
+    this.selectedReceiptIds.set(new Set());
+    this.mutationError.set(null);
+    this.mutationLoading.set(false);
   }
 
   toggleReceiptSelection(receiptId: string, disabled = false): void {
@@ -137,8 +158,21 @@ export class FoldersComponent implements OnInit, OnDestroy {
     return this.selectedReceiptIds().has(receiptId);
   }
 
-  async createFolder(): Promise<void> {
-    if (!this.canCreateFolder()) {
+  isReceiptInFolder(receiptId: string): boolean {
+    const targetFolder = this.folder();
+    if (!targetFolder) {
+      return false;
+    }
+    return targetFolder.receiptIds.includes(receiptId);
+  }
+
+  async addPictures(): Promise<void> {
+    if (!this.canAddPictures()) {
+      return;
+    }
+
+    const targetFolder = this.folder();
+    if (!targetFolder) {
       return;
     }
 
@@ -146,19 +180,65 @@ export class FoldersComponent implements OnInit, OnDestroy {
     this.mutationError.set(null);
 
     try {
-      await this.folderService.createFolder(
-        this.folderName().trim(),
-        Array.from(this.selectedReceiptIds())
-      );
-      this.closeCreateModal();
+      await this.folderService.addReceiptsToFolder(targetFolder, Array.from(this.selectedReceiptIds()));
+      this.closeAllModals();
     } catch (error: any) {
-      this.mutationError.set(error?.message || 'Unable to create folder.');
+      this.mutationError.set(error?.message || 'Unable to add pictures to this folder.');
+      this.mutationLoading.set(false);
+    }
+  }
+
+  async removePictures(): Promise<void> {
+    if (!this.canRemovePictures()) {
+      return;
+    }
+
+    const targetFolder = this.folder();
+    if (!targetFolder) {
+      return;
+    }
+
+    this.mutationLoading.set(true);
+    this.mutationError.set(null);
+
+    try {
+      await this.folderService.removeReceiptsFromFolder(targetFolder, Array.from(this.selectedReceiptIds()));
+      this.closeAllModals();
+    } catch (error: any) {
+      this.mutationError.set(error?.message || 'Unable to remove pictures from this folder.');
+      this.mutationLoading.set(false);
+    }
+  }
+
+  async deleteFolder(): Promise<void> {
+    if (this.mutationLoading()) {
+      return;
+    }
+
+    const targetFolder = this.folder();
+    if (!targetFolder) {
+      return;
+    }
+
+    this.mutationLoading.set(true);
+    this.mutationError.set(null);
+
+    try {
+      await this.folderService.deleteFolder(targetFolder.id);
+      this.closeAllModals();
+      await this.router.navigate(['/app/folders']);
+    } catch (error: any) {
+      this.mutationError.set(error?.message || 'Unable to delete folder.');
       this.mutationLoading.set(false);
     }
   }
 
   getImageUrl(receipt: Receipt): string | null {
     return this.imageUrls()[receipt.id] ?? null;
+  }
+
+  isImageLoading(receiptId: string): boolean {
+    return this.loadingImages().has(receiptId);
   }
 
   isPdf(receipt: Receipt): boolean {
@@ -172,16 +252,25 @@ export class FoldersComponent implements OnInit, OnDestroy {
     }).format(amount);
   }
 
+  formatDate(receipt: Receipt): string {
+    const date = this.extractReceiptDate(receipt);
+    if (!date) {
+      return 'No date';
+    }
+
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  }
+
   trackGroup(_: number, group: MonthGroup): string {
     return group.key;
   }
 
   trackReceipt(_: number, receipt: Receipt): string {
     return receipt.id;
-  }
-
-  trackFolder(_: number, item: FolderListItem): string {
-    return item.folder.id;
   }
 
   private groupReceiptsByMonth(receipts: Receipt[]): MonthGroup[] {
@@ -265,7 +354,7 @@ export class FoldersComponent implements OnInit, OnDestroy {
         }));
       }
     } catch (error) {
-      console.error('Failed to load folder preview image:', error);
+      console.error('Failed to load folder detail image:', error);
     } finally {
       this.loadingImages.update((current) => {
         const next = new Set(current);

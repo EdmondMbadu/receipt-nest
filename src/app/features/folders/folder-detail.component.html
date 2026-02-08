@@ -1,0 +1,264 @@
+<div class="min-h-screen bg-white dark:bg-slate-950">
+  <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div class="absolute -top-24 left-8 h-96 w-96 rounded-full bg-emerald-400/10 blur-[120px] dark:bg-emerald-500/15"></div>
+    <div class="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-cyan-300/10 blur-[130px] dark:bg-cyan-500/10"></div>
+  </div>
+
+  <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+    <section class="rounded-3xl border border-slate-200/80 bg-white/85 p-5 shadow-sm backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/80 sm:p-7">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <a routerLink="/app/folders" class="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.12em] text-emerald-600 transition hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300">
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            Folders
+          </a>
+          <h1 class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ folder()?.name || 'Folder' }}</h1>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            {{ folderReceipts().length }} receipt{{ folderReceipts().length === 1 ? '' : 's' }}
+            @if (totalAmount() > 0) {
+              · {{ formatCurrency(totalAmount()) }}
+            }
+          </p>
+        </div>
+
+        @if (folder()) {
+          <div class="flex flex-wrap gap-2">
+            <button type="button" (click)="openAddModal()" class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+              Add pictures
+            </button>
+            <button type="button" (click)="openRemoveModal()" [disabled]="folderReceipts().length === 0" class="inline-flex items-center rounded-lg border border-amber-200 px-3 py-2 text-xs font-semibold text-amber-700 transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-amber-800 dark:text-amber-300 dark:hover:bg-amber-900/20">
+              Remove pictures
+            </button>
+            <button type="button" (click)="openDeleteModal()" class="inline-flex items-center rounded-lg border border-rose-200 px-3 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 dark:border-rose-800 dark:text-rose-300 dark:hover:bg-rose-900/20">
+              Delete folder
+            </button>
+          </div>
+        }
+      </div>
+    </section>
+
+    @if (foldersError()) {
+      <section class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-300">
+        {{ foldersError() }}
+      </section>
+    }
+
+    @if (foldersLoading() || receiptsLoading()) {
+      <section class="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
+        @for (item of [1,2,3,4,5,6,7,8,9,10,11,12]; track item) {
+          <article class="aspect-square animate-pulse rounded-2xl border border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-900"></article>
+        }
+      </section>
+    } @else if (!folder()) {
+      <section class="rounded-3xl border border-dashed border-slate-300 bg-white/80 p-10 text-center dark:border-slate-700 dark:bg-slate-900/60">
+        <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Folder not found</h2>
+        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">This folder was deleted or does not exist.</p>
+        <a routerLink="/app/folders" class="mt-6 inline-flex rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+          Back to folders
+        </a>
+      </section>
+    } @else if (folderReceiptsByMonth().length === 0) {
+      <section class="rounded-3xl border border-dashed border-slate-300 bg-white/80 p-10 text-center dark:border-slate-700 dark:bg-slate-900/60">
+        <h2 class="text-xl font-semibold text-slate-900 dark:text-white">No pictures in this folder</h2>
+        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Add receipts to start organizing this folder.</p>
+      </section>
+    } @else {
+      @for (group of folderReceiptsByMonth(); track trackGroup($index, group)) {
+        <section class="space-y-3 rounded-3xl border border-slate-200/80 bg-white/85 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/80 sm:p-5">
+          <h2 class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">{{ group.label }}</h2>
+          <div class="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
+            @for (receipt of group.receipts; track trackReceipt($index, receipt)) {
+              <article class="group relative aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
+                @if (isImageLoading(receipt.id)) {
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="h-5 w-5 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent"></div>
+                  </div>
+                } @else if (getImageUrl(receipt)) {
+                  <img [src]="getImageUrl(receipt)" [alt]="receipt.file.originalName" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
+                } @else {
+                  <div class="absolute inset-0 flex items-center justify-center text-lg">🧾</div>
+                }
+
+                @if (isPdf(receipt)) {
+                  <span class="absolute left-2 top-2 rounded-md bg-rose-500/90 px-1.5 py-0.5 text-[9px] font-semibold text-white">PDF</span>
+                }
+
+                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-2 py-2 text-white opacity-0 transition duration-200 group-hover:opacity-100">
+                  <p class="truncate text-[11px] font-semibold">{{ receipt.merchant?.canonicalName || receipt.file.originalName }}</p>
+                  <p class="text-[10px] text-white/80">{{ formatDate(receipt) }}</p>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      }
+    }
+  </div>
+
+  @if (addModalOpen()) {
+    <div class="modal-backdrop" (click)="closeAllModals()">
+      <div class="modal-panel" (click)="$event.stopPropagation()">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-400">Add pictures</p>
+            <h3 class="mt-1 text-xl font-semibold text-slate-900 dark:text-white">{{ folder()?.name }}</h3>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Already-added pictures are blurred and disabled.</p>
+          </div>
+          <button type="button" (click)="closeAllModals()" class="close-btn" aria-label="Close">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="mt-5 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+            <p class="text-sm font-medium text-slate-700 dark:text-slate-200">All pictures</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">{{ selectedCount() }} selected</p>
+          </div>
+
+          <div class="max-h-[24rem] space-y-5 overflow-y-auto p-4">
+            @for (group of allReceiptsByMonth(); track trackGroup($index, group)) {
+              <section class="space-y-3">
+                <h4 class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">{{ group.label }}</h4>
+                <div class="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5">
+                  @for (receipt of group.receipts; track trackReceipt($index, receipt)) {
+                    <button
+                      type="button"
+                      (click)="toggleReceiptSelection(receipt.id, isReceiptInFolder(receipt.id))"
+                      class="picker-tile"
+                      [class.picker-tile--selected]="isReceiptSelected(receipt.id)"
+                      [class.picker-tile--disabled]="isReceiptInFolder(receipt.id)">
+                      <div class="relative h-full w-full overflow-hidden rounded-[0.8rem]">
+                        @if (getImageUrl(receipt)) {
+                          <img [src]="getImageUrl(receipt)" [alt]="receipt.file.originalName" class="h-full w-full object-cover" loading="lazy" />
+                        } @else {
+                          <div class="flex h-full w-full items-center justify-center bg-slate-100 text-lg dark:bg-slate-800">🧾</div>
+                        }
+                        @if (isReceiptInFolder(receipt.id)) {
+                          <div class="absolute inset-0 flex items-center justify-center bg-slate-950/45 backdrop-blur-[1px]">
+                            <span class="rounded-md bg-white/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700">In folder</span>
+                          </div>
+                        }
+                        @if (isPdf(receipt)) {
+                          <span class="absolute left-1 top-1 rounded-md bg-rose-500/90 px-1.5 py-0.5 text-[9px] font-semibold text-white">PDF</span>
+                        }
+                      </div>
+                    </button>
+                  }
+                </div>
+              </section>
+            }
+          </div>
+        </div>
+
+        @if (mutationError()) {
+          <p class="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-300">{{ mutationError() }}</p>
+        }
+
+        <div class="mt-5 flex justify-end gap-2">
+          <button type="button" (click)="closeAllModals()" class="btn-secondary">Cancel</button>
+          <button type="button" (click)="addPictures()" [disabled]="!canAddPictures()" class="btn-primary">
+            {{ mutationLoading() ? 'Adding...' : 'Add Selected' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (removeModalOpen()) {
+    <div class="modal-backdrop" (click)="closeAllModals()">
+      <div class="modal-panel" (click)="$event.stopPropagation()">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-amber-600 dark:text-amber-400">Remove pictures</p>
+            <h3 class="mt-1 text-xl font-semibold text-slate-900 dark:text-white">{{ folder()?.name }}</h3>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Only pictures in this folder are shown.</p>
+          </div>
+          <button type="button" (click)="closeAllModals()" class="close-btn" aria-label="Close">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="mt-5 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+            <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Folder pictures</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">{{ selectedCount() }} selected</p>
+          </div>
+
+          <div class="max-h-[24rem] space-y-5 overflow-y-auto p-4">
+            @if (folderReceiptsByMonth().length === 0) {
+              <p class="rounded-xl border border-dashed border-slate-300 px-3 py-4 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                Folder is empty.
+              </p>
+            } @else {
+              @for (group of folderReceiptsByMonth(); track trackGroup($index, group)) {
+                <section class="space-y-3">
+                  <h4 class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">{{ group.label }}</h4>
+                  <div class="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5">
+                    @for (receipt of group.receipts; track trackReceipt($index, receipt)) {
+                      <button
+                        type="button"
+                        (click)="toggleReceiptSelection(receipt.id)"
+                        class="picker-tile"
+                        [class.picker-tile--selected]="isReceiptSelected(receipt.id)">
+                        <div class="relative h-full w-full overflow-hidden rounded-[0.8rem]">
+                          @if (getImageUrl(receipt)) {
+                            <img [src]="getImageUrl(receipt)" [alt]="receipt.file.originalName" class="h-full w-full object-cover" loading="lazy" />
+                          } @else {
+                            <div class="flex h-full w-full items-center justify-center bg-slate-100 text-lg dark:bg-slate-800">🧾</div>
+                          }
+                          @if (isPdf(receipt)) {
+                            <span class="absolute left-1 top-1 rounded-md bg-rose-500/90 px-1.5 py-0.5 text-[9px] font-semibold text-white">PDF</span>
+                          }
+                        </div>
+                      </button>
+                    }
+                  </div>
+                </section>
+              }
+            }
+          </div>
+        </div>
+
+        @if (mutationError()) {
+          <p class="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-300">{{ mutationError() }}</p>
+        }
+
+        <div class="mt-5 flex justify-end gap-2">
+          <button type="button" (click)="closeAllModals()" class="btn-secondary">Cancel</button>
+          <button type="button" (click)="removePictures()" [disabled]="!canRemovePictures()" class="btn-danger">
+            {{ mutationLoading() ? 'Removing...' : 'Delete Selected' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (deleteModalOpen()) {
+    <div class="modal-backdrop" (click)="closeAllModals()">
+      <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-700 dark:bg-slate-900" (click)="$event.stopPropagation()">
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Delete folder?</h3>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          This deletes folder <span class="font-semibold text-slate-900 dark:text-white">{{ folder()?.name }}</span>.
+          Pictures remain in your library.
+        </p>
+
+        @if (mutationError()) {
+          <p class="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-300">{{ mutationError() }}</p>
+        }
+
+        <div class="mt-6 flex justify-end gap-2">
+          <button type="button" (click)="closeAllModals()" class="btn-secondary">Cancel</button>
+          <button type="button" (click)="deleteFolder()" [disabled]="mutationLoading()" class="btn-danger">
+            {{ mutationLoading() ? 'Deleting...' : 'Delete Folder' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
