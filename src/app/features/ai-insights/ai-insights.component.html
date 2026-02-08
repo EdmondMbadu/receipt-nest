@@ -14,101 +14,100 @@
   <div class="flex flex-col h-screen">
     <!-- Header -->
     <header
-      class="sticky top-0 z-30 flex-shrink-0 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
-      <div class="mx-auto max-w-4xl px-4 py-3 sm:px-6 sm:py-4">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div class="flex items-center gap-3 min-w-0">
-            <button type="button" (click)="goBack()"
-              class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800 sm:h-10 sm:w-10">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+      class="sticky top-0 z-30 flex-shrink-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
+      <div class="mx-auto max-w-4xl">
+        <!-- Navigation bar -->
+        <div class="flex items-center justify-between px-3 h-12 sm:h-14 sm:px-6">
+          <!-- Left: Back -->
+          <button type="button" (click)="goBack()"
+            class="-ml-1 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-600 dark:text-slate-400 transition-colors active:bg-slate-100 dark:active:bg-slate-800 sm:hover:bg-slate-100 sm:dark:hover:bg-slate-800">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+          </button>
+
+          <!-- Center: Title -->
+          <div class="flex items-center gap-2">
+            <div
+              class="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 shadow-md shadow-emerald-500/20 sm:h-8 sm:w-8">
+              <svg class="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
               </svg>
-            </button>
-            <div class="min-w-0">
-              <div class="flex items-center gap-2">
-                <div
-                  class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 shadow-xl shadow-emerald-500/25">
-                  <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
-                  </svg>
-                </div>
-                <h1 class="text-base font-semibold text-slate-900 dark:text-white sm:text-lg">AI Insights</h1>
-              </div>
-              <div
-                class="mt-1 inline-flex max-w-full flex-wrap items-center gap-x-2 gap-y-0.5 rounded-full border border-emerald-200/80 bg-gradient-to-r from-white to-emerald-50 px-3 py-1.5 text-xs shadow-sm dark:border-emerald-700/40 dark:from-slate-900 dark:to-emerald-950/40">
-                <span class="font-semibold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-300">Total</span>
-                <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ formatCurrency(totalSpend()) }}</span>
-                <span class="basis-full text-[10px] text-slate-500 dark:text-slate-400 sm:basis-auto sm:text-[11px]">{{ monthLabel() }}</span>
-              </div>
             </div>
+            <h1 class="text-[15px] font-semibold tracking-tight text-slate-900 dark:text-white sm:text-lg">AI Insights</h1>
           </div>
-          <div class="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto sm:items-center">
-            <!-- Telegram Connect Button -->
+
+          <!-- Right: Theme toggle -->
+          <button type="button" (click)="toggleTheme()"
+            class="-mr-1 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 transition-colors active:bg-slate-100 dark:active:bg-slate-800 sm:hover:bg-slate-100 sm:dark:hover:bg-slate-800">
+            @if (isDarkMode()) {
+            <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+            </svg>
+            } @else {
+            <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+            </svg>
+            }
+          </button>
+        </div>
+
+        <!-- Secondary bar: spend summary + actions -->
+        <div class="flex items-center justify-between gap-2 px-3 pb-2.5 sm:px-6 sm:pb-3">
+          <!-- Spend pill -->
+          <div
+            class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/60 dark:border-emerald-800/40 bg-emerald-50/80 dark:bg-emerald-950/30 px-2.5 py-1 sm:gap-2 sm:px-3 sm:py-1.5">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 sm:text-xs">Total</span>
+            <span class="text-[13px] font-semibold text-slate-900 dark:text-white sm:text-sm">{{ formatCurrency(totalSpend()) }}</span>
+            <span class="text-slate-300 dark:text-slate-600">·</span>
+            <span class="text-[10px] text-slate-500 dark:text-slate-400 sm:text-[11px]">{{ monthLabel() }}</span>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="flex items-center gap-1.5">
+            <!-- Telegram Connect -->
             <button type="button" (click)="openTelegramDialog()"
-              class="relative inline-flex h-10 min-w-0 items-center justify-center gap-1.5 rounded-xl border px-2 text-[11px] font-medium shadow-sm transition-all sm:gap-2 sm:px-3 sm:text-xs"
-              [class.border-sky-300]="telegramLinked()"
-              [class.dark:border-sky-600]="telegramLinked()"
-              [class.bg-sky-50]="telegramLinked()"
-              [class.dark:bg-sky-900/20]="telegramLinked()"
-              [class.text-sky-700]="telegramLinked()"
-              [class.dark:text-sky-300]="telegramLinked()"
-              [class.border-slate-200]="!telegramLinked()"
-              [class.dark:border-slate-700]="!telegramLinked()"
-              [class.bg-white]="!telegramLinked()"
-              [class.dark:bg-slate-900]="!telegramLinked()"
-              [class.text-slate-600]="!telegramLinked()"
-              [class.dark:text-slate-300]="!telegramLinked()"
-              [class.hover:bg-slate-50]="!telegramLinked()"
-              [class.dark:hover:bg-slate-800]="!telegramLinked()">
-              <!-- Telegram SVG Icon -->
-              <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+              class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2 text-[11px] font-medium transition-all sm:h-9 sm:rounded-xl sm:px-3 sm:text-xs"
+              [ngClass]="telegramLinked()
+                ? 'border-sky-200 dark:border-sky-700 bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-300'
+                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'">
+              <svg class="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
               </svg>
               @if (telegramLinked()) {
-                <span class="truncate sm:hidden">Telegram</span>
-                <span class="hidden sm:inline">Telegram Chat</span>
-                <span class="flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                <span class="hidden sm:inline">Telegram</span>
+                <span class="flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
               } @else {
-                <span class="truncate sm:hidden">Connect</span>
-                <span class="hidden sm:inline">Connect Telegram</span>
+                <span class="hidden sm:inline">Connect</span>
               }
             </button>
+            <!-- New Chat -->
             <button type="button" (click)="clearChat()"
-              class="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 text-[11px] font-medium text-slate-600 dark:text-slate-300 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800 sm:gap-2 sm:px-3 sm:text-xs">
-              <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 text-[11px] font-medium text-slate-500 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-800 sm:h-9 sm:rounded-xl sm:px-3 sm:text-xs">
+              <svg class="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
               </svg>
-              <span class="truncate sm:hidden">New</span>
-              <span class="hidden sm:inline">New chat</span>
-            </button>
-            <button type="button" (click)="toggleTheme()"
-              class="inline-flex h-10 w-full items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800 sm:w-10">
-              @if (isDarkMode()) {
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-              </svg>
-              } @else {
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-              </svg>
-              }
+              <span class="hidden sm:inline">New Chat</span>
             </button>
           </div>
         </div>
+
+        <!-- Separator -->
+        <div class="h-px bg-slate-200/80 dark:bg-slate-800"></div>
       </div>
     </header>
 
     <div class="flex-1 overflow-hidden">
-      <div class="mx-auto h-full max-w-5xl px-4 py-4 sm:px-6">
+      <div class="mx-auto h-full max-w-5xl px-0 py-0 sm:px-6 sm:py-3">
         <section
-          class="flex min-h-0 h-full flex-col rounded-2xl border border-slate-200 bg-white/70 shadow-sm backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/60">
+          class="flex min-h-0 h-full flex-col bg-white/70 backdrop-blur-sm dark:bg-slate-900/60 sm:rounded-2xl sm:border sm:border-slate-200 sm:shadow-sm sm:dark:border-slate-800">
             <div #chatContainer class="min-h-0 flex-1 overflow-y-auto">
-              <div class="mx-auto max-w-3xl px-4 py-6 sm:px-6">
+              <div class="mx-auto max-w-3xl px-3 py-4 sm:px-6 sm:py-6">
                 <!-- Initial Insights Cards (shown when no messages) -->
                 @if (showSuggestions()) {
                 <div class="space-y-6">
@@ -223,7 +222,7 @@
             </div>
 
             <div
-              class="flex-shrink-0 border-t border-slate-200 dark:border-slate-800 bg-white/60 px-4 py-4 backdrop-blur-xl dark:bg-slate-950/40 sm:px-6">
+              class="flex-shrink-0 border-t border-slate-200 dark:border-slate-800 bg-white/60 px-3 py-3 backdrop-blur-xl dark:bg-slate-950/40 sm:px-6 sm:py-4">
               <div class="mx-auto max-w-3xl">
                 <!-- Upload progress bar -->
                 @if (isUploading()) {
@@ -247,7 +246,7 @@
                   <!-- Attach button -->
                   <button type="button" (click)="fileInput.click()"
                     [disabled]="isLoading() || isUploading()"
-                    class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed sm:h-12 sm:w-12"
                     title="Attach receipt (image or PDF)">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                       <path stroke-linecap="round" stroke-linejoin="round"
@@ -258,11 +257,11 @@
                   <div class="relative flex-1">
                     <input #messageInput type="text" [ngModel]="messageText()" (ngModelChange)="messageText.set($event)"
                       (keydown)="onKeyDown($event)" placeholder="Ask about your spending or attach a receipt..."
-                      class="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 py-3 pl-4 pr-12 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 shadow-sm transition-all focus:border-emerald-500 dark:focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                      class="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 py-2.5 pl-4 pr-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 shadow-sm transition-all focus:border-emerald-500 dark:focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:py-3 sm:pr-12"
                       [disabled]="isLoading() || isUploading()" />
                   </div>
                   <button type="button" (click)="sendMessage()" [disabled]="isLoading() || isUploading() || !messageText().trim()"
-                    class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-emerald-500/25">
+                    class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-emerald-500/25 sm:h-12 sm:w-12">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round"
                         d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
