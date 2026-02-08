@@ -221,7 +221,7 @@
     </aside>
 
     <div class="min-w-0 flex-1">
-      <header class="sticky top-0 z-30 border-b border-slate-200/70 bg-white/85 px-4 py-3 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/80 lg:hidden">
+      <header *ngIf="!isInsightsRoute()" class="sticky top-0 z-30 border-b border-slate-200/70 bg-white/85 px-4 py-3 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/80 lg:hidden">
         <div class="flex items-center justify-between">
           <button type="button" (click)="toggleSidebar()"
             class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
