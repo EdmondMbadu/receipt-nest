@@ -394,90 +394,33 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
 
   private async createScannedFile(file: File): Promise<File> {
     const image = await this.loadImageFromFile(file);
-    const maxDimension = 2200;
-    const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
-    const width = Math.max(1, Math.round(image.width * scale));
-    const height = Math.max(1, Math.round(image.height * scale));
-
-    const baseCanvas = document.createElement('canvas');
-    baseCanvas.width = width;
-    baseCanvas.height = height;
-    const baseCtx = baseCanvas.getContext('2d');
-    if (!baseCtx) {
+    const originalCanvas = document.createElement('canvas');
+    originalCanvas.width = image.width;
+    originalCanvas.height = image.height;
+    const originalCtx = originalCanvas.getContext('2d');
+    if (!originalCtx) {
       throw new Error('Failed to initialize scan canvas');
     }
-    baseCtx.drawImage(image, 0, 0, width, height);
+    originalCtx.drawImage(image, 0, 0);
 
-    const imageData = baseCtx.getImageData(0, 0, width, height);
-    const data = imageData.data;
+    let outputCanvas = originalCanvas;
+    const corners = this.detectDocumentCorners(originalCtx, image.width, image.height);
 
-    let minLum = 255;
-    let maxLum = 0;
-    for (let i = 0; i < data.length; i += 4) {
-      const lum = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
-      if (lum < minLum) minLum = lum;
-      if (lum > maxLum) maxLum = lum;
-    }
-
-    const range = Math.max(1, maxLum - minLum);
-    let minX = width;
-    let minY = height;
-    let maxX = 0;
-    let maxY = 0;
-    let hasContent = false;
-
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const i = (y * width + x) * 4;
-        const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-        const normalized = (lum - minLum) / range;
-        const boosted = Math.pow(Math.max(0, Math.min(1, normalized)), 0.78);
-
-        let tone = Math.round(boosted * 255);
-        if (tone > 236) tone = 255;
-        if (tone < 16) tone = 0;
-
-        data[i] = tone;
-        data[i + 1] = tone;
-        data[i + 2] = tone;
-
-        // Track likely receipt content for auto-crop.
-        if (tone < 245) {
-          hasContent = true;
-          if (x < minX) minX = x;
-          if (y < minY) minY = y;
-          if (x > maxX) maxX = x;
-          if (y > maxY) maxY = y;
-        }
+    if (corners) {
+      const warped = this.perspectiveWarpFromCorners(originalCtx, corners);
+      if (warped) {
+        outputCanvas = warped;
+      }
+    } else {
+      const fallback = this.autoCropCanvas(originalCanvas);
+      if (fallback) {
+        outputCanvas = fallback;
       }
     }
 
-    baseCtx.putImageData(imageData, 0, 0);
+    this.enhanceDocumentCanvas(outputCanvas);
 
-    let outputCanvas = baseCanvas;
-    if (hasContent) {
-      const padding = Math.round(Math.min(width, height) * 0.03);
-      const cropX = Math.max(0, minX - padding);
-      const cropY = Math.max(0, minY - padding);
-      const cropW = Math.min(width - cropX, maxX - minX + 1 + (padding * 2));
-      const cropH = Math.min(height - cropY, maxY - minY + 1 + (padding * 2));
-      const cropArea = cropW * cropH;
-      const totalArea = width * height;
-
-      // Only crop if we found a meaningful document area.
-      if (cropW > 120 && cropH > 120 && cropArea < totalArea * 0.98) {
-        const croppedCanvas = document.createElement('canvas');
-        croppedCanvas.width = cropW;
-        croppedCanvas.height = cropH;
-        const cropCtx = croppedCanvas.getContext('2d');
-        if (cropCtx) {
-          cropCtx.drawImage(baseCanvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-          outputCanvas = croppedCanvas;
-        }
-      }
-    }
-
-    const scannedBlob = await this.canvasToBlob(outputCanvas, 'image/jpeg', 0.92);
+    const scannedBlob = await this.canvasToBlob(outputCanvas, 'image/jpeg', 0.94);
     const baseName = file.name.replace(/\.[^.]+$/, '');
     const timestamp = Date.now();
 
@@ -514,4 +457,414 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
       }, type, quality);
     });
   }
+
+  private detectDocumentCorners(
+    sourceCtx: CanvasRenderingContext2D,
+    sourceWidth: number,
+    sourceHeight: number
+  ): { tl: Point; tr: Point; br: Point; bl: Point } | null {
+    const maxDetectSize = 1000;
+    const scale = Math.min(1, maxDetectSize / Math.max(sourceWidth, sourceHeight));
+    const detectW = Math.max(1, Math.round(sourceWidth * scale));
+    const detectH = Math.max(1, Math.round(sourceHeight * scale));
+
+    const detectCanvas = document.createElement('canvas');
+    detectCanvas.width = detectW;
+    detectCanvas.height = detectH;
+    const detectCtx = detectCanvas.getContext('2d');
+    if (!detectCtx) return null;
+
+    detectCtx.drawImage(sourceCtx.canvas, 0, 0, sourceWidth, sourceHeight, 0, 0, detectW, detectH);
+    const imageData = detectCtx.getImageData(0, 0, detectW, detectH);
+    const gray = new Uint8ClampedArray(detectW * detectH);
+
+    let mean = 0;
+    for (let i = 0, p = 0; i < imageData.data.length; i += 4, p++) {
+      const lum = Math.round(
+        0.299 * imageData.data[i] + 0.587 * imageData.data[i + 1] + 0.114 * imageData.data[i + 2]
+      );
+      gray[p] = lum;
+      mean += lum;
+    }
+    mean /= gray.length;
+
+    let variance = 0;
+    for (let i = 0; i < gray.length; i++) {
+      const d = gray[i] - mean;
+      variance += d * d;
+    }
+    const std = Math.sqrt(variance / gray.length);
+    const threshold = Math.max(130, Math.min(245, Math.round(mean + std * 0.25 + 12)));
+
+    const mask = new Uint8Array(detectW * detectH);
+    for (let i = 0; i < gray.length; i++) {
+      mask[i] = gray[i] >= threshold ? 1 : 0;
+    }
+
+    const largest = this.findLargestComponent(mask, detectW, detectH);
+    if (!largest) return null;
+
+    const areaRatio = largest.area / (detectW * detectH);
+    if (areaRatio < 0.12) {
+      return null;
+    }
+
+    const hull = this.convexHull(largest.boundary);
+    if (hull.length < 4) return null;
+
+    const quad = this.extractQuadFromHull(hull);
+    if (!quad) return null;
+
+    const scaled = {
+      tl: { x: quad.tl.x / scale, y: quad.tl.y / scale },
+      tr: { x: quad.tr.x / scale, y: quad.tr.y / scale },
+      br: { x: quad.br.x / scale, y: quad.br.y / scale },
+      bl: { x: quad.bl.x / scale, y: quad.bl.y / scale }
+    };
+
+    const polygonArea = this.quadArea(scaled);
+    if (polygonArea < sourceWidth * sourceHeight * 0.08) {
+      return null;
+    }
+
+    return scaled;
+  }
+
+  private perspectiveWarpFromCorners(
+    sourceCtx: CanvasRenderingContext2D,
+    corners: { tl: Point; tr: Point; br: Point; bl: Point }
+  ): HTMLCanvasElement | null {
+    const ordered = this.orderCorners(corners);
+    const topWidth = this.distance(ordered.tl, ordered.tr);
+    const bottomWidth = this.distance(ordered.bl, ordered.br);
+    const leftHeight = this.distance(ordered.tl, ordered.bl);
+    const rightHeight = this.distance(ordered.tr, ordered.br);
+
+    const targetW = Math.round(Math.max(topWidth, bottomWidth));
+    const targetH = Math.round(Math.max(leftHeight, rightHeight));
+
+    if (targetW < 80 || targetH < 80) {
+      return null;
+    }
+
+    const maxOut = 2200;
+    const outScale = Math.min(1, maxOut / Math.max(targetW, targetH));
+    const outW = Math.max(1, Math.round(targetW * outScale));
+    const outH = Math.max(1, Math.round(targetH * outScale));
+
+    const sourceData = sourceCtx.getImageData(0, 0, sourceCtx.canvas.width, sourceCtx.canvas.height);
+    const outCanvas = document.createElement('canvas');
+    outCanvas.width = outW;
+    outCanvas.height = outH;
+    const outCtx = outCanvas.getContext('2d');
+    if (!outCtx) return null;
+
+    const outImage = outCtx.createImageData(outW, outH);
+    const outPixels = outImage.data;
+    const srcPixels = sourceData.data;
+    const srcW = sourceData.width;
+    const srcH = sourceData.height;
+
+    for (let y = 0; y < outH; y++) {
+      const v = outH <= 1 ? 0 : y / (outH - 1);
+      const left = this.lerpPoint(ordered.tl, ordered.bl, v);
+      const right = this.lerpPoint(ordered.tr, ordered.br, v);
+
+      for (let x = 0; x < outW; x++) {
+        const u = outW <= 1 ? 0 : x / (outW - 1);
+        const src = this.lerpPoint(left, right, u);
+        const sample = this.sampleBilinear(srcPixels, srcW, srcH, src.x, src.y);
+        const i = (y * outW + x) * 4;
+        outPixels[i] = sample.r;
+        outPixels[i + 1] = sample.g;
+        outPixels[i + 2] = sample.b;
+        outPixels[i + 3] = 255;
+      }
+    }
+
+    outCtx.putImageData(outImage, 0, 0);
+    return outCanvas;
+  }
+
+  private autoCropCanvas(sourceCanvas: HTMLCanvasElement): HTMLCanvasElement | null {
+    const ctx = sourceCanvas.getContext('2d');
+    if (!ctx) return null;
+    const w = sourceCanvas.width;
+    const h = sourceCanvas.height;
+    const imageData = ctx.getImageData(0, 0, w, h);
+    const data = imageData.data;
+
+    let minX = w;
+    let minY = h;
+    let maxX = 0;
+    let maxY = 0;
+    let count = 0;
+
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const i = (y * w + x) * 4;
+        const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+        if (lum < 245) {
+          count++;
+          if (x < minX) minX = x;
+          if (y < minY) minY = y;
+          if (x > maxX) maxX = x;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+
+    if (!count) return null;
+
+    const pad = Math.round(Math.min(w, h) * 0.03);
+    const cropX = Math.max(0, minX - pad);
+    const cropY = Math.max(0, minY - pad);
+    const cropW = Math.min(w - cropX, maxX - minX + 1 + pad * 2);
+    const cropH = Math.min(h - cropY, maxY - minY + 1 + pad * 2);
+
+    if (cropW < 100 || cropH < 100) return null;
+
+    const out = document.createElement('canvas');
+    out.width = cropW;
+    out.height = cropH;
+    const outCtx = out.getContext('2d');
+    if (!outCtx) return null;
+    outCtx.drawImage(sourceCanvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+    return out;
+  }
+
+  private enhanceDocumentCanvas(canvas: HTMLCanvasElement): void {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    let minLum = 255;
+    let maxLum = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const lum = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+      if (lum < minLum) minLum = lum;
+      if (lum > maxLum) maxLum = lum;
+    }
+
+    const range = Math.max(1, maxLum - minLum);
+    for (let i = 0; i < data.length; i += 4) {
+      const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+      const normalized = (lum - minLum) / range;
+      const boosted = Math.pow(Math.max(0, Math.min(1, normalized)), 0.74);
+
+      let tone = Math.round(boosted * 255);
+      if (tone > 236) tone = 255;
+      if (tone < 18) tone = 0;
+
+      data[i] = tone;
+      data[i + 1] = tone;
+      data[i + 2] = tone;
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+  }
+
+  private findLargestComponent(
+    mask: Uint8Array,
+    width: number,
+    height: number
+  ): { area: number; boundary: Point[] } | null {
+    const visited = new Uint8Array(mask.length);
+    let bestArea = 0;
+    let bestPixels: number[] = [];
+
+    for (let i = 0; i < mask.length; i++) {
+      if (!mask[i] || visited[i]) continue;
+
+      const queue: number[] = [i];
+      visited[i] = 1;
+      const pixels: number[] = [];
+      let head = 0;
+
+      while (head < queue.length) {
+        const idx = queue[head++];
+        pixels.push(idx);
+
+        const x = idx % width;
+        const y = (idx / width) | 0;
+
+        for (let oy = -1; oy <= 1; oy++) {
+          for (let ox = -1; ox <= 1; ox++) {
+            if (ox === 0 && oy === 0) continue;
+            const nx = x + ox;
+            const ny = y + oy;
+            if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+            const ni = ny * width + nx;
+            if (!mask[ni] || visited[ni]) continue;
+            visited[ni] = 1;
+            queue.push(ni);
+          }
+        }
+      }
+
+      if (pixels.length > bestArea) {
+        bestArea = pixels.length;
+        bestPixels = pixels;
+      }
+    }
+
+    if (!bestArea) return null;
+
+    const pixelSet = new Uint8Array(mask.length);
+    for (const p of bestPixels) pixelSet[p] = 1;
+
+    const boundary: Point[] = [];
+    for (const p of bestPixels) {
+      const x = p % width;
+      const y = (p / width) | 0;
+      let isBoundary = false;
+      for (let oy = -1; oy <= 1 && !isBoundary; oy++) {
+        for (let ox = -1; ox <= 1; ox++) {
+          const nx = x + ox;
+          const ny = y + oy;
+          if (nx < 0 || ny < 0 || nx >= width || ny >= height) {
+            isBoundary = true;
+            break;
+          }
+          if (!pixelSet[ny * width + nx]) {
+            isBoundary = true;
+            break;
+          }
+        }
+      }
+      if (isBoundary) {
+        boundary.push({ x, y });
+      }
+    }
+
+    return { area: bestArea, boundary };
+  }
+
+  private convexHull(points: Point[]): Point[] {
+    if (points.length <= 3) return points;
+
+    const sorted = [...points].sort((a, b) => (a.x === b.x ? a.y - b.y : a.x - b.x));
+    const cross = (o: Point, a: Point, b: Point) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+
+    const lower: Point[] = [];
+    for (const p of sorted) {
+      while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) {
+        lower.pop();
+      }
+      lower.push(p);
+    }
+
+    const upper: Point[] = [];
+    for (let i = sorted.length - 1; i >= 0; i--) {
+      const p = sorted[i];
+      while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) {
+        upper.pop();
+      }
+      upper.push(p);
+    }
+
+    lower.pop();
+    upper.pop();
+    return lower.concat(upper);
+  }
+
+  private extractQuadFromHull(hull: Point[]): { tl: Point; tr: Point; br: Point; bl: Point } | null {
+    if (hull.length < 4) return null;
+    let tl = hull[0];
+    let tr = hull[0];
+    let br = hull[0];
+    let bl = hull[0];
+
+    for (const p of hull) {
+      const sum = p.x + p.y;
+      const diff = p.x - p.y;
+      const tlSum = tl.x + tl.y;
+      const brSum = br.x + br.y;
+      const trDiff = tr.x - tr.y;
+      const blDiff = bl.x - bl.y;
+
+      if (sum < tlSum) tl = p;
+      if (sum > brSum) br = p;
+      if (diff > trDiff) tr = p;
+      if (diff < blDiff) bl = p;
+    }
+
+    const unique = new Set([`${tl.x},${tl.y}`, `${tr.x},${tr.y}`, `${br.x},${br.y}`, `${bl.x},${bl.y}`]);
+    if (unique.size < 4) return null;
+    return { tl, tr, br, bl };
+  }
+
+  private orderCorners(corners: { tl: Point; tr: Point; br: Point; bl: Point }): { tl: Point; tr: Point; br: Point; bl: Point } {
+    const points = [corners.tl, corners.tr, corners.br, corners.bl];
+    const bySum = [...points].sort((a, b) => (a.x + a.y) - (b.x + b.y));
+    const byDiff = [...points].sort((a, b) => (a.x - a.y) - (b.x - b.y));
+    return {
+      tl: bySum[0],
+      br: bySum[bySum.length - 1],
+      bl: byDiff[0],
+      tr: byDiff[byDiff.length - 1]
+    };
+  }
+
+  private quadArea(corners: { tl: Point; tr: Point; br: Point; bl: Point }): number {
+    const pts = [corners.tl, corners.tr, corners.br, corners.bl];
+    let area = 0;
+    for (let i = 0; i < pts.length; i++) {
+      const p1 = pts[i];
+      const p2 = pts[(i + 1) % pts.length];
+      area += p1.x * p2.y - p2.x * p1.y;
+    }
+    return Math.abs(area) / 2;
+  }
+
+  private distance(a: Point, b: Point): number {
+    const dx = a.x - b.x;
+    const dy = a.y - b.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  private lerpPoint(a: Point, b: Point, t: number): Point {
+    return {
+      x: a.x + (b.x - a.x) * t,
+      y: a.y + (b.y - a.y) * t
+    };
+  }
+
+  private sampleBilinear(
+    pixels: Uint8ClampedArray,
+    width: number,
+    height: number,
+    x: number,
+    y: number
+  ): { r: number; g: number; b: number } {
+    const x0 = Math.max(0, Math.min(width - 1, Math.floor(x)));
+    const y0 = Math.max(0, Math.min(height - 1, Math.floor(y)));
+    const x1 = Math.max(0, Math.min(width - 1, x0 + 1));
+    const y1 = Math.max(0, Math.min(height - 1, y0 + 1));
+
+    const tx = Math.max(0, Math.min(1, x - x0));
+    const ty = Math.max(0, Math.min(1, y - y0));
+
+    const i00 = (y0 * width + x0) * 4;
+    const i10 = (y0 * width + x1) * 4;
+    const i01 = (y1 * width + x0) * 4;
+    const i11 = (y1 * width + x1) * 4;
+
+    const r = this.bilerp(pixels[i00], pixels[i10], pixels[i01], pixels[i11], tx, ty);
+    const g = this.bilerp(pixels[i00 + 1], pixels[i10 + 1], pixels[i01 + 1], pixels[i11 + 1], tx, ty);
+    const b = this.bilerp(pixels[i00 + 2], pixels[i10 + 2], pixels[i01 + 2], pixels[i11 + 2], tx, ty);
+    return { r, g, b };
+  }
+
+  private bilerp(c00: number, c10: number, c01: number, c11: number, tx: number, ty: number): number {
+    const a = c00 + (c10 - c00) * tx;
+    const b = c01 + (c11 - c01) * tx;
+    return Math.round(a + (b - a) * ty);
+  }
 }
+
+type Point = {
+  x: number;
+  y: number;
+};

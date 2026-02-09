@@ -52,7 +52,7 @@
 
       <label
         class="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-2.5">
-        <span class="text-sm text-slate-700 dark:text-slate-200">Auto-enhance as scan</span>
+        <span class="text-sm text-slate-700 dark:text-slate-200">Full scan (auto-crop + straighten)</span>
         <button type="button" (click)="scanMode.set(!scanMode())"
           class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
           [class.bg-emerald-500]="scanMode()" [class.bg-slate-300]="!scanMode()">
@@ -63,7 +63,7 @@
 
       <div *ngIf="isProcessingScan()"
         class="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2.5">
-        <p class="text-sm text-emerald-700 dark:text-emerald-400">Preparing scan...</p>
+        <p class="text-sm text-emerald-700 dark:text-emerald-400">Scanning receipt (detecting edges, straightening)...</p>
       </div>
 
       <!-- OR Divider -->
