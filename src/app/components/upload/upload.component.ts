@@ -7,7 +7,9 @@ import {
   computed,
   ViewChild,
   ElementRef,
-  effect
+  effect,
+  AfterViewInit,
+  OnDestroy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -29,6 +31,8 @@ export class UploadComponent {
   @Output() close = new EventEmitter<void>();
 
   @ViewChild('videoElement') videoElement?: ElementRef<HTMLVideoElement>;
+  @ViewChild('scannerInput') scannerInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
   // State
   readonly isDragging = signal(false);
@@ -39,6 +43,7 @@ export class UploadComponent {
   readonly errorMessage = signal<string | null>(null);
   readonly showCamera = signal(false);
   private videoStream: MediaStream | null = null;
+  private autoScannerTriggered = false;
 
   constructor() {
     // Watch for camera state changes and initialize camera
@@ -48,6 +53,18 @@ export class UploadComponent {
         setTimeout(() => this.initializeCamera(), 100);
       }
     });
+  }
+
+  ngAfterViewInit(): void {
+    // On touch devices, start in scanner flow so users can capture directly.
+    if (this.isTouchDevice() && !this.autoScannerTriggered) {
+      this.autoScannerTriggered = true;
+      setTimeout(() => this.openScanner(), 50);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.stopCamera();
   }
 
   // Computed
@@ -89,6 +106,15 @@ export class UploadComponent {
     if (input.files && input.files.length > 0) {
       this.handleFile(input.files[0]);
     }
+  }
+
+  onScannerFileSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.handleFile(input.files[0]);
+    }
+    // Allow selecting the same file/capture again.
+    input.value = '';
   }
 
   // Handle selected file
@@ -234,6 +260,21 @@ export class UploadComponent {
     this.errorMessage.set(null);
   }
 
+  openScanner(): void {
+    this.errorMessage.set(null);
+
+    if (this.isTouchDevice() && this.scannerInput?.nativeElement) {
+      this.scannerInput.nativeElement.click();
+      return;
+    }
+
+    this.openCamera();
+  }
+
+  openFilePicker(): void {
+    this.fileInput?.nativeElement.click();
+  }
+
   // Initialize camera stream
   async initializeCamera(): Promise<void> {
     if (!this.videoElement) {
@@ -312,5 +353,14 @@ export class UploadComponent {
     this.stopCamera();
     this.showCamera.set(false);
   }
-}
 
+  private isTouchDevice(): boolean {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return false;
+    }
+
+    const hasTouch = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
+    const coarsePointer = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+    return hasTouch || coarsePointer;
+  }
+}
