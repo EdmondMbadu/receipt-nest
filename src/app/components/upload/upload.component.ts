@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { ReceiptService, UploadProgress, ALLOWED_FILE_TYPES, MAX_FILE_SIZE } from '../../services/receipt.service';
+import { ReceiptService, UploadProgress, MAX_FILE_SIZE } from '../../services/receipt.service';
 import { Receipt } from '../../models/receipt.model';
 
 @Component({
@@ -23,7 +23,7 @@ import { Receipt } from '../../models/receipt.model';
   templateUrl: './upload.component.html',
   styleUrl: './upload.component.css'
 })
-export class UploadComponent {
+export class UploadComponent implements AfterViewInit, OnDestroy {
   private readonly receiptService = inject(ReceiptService);
 
   @Output() uploadComplete = new EventEmitter<Receipt>();
@@ -42,6 +42,9 @@ export class UploadComponent {
   readonly previewUrl = signal<string | null>(null);
   readonly errorMessage = signal<string | null>(null);
   readonly showCamera = signal(false);
+  readonly scanMode = signal(true);
+  readonly isProcessingScan = signal(false);
+  readonly isScannedFile = signal(false);
   private videoStream: MediaStream | null = null;
   private autoScannerTriggered = false;
 
@@ -106,6 +109,7 @@ export class UploadComponent {
     if (input.files && input.files.length > 0) {
       this.handleFile(input.files[0]);
     }
+    input.value = '';
   }
 
   onScannerFileSelect(event: Event): void {
@@ -120,6 +124,7 @@ export class UploadComponent {
   // Handle selected file
   private async handleFile(file: File): Promise<void> {
     this.errorMessage.set(null);
+    this.isScannedFile.set(false);
 
     // Validate file
     const validation = this.receiptService.validateFile(file);
@@ -128,24 +133,45 @@ export class UploadComponent {
       return;
     }
 
-    this.selectedFile.set(file);
+    let processedFile = file;
+    const canScan =
+      this.scanMode() &&
+      file.type.startsWith('image/') &&
+      file.type !== 'image/heic' &&
+      file.type !== 'image/heif' &&
+      !file.name.toLowerCase().endsWith('.heic') &&
+      !file.name.toLowerCase().endsWith('.heif');
+
+    if (canScan) {
+      this.isProcessingScan.set(true);
+      try {
+        processedFile = await this.createScannedFile(file);
+        this.isScannedFile.set(true);
+      } catch (error) {
+        console.error('Scan processing failed, using original image:', error);
+      } finally {
+        this.isProcessingScan.set(false);
+      }
+    }
+
+    this.selectedFile.set(processedFile);
 
     // Check if it's a HEIC file (browsers can't display these natively)
-    const isHeic = file.type === 'image/heic' || file.type === 'image/heif' ||
-      file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif');
+    const isHeic = processedFile.type === 'image/heic' || processedFile.type === 'image/heif' ||
+      processedFile.name.toLowerCase().endsWith('.heic') || processedFile.name.toLowerCase().endsWith('.heif');
 
     // Create preview for images
-    if (file.type.startsWith('image/')) {
+    if (processedFile.type.startsWith('image/')) {
       if (isHeic) {
         // Convert HEIC to JPEG for preview
-        await this.convertHeicForPreview(file);
+        await this.convertHeicForPreview(processedFile);
       } else {
         // Regular image - show directly
         const reader = new FileReader();
         reader.onload = (e) => {
           this.previewUrl.set(e.target?.result as string);
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(processedFile);
       }
     } else {
       // PDF - show icon instead
@@ -233,6 +259,8 @@ export class UploadComponent {
     this.uploadProgress.set(null);
     this.errorMessage.set(null);
     this.isUploading.set(false);
+    this.isProcessingScan.set(false);
+    this.isScannedFile.set(false);
   }
 
   // Remove selected file
@@ -362,5 +390,128 @@ export class UploadComponent {
     const hasTouch = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
     const coarsePointer = window.matchMedia?.('(pointer: coarse)').matches ?? false;
     return hasTouch || coarsePointer;
+  }
+
+  private async createScannedFile(file: File): Promise<File> {
+    const image = await this.loadImageFromFile(file);
+    const maxDimension = 2200;
+    const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
+    const width = Math.max(1, Math.round(image.width * scale));
+    const height = Math.max(1, Math.round(image.height * scale));
+
+    const baseCanvas = document.createElement('canvas');
+    baseCanvas.width = width;
+    baseCanvas.height = height;
+    const baseCtx = baseCanvas.getContext('2d');
+    if (!baseCtx) {
+      throw new Error('Failed to initialize scan canvas');
+    }
+    baseCtx.drawImage(image, 0, 0, width, height);
+
+    const imageData = baseCtx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+
+    let minLum = 255;
+    let maxLum = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const lum = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+      if (lum < minLum) minLum = lum;
+      if (lum > maxLum) maxLum = lum;
+    }
+
+    const range = Math.max(1, maxLum - minLum);
+    let minX = width;
+    let minY = height;
+    let maxX = 0;
+    let maxY = 0;
+    let hasContent = false;
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * 4;
+        const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+        const normalized = (lum - minLum) / range;
+        const boosted = Math.pow(Math.max(0, Math.min(1, normalized)), 0.78);
+
+        let tone = Math.round(boosted * 255);
+        if (tone > 236) tone = 255;
+        if (tone < 16) tone = 0;
+
+        data[i] = tone;
+        data[i + 1] = tone;
+        data[i + 2] = tone;
+
+        // Track likely receipt content for auto-crop.
+        if (tone < 245) {
+          hasContent = true;
+          if (x < minX) minX = x;
+          if (y < minY) minY = y;
+          if (x > maxX) maxX = x;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+
+    baseCtx.putImageData(imageData, 0, 0);
+
+    let outputCanvas = baseCanvas;
+    if (hasContent) {
+      const padding = Math.round(Math.min(width, height) * 0.03);
+      const cropX = Math.max(0, minX - padding);
+      const cropY = Math.max(0, minY - padding);
+      const cropW = Math.min(width - cropX, maxX - minX + 1 + (padding * 2));
+      const cropH = Math.min(height - cropY, maxY - minY + 1 + (padding * 2));
+      const cropArea = cropW * cropH;
+      const totalArea = width * height;
+
+      // Only crop if we found a meaningful document area.
+      if (cropW > 120 && cropH > 120 && cropArea < totalArea * 0.98) {
+        const croppedCanvas = document.createElement('canvas');
+        croppedCanvas.width = cropW;
+        croppedCanvas.height = cropH;
+        const cropCtx = croppedCanvas.getContext('2d');
+        if (cropCtx) {
+          cropCtx.drawImage(baseCanvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+          outputCanvas = croppedCanvas;
+        }
+      }
+    }
+
+    const scannedBlob = await this.canvasToBlob(outputCanvas, 'image/jpeg', 0.92);
+    const baseName = file.name.replace(/\.[^.]+$/, '');
+    const timestamp = Date.now();
+
+    return new File([scannedBlob], `${baseName || 'receipt'}-scan-${timestamp}.jpg`, {
+      type: 'image/jpeg',
+      lastModified: timestamp
+    });
+  }
+
+  private loadImageFromFile(file: File): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      image.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(image);
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Failed to load image for scan'));
+      };
+      image.src = objectUrl;
+    });
+  }
+
+  private canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('Failed to create scanned image'));
+          return;
+        }
+        resolve(blob);
+      }, type, quality);
+    });
   }
 }

@@ -50,6 +50,22 @@
         <span class="font-medium text-slate-700 dark:text-slate-200">Scan Receipt</span>
       </button>
 
+      <label
+        class="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-2.5">
+        <span class="text-sm text-slate-700 dark:text-slate-200">Auto-enhance as scan</span>
+        <button type="button" (click)="scanMode.set(!scanMode())"
+          class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+          [class.bg-emerald-500]="scanMode()" [class.bg-slate-300]="!scanMode()">
+          <span class="inline-block h-5 w-5 transform rounded-full bg-white transition-transform"
+            [class.translate-x-5]="scanMode()" [class.translate-x-0.5]="!scanMode()"></span>
+        </button>
+      </label>
+
+      <div *ngIf="isProcessingScan()"
+        class="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2.5">
+        <p class="text-sm text-emerald-700 dark:text-emerald-400">Preparing scan...</p>
+      </div>
+
       <!-- OR Divider -->
       <div class="relative">
         <div class="absolute inset-0 flex items-center">
@@ -149,6 +165,10 @@
 
     <!-- Preview Area (when file selected) -->
     <div *ngIf="selectedFile() && !showCamera()" class="space-y-4">
+      <div *ngIf="isScannedFile()"
+        class="inline-flex items-center gap-2 rounded-full border border-emerald-200 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+        <span>Scanned</span>
+      </div>
 
       <!-- Image Preview -->
       <div *ngIf="previewUrl()" class="relative rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800">
