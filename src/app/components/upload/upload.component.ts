@@ -45,8 +45,17 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
   readonly scanMode = signal(true);
   readonly isProcessingScan = signal(false);
   readonly isScannedFile = signal(false);
+  readonly autoCaptureStatus = signal<'searching' | 'detected' | 'capturing' | 'unavailable'>('searching');
+  readonly autoCaptureProgress = signal(0);
   private videoStream: MediaStream | null = null;
   private autoScannerTriggered = false;
+  private autoCaptureTimer: ReturnType<typeof setInterval> | null = null;
+  private autoCaptureTriggered = false;
+  private stableDetections = 0;
+  private lastDetection: { centerX: number; centerY: number; area: number } | null = null;
+  private noDetectionTicks = 0;
+  private frameProbeCanvas: HTMLCanvasElement | null = null;
+  private frameProbeCtx: CanvasRenderingContext2D | null = null;
 
   constructor() {
     // Watch for camera state changes and initialize camera
@@ -74,6 +83,13 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
   readonly progressPercent = computed(() => {
     const progress = this.uploadProgress();
     return progress ? Math.round(progress.progress) : 0;
+  });
+  readonly autoCaptureMessage = computed(() => {
+    const status = this.autoCaptureStatus();
+    if (status === 'capturing') return 'Document locked. Capturing...';
+    if (status === 'detected') return 'Document detected. Hold steady for auto-capture.';
+    if (status === 'unavailable') return 'Could not auto-detect. Use manual capture below.';
+    return 'Point camera at receipt/check. Auto-capture will trigger when stable.';
   });
 
   readonly allowedTypesDisplay = 'JPEG, PNG, WebP, HEIC, PDF';
@@ -286,6 +302,8 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
   openCamera(): void {
     this.showCamera.set(true);
     this.errorMessage.set(null);
+    this.autoCaptureStatus.set('searching');
+    this.autoCaptureProgress.set(0);
   }
 
   openScanner(): void {
@@ -319,7 +337,10 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
       });
 
       this.videoStream = stream;
-      this.videoElement.nativeElement.srcObject = stream;
+      const video = this.videoElement.nativeElement;
+      video.srcObject = stream;
+      await video.play().catch(() => undefined);
+      this.startAutoCaptureDetection();
     } catch (error: any) {
       console.error('Failed to access camera:', error);
       this.errorMessage.set('Failed to access camera. Please check permissions.');
@@ -329,6 +350,7 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
 
   // Stop camera stream
   stopCamera(): void {
+    this.stopAutoCaptureDetection();
     if (this.videoStream) {
       this.videoStream.getTracks().forEach(track => track.stop());
       this.videoStream = null;
@@ -340,6 +362,10 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
 
   // Capture photo from camera
   capturePhoto(videoElement: HTMLVideoElement): void {
+    if (this.isUploading() || this.isProcessingScan()) {
+      return;
+    }
+
     if (!videoElement.videoWidth || !videoElement.videoHeight) {
       this.errorMessage.set('Camera not ready. Please wait a moment.');
       return;
@@ -380,6 +406,99 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
   cancelCamera(): void {
     this.stopCamera();
     this.showCamera.set(false);
+  }
+
+  private startAutoCaptureDetection(): void {
+    this.stopAutoCaptureDetection();
+    this.autoCaptureTriggered = false;
+    this.stableDetections = 0;
+    this.lastDetection = null;
+    this.noDetectionTicks = 0;
+    this.autoCaptureStatus.set('searching');
+    this.autoCaptureProgress.set(0);
+
+    this.autoCaptureTimer = setInterval(() => {
+      this.processAutoCaptureFrame();
+    }, 300);
+  }
+
+  private stopAutoCaptureDetection(): void {
+    if (this.autoCaptureTimer) {
+      clearInterval(this.autoCaptureTimer);
+      this.autoCaptureTimer = null;
+    }
+    this.frameProbeCanvas = null;
+    this.frameProbeCtx = null;
+  }
+
+  private processAutoCaptureFrame(): void {
+    if (this.autoCaptureTriggered || !this.showCamera()) {
+      return;
+    }
+
+    const video = this.videoElement?.nativeElement;
+    if (!video || video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
+      return;
+    }
+
+    const maxFrame = 420;
+    const frameScale = Math.min(1, maxFrame / Math.max(video.videoWidth, video.videoHeight));
+    const frameW = Math.max(1, Math.round(video.videoWidth * frameScale));
+    const frameH = Math.max(1, Math.round(video.videoHeight * frameScale));
+
+    if (!this.frameProbeCanvas || this.frameProbeCanvas.width !== frameW || this.frameProbeCanvas.height !== frameH) {
+      this.frameProbeCanvas = document.createElement('canvas');
+      this.frameProbeCanvas.width = frameW;
+      this.frameProbeCanvas.height = frameH;
+      this.frameProbeCtx = this.frameProbeCanvas.getContext('2d');
+    }
+
+    if (!this.frameProbeCtx || !this.frameProbeCanvas) {
+      return;
+    }
+
+    this.frameProbeCtx.drawImage(video, 0, 0, frameW, frameH);
+    const corners = this.detectDocumentCorners(this.frameProbeCtx, frameW, frameH, 420);
+
+    if (!corners) {
+      this.noDetectionTicks += 1;
+      this.stableDetections = Math.max(0, this.stableDetections - 1);
+      this.autoCaptureProgress.set(Math.max(0, this.stableDetections * 25));
+      this.autoCaptureStatus.set(this.noDetectionTicks > 25 ? 'unavailable' : 'searching');
+      this.lastDetection = null;
+      return;
+    }
+
+    this.noDetectionTicks = 0;
+    const centerX = (corners.tl.x + corners.tr.x + corners.br.x + corners.bl.x) / 4;
+    const centerY = (corners.tl.y + corners.tr.y + corners.br.y + corners.bl.y) / 4;
+    const area = this.quadArea(corners);
+
+    let isStable = false;
+    if (this.lastDetection) {
+      const dx = centerX - this.lastDetection.centerX;
+      const dy = centerY - this.lastDetection.centerY;
+      const centerDistance = Math.sqrt(dx * dx + dy * dy);
+      const diag = Math.sqrt(frameW * frameW + frameH * frameH);
+      const areaDrift = Math.abs(area - this.lastDetection.area) / Math.max(1, this.lastDetection.area);
+      isStable = centerDistance < diag * 0.025 && areaDrift < 0.16;
+    } else {
+      isStable = true;
+    }
+
+    this.lastDetection = { centerX, centerY, area };
+    this.stableDetections = isStable ? this.stableDetections + 1 : 1;
+    this.autoCaptureStatus.set('detected');
+    const progress = Math.min(100, this.stableDetections * 25);
+    this.autoCaptureProgress.set(progress);
+
+    if (this.stableDetections >= 4) {
+      this.autoCaptureTriggered = true;
+      this.autoCaptureStatus.set('capturing');
+      this.autoCaptureProgress.set(100);
+      this.stopAutoCaptureDetection();
+      this.capturePhoto(video);
+    }
   }
 
   private isTouchDevice(): boolean {
@@ -461,9 +580,9 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
   private detectDocumentCorners(
     sourceCtx: CanvasRenderingContext2D,
     sourceWidth: number,
-    sourceHeight: number
+    sourceHeight: number,
+    maxDetectSize = 1000
   ): { tl: Point; tr: Point; br: Point; bl: Point } | null {
-    const maxDetectSize = 1000;
     const scale = Math.min(1, maxDetectSize / Math.max(sourceWidth, sourceHeight));
     const detectW = Math.max(1, Math.round(sourceWidth * scale));
     const detectH = Math.max(1, Math.round(sourceHeight * scale));
