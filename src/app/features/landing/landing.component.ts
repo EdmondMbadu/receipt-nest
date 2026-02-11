@@ -38,8 +38,8 @@ export class LandingComponent {
 
   constructor() {
     // Set SEO meta tags
-    this.title.setTitle('ReceiptNest - AI-Powered Receipt Scanner & Expense Tracker');
-    this.meta.updateTag({ name: 'description', content: 'ReceiptNest is a free AI-powered receipt scanner and expense tracker. Scan receipts, organize expenses by category, track spending trends, and export reports.' });
+    this.title.setTitle('ReceiptNest - Receipt Inbox for Freelancers and Small Teams');
+    this.meta.updateTag({ name: 'description', content: 'ReceiptNest turns scattered receipts into a clean monthly expense inbox. Built for freelancers and small teams that need fast categorization and export-ready reports.' });
 
     // Redirect to home if user is already authenticated
     effect(() => {
@@ -65,5 +65,4 @@ export class LandingComponent {
     this.isDemoOpen.set(false);
   }
 }
-
 
