@@ -276,7 +276,7 @@
               </div>
             </div>
 
-            <app-upload *ngIf="showUploadModal()" (uploadComplete)="onUploadComplete($event)" (uploadError)="onUploadError($event)"
+            <app-upload *ngIf="showUploadModal()" [autoOpenScannerOnTouch]="false" (uploadComplete)="onUploadComplete($event)" (uploadError)="onUploadError($event)"
               (close)="closeUploadModal()">
             </app-upload>
         </section>

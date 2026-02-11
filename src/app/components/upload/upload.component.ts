@@ -1,6 +1,7 @@
 import {
   Component,
   EventEmitter,
+  Input,
   Output,
   inject,
   signal,
@@ -26,6 +27,7 @@ import { Receipt } from '../../models/receipt.model';
 export class UploadComponent implements AfterViewInit, OnDestroy {
   private readonly receiptService = inject(ReceiptService);
 
+  @Input() autoOpenScannerOnTouch = true;
   @Output() uploadComplete = new EventEmitter<Receipt>();
   @Output() uploadError = new EventEmitter<string>();
   @Output() close = new EventEmitter<void>();
@@ -69,7 +71,7 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     // On touch devices, start in scanner flow so users can capture directly.
-    if (this.isTouchDevice() && !this.autoScannerTriggered) {
+    if (this.autoOpenScannerOnTouch && this.isTouchDevice() && !this.autoScannerTriggered) {
       this.autoScannerTriggered = true;
       setTimeout(() => this.openScanner(), 50);
     }
