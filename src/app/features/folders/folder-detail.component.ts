@@ -348,6 +348,10 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
     return receipt.id;
   }
 
+  openReceiptDetail(receiptId: string): void {
+    void this.router.navigate(['/app/receipt', receiptId]);
+  }
+
   getMonthTotal(group: MonthGroup): number {
     return group.receipts.reduce((sum, receipt) => sum + (receipt.totalAmount || 0), 0);
   }

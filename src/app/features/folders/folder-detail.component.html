@@ -167,7 +167,10 @@
           }
           <div class="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
             @for (receipt of group.receipts; track trackReceipt($index, receipt)) {
-              <article class="group relative aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
+              <button
+                type="button"
+                (click)="openReceiptDetail(receipt.id)"
+                class="group relative aspect-square w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 text-left transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:border-slate-700 dark:bg-slate-800">
                 @if (isImageLoading(receipt.id)) {
                   <div class="absolute inset-0 flex items-center justify-center">
                     <div class="h-5 w-5 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent"></div>
@@ -186,7 +189,7 @@
                   <p class="truncate text-[11px] font-semibold">{{ receipt.merchant?.canonicalName || receipt.file.originalName }}</p>
                   <p class="text-[10px] text-white/80">{{ formatDate(receipt) }}</p>
                 </div>
-              </article>
+              </button>
             }
           </div>
         </section>
