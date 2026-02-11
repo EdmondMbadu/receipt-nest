@@ -5,6 +5,9 @@ export interface Folder {
   userId: string;
   name: string;
   receiptIds: string[];
+  isAuto?: boolean;
+  autoType?: 'merchant' | 'title' | 'category';
+  autoKey?: string;
   createdAt: Timestamp | ReturnType<typeof serverTimestamp>;
   updatedAt: Timestamp | ReturnType<typeof serverTimestamp>;
 }

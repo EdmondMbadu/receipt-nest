@@ -93,6 +93,17 @@ export class FoldersComponent implements OnInit, OnDestroy {
     }
   });
 
+  private readonly autoFolderSyncEffect = effect(() => {
+    if (this.receiptsLoading() || this.foldersLoading()) {
+      return;
+    }
+
+    const receipts = this.receipts();
+    void this.folderService.syncAutoFolders(receipts).catch((error) => {
+      console.error('Failed to sync automatic folders:', error);
+    });
+  });
+
   ngOnInit(): void {
     this.receiptService.subscribeToReceipts();
     this.folderService.subscribeToFolders();
