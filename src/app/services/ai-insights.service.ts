@@ -22,6 +22,7 @@ import {
 import { app } from '../../../environments/environments';
 import { AuthService } from './auth.service';
 import { ReceiptService } from './receipt.service';
+import { Receipt } from '../models/receipt.model';
 
 export interface ChatMessage {
   id: string;
@@ -377,6 +378,51 @@ export class AiInsightsService {
       this.isUploading.set(false);
       this.uploadProgress.set(0);
     }
+  }
+
+  /**
+   * Attach a receipt that has already been uploaded (e.g. via shared Upload modal)
+   * into the current AI chat thread.
+   */
+  async attachExistingReceiptToChat(receipt: Receipt): Promise<void> {
+    await this.initializeChatState();
+    this.error.set(null);
+
+    const fileName = receipt.file?.originalName || 'receipt';
+    const isImage = (receipt.file?.mimeType || '').startsWith('image/');
+    const attachLabel = isImage ? 'Receipt image' : 'Receipt document';
+    const messageId = crypto.randomUUID();
+
+    let downloadUrl: string | null = null;
+    try {
+      downloadUrl = await this.receiptService.getReceiptFileUrl(receipt.file.storagePath);
+    } catch {
+      // Non-critical; the storage path metadata is enough to persist the attachment reference.
+    }
+
+    if (downloadUrl) {
+      this.chatThumbnails.set(messageId, downloadUrl);
+    }
+
+    const userMessage: ChatMessage = {
+      id: messageId,
+      role: 'user',
+      content: `${attachLabel}: ${fileName} [receipt_path:${receipt.file.storagePath}]`,
+      timestamp: new Date()
+    };
+    this.messages.update(msgs => [...msgs, userMessage]);
+
+    const assistantMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: 'assistant',
+      content: `Receipt uploaded! "${fileName}" is now being processed. I'll let you know when it's done.`,
+      timestamp: new Date()
+    };
+    this.messages.update(msgs => [...msgs, assistantMessage]);
+
+    const chatId = await this.ensureActiveChat();
+    await this.persistChat(chatId);
+    this.watchReceiptProcessing(receipt.id, chatId);
   }
 
   /**

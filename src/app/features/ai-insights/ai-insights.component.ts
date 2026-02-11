@@ -9,19 +9,20 @@ import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 import { ReceiptService } from '../../services/receipt.service';
 import { AiInsightsService } from '../../services/ai-insights.service';
+import { UploadComponent } from '../../components/upload/upload.component';
+import { Receipt } from '../../models/receipt.model';
 import { app } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-ai-insights',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UploadComponent],
   templateUrl: './ai-insights.component.html',
   styleUrl: './ai-insights.component.css'
 })
 export class AiInsightsComponent implements OnInit, OnDestroy {
   @ViewChild('chatContainer') chatContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('messageInput') messageInput!: ElementRef<HTMLInputElement>;
-  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   private readonly auth = inject(AuthService);
   private readonly theme = inject(ThemeService);
@@ -44,6 +45,7 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
 
   // Input state
   readonly messageText = signal('');
+  readonly showUploadModal = signal(false);
 
   // Computed
   readonly isPro = computed(() => this.subscriptionPlan() === 'pro');
@@ -147,15 +149,22 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
     }
   }
 
-  async onFileSelected(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file || !this.hasAiAccess()) return;
+  openUploadModal(): void {
+    if (this.isLoading() || this.isUploading() || !this.hasAiAccess()) return;
+    this.showUploadModal.set(true);
+  }
 
-    // Reset the input so the same file can be re-selected
-    input.value = '';
+  closeUploadModal(): void {
+    this.showUploadModal.set(false);
+  }
 
-    await this.aiService.uploadReceiptFromChat(file);
+  async onUploadComplete(receipt: Receipt): Promise<void> {
+    this.showUploadModal.set(false);
+    await this.aiService.attachExistingReceiptToChat(receipt);
+  }
+
+  onUploadError(error: string): void {
+    console.error('Upload error:', error);
   }
 
   private scrollToBottom(): void {

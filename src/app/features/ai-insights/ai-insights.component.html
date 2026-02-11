@@ -244,17 +244,12 @@
                 </div>
                 }
 
-                <div class="flex items-end gap-2">
-                  <!-- Hidden file input -->
-                  <input #fileInput type="file" class="hidden"
-                    accept="image/jpeg,image/jpg,image/png,image/webp,image/heic,image/heif,application/pdf"
-                    (change)="onFileSelected($event)" />
-
+                <div class="relative flex items-end gap-2">
                   <!-- Attach button -->
-                  <button type="button" (click)="fileInput.click()"
+                  <button type="button" (click)="openUploadModal()"
                     [disabled]="isLoading() || isUploading()"
                     class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed sm:h-12 sm:w-12"
-                    title="Attach receipt (image or PDF)">
+                    title="Add receipt">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                       <path stroke-linecap="round" stroke-linejoin="round"
                         d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
@@ -280,6 +275,10 @@
                 </p>
               </div>
             </div>
+
+            <app-upload *ngIf="showUploadModal()" (uploadComplete)="onUploadComplete($event)" (uploadError)="onUploadError($event)"
+              (close)="closeUploadModal()">
+            </app-upload>
         </section>
       </div>
     </div>
