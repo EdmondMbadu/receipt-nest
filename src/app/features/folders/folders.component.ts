@@ -44,6 +44,7 @@ export class FoldersComponent implements OnInit, OnDestroy {
 
   readonly createModalOpen = signal(false);
   readonly folderName = signal('');
+  readonly folderSearchQuery = signal('');
   readonly selectedReceiptIds = signal<Set<string>>(new Set());
 
   readonly mutationLoading = signal(false);
@@ -79,6 +80,20 @@ export class FoldersComponent implements OnInit, OnDestroy {
   readonly allReceiptsByMonth = computed(() => this.groupReceiptsByMonth(this.receipts()));
 
   readonly hasFolders = computed(() => this.folders().length > 0);
+  readonly normalizedFolderSearchQuery = computed(() => this.folderSearchQuery().trim().toLowerCase());
+  readonly filteredFolderItems = computed(() => {
+    const query = this.normalizedFolderSearchQuery();
+    if (!query) {
+      return this.folderItems();
+    }
+
+    return this.folderItems().filter((item) => {
+      const folderName = item.folder.name.toLowerCase();
+      const typeLabel = item.folder.autoType?.toLowerCase() || '';
+      return folderName.includes(query) || typeLabel.includes(query);
+    });
+  });
+  readonly hasFilteredFolders = computed(() => this.filteredFolderItems().length > 0);
 
   readonly selectedCount = computed(() => this.selectedReceiptIds().size);
 
@@ -193,6 +208,10 @@ export class FoldersComponent implements OnInit, OnDestroy {
 
   trackFolder(_: number, item: FolderListItem): string {
     return item.folder.id;
+  }
+
+  clearFolderSearch(): void {
+    this.folderSearchQuery.set('');
   }
 
   private groupReceiptsByMonth(receipts: Receipt[]): MonthGroup[] {
