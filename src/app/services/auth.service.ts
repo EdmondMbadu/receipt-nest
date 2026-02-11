@@ -1,4 +1,5 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import {
   Auth,
   UserCredential,
@@ -28,9 +29,11 @@ import { UserProfile } from '../models/user.model';
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly auth: Auth = getAuth(app);
-  private readonly db: Firestore = getFirestore(app);
-  private readonly functions = getFunctions(app);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
+  private readonly auth: Auth | null;
+  private readonly db: Firestore | null;
+  private readonly functions: ReturnType<typeof getFunctions> | null;
 
   private initialized = false;
   private readonly initPromise: Promise<void>;
@@ -42,8 +45,23 @@ export class AuthService {
   readonly isAuthenticated = computed<boolean>(() => !!this.user());
 
   constructor() {
+    if (!this.isBrowser) {
+      this.auth = null;
+      this.db = null;
+      this.functions = null;
+      this.isLoading.set(false);
+      this.initialized = true;
+      this.initPromise = Promise.resolve();
+      return;
+    }
+
+    this.auth = getAuth(app);
+    this.db = getFirestore(app);
+    this.functions = getFunctions(app);
+
+    const auth = this.requireAuth();
     this.initPromise = new Promise((resolve) => {
-      onAuthStateChanged(this.auth, async (firebaseUser) => {
+      onAuthStateChanged(auth, async (firebaseUser) => {
         try {
           if (!firebaseUser) {
             this.user.set(null);
@@ -87,7 +105,8 @@ export class AuthService {
   }
 
   private async loadOrCreateUserProfile(uid: string, email: string): Promise<UserProfile> {
-    const userRef = doc(this.db, 'users', uid);
+    const db = this.requireDb();
+    const userRef = doc(db, 'users', uid);
     const snapshot = await getDoc(userRef);
 
     if (snapshot.exists()) {
@@ -115,8 +134,10 @@ export class AuthService {
     email: string;
     password: string;
   }): Promise<UserCredential> {
+    const auth = this.requireAuth();
+    const db = this.requireDb();
     this.resetAuthStateReady();
-    const credential = await createUserWithEmailAndPassword(this.auth, form.email, form.password);
+    const credential = await createUserWithEmailAndPassword(auth, form.email, form.password);
 
     const profile: UserProfile = {
       id: credential.user.uid,
@@ -128,9 +149,9 @@ export class AuthService {
       updatedAt: serverTimestamp()
     };
 
-    await setDoc(doc(this.db, 'users', credential.user.uid), profile);
+    await setDoc(doc(db, 'users', credential.user.uid), profile);
     await this.sendVerificationEmail();
-    await signOut(this.auth);
+    await signOut(auth);
     this.user.set(null);
     this.resolveAuthStateReady?.();
     this.resolveAuthStateReady = null;
@@ -139,13 +160,14 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
+    const auth = this.requireAuth();
     this.resetAuthStateReady();
-    const credential = await signInWithEmailAndPassword(this.auth, email, password);
+    const credential = await signInWithEmailAndPassword(auth, email, password);
     const user = credential.user;
 
     if (!user.emailVerified) {
       await this.sendVerificationEmail();
-      await signOut(this.auth);
+      await signOut(auth);
       this.user.set(null);
       const error: any = new Error('Email not verified');
       error.code = 'auth/email-not-verified';
@@ -154,21 +176,24 @@ export class AuthService {
   }
 
   async loginWithGoogle() {
+    const auth = this.requireAuth();
     this.resetAuthStateReady();
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    await signInWithPopup(this.auth, provider);
+    await signInWithPopup(auth, provider);
   }
 
   async sendVerificationEmail(): Promise<void> {
-    const user = this.auth.currentUser;
+    const auth = this.requireAuth();
+    const functions = this.requireFunctions();
+    const user = auth.currentUser;
     if (!user) {
       const error: any = new Error('No signed-in user to verify');
       error.code = 'auth/no-current-user';
       throw error;
     }
 
-    const callable = httpsCallable(this.functions, 'sendVerificationEmail');
+    const callable = httpsCallable(functions, 'sendVerificationEmail');
     await callable({});
   }
 
@@ -179,11 +204,13 @@ export class AuthService {
       throw error;
     }
 
-    await sendPasswordResetEmail(this.auth, email);
+    const auth = this.requireAuth();
+    await sendPasswordResetEmail(auth, email);
   }
 
   async logout() {
-    await signOut(this.auth);
+    const auth = this.requireAuth();
+    await signOut(auth);
     this.user.set(null);
   }
 
@@ -196,11 +223,42 @@ export class AuthService {
   }
 
   private async sendWelcomeEmailIfNeeded(): Promise<void> {
+    const functions = this.requireFunctions();
     try {
-      const callable = httpsCallable(this.functions, 'sendWelcomeEmail');
+      const callable = httpsCallable(functions, 'sendWelcomeEmail');
       await callable({});
     } catch (error) {
       console.error('Failed to send welcome email', error);
     }
+  }
+
+  private requireAuth(): Auth {
+    if (!this.auth) {
+      const error: any = new Error('Authentication is only available in the browser.');
+      error.code = 'auth/not-available-in-this-environment';
+      throw error;
+    }
+
+    return this.auth;
+  }
+
+  private requireDb(): Firestore {
+    if (!this.db) {
+      const error: any = new Error('Database access is only available in the browser.');
+      error.code = 'firestore/not-available-in-this-environment';
+      throw error;
+    }
+
+    return this.db;
+  }
+
+  private requireFunctions(): ReturnType<typeof getFunctions> {
+    if (!this.functions) {
+      const error: any = new Error('Cloud functions are only available in the browser.');
+      error.code = 'functions/not-available-in-this-environment';
+      throw error;
+    }
+
+    return this.functions;
   }
 }
