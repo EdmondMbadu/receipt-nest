@@ -5,8 +5,13 @@
   </div>
 
   <div class="flex min-h-screen">
+    <div
+      class="hidden shrink-0 lg:block"
+      [class.w-72]="desktopSidebarExpanded()"
+      [class.w-20]="!desktopSidebarExpanded()"></div>
+
     <aside
-      class="hidden shrink-0 border-r border-slate-200/70 bg-white/90 backdrop-blur-xl transition-all duration-200 dark:border-slate-800 dark:bg-slate-900/75 lg:block"
+      class="fixed left-0 top-0 z-30 hidden h-screen border-r border-slate-200/70 bg-white/90 backdrop-blur-xl transition-all duration-200 dark:border-slate-800 dark:bg-slate-900/75 lg:block"
       [class.w-72]="desktopSidebarExpanded()"
       [class.w-20]="!desktopSidebarExpanded()"
       [class.p-6]="desktopSidebarExpanded()"
