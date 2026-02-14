@@ -107,11 +107,6 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     this.errorMessage.set(null);
     this.isScannedFile.set(false);
 
-    if (!file.type.startsWith('image/')) {
-      this.errorMessage.set('Please upload an image file.');
-      return;
-    }
-
     // Validate file
     const validation = this.receiptService.validateFile(file);
     if (!validation.valid) {

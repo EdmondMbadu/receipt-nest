@@ -19,7 +19,7 @@
     <div class="mb-6">
       <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Add Receipt</h2>
       <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-        Scan with camera or upload a receipt photo
+        Scan with camera or upload a receipt document
       </p>
     </div>
 
@@ -31,7 +31,8 @@
 
     <!-- Upload Area (when no file selected and camera not active) -->
     <div *ngIf="!selectedFile() && !showCamera()" class="space-y-4">
-      <input #fileInput type="file" class="hidden" accept="image/*" (change)="onFileSelect($event)" />
+      <input #fileInput type="file" class="hidden" accept=".jpg,.jpeg,.png,.webp,.heic,.heif,.pdf,.doc,.docx"
+        (change)="onFileSelect($event)" />
 
       <!-- Scanner Button -->
       <button type="button" (click)="openScanner()"
@@ -68,10 +69,10 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
-        <span class="text-sm font-medium text-slate-700 dark:text-slate-200">Upload Existing Photo</span>
+        <span class="text-sm font-medium text-slate-700 dark:text-slate-200">Upload Existing File</span>
       </button>
       <p class="text-xs text-slate-500 dark:text-slate-400">
-        Photo uploads and camera capture supported. Max file size {{ maxSizeDisplay }}.
+        Upload supported: JPEG, PNG, WebP, HEIC, PDF, DOC, DOCX. Max file size {{ maxSizeDisplay }}.
       </p>
     </div>
 
@@ -140,6 +141,17 @@
       <!-- Image Preview -->
       <div *ngIf="previewUrl()" class="relative rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800">
         <img [src]="previewUrl()" alt="Receipt preview" class="w-full max-h-64 object-contain" />
+      </div>
+
+      <div *ngIf="!previewUrl()"
+        class="flex flex-col items-center justify-center h-48 rounded-xl bg-slate-100 dark:bg-slate-800">
+        <div class="rounded-full bg-sky-100 dark:bg-sky-900/30 p-4 mb-3">
+          <svg class="h-10 w-10 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Document selected</p>
       </div>
 
       <!-- File Info -->

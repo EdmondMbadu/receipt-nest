@@ -49,8 +49,12 @@ export const ALLOWED_FILE_TYPES = [
   'image/webp',
   'image/heic',
   'image/heif',
-  'application/pdf'
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 ];
+
+const ALLOWED_FILE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'pdf', 'doc', 'docx'];
 
 /**
  * Maximum file size (10MB)
@@ -113,10 +117,14 @@ export class ReceiptService {
    * Validate file before upload
    */
   validateFile(file: File): { valid: boolean; error?: string } {
-    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    const hasAllowedMime = ALLOWED_FILE_TYPES.includes(file.type);
+    const hasAllowedExtension = !!extension && ALLOWED_FILE_EXTENSIONS.includes(extension);
+
+    if (!hasAllowedMime && !hasAllowedExtension) {
       return {
         valid: false,
-        error: `Invalid file type. Allowed: JPEG, PNG, WebP, HEIC, PDF`
+        error: 'Invalid file type. Allowed: JPEG, PNG, WebP, HEIC, HEIF, PDF, DOC, DOCX'
       };
     }
 
