@@ -64,10 +64,48 @@ export class FoldersComponent implements OnInit, OnDestroy {
     return map;
   });
 
+  readonly mergedSourceFolderIds = computed(() => {
+    const hiddenIds = new Set<string>();
+    for (const folder of this.folders()) {
+      for (const entry of folder.mergedSources || []) {
+        if (entry.sourceFolderId) {
+          hiddenIds.add(entry.sourceFolderId);
+        }
+      }
+    }
+    return hiddenIds;
+  });
+
+  readonly mergedSourceAutoKeys = computed(() => {
+    const hiddenAutoKeys = new Set<string>();
+    for (const folder of this.folders()) {
+      for (const entry of folder.mergedSources || []) {
+        if (entry.sourceAutoType && entry.sourceAutoKey) {
+          hiddenAutoKeys.add(`${entry.sourceAutoType}:${entry.sourceAutoKey}`);
+        }
+      }
+    }
+    return hiddenAutoKeys;
+  });
+
   readonly folderItems = computed<FolderListItem[]>(() => {
     const map = this.receiptMap();
+    const hiddenIds = this.mergedSourceFolderIds();
+    const hiddenAutoKeys = this.mergedSourceAutoKeys();
 
-    return this.folders().map((folder) => {
+    return this.folders()
+      .filter((folder) => {
+        if (hiddenIds.has(folder.id)) {
+          return false;
+        }
+
+        if (folder.isAuto && folder.autoType && folder.autoKey) {
+          return !hiddenAutoKeys.has(`${folder.autoType}:${folder.autoKey}`);
+        }
+
+        return true;
+      })
+      .map((folder) => {
       const receipts = folder.receiptIds
         .map((receiptId) => map.get(receiptId))
         .filter((receipt): receipt is Receipt => !!receipt);

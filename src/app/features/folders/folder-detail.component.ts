@@ -45,6 +45,7 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
   readonly removeModalOpen = signal(false);
   readonly deleteModalOpen = signal(false);
   readonly renameModalOpen = signal(false);
+  readonly mergedSourcesExpanded = signal(false);
   readonly renameFolderName = signal('');
 
   readonly selectedReceiptIds = signal<Set<string>>(new Set());
@@ -143,6 +144,10 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
     this.renameFolderName.set(this.folder()?.name || '');
     this.mutationError.set(null);
     this.renameModalOpen.set(true);
+  }
+
+  toggleMergedSources(): void {
+    this.mergedSourcesExpanded.update((expanded) => !expanded);
   }
 
   toggleDownloadMenu(key: string): void {
