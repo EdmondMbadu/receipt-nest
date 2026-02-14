@@ -97,13 +97,13 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
   onFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.handleFile(input.files[0]);
+      this.handleFile(input.files[0], 'upload');
     }
     input.value = '';
   }
 
   // Handle selected file
-  private async handleFile(file: File): Promise<void> {
+  private async handleFile(file: File, source: 'upload' | 'camera' = 'upload'): Promise<void> {
     this.errorMessage.set(null);
     this.isScannedFile.set(false);
 
@@ -116,6 +116,7 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
 
     let processedFile = file;
     const canScan =
+      source === 'camera' &&
       this.scanMode() &&
       file.type.startsWith('image/') &&
       file.type !== 'image/heic' &&
@@ -358,7 +359,7 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
 
       this.stopCamera();
       this.showCamera.set(false);
-      this.handleFile(file);
+      this.handleFile(file, 'camera');
     }, 'image/jpeg', 0.95);
   }
 
@@ -614,10 +615,11 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     corners: { tl: Point; tr: Point; br: Point; bl: Point }
   ): HTMLCanvasElement | null {
     const ordered = this.orderCorners(corners);
-    const topWidth = this.distance(ordered.tl, ordered.tr);
-    const bottomWidth = this.distance(ordered.bl, ordered.br);
-    const leftHeight = this.distance(ordered.tl, ordered.bl);
-    const rightHeight = this.distance(ordered.tr, ordered.br);
+    const padded = this.expandQuadWithMargin(ordered, sourceCtx.canvas.width, sourceCtx.canvas.height);
+    const topWidth = this.distance(padded.tl, padded.tr);
+    const bottomWidth = this.distance(padded.bl, padded.br);
+    const leftHeight = this.distance(padded.tl, padded.bl);
+    const rightHeight = this.distance(padded.tr, padded.br);
 
     const targetW = Math.round(Math.max(topWidth, bottomWidth));
     const targetH = Math.round(Math.max(leftHeight, rightHeight));
@@ -646,8 +648,8 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
 
     for (let y = 0; y < outH; y++) {
       const v = outH <= 1 ? 0 : y / (outH - 1);
-      const left = this.lerpPoint(ordered.tl, ordered.bl, v);
-      const right = this.lerpPoint(ordered.tr, ordered.br, v);
+      const left = this.lerpPoint(padded.tl, padded.bl, v);
+      const right = this.lerpPoint(padded.tr, padded.br, v);
 
       for (let x = 0; x < outW; x++) {
         const u = outW <= 1 ? 0 : x / (outW - 1);
@@ -695,11 +697,14 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
 
     if (!count) return null;
 
-    const pad = Math.round(Math.min(w, h) * 0.03);
-    const cropX = Math.max(0, minX - pad);
-    const cropY = Math.max(0, minY - pad);
-    const cropW = Math.min(w - cropX, maxX - minX + 1 + pad * 2);
-    const cropH = Math.min(h - cropY, maxY - minY + 1 + pad * 2);
+    // Keep extra headroom to avoid clipping merchant/title at the top.
+    const padX = Math.round(Math.min(w, h) * 0.03);
+    const padTop = Math.round(Math.min(w, h) * 0.07);
+    const padBottom = Math.round(Math.min(w, h) * 0.035);
+    const cropX = Math.max(0, minX - padX);
+    const cropY = Math.max(0, minY - padTop);
+    const cropW = Math.min(w - cropX, maxX - minX + 1 + padX * 2);
+    const cropH = Math.min(h - cropY, maxY - minY + 1 + padTop + padBottom);
 
     if (cropW < 100 || cropH < 100) return null;
 
@@ -940,6 +945,44 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     const a = c00 + (c10 - c00) * tx;
     const b = c01 + (c11 - c01) * tx;
     return Math.round(a + (b - a) * ty);
+  }
+
+  private expandQuadWithMargin(
+    quad: { tl: Point; tr: Point; br: Point; bl: Point },
+    maxW: number,
+    maxH: number
+  ): { tl: Point; tr: Point; br: Point; bl: Point } {
+    const centerX = (quad.tl.x + quad.tr.x + quad.br.x + quad.bl.x) / 4;
+    const centerY = (quad.tl.y + quad.tr.y + quad.br.y + quad.bl.y) / 4;
+    const uniformScale = 1.03;
+    const topLift = maxH * 0.035;
+    const bottomDrop = maxH * 0.01;
+
+    const scaleFromCenter = (p: Point): Point => ({
+      x: centerX + (p.x - centerX) * uniformScale,
+      y: centerY + (p.y - centerY) * uniformScale
+    });
+
+    const tl = scaleFromCenter(quad.tl);
+    const tr = scaleFromCenter(quad.tr);
+    const br = scaleFromCenter(quad.br);
+    const bl = scaleFromCenter(quad.bl);
+
+    tl.y -= topLift;
+    tr.y -= topLift;
+    bl.y += bottomDrop;
+    br.y += bottomDrop;
+
+    return {
+      tl: { x: this.clamp(tl.x, 0, maxW - 1), y: this.clamp(tl.y, 0, maxH - 1) },
+      tr: { x: this.clamp(tr.x, 0, maxW - 1), y: this.clamp(tr.y, 0, maxH - 1) },
+      br: { x: this.clamp(br.x, 0, maxW - 1), y: this.clamp(br.y, 0, maxH - 1) },
+      bl: { x: this.clamp(bl.x, 0, maxW - 1), y: this.clamp(bl.y, 0, maxH - 1) }
+    };
+  }
+
+  private clamp(value: number, min: number, max: number): number {
+    return Math.min(max, Math.max(min, value));
   }
 }
 
