@@ -136,7 +136,7 @@ Return ONLY the JSON object, no other text.`;
     bufferSize: fileBuffer.length
   });
 
-  const result = await model.generateContent({
+  const modelResult = await model.generateContent({
     contents: [
       {
         role: "user",
@@ -148,7 +148,7 @@ Return ONLY the JSON object, no other text.`;
     ],
   });
 
-  const responseText = result.response.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  const responseText = modelResult.response.candidates?.[0]?.content?.parts?.[0]?.text || "";
   logger.info("Gemini raw response", { text: responseText });
 
   // Handle empty response
@@ -158,7 +158,7 @@ Return ONLY the JSON object, no other text.`;
   }
 
   // Parse the response
-  let parsed: { total?: unknown; merchant?: unknown; date?: unknown; currency?: unknown };
+  let parsed: Record<string, unknown>;
   try {
     parsed = JSON.parse(responseText);
   } catch (parseError) {
@@ -179,25 +179,37 @@ Return ONLY the JSON object, no other text.`;
 
   logger.info("Gemini parsed response", parsed);
 
-  // Extract and validate total
-  let totalValue: number | undefined;
-  if (parsed.total !== undefined && parsed.total !== null) {
-    const rawTotal = parsed.total;
-    if (typeof rawTotal === 'number' && rawTotal > 0) {
-      totalValue = rawTotal;
-    } else if (typeof rawTotal === 'string') {
-      const numStr = rawTotal.replace(/[^0-9.-]/g, '');
-      const num = parseFloat(numStr);
-      if (!isNaN(num) && num > 0) {
-        totalValue = num;
-      }
-    }
-  }
+  const totalCandidates = [
+    parsed.total,
+    parsed.totalAmount,
+    parsed.total_amount,
+    parsed.amount,
+    parsed.amount_paid,
+    parsed.grandTotal,
+    parsed.grand_total,
+    parsed.finalTotal,
+    parsed.final_total,
+    parsed.balance,
+    parsed.amountDue,
+    parsed.amount_due,
+  ];
+  const totalValue = totalCandidates
+    .map((value) => parsePositiveNumber(value))
+    .find((value): value is number => value !== undefined);
 
   // Extract merchant
   let merchantValue: string | undefined;
-  if (parsed.merchant) {
-    const merchant = String(parsed.merchant).trim();
+  const merchantRaw =
+    parsed.merchant ??
+    parsed.supplier ??
+    parsed.vendor ??
+    parsed.store ??
+    parsed.businessName ??
+    parsed.business_name ??
+    parsed.merchantName ??
+    parsed.merchant_name;
+  if (merchantRaw) {
+    const merchant = String(merchantRaw).trim();
     if (merchant.length > 0 && !['null', 'unknown', 'n/a', 'none'].includes(merchant.toLowerCase())) {
       // Clean up merchant name - remove store numbers
       merchantValue = merchant.replace(/#\s*\d+/g, '').replace(/\s+/g, ' ').trim();
@@ -206,15 +218,25 @@ Return ONLY the JSON object, no other text.`;
 
   // Extract date
   let dateValue: string | undefined;
-  if (parsed.date) {
-    const dateStr = String(parsed.date);
+  const dateRaw =
+    parsed.date ??
+    parsed.transactionDate ??
+    parsed.transaction_date ??
+    parsed.purchaseDate ??
+    parsed.purchase_date;
+  if (dateRaw) {
+    const dateStr = String(dateRaw);
     if (dateStr && !['null', 'unknown', 'n/a'].includes(dateStr.toLowerCase())) {
       dateValue = parseDate(dateStr) || undefined;
     }
   }
 
   // Extract currency
-  const currencyValue = parsed.currency ? String(parsed.currency).toUpperCase() : 'USD';
+  const currencyRaw =
+    parsed.currency ??
+    parsed.currencyCode ??
+    parsed.currency_code;
+  const currencyValue = currencyRaw ? String(currencyRaw).toUpperCase() : 'USD';
 
   // Calculate confidence - be generous to avoid needs_review
   let confidence = 0.85;
@@ -232,21 +254,24 @@ Return ONLY the JSON object, no other text.`;
     confidence
   });
 
-  return {
+  const extractionResult: ExtractionResult = {
     source: "gemini",
     processedAt: admin.firestore.FieldValue.serverTimestamp(),
-    totalAmount: totalValue !== undefined && totalValue > 0
-      ? { value: totalValue, confidence, rawText: String(totalValue) }
-      : undefined,
     currency: { value: currencyValue, confidence: 0.9 },
-    date: dateValue
-      ? { value: dateValue, confidence }
-      : undefined,
-    supplierName: merchantValue
-      ? { value: merchantValue, confidence, rawText: merchantValue }
-      : undefined,
     overallConfidence: confidence,
   };
+
+  if (totalValue !== undefined && totalValue > 0) {
+    extractionResult.totalAmount = { value: totalValue, confidence, rawText: String(totalValue) };
+  }
+  if (dateValue) {
+    extractionResult.date = { value: dateValue, confidence };
+  }
+  if (merchantValue) {
+    extractionResult.supplierName = { value: merchantValue, confidence, rawText: merchantValue };
+  }
+
+  return extractionResult;
 }
 
 /**
@@ -696,6 +721,28 @@ function parseDate(dateStr: string): string | null {
   }
 
   return null;
+}
+
+function parsePositiveNumber(value: unknown): number | undefined {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value === "number" && isFinite(value) && value > 0) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const normalized = value
+      .replace(/[$,\s]/g, "")
+      .replace(/[^\d.-]/g, "");
+    const parsed = parseFloat(normalized);
+    if (!isNaN(parsed) && isFinite(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+
+  return undefined;
 }
 
 /**

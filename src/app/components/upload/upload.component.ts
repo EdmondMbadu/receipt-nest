@@ -33,11 +33,9 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
   @Output() close = new EventEmitter<void>();
 
   @ViewChild('videoElement') videoElement?: ElementRef<HTMLVideoElement>;
-  @ViewChild('scannerInput') scannerInput?: ElementRef<HTMLInputElement>;
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
   // State
-  readonly isDragging = signal(false);
   readonly isUploading = signal(false);
   readonly uploadProgress = signal<UploadProgress | null>(null);
   readonly selectedFile = signal<File | null>(null);
@@ -94,34 +92,8 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     return 'Point camera at receipt/check. Auto-capture will trigger when stable.';
   });
 
-  readonly allowedTypesDisplay = 'JPEG, PNG, WebP, HEIC, PDF';
   readonly maxSizeDisplay = `${MAX_FILE_SIZE / 1024 / 1024}MB`;
 
-  // Drag and drop handlers
-  onDragOver(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.isDragging.set(true);
-  }
-
-  onDragLeave(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.isDragging.set(false);
-  }
-
-  onDrop(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.isDragging.set(false);
-
-    const files = event.dataTransfer?.files;
-    if (files && files.length > 0) {
-      this.handleFile(files[0]);
-    }
-  }
-
-  // File input handler
   onFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -130,19 +102,15 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     input.value = '';
   }
 
-  onScannerFileSelect(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.handleFile(input.files[0]);
-    }
-    // Allow selecting the same file/capture again.
-    input.value = '';
-  }
-
   // Handle selected file
   private async handleFile(file: File): Promise<void> {
     this.errorMessage.set(null);
     this.isScannedFile.set(false);
+
+    if (!file.type.startsWith('image/')) {
+      this.errorMessage.set('Please upload an image file.');
+      return;
+    }
 
     // Validate file
     const validation = this.receiptService.validateFile(file);
@@ -310,16 +278,11 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
 
   openScanner(): void {
     this.errorMessage.set(null);
-
-    if (this.isTouchDevice() && this.scannerInput?.nativeElement) {
-      this.scannerInput.nativeElement.click();
-      return;
-    }
-
     this.openCamera();
   }
 
   openFilePicker(): void {
+    this.errorMessage.set(null);
     this.fileInput?.nativeElement.click();
   }
 

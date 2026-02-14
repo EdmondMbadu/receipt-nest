@@ -14,6 +14,7 @@ import * as admin from "firebase-admin";
 
 // Initialize Firebase Admin
 admin.initializeApp();
+admin.firestore().settings({ ignoreUndefinedProperties: true });
 
 // Set global options for cost control
 setGlobalOptions({ maxInstances: 10 });
