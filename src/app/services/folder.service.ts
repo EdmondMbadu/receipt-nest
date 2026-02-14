@@ -1,6 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import {
   Firestore,
+  Timestamp,
   Unsubscribe,
   addDoc,
   collection,
@@ -10,13 +11,14 @@ import {
   orderBy,
   query,
   serverTimestamp,
-  updateDoc
+  updateDoc,
+  writeBatch
 } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 
 import { app } from '../../../environments/environments';
 import { AuthService } from './auth.service';
-import { Folder } from '../models/folder.model';
+import { Folder, FolderMergeEntry } from '../models/folder.model';
 import { Receipt } from '../models/receipt.model';
 
 @Injectable({
@@ -159,6 +161,94 @@ export class FolderService {
       name: cleanedName,
       updatedAt: serverTimestamp()
     });
+  }
+
+  async mergeFolders(sourceFolderId: string, targetFolderId: string): Promise<void> {
+    if (sourceFolderId === targetFolderId) {
+      throw new Error('Choose two different folders to merge.');
+    }
+
+    const sourceFolder = this.folders().find((folder) => folder.id === sourceFolderId);
+    const targetFolder = this.folders().find((folder) => folder.id === targetFolderId);
+
+    if (!sourceFolder || !targetFolder) {
+      throw new Error('One or both folders no longer exist.');
+    }
+
+    const targetReceiptSet = new Set(targetFolder.receiptIds || []);
+    const sourceReceiptIds = Array.from(new Set(sourceFolder.receiptIds || []));
+    const sourceOnlyReceiptIds = sourceReceiptIds.filter((receiptId) => !targetReceiptSet.has(receiptId));
+    const mergedReceiptIds = Array.from(new Set([...(targetFolder.receiptIds || []), ...sourceReceiptIds]));
+    const mergeEntry: FolderMergeEntry = {
+      mergeId: `${sourceFolder.id}-${Date.now()}`,
+      sourceFolderId: sourceFolder.id,
+      sourceFolderName: sourceFolder.name,
+      sourceFolderReceiptIds: sourceReceiptIds,
+      sourceOnlyReceiptIds,
+      mergedAt: Timestamp.now()
+    };
+    if (typeof sourceFolder.isAuto === 'boolean') {
+      mergeEntry.sourceIsAuto = sourceFolder.isAuto;
+    }
+    if (sourceFolder.autoType) {
+      mergeEntry.sourceAutoType = sourceFolder.autoType;
+    }
+    if (sourceFolder.autoKey) {
+      mergeEntry.sourceAutoKey = sourceFolder.autoKey;
+    }
+    const mergedSources = [...(targetFolder.mergedSources || []), mergeEntry];
+    const batch = writeBatch(this.db);
+
+    const targetFolderRef = doc(this.db, this.getFoldersPath(), targetFolderId);
+    batch.update(targetFolderRef, {
+      receiptIds: mergedReceiptIds,
+      mergedSources,
+      updatedAt: serverTimestamp()
+    });
+
+    const sourceFolderRef = doc(this.db, this.getFoldersPath(), sourceFolderId);
+    batch.delete(sourceFolderRef);
+
+    await batch.commit();
+  }
+
+  async unmergeFolder(targetFolderId: string, mergeId: string): Promise<void> {
+    const targetFolder = this.folders().find((folder) => folder.id === targetFolderId);
+    if (!targetFolder) {
+      throw new Error('Destination folder no longer exists.');
+    }
+
+    const mergedSources = targetFolder.mergedSources || [];
+    const mergeEntry = mergedSources.find((entry) => entry.mergeId === mergeId);
+    if (!mergeEntry) {
+      throw new Error('Merge record not found.');
+    }
+
+    const sourceOnlySet = new Set(mergeEntry.sourceOnlyReceiptIds || []);
+    const nextTargetReceiptIds = (targetFolder.receiptIds || []).filter((receiptId) => !sourceOnlySet.has(receiptId));
+    const nextMergedSources = mergedSources.filter((entry) => entry.mergeId !== mergeId);
+
+    const batch = writeBatch(this.db);
+    const targetFolderRef = doc(this.db, this.getFoldersPath(), targetFolder.id);
+    batch.update(targetFolderRef, {
+      receiptIds: Array.from(new Set(nextTargetReceiptIds)),
+      mergedSources: nextMergedSources,
+      updatedAt: serverTimestamp()
+    });
+
+    const restoredFolderRef = doc(this.db, this.getFoldersPath(), mergeEntry.sourceFolderId);
+    batch.set(restoredFolderRef, {
+      userId: targetFolder.userId,
+      name: mergeEntry.sourceFolderName,
+      receiptIds: Array.from(new Set(mergeEntry.sourceFolderReceiptIds || [])),
+      isAuto: !!mergeEntry.sourceIsAuto,
+      autoType: mergeEntry.sourceAutoType || null,
+      autoKey: mergeEntry.sourceAutoKey || null,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    await batch.commit();
   }
 
   private async updateFolderReceipts(folderId: string, receiptIds: string[]): Promise<void> {

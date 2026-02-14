@@ -43,9 +43,12 @@ export class FoldersComponent implements OnInit, OnDestroy {
   readonly receiptsLoading = this.receiptService.isLoading;
 
   readonly createModalOpen = signal(false);
+  readonly mergeModalOpen = signal(false);
   readonly folderName = signal('');
   readonly folderSearchQuery = signal('');
   readonly selectedReceiptIds = signal<Set<string>>(new Set());
+  readonly mergeSourceFolderId = signal<string | null>(null);
+  readonly mergeTargetFolderId = signal<string | null>(null);
 
   readonly mutationLoading = signal(false);
   readonly mutationError = signal<string | null>(null);
@@ -96,6 +99,18 @@ export class FoldersComponent implements OnInit, OnDestroy {
   readonly hasFilteredFolders = computed(() => this.filteredFolderItems().length > 0);
 
   readonly selectedCount = computed(() => this.selectedReceiptIds().size);
+  readonly mergeSourceFolder = computed(() => {
+    const sourceId = this.mergeSourceFolderId();
+    if (!sourceId) return null;
+    return this.folders().find((folder) => folder.id === sourceId) ?? null;
+  });
+  readonly mergeTargetCandidates = computed(() => {
+    const sourceId = this.mergeSourceFolderId();
+    return this.folders().filter((folder) => folder.id !== sourceId);
+  });
+  readonly canMergeFolders = computed(() => {
+    return !!this.mergeSourceFolderId() && !!this.mergeTargetFolderId() && !this.mutationLoading();
+  });
 
   readonly canCreateFolder = computed(() => {
     return this.folderName().trim().length > 0 && this.selectedCount() > 0 && !this.mutationLoading();
@@ -143,6 +158,25 @@ export class FoldersComponent implements OnInit, OnDestroy {
     this.selectedReceiptIds.set(new Set());
   }
 
+  openMergeModal(folderId: string, event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.mutationError.set(null);
+    this.mergeSourceFolderId.set(folderId);
+
+    const firstTarget = this.folders().find((folder) => folder.id !== folderId) || null;
+    this.mergeTargetFolderId.set(firstTarget?.id || null);
+    this.mergeModalOpen.set(true);
+  }
+
+  closeMergeModal(): void {
+    this.mergeModalOpen.set(false);
+    this.mergeSourceFolderId.set(null);
+    this.mergeTargetFolderId.set(null);
+    this.mutationLoading.set(false);
+    this.mutationError.set(null);
+  }
+
   toggleReceiptSelection(receiptId: string, disabled = false): void {
     if (disabled || this.mutationLoading()) {
       return;
@@ -179,6 +213,29 @@ export class FoldersComponent implements OnInit, OnDestroy {
       this.closeCreateModal();
     } catch (error: any) {
       this.mutationError.set(error?.message || 'Unable to create folder.');
+      this.mutationLoading.set(false);
+    }
+  }
+
+  async mergeFolders(): Promise<void> {
+    if (!this.canMergeFolders()) {
+      return;
+    }
+
+    const sourceId = this.mergeSourceFolderId();
+    const targetId = this.mergeTargetFolderId();
+    if (!sourceId || !targetId) {
+      return;
+    }
+
+    this.mutationLoading.set(true);
+    this.mutationError.set(null);
+
+    try {
+      await this.folderService.mergeFolders(sourceId, targetId);
+      this.closeMergeModal();
+    } catch (error: any) {
+      this.mutationError.set(error?.message || 'Unable to merge folders.');
       this.mutationLoading.set(false);
     }
   }

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import { Folder } from '../../models/folder.model';
+import { Folder, FolderMergeEntry } from '../../models/folder.model';
 import { Receipt } from '../../models/receipt.model';
 import { FolderService } from '../../services/folder.service';
 import { PdfThumbnailService } from '../../services/pdf-thumbnail.service';
@@ -91,6 +91,7 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
   readonly canRemovePictures = computed(() => this.selectedCount() > 0 && !this.mutationLoading());
 
   readonly totalAmount = computed(() => this.folderReceipts().reduce((sum, receipt) => sum + (receipt.totalAmount || 0), 0));
+  readonly mergedSources = computed(() => this.folder()?.mergedSources || []);
   readonly downloadingPdfKey = signal<string | null>(null);
   readonly downloadingCsvKey = signal<string | null>(null);
   readonly downloadMenuOpenKey = signal<string | null>(null);
@@ -290,6 +291,28 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+  async unmergeFolder(mergeEntry: FolderMergeEntry): Promise<void> {
+    if (this.mutationLoading()) {
+      return;
+    }
+
+    const targetFolder = this.folder();
+    if (!targetFolder) {
+      return;
+    }
+
+    this.mutationLoading.set(true);
+    this.mutationError.set(null);
+
+    try {
+      await this.folderService.unmergeFolder(targetFolder.id, mergeEntry.mergeId);
+      this.mutationLoading.set(false);
+    } catch (error: any) {
+      this.mutationError.set(error?.message || 'Unable to unmerge this folder.');
+      this.mutationLoading.set(false);
+    }
+  }
+
   downloadFolderCsv(): void {
     const folderName = this.folder()?.name || 'Folder';
     this.downloadReceiptsCsv(this.folderReceipts(), `${folderName} receipts`, 'folder');
@@ -346,6 +369,10 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
 
   trackReceipt(_: number, receipt: Receipt): string {
     return receipt.id;
+  }
+
+  trackMergeEntry(_: number, mergeEntry: FolderMergeEntry): string {
+    return mergeEntry.mergeId;
   }
 
   openReceiptDetail(receiptId: string): void {
