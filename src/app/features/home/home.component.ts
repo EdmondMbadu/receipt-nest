@@ -67,6 +67,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly downloadMenuOpenKey = signal<string | null>(null);
   readonly billingPortalError = signal<string | null>(null);
   readonly billingPortalLoading = signal(false);
+  readonly forwardingAddress = signal<string | null>(null);
+  readonly forwardingFallbackAddresses = signal<string[]>([]);
+  readonly forwardingAddressLoading = signal(false);
+  readonly forwardingAddressError = signal<string | null>(null);
+  readonly forwardingAddressCopied = signal(false);
   readonly showDesktopFab = signal(false);
 
   @ViewChild('addReceiptButton') addReceiptButton?: ElementRef<HTMLElement>;
@@ -404,6 +409,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit(): void {
     // Subscribe to real-time receipt updates
     this.receiptService.subscribeToReceipts();
+    void this.loadReceiptForwardingAddress();
   }
 
   ngOnDestroy(): void {
@@ -760,6 +766,77 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.billingPortalError.set('Unable to open billing portal right now.');
     } finally {
       this.billingPortalLoading.set(false);
+    }
+  }
+
+  async loadReceiptForwardingAddress(): Promise<void> {
+    if (!this.user()) {
+      return;
+    }
+
+    this.forwardingAddressLoading.set(true);
+    this.forwardingAddressError.set(null);
+
+    try {
+      const callable = httpsCallable(this.functions, 'generateReceiptForwardingAddress');
+      const response = await callable({});
+      const data = response.data as { emailAddress?: string; fallbackAddresses?: string[] };
+      if (!data?.emailAddress) {
+        throw new Error('Missing forwarding address response.');
+      }
+      this.forwardingAddress.set(data.emailAddress);
+      this.forwardingFallbackAddresses.set(
+        Array.isArray(data.fallbackAddresses)
+          ? data.fallbackAddresses.filter((value): value is string => typeof value === 'string' && value.length > 0)
+          : []
+      );
+    } catch (error) {
+      console.error('Failed to load forwarding address', error);
+      this.forwardingAddressError.set('Email forwarding is not configured yet.');
+    } finally {
+      this.forwardingAddressLoading.set(false);
+    }
+  }
+
+  async copyForwardingAddress(): Promise<void> {
+    const address = this.forwardingAddress();
+    if (!address) {
+      return;
+    }
+
+    await this.copyAddressToClipboard(address, true);
+  }
+
+  async copyFallbackForwardingAddress(address: string): Promise<void> {
+    if (!address) {
+      return;
+    }
+
+    await this.copyAddressToClipboard(address, false);
+  }
+
+  private async copyAddressToClipboard(address: string, markPrimaryCopied: boolean): Promise<void> {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(address);
+      } else if (typeof document !== 'undefined') {
+        const textarea = document.createElement('textarea');
+        textarea.value = address;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+
+      if (markPrimaryCopied) {
+        this.forwardingAddressCopied.set(true);
+        setTimeout(() => this.forwardingAddressCopied.set(false), 2500);
+      }
+    } catch (error) {
+      console.error('Failed to copy forwarding address', error);
+      this.forwardingAddressError.set('Unable to copy forwarding address.');
     }
   }
 

@@ -18,6 +18,11 @@ export interface UserProfile {
   welcomeEmailSentAt?: Timestamp | ReturnType<typeof serverTimestamp>;
   telegramChatId?: number;
   telegramLinkedAt?: Timestamp | ReturnType<typeof serverTimestamp>;
+  receiptEmailToken?: string;
+  receiptEmailAlias?: string;
+  receiptForwardingAddress?: string;
+  receiptForwardingFallbackAddresses?: string[];
+  receiptForwardingEnabled?: boolean;
   createdAt?: Timestamp | ReturnType<typeof serverTimestamp>;
   updatedAt?: Timestamp | ReturnType<typeof serverTimestamp>;
 }

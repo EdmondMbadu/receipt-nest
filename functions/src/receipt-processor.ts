@@ -47,6 +47,7 @@ interface ReceiptCategory {
 
 interface ReceiptDoc {
   status?: string;
+  skipProcessing?: boolean;
   notes?: string;
   totalAmount?: number;
   currency?: string;
@@ -295,6 +296,11 @@ export const processReceipt = onDocumentCreated(
     const { userId, receiptId } = event.params;
 
     logger.info(`Processing receipt: ${receiptId} for user: ${userId}`);
+
+    if (receiptData.skipProcessing === true) {
+      logger.info(`Skipping processing for receipt ${receiptId} (skipProcessing=true).`);
+      return;
+    }
 
     // Get Firestore reference
     const db = admin.firestore();

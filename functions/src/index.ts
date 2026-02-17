@@ -25,4 +25,5 @@ export { createCheckoutSession, createPortalSession, stripeWebhook } from "./bil
 export { generateAiInsights } from "./ai-insights";
 export { sendTestEmail } from "./admin";
 export { sendVerificationEmail, sendWelcomeEmail } from "./email";
+export { generateReceiptForwardingAddress, inboundEmailWebhook } from "./email-ingest";
 export { telegramWebhook, generateTelegramLinkToken, setupTelegramWebhook, onTelegramReceiptProcessed } from "./telegram";
