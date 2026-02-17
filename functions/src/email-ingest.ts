@@ -825,7 +825,12 @@ async function generateEmailPreviewImage(input: EmailPreviewImageInput): Promise
   const subject = input.subject || "(no subject)";
 
   const subjectLines = wrapTextForPreview(subject, 42, 2);
-  const excerptLines = wrapTextForPreview(input.bodyText, 58, 10);
+  const cleanExcerpt = buildCleanPreviewExcerpt(input.bodyText);
+  const excerptLines = wrapTextForPreview(
+    cleanExcerpt || "No readable email body content was detected.",
+    58,
+    10
+  );
   const generatedAt = new Date().toLocaleString("en-US", {
     month: "short",
     day: "numeric",
@@ -962,6 +967,93 @@ function wrapTextForPreview(value: string, maxCharsPerLine: number, maxLines: nu
   }
 
   return lines.slice(0, maxLines);
+}
+
+function buildCleanPreviewExcerpt(value: string): string {
+  if (!value) {
+    return "";
+  }
+
+  const normalized = value
+    .replace(/\u0000/g, " ")
+    .replace(/\uFFFD/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!normalized) {
+    return "";
+  }
+
+  const candidates = normalized
+    .split(/(?<=[.!?])\s+|(?:\s{2,})|(?:\s*[|•]\s*)/)
+    .map((part) => part.trim())
+    .filter((part) => part.length >= 3);
+
+  const cleanParts: string[] = [];
+  for (const rawPart of candidates) {
+    let part = rawPart
+      .replace(/=[A-Fa-f0-9]{2}/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (!part || isPreviewNoiseSegment(part)) {
+      continue;
+    }
+
+    if (part.length > 180) {
+      part = `${part.slice(0, 177)}...`;
+    }
+    cleanParts.push(part);
+
+    if (cleanParts.join(" ").length > 700 || cleanParts.length >= 12) {
+      break;
+    }
+  }
+
+  if (cleanParts.length === 0) {
+    return "";
+  }
+
+  const joined = cleanParts.join(" ");
+  return joined.length > 700 ? `${joined.slice(0, 697)}...` : joined;
+}
+
+function isPreviewNoiseSegment(value: string): boolean {
+  const lower = value.toLowerCase();
+
+  if (
+    lower.includes("content-type:") ||
+    lower.includes("content-transfer-encoding") ||
+    lower.includes("mime-version:") ||
+    lower.includes("boundary=") ||
+    lower.includes("dkim-signature:") ||
+    lower.includes("authentication-results:") ||
+    lower.includes("unsubscribe") ||
+    lower.includes("list-unsubscribe") ||
+    lower.includes("received:") ||
+    lower.includes("return-path:")
+  ) {
+    return true;
+  }
+
+  if (/[A-Za-z0-9+/=]{40,}/.test(value)) {
+    return true;
+  }
+
+  const alphaCount = (value.match(/[A-Za-z]/g) || []).length;
+  const symbolCount = (value.match(/[^A-Za-z0-9\s]/g) || []).length;
+  if (alphaCount < 3) {
+    return true;
+  }
+  if (symbolCount > alphaCount * 0.8 && value.length > 20) {
+    return true;
+  }
+
+  const maxTokenLength = value.split(/\s+/).reduce((max, token) => Math.max(max, token.length), 0);
+  if (maxTokenLength > 45) {
+    return true;
+  }
+
+  return false;
 }
 
 function formatEmailPreviewAmount(totalAmount: number | undefined, currency: string | undefined): string {
@@ -1578,9 +1670,23 @@ function decodePotentialBase64(value: string): Buffer | null {
 
 function decodeQuotedPrintable(value: string): string {
   const softBreakRemoved = value.replace(/=\r?\n/g, "");
-  return softBreakRemoved.replace(/=([A-Fa-f0-9]{2})/g, (_, hex: string) =>
-    String.fromCharCode(parseInt(hex, 16))
-  );
+  const bytes: number[] = [];
+
+  for (let i = 0; i < softBreakRemoved.length; i++) {
+    const char = softBreakRemoved[i];
+    if (char === "=" && i + 2 < softBreakRemoved.length) {
+      const hex = softBreakRemoved.slice(i + 1, i + 3);
+      if (/^[A-Fa-f0-9]{2}$/.test(hex)) {
+        bytes.push(parseInt(hex, 16));
+        i += 2;
+        continue;
+      }
+    }
+
+    bytes.push(char.charCodeAt(0));
+  }
+
+  return Buffer.from(bytes).toString("utf8");
 }
 
 function normalizeAttachmentMimeType(attachment: ParsedAttachment): string | null {
