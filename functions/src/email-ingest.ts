@@ -5,6 +5,7 @@ import * as admin from "firebase-admin";
 import { VertexAI } from "@google-cloud/vertexai";
 import * as crypto from "crypto";
 import type { Request } from "express";
+import sharp from "sharp";
 
 const receiptInboundDomain = defineSecret("RECEIPT_INBOUND_DOMAIN");
 const emailIngestWebhookKey = defineSecret("EMAIL_INGEST_WEBHOOK_KEY");
@@ -97,6 +98,17 @@ interface ReceiptCategory {
   name: string;
   confidence: number;
   assignedBy: "ai" | "user" | "rule" | "default";
+}
+
+interface EmailPreviewImageInput {
+  subject: string;
+  sender: string;
+  merchantName: string;
+  totalAmount?: number;
+  currency?: string;
+  transactionDate?: string;
+  bodyText: string;
+  status: "final" | "needs_review";
 }
 
 const PART_SEPARATOR_CRLF = Buffer.from("\r\n\r\n");
@@ -585,12 +597,48 @@ async function saveTextOnlyReceipt(
     "",
     text || "(empty body)",
   ].join("\n");
-  const storagePath = `users/${userId}/receipts/${timestamp}_email_body.txt`;
+  const textStoragePath = `users/${userId}/receipts/${timestamp}_email_body.txt`;
+  const previewStoragePath = `users/${userId}/receipts/${timestamp}_email_preview.png`;
 
   const bucket = admin.storage().bucket();
-  await bucket.file(storagePath).save(Buffer.from(textPayload, "utf8"), {
+  await bucket.file(textStoragePath).save(Buffer.from(textPayload, "utf8"), {
     metadata: { contentType: "text/plain; charset=utf-8" },
   });
+
+  let receiptFileStoragePath = textStoragePath;
+  let receiptFileOriginalName = `${sanitizeFileName(subject || "forwarded-email")}.txt`;
+  let receiptFileMimeType = "text/plain";
+  let receiptFileSizeBytes = Buffer.byteLength(textPayload, "utf8");
+  let previewGenerated = false;
+
+  try {
+    const previewBuffer = await generateEmailPreviewImage({
+      subject,
+      sender,
+      merchantName: merchant.canonicalName || merchantName,
+      totalAmount: extraction.totalAmount?.value,
+      currency: extraction.currency?.value,
+      transactionDate: extraction.date?.value,
+      bodyText: text,
+      status,
+    });
+
+    await bucket.file(previewStoragePath).save(previewBuffer, {
+      metadata: { contentType: "image/png" },
+    });
+
+    receiptFileStoragePath = previewStoragePath;
+    receiptFileOriginalName = `${sanitizeFileName(subject || "forwarded-email")}_preview.png`;
+    receiptFileMimeType = "image/png";
+    receiptFileSizeBytes = previewBuffer.length;
+    previewGenerated = true;
+  } catch (error) {
+    logger.warn("Failed to generate text-email preview image. Falling back to text file.", {
+      userId,
+      messageId: extractMessageId(fields),
+      error,
+    });
+  }
 
   const updateData: Record<string, unknown> = {
     userId,
@@ -598,10 +646,10 @@ async function saveTextOnlyReceipt(
     skipProcessing: true,
     source: "email",
     file: {
-      storagePath,
-      originalName: `${subject || "forwarded-email"}.txt`,
-      mimeType: "text/plain",
-      sizeBytes: Buffer.byteLength(textPayload, "utf8"),
+      storagePath: receiptFileStoragePath,
+      originalName: receiptFileOriginalName,
+      mimeType: receiptFileMimeType,
+      sizeBytes: receiptFileSizeBytes,
       uploadedAt: admin.firestore.FieldValue.serverTimestamp(),
     },
     extraction,
@@ -613,6 +661,9 @@ async function saveTextOnlyReceipt(
       subject,
       messageId: extractMessageId(fields),
       ingestMode: "text_fallback",
+      textStoragePath,
+      previewStoragePath: previewGenerated ? previewStoragePath : null,
+      previewGenerated,
       ingestedAt: admin.firestore.FieldValue.serverTimestamp(),
     },
     notes: `Imported from forwarded email${subject ? `: ${subject}` : ""}.`,
@@ -759,6 +810,201 @@ ${bodyExcerpt}`;
 
     return extraction;
   }
+}
+
+async function generateEmailPreviewImage(input: EmailPreviewImageInput): Promise<Buffer> {
+  const width = 1200;
+  const height = 1600;
+  const statusColor = input.status === "final" ? "#0f766e" : "#b45309";
+  const statusBg = input.status === "final" ? "#ccfbf1" : "#fef3c7";
+  const statusLabel = input.status === "final" ? "Auto-classified" : "Review required";
+  const merchant = input.merchantName || "Email Receipt";
+  const amount = formatEmailPreviewAmount(input.totalAmount, input.currency);
+  const dateLabel = formatEmailPreviewDate(input.transactionDate);
+  const sender = input.sender || "(unknown sender)";
+  const subject = input.subject || "(no subject)";
+
+  const subjectLines = wrapTextForPreview(subject, 42, 2);
+  const excerptLines = wrapTextForPreview(input.bodyText, 58, 10);
+  const generatedAt = new Date().toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+  const subjectNodes = subjectLines
+    .map((line, index) =>
+      `<text x="120" y="${310 + index * 44}" class="subject">${escapeSvgText(line)}</text>`
+    )
+    .join("");
+
+  const excerptNodes = excerptLines
+    .map((line, index) =>
+      `<text x="120" y="${880 + index * 34}" class="excerpt">${escapeSvgText(line)}</text>`
+    )
+    .join("");
+
+  const svg = `
+<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#eef2ff"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0f172a" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <rect width="${width}" height="${height}" fill="url(#bg)"/>
+  <rect x="70" y="70" width="1060" height="1460" rx="40" fill="#ffffff" filter="url(#shadow)"/>
+  <rect x="70" y="70" width="1060" height="120" rx="40" fill="#0f172a"/>
+  <rect x="70" y="150" width="1060" height="40" fill="#0f172a"/>
+  <text x="120" y="145" class="title">ReceiptNest Email Receipt</text>
+
+  <rect x="880" y="250" width="190" height="44" rx="22" fill="${statusBg}"/>
+  <text x="975" y="278" text-anchor="middle" class="status" fill="${statusColor}">${escapeSvgText(statusLabel)}</text>
+
+  <text x="120" y="245" class="label">Subject</text>
+  ${subjectNodes}
+
+  <text x="120" y="420" class="label">From</text>
+  <text x="120" y="465" class="value">${escapeSvgText(sender)}</text>
+
+  <line x1="120" y1="530" x2="1080" y2="530" stroke="#e2e8f0" stroke-width="2"/>
+
+  <text x="120" y="590" class="label">Merchant</text>
+  <text x="120" y="642" class="merchant">${escapeSvgText(merchant)}</text>
+
+  <text x="120" y="730" class="label">Detected Total</text>
+  <text x="120" y="790" class="amount">${escapeSvgText(amount)}</text>
+
+  <text x="680" y="730" class="label">Date</text>
+  <text x="680" y="790" class="value">${escapeSvgText(dateLabel)}</text>
+
+  <line x1="120" y1="835" x2="1080" y2="835" stroke="#e2e8f0" stroke-width="2"/>
+
+  <text x="120" y="850" class="label">Email body excerpt</text>
+  ${excerptNodes}
+
+  <line x1="120" y1="1320" x2="1080" y2="1320" stroke="#e2e8f0" stroke-width="2"/>
+  <text x="120" y="1370" class="foot">Generated ${escapeSvgText(generatedAt)}</text>
+  <text x="120" y="1410" class="foot">No attachment found. Preview created from extracted email content.</text>
+
+  <style>
+    .title { font-family: Arial, sans-serif; font-size: 42px; font-weight: 700; fill: #f8fafc; }
+    .label { font-family: Arial, sans-serif; font-size: 28px; font-weight: 600; fill: #475569; }
+    .subject { font-family: Arial, sans-serif; font-size: 40px; font-weight: 700; fill: #0f172a; }
+    .value { font-family: Arial, sans-serif; font-size: 34px; font-weight: 500; fill: #0f172a; }
+    .merchant { font-family: Arial, sans-serif; font-size: 52px; font-weight: 800; fill: #0f172a; }
+    .amount { font-family: Arial, sans-serif; font-size: 64px; font-weight: 800; fill: #065f46; }
+    .excerpt { font-family: Arial, sans-serif; font-size: 30px; font-weight: 400; fill: #1e293b; }
+    .status { font-family: Arial, sans-serif; font-size: 18px; font-weight: 700; }
+    .foot { font-family: Arial, sans-serif; font-size: 26px; font-weight: 400; fill: #64748b; }
+  </style>
+</svg>
+`;
+
+  return sharp(Buffer.from(svg, "utf8"))
+    .png({ compressionLevel: 9 })
+    .toBuffer();
+}
+
+function wrapTextForPreview(value: string, maxCharsPerLine: number, maxLines: number): string[] {
+  const normalized = value.replace(/\s+/g, " ").trim();
+  if (!normalized) {
+    return [];
+  }
+
+  const words = normalized.split(" ");
+  const lines: string[] = [];
+  let current = "";
+  let consumedWords = 0;
+
+  for (const word of words) {
+    consumedWords += 1;
+    const candidate = current ? `${current} ${word}` : word;
+    if (candidate.length <= maxCharsPerLine) {
+      current = candidate;
+      continue;
+    }
+
+    if (current) {
+      lines.push(current);
+      if (lines.length >= maxLines) {
+        break;
+      }
+    }
+
+    if (word.length > maxCharsPerLine) {
+      current = `${word.slice(0, Math.max(maxCharsPerLine - 3, 1))}...`;
+    } else {
+      current = word;
+    }
+  }
+
+  if (lines.length < maxLines && current) {
+    lines.push(current);
+  }
+
+  if (lines.length === 0) {
+    return [normalized.slice(0, maxCharsPerLine)];
+  }
+
+  if (consumedWords < words.length || lines.join(" ").length < normalized.length) {
+    const lastIndex = Math.min(lines.length - 1, maxLines - 1);
+    const lastLine = lines[lastIndex];
+    if (lastLine && !lastLine.endsWith("...")) {
+      lines[lastIndex] = `${lastLine.slice(0, Math.max(maxCharsPerLine - 3, 1))}...`;
+    }
+  }
+
+  return lines.slice(0, maxLines);
+}
+
+function formatEmailPreviewAmount(totalAmount: number | undefined, currency: string | undefined): string {
+  if (typeof totalAmount !== "number" || !isFinite(totalAmount) || totalAmount <= 0) {
+    return "Amount not detected";
+  }
+
+  const normalizedCurrency = (currency || "USD").toUpperCase();
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: normalizedCurrency,
+      maximumFractionDigits: 2,
+    }).format(totalAmount);
+  } catch {
+    return `${totalAmount.toFixed(2)} ${normalizedCurrency}`;
+  }
+}
+
+function formatEmailPreviewDate(transactionDate: string | undefined): string {
+  if (!transactionDate) {
+    return "Date not detected";
+  }
+
+  const parsed = new Date(transactionDate);
+  if (isNaN(parsed.getTime())) {
+    return transactionDate;
+  }
+
+  return parsed.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function escapeSvgText(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 async function normalizeMerchant(
