@@ -44,3 +44,12 @@ Set these Firebase function secrets:
 - Home dashboard shows a generated forwarding address and a copy button.
 - User forwards receipt emails to that address.
 - Receipts appear in the same list and follow the same status flow.
+
+## Troubleshooting
+
+- Check function logs:
+  - `inboundEmailWebhook` should log parsed recipients and attachment metadata.
+  - `processReceipt` should run for attachment-mode receipts.
+- In Firestore receipt docs, inspect `email.ingestMode`:
+  - `attachment` means file ingestion path was used.
+  - `text_fallback` means no valid attachment was accepted.

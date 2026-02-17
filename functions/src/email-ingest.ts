@@ -28,6 +28,16 @@ const ALLOWED_ATTACHMENT_TYPES = new Set([
   "application/pdf",
 ]);
 
+const ALLOWED_ATTACHMENT_EXTENSIONS = new Set([
+  "jpg",
+  "jpeg",
+  "png",
+  "webp",
+  "heic",
+  "heif",
+  "pdf",
+]);
+
 const CATEGORIES = [
   { id: "groceries", name: "Groceries", keywords: ["grocery", "supermarket", "food", "whole foods", "trader joe", "kroger"] },
   { id: "restaurants", name: "Restaurants", keywords: ["restaurant", "cafe", "coffee", "starbucks", "mcdonalds", "uber eats"] },
@@ -170,6 +180,18 @@ export const inboundEmailWebhook = onRequest(
     try {
       const parsedEmail = parseInboundEmail(req);
       const recipients = extractRecipientAddresses(parsedEmail.fields);
+      logger.info("Parsed inbound email", {
+        recipients,
+        attachmentCount: parsedEmail.attachments.length,
+        attachments: parsedEmail.attachments.map((attachment) => ({
+          fieldName: attachment.fieldName,
+          fileName: attachment.fileName,
+          mimeType: attachment.mimeType,
+          sizeBytes: attachment.data.length,
+          allowed: isAllowedAttachment(attachment),
+          resolvedMimeType: normalizeAttachmentMimeType(attachment),
+        })),
+      });
 
       if (recipients.length === 0) {
         logger.warn("Inbound email missing recipient addresses.");
@@ -208,6 +230,12 @@ export const inboundEmailWebhook = onRequest(
         const validAttachments = parsedEmail.attachments
           .filter((attachment) => isAllowedAttachment(attachment))
           .slice(0, MAX_ATTACHMENTS_PER_EMAIL);
+
+        logger.info("Resolved inbound attachments for user", {
+          userId,
+          recipientLocals,
+          validAttachmentCount: validAttachments.length,
+        });
 
         if (validAttachments.length > 0) {
           for (const attachment of validAttachments) {
@@ -299,13 +327,19 @@ function parseInboundEmail(req: Request): ParsedInboundEmail {
     }
 
     const dataStart = headerEndIndex + PART_SEPARATOR.length;
-    const nextDelimiterIndex = rawBody.indexOf(Buffer.from(`\r\n--${boundary}`), dataStart);
+    const nextDelimiterIndex = rawBody.indexOf(delimiter, dataStart);
     if (nextDelimiterIndex < 0) {
       break;
     }
 
-    const partData = rawBody.slice(dataStart, nextDelimiterIndex);
-    cursor = nextDelimiterIndex + 2;
+    let partData = rawBody.slice(dataStart, nextDelimiterIndex);
+    while (
+      partData.length > 0 &&
+      (partData[partData.length - 1] === 10 || partData[partData.length - 1] === 13)
+    ) {
+      partData = partData.slice(0, partData.length - 1);
+    }
+    cursor = nextDelimiterIndex;
 
     const contentDisposition = headers["content-disposition"] || "";
     const fieldNameMatch = contentDisposition.match(/name="([^"]+)"/i);
@@ -317,10 +351,6 @@ function parseInboundEmail(req: Request): ParsedInboundEmail {
     const fileNameMatch = contentDisposition.match(/filename="([^"]*)"/i);
     if (!fileNameMatch) {
       fields[fieldName] = partData.toString("utf8");
-      continue;
-    }
-
-    if (!fieldName.toLowerCase().startsWith("attachment")) {
       continue;
     }
 
@@ -455,11 +485,12 @@ async function saveAttachmentReceipt(
   attachment: ParsedAttachment,
   fields: Record<string, string>
 ): Promise<void> {
+  const resolvedMimeType = normalizeAttachmentMimeType(attachment) || "application/octet-stream";
   const timestamp = Date.now();
   const storagePath = `users/${userId}/receipts/${timestamp}_${sanitizeFileName(attachment.fileName)}`;
   const bucket = admin.storage().bucket();
   await bucket.file(storagePath).save(attachment.data, {
-    metadata: { contentType: attachment.mimeType },
+    metadata: { contentType: resolvedMimeType },
   });
 
   const db = admin.firestore();
@@ -469,7 +500,7 @@ async function saveAttachmentReceipt(
     file: {
       storagePath,
       originalName: attachment.fileName,
-      mimeType: attachment.mimeType,
+      mimeType: resolvedMimeType,
       sizeBytes: attachment.data.length,
       uploadedAt: admin.firestore.FieldValue.serverTimestamp(),
     },
@@ -479,6 +510,7 @@ async function saveAttachmentReceipt(
       to: fields.to || "",
       subject: fields.subject || "",
       messageId: extractMessageId(fields),
+      ingestMode: "attachment",
       ingestedAt: admin.firestore.FieldValue.serverTimestamp(),
     },
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -540,6 +572,7 @@ async function saveTextOnlyReceipt(
       to: fields.to || "",
       subject,
       messageId: extractMessageId(fields),
+      ingestMode: "text_fallback",
       ingestedAt: admin.firestore.FieldValue.serverTimestamp(),
     },
     notes: `Imported from forwarded email${subject ? `: ${subject}` : ""}.`,
@@ -913,8 +946,51 @@ function extractMessageId(fields: Record<string, string>): string | null {
 }
 
 function isAllowedAttachment(attachment: ParsedAttachment): boolean {
-  const mimeType = attachment.mimeType.toLowerCase().split(";")[0].trim();
-  return ALLOWED_ATTACHMENT_TYPES.has(mimeType) && attachment.data.length > 0 && attachment.data.length <= MAX_ATTACHMENT_SIZE_BYTES;
+  const mimeType = normalizeAttachmentMimeType(attachment);
+  if (!mimeType) {
+    return false;
+  }
+  return attachment.data.length > 0 && attachment.data.length <= MAX_ATTACHMENT_SIZE_BYTES;
+}
+
+function normalizeAttachmentMimeType(attachment: ParsedAttachment): string | null {
+  const rawMimeType = String(attachment.mimeType || "").toLowerCase().split(";")[0].trim();
+  if (ALLOWED_ATTACHMENT_TYPES.has(rawMimeType)) {
+    return rawMimeType;
+  }
+
+  const extension = getFileExtension(attachment.fileName);
+  if (!extension || !ALLOWED_ATTACHMENT_EXTENSIONS.has(extension)) {
+    return null;
+  }
+
+  switch (extension) {
+    case "jpg":
+    case "jpeg":
+      return "image/jpeg";
+    case "png":
+      return "image/png";
+    case "webp":
+      return "image/webp";
+    case "heic":
+      return "image/heic";
+    case "heif":
+      return "image/heif";
+    case "pdf":
+      return "application/pdf";
+    default:
+      return null;
+  }
+}
+
+function getFileExtension(fileName: string): string | null {
+  const cleaned = fileName.trim().toLowerCase();
+  const dotIndex = cleaned.lastIndexOf(".");
+  if (dotIndex <= 0 || dotIndex === cleaned.length - 1) {
+    return null;
+  }
+
+  return cleaned.slice(dotIndex + 1);
 }
 
 function decodeHtmlEntities(value: string): string {
