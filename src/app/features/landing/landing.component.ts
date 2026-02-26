@@ -38,8 +38,8 @@ export class LandingComponent {
 
   constructor() {
     // Set SEO meta tags
-    this.title.setTitle('ReceiptNest - Receipt Inbox for Freelancers and Small Teams');
-    this.meta.updateTag({ name: 'description', content: 'ReceiptNest turns scattered receipts into a clean monthly expense inbox. Built for freelancers and small teams that need fast categorization and export-ready reports.' });
+    this.title.setTitle('ReceiptNest - Finally know where your money goes');
+    this.meta.updateTag({ name: 'description', content: 'ReceiptNest gives self-employed people a private, auto-organized view of spending with tax-ready exports and team visibility when needed.' });
 
     // Redirect to home if user is already authenticated
     effect(() => {
@@ -65,4 +65,3 @@ export class LandingComponent {
     this.isDemoOpen.set(false);
   }
 }
-
