@@ -41,6 +41,5 @@
   },
   "storage": {
     "rules": "storage.rules"
-  },
-  "extensions": {}
+  }
 }
