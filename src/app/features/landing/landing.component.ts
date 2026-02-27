@@ -38,8 +38,8 @@ export class LandingComponent {
 
   constructor() {
     // Set SEO meta tags
-    this.title.setTitle('ReceiptNest - Finally know where your money goes');
-    this.meta.updateTag({ name: 'description', content: 'ReceiptNest gives self-employed people a private, auto-organized view of spending with tax-ready exports and team visibility when needed.' });
+    this.title.setTitle('ReceiptNest AI - Finally know where your money goes');
+    this.meta.updateTag({ name: 'description', content: 'ReceiptNest AI gives self-employed people a private, auto-organized view of spending with tax-ready exports and team visibility when needed.' });
 
     // Redirect to home if user is already authenticated
     effect(() => {
