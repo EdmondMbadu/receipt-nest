@@ -170,7 +170,7 @@ export const inboundEmailWebhook = onRequest(
   },
   async (req, res) => {
     if (req.method === "GET") {
-      res.status(200).send("ReceiptNest inbound email webhook is live.");
+      res.status(200).send("ReceiptNest AI inbound email webhook is live.");
       return;
     }
 
@@ -867,7 +867,7 @@ async function generateEmailPreviewImage(input: EmailPreviewImageInput): Promise
   <rect x="70" y="70" width="1060" height="1460" rx="40" fill="#ffffff" filter="url(#shadow)"/>
   <rect x="70" y="70" width="1060" height="120" rx="40" fill="#0f172a"/>
   <rect x="70" y="150" width="1060" height="40" fill="#0f172a"/>
-  <text x="120" y="145" class="title">ReceiptNest Email Receipt</text>
+  <text x="120" y="145" class="title">ReceiptNest AI Email Receipt</text>
 
   <rect x="880" y="250" width="190" height="44" rx="22" fill="${statusBg}"/>
   <text x="975" y="278" text-anchor="middle" class="status" fill="${statusColor}">${escapeSvgText(statusLabel)}</text>

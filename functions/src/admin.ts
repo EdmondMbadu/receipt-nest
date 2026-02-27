@@ -40,14 +40,14 @@ export const sendTestEmail = onCall(
     }
 
     const subject = String(request.data?.subject || "Test Email").trim() || "Test Email";
-    const message = String(request.data?.message || "").trim() || "This is a test email from ReceiptNest.";
+    const message = String(request.data?.message || "").trim() || "This is a test email from ReceiptNest AI.";
     const safeSubject = subject.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const safeMessage = message
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/\\n/g, "<br />");
-    const preheader = "ReceiptNest test email confirmation.";
+    const preheader = "ReceiptNest AI test email confirmation.";
     const html = `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -68,7 +68,7 @@ export const sendTestEmail = onCall(
                 <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                   <tr>
                     <td>
-                      <p style="margin:0; font-size:12px; letter-spacing:0.28em; text-transform:uppercase; font-weight:600; color:#a7f3d0;">ReceiptNest</p>
+                      <p style="margin:0; font-size:12px; letter-spacing:0.28em; text-transform:uppercase; font-weight:600; color:#a7f3d0;">ReceiptNest AI</p>
                       <h1 style="margin:10px 0 0; font-size:24px; font-weight:600; font-family:Arial, sans-serif;">${safeSubject}</h1>
                       <p style="margin:8px 0 0; font-size:14px; color:#d1fae5; font-family:Arial, sans-serif;">A quick confirmation that your mail setup is working.</p>
                     </td>
@@ -88,7 +88,7 @@ export const sendTestEmail = onCall(
                 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:22px 0 14px;">
                   <tr>
                     <td style="padding:14px 16px; background:#ecfdf5; border-radius:12px; border:1px solid #d1fae5; font-size:13px; color:#065f46;">
-                      Test sent from the ReceiptNest Admin Console.
+                      Test sent from the ReceiptNest AI Admin Console.
                     </td>
                   </tr>
                 </table>
@@ -103,7 +103,7 @@ export const sendTestEmail = onCall(
                 <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                   <tr>
                     <td>
-                      <p style="margin:0 0 6px;">ReceiptNest • info@receipt-nest.com</p>
+                      <p style="margin:0 0 6px;">ReceiptNest AI • info@receipt-nest.com</p>
                       <p style="margin:0;">You are receiving this email because an admin initiated a test send.</p>
                     </td>
                     <td align="right">
@@ -114,7 +114,7 @@ export const sendTestEmail = onCall(
               </td>
             </tr>
           </table>
-          <p style="margin:16px 0 0; font-size:11px; color:#94a3b8;">© ${new Date().getFullYear()} ReceiptNest. All rights reserved.</p>
+          <p style="margin:16px 0 0; font-size:11px; color:#94a3b8;">© ${new Date().getFullYear()} ReceiptNest AI. All rights reserved.</p>
         </td>
       </tr>
     </table>
@@ -126,8 +126,8 @@ export const sendTestEmail = onCall(
     try {
       await sgMail.send({
         to,
-        from: { email: fromEmail, name: "ReceiptNest" },
-        replyTo: { email: fromEmail, name: "ReceiptNest" },
+        from: { email: fromEmail, name: "ReceiptNest AI" },
+        replyTo: { email: fromEmail, name: "ReceiptNest AI" },
         subject,
         text: message,
         html

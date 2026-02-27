@@ -37,7 +37,7 @@ const buildEmailShell = (title: string, bodyHtml: string, preheader: string) => 
                 <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                   <tr>
                     <td>
-                      <p style="margin:0; font-size:12px; letter-spacing:0.28em; text-transform:uppercase; font-weight:600; color:#a7f3d0;">ReceiptNest</p>
+                      <p style="margin:0; font-size:12px; letter-spacing:0.28em; text-transform:uppercase; font-weight:600; color:#a7f3d0;">ReceiptNest AI</p>
                       <h1 style="margin:10px 0 0; font-size:24px; font-weight:600; font-family:Arial, sans-serif;">${safeTitle}</h1>
                     </td>
                     <td align="right" style="vertical-align:top;">
@@ -59,18 +59,18 @@ const buildEmailShell = (title: string, bodyHtml: string, preheader: string) => 
                 <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                   <tr>
                     <td>
-                      <p style="margin:0 0 6px;">ReceiptNest • info@receipt-nest.com</p>
-                      <p style="margin:0;">You are receiving this email because you created a ReceiptNest account.</p>
+                      <p style="margin:0 0 6px;">ReceiptNest AI • info@receipt-nest.com</p>
+                      <p style="margin:0;">You are receiving this email because you created a ReceiptNest AI account.</p>
                     </td>
                     <td align="right">
-                      <span style="display:inline-block; padding:6px 10px; border-radius:999px; background:#0f172a; color:#e2e8f0; font-size:11px;">ReceiptNest</span>
+                      <span style="display:inline-block; padding:6px 10px; border-radius:999px; background:#0f172a; color:#e2e8f0; font-size:11px;">ReceiptNest AI</span>
                     </td>
                   </tr>
                 </table>
               </td>
             </tr>
           </table>
-          <p style="margin:16px 0 0; font-size:11px; color:#94a3b8;">© ${new Date().getFullYear()} ReceiptNest. All rights reserved.</p>
+          <p style="margin:16px 0 0; font-size:11px; color:#94a3b8;">© ${new Date().getFullYear()} ReceiptNest AI. All rights reserved.</p>
         </td>
       </tr>
     </table>
@@ -85,8 +85,8 @@ const sendEmail = async (to: string, subject: string, text: string, html: string
   sgMail.setApiKey(sendgridApiKey.value());
   await sgMail.send({
     to,
-    from: { email: fromEmail, name: "ReceiptNest" },
-    replyTo: { email: fromEmail, name: "ReceiptNest" },
+    from: { email: fromEmail, name: "ReceiptNest AI" },
+    replyTo: { email: fromEmail, name: "ReceiptNest AI" },
     subject,
     text,
     html
@@ -114,11 +114,11 @@ export const sendVerificationEmail = onCall(
       handleCodeInApp: false
     });
 
-    const subject = "Verify your ReceiptNest email";
-    const text = `Welcome to ReceiptNest!\n\nPlease verify your email to finish setting up your account: ${link}\n\nOnce verified, you can head to your dashboard and start organizing receipts.`;
+    const subject = "Verify your ReceiptNest AI email";
+    const text = `Welcome to ReceiptNest AI!\n\nPlease verify your email to finish setting up your account: ${link}\n\nOnce verified, you can head to your dashboard and start organizing receipts.`;
     const bodyHtml = `
       <p style="margin:0 0 12px; font-size:15px; line-height:1.6;">Hello,</p>
-      <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">Thanks for signing up for ReceiptNest. Please verify your email to finish setting up your account.</p>
+      <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">Thanks for signing up for ReceiptNest AI. Please verify your email to finish setting up your account.</p>
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:18px 0;">
         <tr>
           <td align="center" bgcolor="#10b981" style="border-radius:999px;">
@@ -163,10 +163,10 @@ export const sendWelcomeEmail = onCall(
       return { ok: true };
     }
 
-    const subject = "Welcome to ReceiptNest";
-    const text = `Welcome to ReceiptNest!\n\nCapture receipts, stay organized, and keep every expense in one place.\n\nGo to your dashboard: ${appBaseUrl.value()}/app`;
+    const subject = "Welcome to ReceiptNest AI";
+    const text = `Welcome to ReceiptNest AI!\n\nCapture receipts, stay organized, and keep every expense in one place.\n\nGo to your dashboard: ${appBaseUrl.value()}/app`;
     const bodyHtml = `
-      <p style="margin:0 0 12px; font-size:15px; line-height:1.6;">Welcome to ReceiptNest,</p>
+      <p style="margin:0 0 12px; font-size:15px; line-height:1.6;">Welcome to ReceiptNest AI,</p>
       <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">Your receipts are about to get a lot calmer. Upload anything, keep it tidy, and track your spend without the chaos.</p>
       <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">When you are ready, jump into your dashboard and start building your receipt library.</p>
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:18px 0;">
@@ -177,10 +177,10 @@ export const sendWelcomeEmail = onCall(
         </tr>
       </table>
       <div style="margin-top:18px; padding:14px 16px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; font-size:13px; color:#475569;">
-        Need a quick start? Upload your first receipt and let ReceiptNest do the organizing.
+        Need a quick start? Upload your first receipt and let ReceiptNest AI do the organizing.
       </div>
     `;
-    const html = buildEmailShell(subject, bodyHtml, "Welcome to ReceiptNest. Your receipts just got organized.");
+    const html = buildEmailShell(subject, bodyHtml, "Welcome to ReceiptNest AI. Your receipts just got organized.");
 
     try {
       await sendEmail(email, subject, text, html);

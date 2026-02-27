@@ -1,4 +1,4 @@
-# ReceiptNest
+# ReceiptNest AI
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.3.
 
@@ -60,7 +60,7 @@ For more information on using the Angular CLI, including detailed command refere
 
 ## Email Forwarding Receipts
 
-ReceiptNest supports forwarding receipt emails into your account through a shared inbound webhook + per-user alias strategy.
+ReceiptNest AI supports forwarding receipt emails into your account through a shared inbound webhook + per-user alias strategy.
 
 Setup details: `docs/email-forwarding.md`
 # receipt-nest

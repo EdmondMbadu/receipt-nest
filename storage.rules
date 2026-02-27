@@ -1,5 +1,5 @@
 rules_version = '2';
-// Firebase Storage Security Rules for ReceiptNest
+// Firebase Storage Security Rules for ReceiptNest AI
 service firebase.storage {
   match /b/{bucket}/o {
     function isAdmin() {

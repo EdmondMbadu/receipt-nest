@@ -36,7 +36,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly error = signal<string | null>(null);
   readonly testEmailTo = signal('');
   readonly testEmailSubject = signal('Test Email');
-  readonly testEmailMessage = signal('This is a test email from ReceiptNest.');
+  readonly testEmailMessage = signal('This is a test email from ReceiptNest AI.');
   readonly testEmailSending = signal(false);
   readonly testEmailError = signal<string | null>(null);
   readonly testEmailSuccess = signal<string | null>(null);
@@ -87,7 +87,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     const subject = this.testEmailSubject().trim() || 'Test Email';
-    const message = this.testEmailMessage().trim() || 'This is a test email from ReceiptNest.';
+    const message = this.testEmailMessage().trim() || 'This is a test email from ReceiptNest AI.';
 
     this.testEmailSending.set(true);
     try {

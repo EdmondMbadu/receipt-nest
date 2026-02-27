@@ -52,8 +52,8 @@ export class PricingComponent implements OnDestroy {
   });
 
   constructor() {
-    this.title.setTitle('Pricing - ReceiptNest');
-    this.meta.updateTag({ name: 'description', content: 'Review your ReceiptNest plan and upgrade when you are ready.' });
+    this.title.setTitle('Pricing - ReceiptNest AI');
+    this.meta.updateTag({ name: 'description', content: 'Review your ReceiptNest AI plan and upgrade when you are ready.' });
 
     this.routeSubscription = this.route.queryParamMap.subscribe((params) => {
       this.limitReachedNotice.set(params.get('limit') === 'free');

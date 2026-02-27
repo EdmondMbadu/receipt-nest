@@ -20,8 +20,8 @@ export class TermsComponent {
   readonly lastUpdated = 'December 29, 2025';
 
   constructor() {
-    this.title.setTitle('Terms and Conditions - ReceiptNest');
-    this.meta.updateTag({ name: 'description', content: 'Read the Terms and Conditions for using ReceiptNest, the AI-powered receipt scanner and expense tracker.' });
+    this.title.setTitle('Terms and Conditions - ReceiptNest AI');
+    this.meta.updateTag({ name: 'description', content: 'Read the Terms and Conditions for using ReceiptNest AI, the AI-powered receipt scanner and expense tracker.' });
   }
 
   toggleTheme() {

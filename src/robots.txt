@@ -1,4 +1,4 @@
-# robots.txt for ReceiptNest
+# robots.txt for ReceiptNest AI
 # https://receipt-nest.com
 
 User-agent: *

@@ -19,8 +19,8 @@ export class SupportComponent {
   readonly currentYear = new Date().getFullYear();
 
   constructor() {
-    this.title.setTitle('Support - ReceiptNest');
-    this.meta.updateTag({ name: 'description', content: 'Get help with ReceiptNest. Contact our support team for questions about receipt scanning, expense tracking, and account assistance.' });
+    this.title.setTitle('Support - ReceiptNest AI');
+    this.meta.updateTag({ name: 'description', content: 'Get help with ReceiptNest AI. Contact our support team for questions about receipt scanning, expense tracking, and account assistance.' });
   }
 
   toggleTheme() {

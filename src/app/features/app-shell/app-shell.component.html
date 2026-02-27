@@ -27,11 +27,14 @@
           </button>
           @if (desktopSidebarExpanded()) {
           <div class="flex items-center gap-3 min-w-0">
-            <img src="assets/receipt-nest.png" alt="ReceiptNest Logo"
+            <img src="assets/receipt-nest.png" alt="ReceiptNest AI Logo"
               class="h-11 w-11 rounded-xl object-contain ring-1 ring-slate-200 dark:ring-slate-700" />
             <div>
               <p class="text-[11px] font-medium uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-400">Workspace</p>
-              <h1 class="text-base font-semibold text-slate-900 dark:text-white">ReceiptNest</h1>
+              <h1 class="text-base font-semibold tracking-tight">
+                <span class="text-slate-900 dark:text-white">Receipt</span><span class="text-emerald-600 dark:text-emerald-400">Nest</span><span
+                  class="ml-1 rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 dark:border-emerald-700/60 dark:bg-emerald-900/40 dark:text-emerald-300">AI</span>
+              </h1>
             </div>
           </div>
           }
@@ -245,8 +248,11 @@
             </svg>
           </button>
           <div class="flex items-center gap-2">
-            <img src="assets/receipt-nest.png" alt="ReceiptNest Logo" class="h-8 w-8 rounded-lg object-contain" />
-            <p class="text-sm font-semibold text-slate-900 dark:text-white">ReceiptNest</p>
+            <img src="assets/receipt-nest.png" alt="ReceiptNest AI Logo" class="h-8 w-8 rounded-lg object-contain" />
+            <p class="text-sm font-semibold tracking-tight">
+              <span class="text-slate-900 dark:text-white">Receipt</span><span class="text-emerald-600 dark:text-emerald-400">Nest</span><span
+                class="ml-1 rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 dark:border-emerald-700/60 dark:bg-emerald-900/40 dark:text-emerald-300">AI</span>
+            </p>
           </div>
           <button type="button" (click)="toggleTheme()"
             class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
@@ -271,10 +277,13 @@
     class="fixed left-0 top-0 z-50 flex h-full w-72 flex-col border-r border-slate-200 bg-white/95 p-6 shadow-2xl backdrop-blur-xl transition-transform duration-200 dark:border-slate-800 dark:bg-slate-900/95 lg:hidden">
     <div class="mb-8 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <img src="assets/receipt-nest.png" alt="ReceiptNest Logo" class="h-10 w-10 rounded-xl object-contain ring-1 ring-slate-200 dark:ring-slate-700" />
+        <img src="assets/receipt-nest.png" alt="ReceiptNest AI Logo" class="h-10 w-10 rounded-xl object-contain ring-1 ring-slate-200 dark:ring-slate-700" />
         <div>
           <p class="text-[11px] font-medium uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-400">Workspace</p>
-          <p class="text-sm font-semibold text-slate-900 dark:text-white">ReceiptNest</p>
+          <p class="text-sm font-semibold tracking-tight">
+            <span class="text-slate-900 dark:text-white">Receipt</span><span class="text-emerald-600 dark:text-emerald-400">Nest</span><span
+              class="ml-1 rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 dark:border-emerald-700/60 dark:bg-emerald-900/40 dark:text-emerald-300">AI</span>
+          </p>
         </div>
       </div>
       <button type="button" (click)="closeSidebar()"
