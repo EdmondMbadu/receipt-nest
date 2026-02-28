@@ -28,8 +28,8 @@
         <div class="hidden items-center gap-1 lg:flex">
           <a href="#features"
             class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Features</a>
-          <a href="#teams"
-            class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Teams</a>
+          <a href="#people"
+            class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">People</a>
           <a href="#pricing"
             class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Pricing</a>
           <a href="#faq"
@@ -127,14 +127,14 @@
             </svg>
             Features
           </a>
-          <a href="#teams" (click)="toggleMobileMenu()"
+          <a href="#people" (click)="toggleMobileMenu()"
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
               viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
             </svg>
-            Teams
+            People
           </a>
           <a href="#pricing" (click)="toggleMobileMenu()"
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
@@ -607,7 +607,7 @@
   </section>
 
   <!-- Who Uses ReceiptNest AI -->
-  <section id="teams" class="py-24 sm:py-32">
+  <section id="people" class="py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="max-w-2xl">
         <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">Who uses
@@ -641,10 +641,9 @@
         </div>
 
         <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 lg:p-8">
-          <h3 class="text-base font-semibold text-slate-900 dark:text-white">Couple splitting finances</h3>
+          <h3 class="text-base font-semibold text-slate-900 dark:text-white">Independent consultant</h3>
           <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
-            "We each track our own spending but see the household total together. No more awkward 'where did the money
-            go' conversations."
+            "I can finally separate business spending from personal spending and see my monthly totals without spreadsheets."
           </p>
         </div>
       </div>
@@ -665,7 +664,7 @@
         </p>
       </div>
 
-      <div class="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-2">
         <!-- Screenshot 1 -->
         <div class="group">
           <div
@@ -779,43 +778,6 @@
           </div>
         </div>
 
-        <!-- Screenshot 5 (Teams) -->
-        <div class="group">
-          <div
-            class="relative rounded-2xl border border-sky-200 dark:border-sky-900/50 bg-white dark:bg-slate-900 p-3 shadow-lg shadow-sky-500/5 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-sky-500/10">
-            <div class="absolute top-5 right-5 z-10">
-              <span
-                class="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-sky-500 to-sky-600 px-3 py-1 text-xs font-bold text-white shadow-lg">
-                TEAMS
-              </span>
-            </div>
-            <div
-              class="aspect-[4/3] rounded-xl bg-gradient-to-br from-sky-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-sky-100 dark:border-sky-900/50">
-              <div class="w-full max-w-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
-                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Team total spend</p>
-                <p class="mt-1 text-2xl font-bold text-slate-900 dark:text-white">$4,892</p>
-                <div class="mt-3 space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                  <div class="flex items-center justify-between">
-                    <span>Member 1</span>
-                    <span class="font-semibold text-slate-900 dark:text-white">$2,437</span>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <span>Member 2</span>
-                    <span class="font-semibold text-slate-900 dark:text-white">$2,455</span>
-                  </div>
-                  <div class="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                    <div class="h-full w-1/2 bg-sky-500"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="mt-4 px-1">
-            <h3 class="font-semibold text-slate-900 dark:text-white">TEAMS - See the full picture together</h3>
-            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Merge accounts, see individual and combined
-              spending, and keep everyone on the same page - without sharing login credentials.</p>
-          </div>
-        </div>
       </div>
     </div>
   </section>
@@ -830,7 +792,7 @@
         </h2>
       </div>
 
-      <div class="mt-16 grid gap-8 lg:grid-cols-3">
+      <div class="mt-16 grid gap-8 lg:grid-cols-2">
         <!-- Starter Plan -->
         <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 lg:p-10">
           <div>
@@ -960,62 +922,6 @@
           </a>
         </div>
 
-        <!-- Teams Plan -->
-        <div class="rounded-2xl border border-sky-200 dark:border-sky-900/50 bg-white dark:bg-slate-900 p-8 lg:p-10">
-          <div>
-            <p class="text-sm font-medium text-sky-600 dark:text-sky-400">Teams</p>
-            <div class="mt-4 flex items-baseline gap-2">
-              <span class="text-5xl font-bold text-slate-900 dark:text-white">$19</span>
-              <span class="text-slate-500 dark:text-slate-400">/month</span>
-            </div>
-            <p class="mt-4 text-slate-600 dark:text-slate-300">
-              For partners, couples, or small teams who want individual + shared spending visibility.
-            </p>
-          </div>
-
-          <ul class="mt-8 space-y-4">
-            <li class="flex items-start gap-3">
-              <svg class="h-5 w-5 text-sky-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-              </svg>
-              <span class="text-slate-700 dark:text-slate-200 font-medium">Up to 5 team members</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <svg class="h-5 w-5 text-sky-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-              </svg>
-              <span class="text-slate-700 dark:text-slate-200 font-medium">Individual + combined dashboards</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <svg class="h-5 w-5 text-sky-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-              </svg>
-              <span class="text-slate-700 dark:text-slate-200 font-medium">Per-member spending breakdowns</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <svg class="h-5 w-5 text-sky-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-              </svg>
-              <span class="text-slate-700 dark:text-slate-200 font-medium">Shared category rules</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <svg class="h-5 w-5 text-sky-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-              </svg>
-              <span class="text-slate-700 dark:text-slate-200 font-medium">Team export (all members, one file)</span>
-            </li>
-          </ul>
-
-          <a routerLink="/register"
-            class="mt-10 block w-full text-center rounded-xl border border-sky-200 dark:border-sky-800/70 bg-sky-50/70 dark:bg-sky-900/20 px-6 py-4 text-base font-semibold text-sky-900 dark:text-sky-100 hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-all duration-200">
-            Start with Teams
-          </a>
-        </div>
       </div>
     </div>
   </section>
@@ -1123,11 +1029,9 @@
         </div>
 
         <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 lg:p-8">
-          <h3 class="text-base font-semibold text-slate-900 dark:text-white">Can I use this with my partner or team?</h3>
+          <h3 class="text-base font-semibold text-slate-900 dark:text-white">Can I switch plans later?</h3>
           <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
-            Yes. Our Teams plan lets multiple people connect their accounts. Each person sees their own receipts and
-            spending, and you all get a combined dashboard showing total spend. Great for couples, business partners,
-            or small teams.
+            Yes. You can start on Free and upgrade to Pro when you need unlimited receipts and advanced tools.
           </p>
         </div>
 
