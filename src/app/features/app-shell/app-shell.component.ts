@@ -91,6 +91,11 @@ export class AppShellComponent {
   );
   readonly isInsightsRoute = computed(() => this.currentUrl().startsWith('/app/insights'));
 
+  readonly isFreePlan = computed(() => {
+    const profile = this.user();
+    return !profile?.subscriptionPlan || profile.subscriptionPlan === 'free';
+  });
+
   readonly displayName = computed(() => {
     const profile = this.user();
     if (!profile) return 'Account';
@@ -157,6 +162,12 @@ export class AppShellComponent {
 
   closeSettingsDropUp(): void {
     this.settingsDropUpOpen.set(false);
+  }
+
+  navigateToPricing(): void {
+    this.settingsDropUpOpen.set(false);
+    this.closeSidebar();
+    this.router.navigate(['/app/pricing']);
   }
 
   toggleTheme(): void {
