@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
@@ -81,6 +81,8 @@ export class AppShellComponent {
     const hasPassword = !this.usesPasswordAuth() || this.deleteAccountPassword().trim().length > 0;
     return matchesKeyword && hasPassword && !this.deleteAccountPending();
   });
+  @ViewChild('deleteConfirmCard') private deleteConfirmCardRef?: ElementRef<HTMLElement>;
+  @ViewChild('deleteConfirmInput') private deleteConfirmInputRef?: ElementRef<HTMLInputElement>;
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -286,6 +288,7 @@ export class AppShellComponent {
     this.deleteConfirmText.set('');
     this.deleteAccountPassword.set('');
     this.deleteAccountError.set(null);
+    this.scrollToDeleteConfirmation();
   }
 
   closeDeleteConfirmation(): void {
@@ -530,5 +533,15 @@ export class AppShellComponent {
       return;
     }
     localStorage.removeItem('aiInsightsActiveChatId');
+  }
+
+  private scrollToDeleteConfirmation(): void {
+    setTimeout(() => {
+      this.deleteConfirmCardRef?.nativeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest'
+      });
+      this.deleteConfirmInputRef?.nativeElement.focus();
+    }, 80);
   }
 }
