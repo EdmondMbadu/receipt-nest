@@ -488,6 +488,13 @@
             </svg>
             Settings
           </button>
+          <button type="button" (click)="navigateToPricing()"
+            class="settings-dropup-item flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm font-medium text-emerald-700 transition hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/25">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+            </svg>
+            {{ isFreePlan() ? 'Upgrade' : 'Plan' }}
+          </button>
           <button type="button" (click)="logout()"
             class="settings-dropup-item flex w-full items-center gap-2.5 rounded-b-xl px-3.5 py-2.5 text-left text-sm font-medium text-rose-600 transition hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-900/25">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -519,280 +526,333 @@
   </aside>
 
   @if (settingsModalOpen()) {
-  <div class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/65 px-4 py-6 backdrop-blur-sm"
+  <div class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/50 px-4 py-6 backdrop-blur-sm"
     (click)="closeSettingsModal()">
-    <div class="settings-modal-panel w-full max-w-3xl overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-2xl dark:border-slate-700/80 dark:bg-slate-900"
+    <div class="flex w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700/80 dark:bg-slate-900"
+      style="max-height: min(85vh, 640px)"
       (click)="$event.stopPropagation()">
-      <div class="settings-modal-head px-6 py-5">
-        <div class="flex items-start justify-between gap-4">
-          <div>
-            <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-200/95">Workspace Preferences</p>
-            <h2 class="mt-2 text-xl font-semibold text-white">Settings</h2>
-            <p class="mt-1 text-sm text-emerald-100/90">Manage your profile, security, and notifications.</p>
-          </div>
+
+      <!-- Sidebar nav -->
+      <div class="hidden w-52 shrink-0 flex-col border-r border-slate-100 bg-slate-50/80 p-5 sm:flex dark:border-slate-800 dark:bg-slate-900/80">
+        <h2 class="text-base font-semibold text-slate-900 dark:text-white">Settings</h2>
+        <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">Manage your account</p>
+
+        <nav class="mt-6 space-y-1">
+          <button type="button" (click)="setSettingsTab('general')"
+            class="settings-sidebar-item"
+            [class.settings-sidebar-item--active]="settingsActiveTab() === 'general'">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            General
+          </button>
+          <button type="button" (click)="setSettingsTab('account')"
+            class="settings-sidebar-item"
+            [class.settings-sidebar-item--active]="settingsActiveTab() === 'account'">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+            </svg>
+            Account
+          </button>
+          <button type="button" (click)="setSettingsTab('notifications')"
+            class="settings-sidebar-item"
+            [class.settings-sidebar-item--active]="settingsActiveTab() === 'notifications'">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+            </svg>
+            Notifications
+          </button>
+        </nav>
+      </div>
+
+      <!-- Content area -->
+      <div class="flex min-w-0 flex-1 flex-col">
+        <!-- Mobile tab bar -->
+        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-3 sm:hidden dark:border-slate-800">
+          <h2 class="text-base font-semibold text-slate-900 dark:text-white">Settings</h2>
           <button type="button" (click)="closeSettingsModal()"
-            class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/35 bg-white/10 text-white transition hover:bg-white/20"
+            class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
             aria-label="Close settings">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-      </div>
-
-      <div class="border-b border-slate-200/80 px-6 pt-4 dark:border-slate-700/80">
-        <div class="flex flex-wrap gap-2">
-          <button type="button" (click)="setSettingsTab('general')" class="settings-tab"
-            [class.settings-tab--active]="settingsActiveTab() === 'general'">
+        <div class="flex gap-1 border-b border-slate-100 px-5 py-2 sm:hidden dark:border-slate-800">
+          <button type="button" (click)="setSettingsTab('general')"
+            class="settings-mobile-tab"
+            [class.settings-mobile-tab--active]="settingsActiveTab() === 'general'">
             General
           </button>
-          <button type="button" (click)="setSettingsTab('account')" class="settings-tab"
-            [class.settings-tab--active]="settingsActiveTab() === 'account'">
+          <button type="button" (click)="setSettingsTab('account')"
+            class="settings-mobile-tab"
+            [class.settings-mobile-tab--active]="settingsActiveTab() === 'account'">
             Account
           </button>
-          <button type="button" (click)="setSettingsTab('notifications')" class="settings-tab"
-            [class.settings-tab--active]="settingsActiveTab() === 'notifications'">
+          <button type="button" (click)="setSettingsTab('notifications')"
+            class="settings-mobile-tab"
+            [class.settings-mobile-tab--active]="settingsActiveTab() === 'notifications'">
             Notifications
           </button>
         </div>
-      </div>
 
-      <div class="max-h-[70vh] overflow-y-auto px-6 pb-6 pt-5">
-        @if (settingsActiveTab() === 'general') {
-        <section class="space-y-4">
-          <div class="grid gap-4 sm:grid-cols-2">
-            <label class="space-y-1.5">
-              <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">First name</span>
-              <input type="text" [value]="settingsFirstName()"
-                (input)="settingsFirstName.set(($any($event.target).value ?? '').toString())"
-                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-emerald-500 dark:focus:ring-emerald-900/50" />
-            </label>
-            <label class="space-y-1.5">
-              <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">Last name</span>
-              <input type="text" [value]="settingsLastName()"
-                (input)="settingsLastName.set(($any($event.target).value ?? '').toString())"
-                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-emerald-500 dark:focus:ring-emerald-900/50" />
-            </label>
+        <!-- Desktop header + close -->
+        <div class="hidden items-center justify-between border-b border-slate-100 px-6 py-4 sm:flex dark:border-slate-800">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">
+              {{ settingsActiveTab() === 'general' ? 'General' : settingsActiveTab() === 'account' ? 'Account' : 'Notifications' }}
+            </h3>
+            <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
+              {{ settingsActiveTab() === 'general' ? 'Profile and appearance' : settingsActiveTab() === 'account' ? 'Security and data' : 'Email preferences' }}
+            </p>
           </div>
+          <button type="button" (click)="closeSettingsModal()"
+            class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+            aria-label="Close settings">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
-          <label class="space-y-1.5">
-            <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">Email</span>
-            <input type="email" [value]="settingsEmail()" readonly
-              class="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/70 dark:text-slate-300" />
-          </label>
-
-          <div class="space-y-1.5">
-            <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">Theme</span>
-            <div class="flex gap-2">
-              <button type="button" (click)="isDarkMode() && toggleTheme()"
-                class="theme-option flex flex-1 items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition"
-                [class.theme-option--active]="!isDarkMode()"
-                [class]="!isDarkMode()
-                  ? 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300'
-                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300 dark:hover:border-slate-600'">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-                </svg>
-                Light
-              </button>
-              <button type="button" (click)="!isDarkMode() && toggleTheme()"
-                class="theme-option flex flex-1 items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition"
-                [class.theme-option--active]="isDarkMode()"
-                [class]="isDarkMode()
-                  ? 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300'
-                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300 dark:hover:border-slate-600'">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-                </svg>
-                Dark
-              </button>
-            </div>
-          </div>
-
-          @if (settingsError()) {
-          <p class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:border-rose-800/70 dark:bg-rose-900/25 dark:text-rose-300">
-            {{ settingsError() }}
-          </p>
-          }
-          @if (settingsSuccess()) {
-          <p class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-800/70 dark:bg-emerald-900/25 dark:text-emerald-300">
-            {{ settingsSuccess() }}
-          </p>
-          }
-
-          <div class="flex justify-end">
-            <button type="button" (click)="saveProfileSettings()"
-              class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-              [disabled]="settingsSaving()">
-              {{ settingsSaving() ? 'Saving...' : 'Save profile' }}
-            </button>
-          </div>
-        </section>
-        }
-
-        @if (settingsActiveTab() === 'account') {
-        <section class="space-y-6">
-          <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-700 dark:bg-slate-800/35">
-            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Change password</h3>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Keep your account secure with a strong, unique password.</p>
-
-            @if (usesPasswordAuth()) {
-            <div class="mt-4 grid gap-3 sm:grid-cols-2">
-              <label class="space-y-1.5 sm:col-span-2">
-                <span class="text-xs font-medium text-slate-600 dark:text-slate-300">Current password</span>
-                <input type="password" [value]="passwordCurrent()"
-                  (input)="passwordCurrent.set(($any($event.target).value ?? '').toString())"
-                  class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-emerald-500 dark:focus:ring-emerald-900/50" />
+        <!-- Tab content -->
+        <div class="flex-1 overflow-y-auto px-6 py-5">
+          @if (settingsActiveTab() === 'general') {
+          <section class="space-y-5">
+            <div class="grid gap-4 sm:grid-cols-2">
+              <label class="space-y-1.5">
+                <span class="text-xs font-medium text-slate-500 dark:text-slate-400">First name</span>
+                <input type="text" [value]="settingsFirstName()"
+                  (input)="settingsFirstName.set(($any($event.target).value ?? '').toString())"
+                  class="settings-input" />
               </label>
               <label class="space-y-1.5">
-                <span class="text-xs font-medium text-slate-600 dark:text-slate-300">New password</span>
-                <input type="password" [value]="passwordNext()"
-                  (input)="passwordNext.set(($any($event.target).value ?? '').toString())"
-                  class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-emerald-500 dark:focus:ring-emerald-900/50" />
-              </label>
-              <label class="space-y-1.5">
-                <span class="text-xs font-medium text-slate-600 dark:text-slate-300">Confirm password</span>
-                <input type="password" [value]="passwordConfirm()"
-                  (input)="passwordConfirm.set(($any($event.target).value ?? '').toString())"
-                  class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-emerald-500 dark:focus:ring-emerald-900/50" />
+                <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Last name</span>
+                <input type="text" [value]="settingsLastName()"
+                  (input)="settingsLastName.set(($any($event.target).value ?? '').toString())"
+                  class="settings-input" />
               </label>
             </div>
 
-            @if (passwordError()) {
-            <p class="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:border-rose-800/70 dark:bg-rose-900/25 dark:text-rose-300">
-              {{ passwordError() }}
+            <label class="space-y-1.5">
+              <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Email</span>
+              <input type="email" [value]="settingsEmail()" readonly
+                class="w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-500" />
+            </label>
+
+            <div class="space-y-1.5">
+              <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Theme</span>
+              <div class="flex gap-2">
+                <button type="button" (click)="isDarkMode() && toggleTheme()"
+                  class="flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition"
+                  [class]="!isDarkMode()
+                    ? 'border-slate-900 bg-slate-900 text-white dark:border-slate-200 dark:bg-slate-200 dark:text-slate-900'
+                    : 'border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600'">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                  </svg>
+                  Light
+                </button>
+                <button type="button" (click)="!isDarkMode() && toggleTheme()"
+                  class="flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition"
+                  [class]="isDarkMode()
+                    ? 'border-slate-900 bg-slate-900 text-white dark:border-slate-200 dark:bg-slate-200 dark:text-slate-900'
+                    : 'border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600'">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                  </svg>
+                  Dark
+                </button>
+              </div>
+            </div>
+
+            @if (settingsError()) {
+            <p class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:border-rose-800/60 dark:bg-rose-900/20 dark:text-rose-300">
+              {{ settingsError() }}
             </p>
             }
-            @if (passwordSuccess()) {
-            <p class="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-800/70 dark:bg-emerald-900/25 dark:text-emerald-300">
-              {{ passwordSuccess() }}
+            @if (settingsSuccess()) {
+            <p class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-800/60 dark:bg-emerald-900/20 dark:text-emerald-300">
+              {{ settingsSuccess() }}
             </p>
             }
 
-            <div class="mt-4 flex justify-end">
-              <button type="button" (click)="updatePassword()"
-                class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
-                [disabled]="passwordSaving()">
-                {{ passwordSaving() ? 'Updating...' : 'Update password' }}
+            <div class="flex justify-end pt-1">
+              <button type="button" (click)="saveProfileSettings()"
+                class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+                [disabled]="settingsSaving()">
+                {{ settingsSaving() ? 'Saving...' : 'Save changes' }}
               </button>
             </div>
-            } @else {
-            <p class="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:border-amber-900/60 dark:bg-amber-900/20 dark:text-amber-200">
-              This account uses a social sign-in provider. Password changes are not available here.
-            </p>
-            }
-          </div>
+          </section>
+          }
 
-          <div class="rounded-2xl border border-rose-200 bg-rose-50/60 p-4 dark:border-rose-900/70 dark:bg-rose-900/20">
-            <h3 class="text-sm font-semibold text-rose-700 dark:text-rose-300">Delete account</h3>
-            <p class="mt-1 text-xs text-rose-600 dark:text-rose-200">
-              This permanently deletes your profile, receipts, chats, folders, shares, and linked account data.
-            </p>
-            <div class="mt-4">
-              <button type="button" (click)="openDeleteConfirmation()"
-                class="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700">
-                Delete account permanently
-              </button>
-            </div>
-
-            @if (showDeleteConfirmation()) {
-            <div class="mt-4 rounded-xl border border-rose-300/80 bg-white/90 p-4 dark:border-rose-700/70 dark:bg-slate-900/60">
-              <p class="text-sm font-medium text-rose-700 dark:text-rose-300">Final confirmation required</p>
-              <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">Type <span class="font-semibold">DELETE</span> to confirm this irreversible action.</p>
-
-              <label class="mt-3 block space-y-1.5">
-                <span class="text-xs font-medium text-slate-600 dark:text-slate-300">Confirmation text</span>
-                <input type="text" [value]="deleteConfirmText()"
-                  (input)="deleteConfirmText.set(($any($event.target).value ?? '').toString())"
-                  placeholder="Type DELETE"
-                  class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-100 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-rose-500 dark:focus:ring-rose-900/45" />
-              </label>
+          @if (settingsActiveTab() === 'account') {
+          <section class="space-y-6">
+            <div class="rounded-xl border border-slate-200 p-4 dark:border-slate-700/80">
+              <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Change password</h3>
+              <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">Keep your account secure with a strong, unique password.</p>
 
               @if (usesPasswordAuth()) {
-              <label class="mt-3 block space-y-1.5">
-                <span class="text-xs font-medium text-slate-600 dark:text-slate-300">Current password</span>
-                <input type="password" [value]="deleteAccountPassword()"
-                  (input)="deleteAccountPassword.set(($any($event.target).value ?? '').toString())"
-                  class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-100 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-rose-500 dark:focus:ring-rose-900/45" />
-              </label>
-              }
+              <div class="mt-4 space-y-3">
+                <label class="space-y-1.5">
+                  <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Current password</span>
+                  <input type="password" [value]="passwordCurrent()"
+                    (input)="passwordCurrent.set(($any($event.target).value ?? '').toString())"
+                    class="settings-input" />
+                </label>
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <label class="space-y-1.5">
+                    <span class="text-xs font-medium text-slate-500 dark:text-slate-400">New password</span>
+                    <input type="password" [value]="passwordNext()"
+                      (input)="passwordNext.set(($any($event.target).value ?? '').toString())"
+                      class="settings-input" />
+                  </label>
+                  <label class="space-y-1.5">
+                    <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Confirm password</span>
+                    <input type="password" [value]="passwordConfirm()"
+                      (input)="passwordConfirm.set(($any($event.target).value ?? '').toString())"
+                      class="settings-input" />
+                  </label>
+                </div>
+              </div>
 
-              @if (deleteAccountError()) {
-              <p class="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-800/70 dark:bg-rose-900/25 dark:text-rose-300">
-                {{ deleteAccountError() }}
+              @if (passwordError()) {
+              <p class="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:border-rose-800/60 dark:bg-rose-900/20 dark:text-rose-300">
+                {{ passwordError() }}
+              </p>
+              }
+              @if (passwordSuccess()) {
+              <p class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-800/60 dark:bg-emerald-900/20 dark:text-emerald-300">
+                {{ passwordSuccess() }}
               </p>
               }
 
-              <div class="mt-4 flex flex-wrap justify-end gap-2">
-                <button type="button" (click)="closeDeleteConfirmation()"
-                  class="rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800">
-                  Cancel
-                </button>
-                <button type="button" (click)="deleteAccount()"
-                  class="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  [disabled]="!canConfirmDelete()">
-                  {{ deleteAccountPending() ? 'Deleting...' : 'Delete everything' }}
+              <div class="mt-4 flex justify-end">
+                <button type="button" (click)="updatePassword()"
+                  class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+                  [disabled]="passwordSaving()">
+                  {{ passwordSaving() ? 'Updating...' : 'Update password' }}
                 </button>
               </div>
+              } @else {
+              <p class="mt-3 rounded-lg border border-amber-200/80 bg-amber-50/60 px-3 py-2 text-sm text-amber-700 dark:border-amber-800/40 dark:bg-amber-900/15 dark:text-amber-300">
+                This account uses a social sign-in provider. Password changes are not available here.
+              </p>
+              }
             </div>
+
+            <div class="rounded-xl border border-rose-200/80 p-4 dark:border-rose-900/50">
+              <h3 class="text-sm font-semibold text-rose-700 dark:text-rose-300">Delete account</h3>
+              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Permanently deletes your profile, receipts, chats, folders, shares, and linked data.
+              </p>
+              <div class="mt-4">
+                <button type="button" (click)="openDeleteConfirmation()"
+                  class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-rose-700">
+                  Delete account
+                </button>
+              </div>
+
+              @if (showDeleteConfirmation()) {
+              <div class="mt-4 rounded-lg border border-rose-200 bg-white p-4 dark:border-rose-800/50 dark:bg-slate-900/80">
+                <p class="text-sm font-medium text-rose-700 dark:text-rose-300">Final confirmation</p>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Type <span class="font-semibold text-slate-700 dark:text-slate-200">DELETE</span> to confirm.</p>
+
+                <label class="mt-3 block space-y-1.5">
+                  <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Confirmation</span>
+                  <input type="text" [value]="deleteConfirmText()"
+                    (input)="deleteConfirmText.set(($any($event.target).value ?? '').toString())"
+                    placeholder="Type DELETE"
+                    class="settings-input focus:border-rose-300 focus:ring-rose-100 dark:focus:border-rose-500 dark:focus:ring-rose-900/30" />
+                </label>
+
+                @if (usesPasswordAuth()) {
+                <label class="mt-3 block space-y-1.5">
+                  <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Current password</span>
+                  <input type="password" [value]="deleteAccountPassword()"
+                    (input)="deleteAccountPassword.set(($any($event.target).value ?? '').toString())"
+                    class="settings-input focus:border-rose-300 focus:ring-rose-100 dark:focus:border-rose-500 dark:focus:ring-rose-900/30" />
+                </label>
+                }
+
+                @if (deleteAccountError()) {
+                <p class="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:border-rose-800/60 dark:bg-rose-900/20 dark:text-rose-300">
+                  {{ deleteAccountError() }}
+                </p>
+                }
+
+                <div class="mt-4 flex justify-end gap-2">
+                  <button type="button" (click)="closeDeleteConfirmation()"
+                    class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                    Cancel
+                  </button>
+                  <button type="button" (click)="deleteAccount()"
+                    class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    [disabled]="!canConfirmDelete()">
+                    {{ deleteAccountPending() ? 'Deleting...' : 'Delete everything' }}
+                  </button>
+                </div>
+              </div>
+              }
+            </div>
+          </section>
+          }
+
+          @if (settingsActiveTab() === 'notifications') {
+          <section class="space-y-5">
+            <p class="text-sm text-slate-500 dark:text-slate-400">Choose what updates we send you.</p>
+
+            <div class="space-y-2">
+              <button type="button" (click)="notificationsReceiptProcessing.set(!notificationsReceiptProcessing())"
+                class="settings-toggle-row">
+                <div>
+                  <p class="text-sm font-medium text-slate-800 dark:text-slate-100">Receipt processing</p>
+                  <p class="text-xs text-slate-400 dark:text-slate-500">Get notified when receipts are processed or need review.</p>
+                </div>
+                <span class="settings-toggle" [class.settings-toggle--on]="notificationsReceiptProcessing()"></span>
+              </button>
+
+              <button type="button" (click)="notificationsProductUpdates.set(!notificationsProductUpdates())"
+                class="settings-toggle-row">
+                <div>
+                  <p class="text-sm font-medium text-slate-800 dark:text-slate-100">Product updates</p>
+                  <p class="text-xs text-slate-400 dark:text-slate-500">New features and improvements.</p>
+                </div>
+                <span class="settings-toggle" [class.settings-toggle--on]="notificationsProductUpdates()"></span>
+              </button>
+
+              <button type="button" (click)="notificationsSecurityAlerts.set(!notificationsSecurityAlerts())"
+                class="settings-toggle-row">
+                <div>
+                  <p class="text-sm font-medium text-slate-800 dark:text-slate-100">Security alerts</p>
+                  <p class="text-xs text-slate-400 dark:text-slate-500">Account activity and security notifications.</p>
+                </div>
+                <span class="settings-toggle" [class.settings-toggle--on]="notificationsSecurityAlerts()"></span>
+              </button>
+            </div>
+
+            @if (notificationsError()) {
+            <p class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:border-rose-800/60 dark:bg-rose-900/20 dark:text-rose-300">
+              {{ notificationsError() }}
+            </p>
             }
-          </div>
-        </section>
-        }
+            @if (notificationsSuccess()) {
+            <p class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-800/60 dark:bg-emerald-900/20 dark:text-emerald-300">
+              {{ notificationsSuccess() }}
+            </p>
+            }
 
-        @if (settingsActiveTab() === 'notifications') {
-        <section class="space-y-4">
-          <p class="text-sm text-slate-600 dark:text-slate-300">Choose what updates we send you. You can refine these later.</p>
-
-          <div class="space-y-3">
-            <button type="button" (click)="notificationsReceiptProcessing.set(!notificationsReceiptProcessing())"
-              class="settings-toggle-row">
-              <div>
-                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Receipt processing updates</p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Get notified when new receipts are processed or require review.</p>
-              </div>
-              <span class="settings-toggle" [class.settings-toggle--on]="notificationsReceiptProcessing()"></span>
-            </button>
-
-            <button type="button" (click)="notificationsProductUpdates.set(!notificationsProductUpdates())"
-              class="settings-toggle-row">
-              <div>
-                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Product updates</p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Receive updates about new features and improvements.</p>
-              </div>
-              <span class="settings-toggle" [class.settings-toggle--on]="notificationsProductUpdates()"></span>
-            </button>
-
-            <button type="button" (click)="notificationsSecurityAlerts.set(!notificationsSecurityAlerts())"
-              class="settings-toggle-row">
-              <div>
-                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Security alerts</p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Important account activity and security notifications.</p>
-              </div>
-              <span class="settings-toggle" [class.settings-toggle--on]="notificationsSecurityAlerts()"></span>
-            </button>
-          </div>
-
-          @if (notificationsError()) {
-          <p class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:border-rose-800/70 dark:bg-rose-900/25 dark:text-rose-300">
-            {{ notificationsError() }}
-          </p>
+            <div class="flex justify-end pt-1">
+              <button type="button" (click)="saveNotificationSettings()"
+                class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+                [disabled]="notificationsSaving()">
+                {{ notificationsSaving() ? 'Saving...' : 'Save changes' }}
+              </button>
+            </div>
+          </section>
           }
-          @if (notificationsSuccess()) {
-          <p class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-800/70 dark:bg-emerald-900/25 dark:text-emerald-300">
-            {{ notificationsSuccess() }}
-          </p>
-          }
-
-          <div class="flex justify-end">
-            <button type="button" (click)="saveNotificationSettings()"
-              class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-              [disabled]="notificationsSaving()">
-              {{ notificationsSaving() ? 'Saving...' : 'Save notifications' }}
-            </button>
-          </div>
-        </section>
-        }
+        </div>
       </div>
     </div>
   </div>
