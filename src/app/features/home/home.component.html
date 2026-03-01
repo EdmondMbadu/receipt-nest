@@ -634,7 +634,7 @@
             class="pointer-events-none absolute inset-x-0 border-t border-slate-200/70 dark:border-slate-700/70"
             [style.bottom.%]="yTick.position">
           </div>
-          <div class="relative z-10 flex h-full items-end gap-1 px-1.5 py-1.5">
+          <div class="relative z-10 flex h-full items-end gap-1 px-1.5 pb-1.5 pt-0">
             <button type="button" *ngFor="let month of histogramMonthlyData(); trackBy: trackHistogramMonth"
               class="group relative flex-1 min-w-[3px] rounded-t-md bg-emerald-200/80 transition-all duration-150 hover:bg-emerald-500 dark:bg-emerald-500/45 dark:hover:bg-emerald-400"
               [style.height.%]="getHistogramBarHeight(month.amount)" (mouseenter)="hoveredHistogramMonth.set(month)"

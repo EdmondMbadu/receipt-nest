@@ -1219,11 +1219,20 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   formatCompactCurrency(amount: number): string {
+    if (Math.abs(amount) < 1000) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      }).format(amount);
+    }
+
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       notation: 'compact',
-      maximumFractionDigits: amount >= 100 ? 0 : 1
+      minimumFractionDigits: Math.abs(amount) < 10_000 ? 1 : 0,
+      maximumFractionDigits: 1
     }).format(amount);
   }
 
@@ -1265,14 +1274,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   getHistogramBarHeight(amount: number): number {
     const maxAmount = this.histogramMaxAmount();
-    if (maxAmount <= 0) {
-      return 1;
+    if (maxAmount <= 0 || amount <= 0) {
+      return 0;
     }
-    const normalized = (amount / maxAmount) * 100;
-    if (amount <= 0) {
-      return 1;
-    }
-    return Math.max(4, normalized);
+    return (amount / maxAmount) * 100;
   }
 
   trackHistogramMonth(index: number, month: HistogramMonthPoint): string {
