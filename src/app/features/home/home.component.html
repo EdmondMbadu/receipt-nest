@@ -389,175 +389,250 @@
     <section *ngIf="!isLoadingReceipts() && receiptCount() > 0"
       class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-sm">
       <!-- Graph Header -->
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
-        <div>
-          <!-- Month Picker -->
-          <div class="relative inline-block">
-            <button type="button" (click)="toggleMonthPickerGraph()"
-              class="inline-flex items-center gap-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition-colors">
-              {{ selectedMonthLabel() }}
-              <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
+      <div class="mb-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div
+            class="inline-flex items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 p-1">
+            <button type="button" (click)="setGraphViewMode('daily')"
+              class="rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+              [attr.aria-pressed]="graphViewMode() === 'daily'"
+              [class.bg-white]="graphViewMode() === 'daily'" [class.dark:bg-slate-700]="graphViewMode() === 'daily'"
+              [class.text-slate-800]="graphViewMode() === 'daily'" [class.dark:text-slate-100]="graphViewMode() === 'daily'"
+              [class.text-slate-500]="graphViewMode() !== 'daily'" [class.dark:text-slate-300]="graphViewMode() !== 'daily'">
+              Month
             </button>
-            <!-- Month Picker Dropdown Menu -->
-            <div *ngIf="showMonthPickerGraph()"
-              class="absolute left-0 top-full mt-1 z-20 w-48 max-h-64 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl">
-              <button *ngFor="let month of availableMonths()" type="button"
-                (click)="selectMonthFromGraph(month.year, month.month)"
-                class="w-full px-4 py-2.5 text-left text-xs font-medium hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors"
-                [class.bg-emerald-50]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
-                [class.dark:bg-slate-700]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
-                [class.text-emerald-600]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
-                [class.dark:text-emerald-400]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()">
-                {{ month.label }}
+            <button type="button" (click)="setGraphViewMode('histogram')"
+              class="rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+              [attr.aria-pressed]="graphViewMode() === 'histogram'"
+              [class.bg-white]="graphViewMode() === 'histogram'"
+              [class.dark:bg-slate-700]="graphViewMode() === 'histogram'"
+              [class.text-slate-800]="graphViewMode() === 'histogram'"
+              [class.dark:text-slate-100]="graphViewMode() === 'histogram'"
+              [class.text-slate-500]="graphViewMode() !== 'histogram'"
+              [class.dark:text-slate-300]="graphViewMode() !== 'histogram'">
+              Histogram
+            </button>
+          </div>
+
+          <div *ngIf="graphViewMode() === 'histogram'"
+            class="inline-flex items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1">
+            <button type="button" (click)="setHistogramRange('this-year')"
+              class="rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+              [attr.aria-pressed]="histogramRange() === 'this-year'"
+              [class.bg-emerald-500]="histogramRange() === 'this-year'"
+              [class.text-white]="histogramRange() === 'this-year'" [class.bg-transparent]="histogramRange() !== 'this-year'"
+              [class.text-slate-500]="histogramRange() !== 'this-year'" [class.dark:text-slate-300]="histogramRange() !== 'this-year'">
+              This Year
+            </button>
+            <button type="button" (click)="setHistogramRange('5y')"
+              class="rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+              [attr.aria-pressed]="histogramRange() === '5y'"
+              [class.bg-emerald-500]="histogramRange() === '5y'" [class.text-white]="histogramRange() === '5y'"
+              [class.bg-transparent]="histogramRange() !== '5y'" [class.text-slate-500]="histogramRange() !== '5y'"
+              [class.dark:text-slate-300]="histogramRange() !== '5y'">
+              5Y
+            </button>
+            <button type="button" (click)="setHistogramRange('all')"
+              class="rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+              [attr.aria-pressed]="histogramRange() === 'all'"
+              [class.bg-emerald-500]="histogramRange() === 'all'" [class.text-white]="histogramRange() === 'all'"
+              [class.bg-transparent]="histogramRange() !== 'all'" [class.text-slate-500]="histogramRange() !== 'all'"
+              [class.dark:text-slate-300]="histogramRange() !== 'all'">
+              All
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div *ngIf="graphViewMode() === 'daily'" class="relative inline-block">
+              <button type="button" (click)="toggleMonthPickerGraph()"
+                class="inline-flex items-center gap-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition-colors">
+                {{ selectedMonthLabel() }}
+                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div *ngIf="showMonthPickerGraph()"
+                class="absolute left-0 top-full mt-1 z-20 w-48 max-h-64 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl">
+                <button *ngFor="let month of availableMonths()" type="button"
+                  (click)="selectMonthFromGraph(month.year, month.month)"
+                  class="w-full px-4 py-2.5 text-left text-xs font-medium hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors"
+                  [class.bg-emerald-50]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
+                  [class.dark:bg-slate-700]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
+                  [class.text-emerald-600]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
+                  [class.dark:text-emerald-400]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()">
+                  {{ month.label }}
+                </button>
+              </div>
+            </div>
+
+            <p *ngIf="graphViewMode() === 'histogram'"
+              class="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              {{ histogramRangeLabel() }}
+            </p>
+
+            <div class="mt-1 flex items-baseline gap-3">
+              <p class="text-2xl sm:text-3xl font-bold"
+                [class.text-emerald-600]="graphViewMode() === 'daily' && !hoveredDay()"
+                [class.dark:text-emerald-400]="graphViewMode() === 'daily' && !hoveredDay()"
+                [class.text-slate-900]="graphViewMode() === 'histogram' || (graphViewMode() === 'daily' && hoveredDay())"
+                [class.dark:text-white]="graphViewMode() === 'histogram' || (graphViewMode() === 'daily' && hoveredDay())">
+                {{
+                graphViewMode() === 'histogram'
+                ? formatCurrency(hoveredHistogramMonth()?.amount ?? histogramTotalSpend())
+                : (hoveredDay() ? formatCurrency(hoveredDay()!.amount) : formatCurrency(selectedMonthSpend()))
+                }}
+              </p>
+
+              <span *ngIf="graphViewMode() === 'daily' && !hoveredDay() && monthOverMonthChange()"
+                class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium"
+                [class.bg-emerald-50]="!monthOverMonthChange()!.isIncrease"
+                [class.dark:bg-emerald-900/30]="!monthOverMonthChange()!.isIncrease"
+                [class.text-emerald-700]="!monthOverMonthChange()!.isIncrease"
+                [class.dark:text-emerald-300]="!monthOverMonthChange()!.isIncrease"
+                [class.bg-red-50]="monthOverMonthChange()!.isIncrease"
+                [class.dark:bg-red-900/30]="monthOverMonthChange()!.isIncrease"
+                [class.text-red-700]="monthOverMonthChange()!.isIncrease"
+                [class.dark:text-red-300]="monthOverMonthChange()!.isIncrease">
+                <svg *ngIf="!monthOverMonthChange()!.isIncrease" class="h-3 w-3" fill="none" stroke="currentColor"
+                  stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
+                </svg>
+                <svg *ngIf="monthOverMonthChange()!.isIncrease" class="h-3 w-3" fill="none" stroke="currentColor"
+                  stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22m0 0l-5.94-2.281m5.94 2.28l-2.28 5.941" />
+                </svg>
+                {{ monthOverMonthChange()!.percent }}% {{ monthOverMonthChange()!.isIncrease ? 'up' : 'down' }}
+              </span>
+            </div>
+
+            <p *ngIf="graphViewMode() === 'daily' && hoveredDay()" class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Day {{ hoveredDay()!.day }} spending
+            </p>
+            <p *ngIf="graphViewMode() === 'daily' && !hoveredDay() && !selectedDay()" class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Total spend for {{ selectedMonthLabel() }}
+            </p>
+            <div
+              *ngIf="graphViewMode() === 'daily' && !hoveredDay() && selectedDay() && selectedDay()!.month === receiptService.selectedMonth() && selectedDay()!.year === receiptService.selectedYear()"
+              class="mt-1 flex items-center gap-2">
+              <p class="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                Showing Day {{ selectedDay()!.day }} receipts
+              </p>
+              <button type="button" (click)="clearDaySelection()"
+                class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
+                Clear
+                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
-          </div>
-          <!-- Spending Amount -->
-          <div class="flex items-baseline gap-3 mt-1">
-            <p class="text-2xl sm:text-3xl font-bold" [class.text-emerald-600]="!hoveredDay()"
-              [class.dark:text-emerald-400]="!hoveredDay()" [class.text-slate-900]="hoveredDay()"
-              [class.dark:text-white]="hoveredDay()">
-              {{ hoveredDay() ? formatCurrency(hoveredDay()!.amount) : formatCurrency(selectedMonthSpend()) }}
+            <p *ngIf="graphViewMode() === 'daily' && !hoveredDay() && selectedDay() && (selectedDay()!.month !== receiptService.selectedMonth() || selectedDay()!.year !== receiptService.selectedYear())"
+              class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Total spend for {{ selectedMonthLabel() }}
             </p>
-            <!-- Month over month change badge -->
-            <span *ngIf="!hoveredDay() && monthOverMonthChange()"
-              class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium"
-              [class.bg-emerald-50]="!monthOverMonthChange()!.isIncrease"
-              [class.dark:bg-emerald-900/30]="!monthOverMonthChange()!.isIncrease"
-              [class.text-emerald-700]="!monthOverMonthChange()!.isIncrease"
-              [class.dark:text-emerald-300]="!monthOverMonthChange()!.isIncrease"
-              [class.bg-red-50]="monthOverMonthChange()!.isIncrease"
-              [class.dark:bg-red-900/30]="monthOverMonthChange()!.isIncrease"
-              [class.text-red-700]="monthOverMonthChange()!.isIncrease"
-              [class.dark:text-red-300]="monthOverMonthChange()!.isIncrease">
-              <!-- Down arrow (spending decreased - good) -->
-              <svg *ngIf="!monthOverMonthChange()!.isIncrease" class="h-3 w-3" fill="none" stroke="currentColor"
-                stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
-              </svg>
-              <!-- Up arrow (spending increased - bad) -->
-              <svg *ngIf="monthOverMonthChange()!.isIncrease" class="h-3 w-3" fill="none" stroke="currentColor"
-                stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22m0 0l-5.94-2.281m5.94 2.28l-2.28 5.941" />
-              </svg>
-              {{ monthOverMonthChange()!.percent }}% {{ monthOverMonthChange()!.isIncrease ? 'up' : 'down' }}
-            </span>
-          </div>
-          <p *ngIf="hoveredDay()" class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Day {{ hoveredDay()!.day }} spending
-          </p>
-          <p *ngIf="!hoveredDay() && !selectedDay()" class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Total spend for {{ selectedMonthLabel() }}
-          </p>
-          <!-- Selected day indicator with clear button -->
-          <div
-            *ngIf="!hoveredDay() && selectedDay() && selectedDay()!.month === receiptService.selectedMonth() && selectedDay()!.year === receiptService.selectedYear()"
-            class="flex items-center gap-2 mt-1">
-            <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-              Showing Day {{ selectedDay()!.day }} receipts
+
+            <p *ngIf="graphViewMode() === 'histogram' && hoveredHistogramMonth()"
+              class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              {{ hoveredHistogramMonth()!.fullLabel }}
             </p>
-            <button type="button" (click)="clearDaySelection()"
-              class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-              Clear
-              <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <p *ngIf="graphViewMode() === 'histogram' && !hoveredHistogramMonth()"
+              class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Monthly spending trend for {{ histogramRangeLabel() }}
+            </p>
           </div>
-          <p *ngIf="!hoveredDay() && selectedDay() && (selectedDay()!.month !== receiptService.selectedMonth() || selectedDay()!.year !== receiptService.selectedYear())"
-            class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Total spend for {{ selectedMonthLabel() }}
-          </p>
-        </div>
-        <!-- Month Navigation + Share -->
-        <div class="flex items-center justify-end gap-2">
-          <button type="button" (click)="openShareModal()"
-            class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
-            aria-label="Share this month's snapshot">
-            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
-            </svg>
-            <span class="hidden sm:inline">Share</span>
-          </button>
-          <div
-            class="flex items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1">
-            <button type="button" (click)="goToPreviousMonth()"
-              class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 transition-colors">
-              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+
+          <div *ngIf="graphViewMode() === 'daily'" class="flex items-center justify-end gap-2">
+            <button type="button" (click)="openShareModal()"
+              class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+              aria-label="Share this month's snapshot">
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
               </svg>
+              <span class="hidden sm:inline">Share</span>
             </button>
-            <button type="button" (click)="goToNextMonth()" [disabled]="isCurrentMonth()"
-              class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent">
-              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+            <div
+              class="flex items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1">
+              <button type="button" (click)="goToPreviousMonth()"
+                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 transition-colors">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button type="button" (click)="goToNextMonth()" [disabled]="isCurrentMonth()"
+                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Interactive SVG Chart -->
-      <div class="relative h-36 sm:h-44" (mouseleave)="hoveredDay.set(null)" (touchend)="hoveredDay.set(null)">
+      <div *ngIf="graphViewMode() === 'daily'" class="relative h-36 sm:h-44" (mouseleave)="hoveredDay.set(null)"
+        (touchend)="hoveredDay.set(null)">
         <svg class="w-full h-full" viewBox="0 0 200 100" preserveAspectRatio="none">
-          <!-- Gradient for area fill -->
           <defs>
             <linearGradient id="spendingGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="#10b981" stop-opacity="0.15" />
               <stop offset="100%" stop-color="#10b981" stop-opacity="0.02" />
             </linearGradient>
           </defs>
-
-          <!-- Area fill -->
           <path [attr.d]="chartPathData().areaPath" fill="url(#spendingGradient)" />
-
-          <!-- Line -->
           <path [attr.d]="chartPathData().linePath" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round"
             stroke-linejoin="round" />
-
-          <!-- Selected day indicator dot (persistent) -->
           <circle
             *ngIf="selectedDay() && chartPathData().hasData && selectedDay()!.month === receiptService.selectedMonth() && selectedDay()!.year === receiptService.selectedYear()"
             [attr.cx]="getChartX(selectedDay()!.day)" [attr.cy]="getChartY(getAmountForDay(selectedDay()!.day))" r="5"
             fill="#10b981" stroke="white" stroke-width="2" class="drop-shadow-md" />
-
-          <!-- Hover indicator dot -->
           <circle *ngIf="hoveredDay() && chartPathData().hasData" [attr.cx]="getChartX(hoveredDay()!.day)"
             [attr.cy]="getChartY(hoveredDay()!.amount)" r="3" fill="#10b981" stroke="white" stroke-width="1.5" />
         </svg>
 
-        <!-- Invisible hover areas for each day -->
-        <div class="absolute inset-0 flex z-10">
+        <div class="absolute inset-0 z-10 flex">
           <div *ngFor="let day of dailySpendingData()" class="flex-1 cursor-pointer" (mouseenter)="hoveredDay.set(day)"
             (touchstart)="hoveredDay.set(day)" (click)="onDayClick(day, $event)">
           </div>
         </div>
 
-        <!-- Vertical selected day line (persistent) -->
         <div
           *ngIf="selectedDay() && selectedDay()!.month === receiptService.selectedMonth() && selectedDay()!.year === receiptService.selectedYear()"
           class="absolute top-0 bottom-0 w-0.5 bg-emerald-500 pointer-events-none transition-all duration-300"
           [style.left.%]="((selectedDay()!.day - 1) / (dailySpendingData().length - 1)) * 100">
         </div>
-
-        <!-- Vertical hover line -->
         <div *ngIf="hoveredDay()" class="absolute top-0 bottom-0 w-px bg-emerald-500/50 pointer-events-none"
           [style.left.%]="((hoveredDay()!.day - 1) / (dailySpendingData().length - 1)) * 100">
         </div>
       </div>
 
-      <!-- X-axis labels -->
-      <div class="flex justify-between mt-3 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+      <div *ngIf="graphViewMode() === 'daily'"
+        class="mt-3 flex justify-between text-[10px] font-medium text-slate-400 dark:text-slate-500">
         <span>1</span>
         <span>{{ Math.ceil(dailySpendingData().length / 4) }}</span>
         <span>{{ Math.ceil(dailySpendingData().length / 2) }}</span>
         <span>{{ Math.ceil(dailySpendingData().length * 3 / 4) }}</span>
         <span>{{ dailySpendingData().length }}</span>
+      </div>
+
+      <div *ngIf="graphViewMode() === 'histogram'" class="relative h-36 sm:h-44" (mouseleave)="hoveredHistogramMonth.set(null)"
+        (touchend)="hoveredHistogramMonth.set(null)">
+        <div
+          class="absolute inset-0 flex items-end gap-1 rounded-xl border border-slate-200/70 bg-slate-50/60 px-1.5 py-1.5 dark:border-slate-700/80 dark:bg-slate-800/35">
+          <button type="button" *ngFor="let month of histogramMonthlyData(); trackBy: trackHistogramMonth"
+            class="group relative flex-1 min-w-[3px] rounded-t-md bg-emerald-200/80 transition-all duration-150 hover:bg-emerald-500 dark:bg-emerald-500/45 dark:hover:bg-emerald-400"
+            [style.height.%]="getHistogramBarHeight(month.amount)" (mouseenter)="hoveredHistogramMonth.set(month)"
+            (touchstart)="hoveredHistogramMonth.set(month)" [attr.aria-label]="month.fullLabel + ': ' + formatCurrency(month.amount)">
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="graphViewMode() === 'histogram'"
+        class="mt-3 flex justify-between text-[10px] font-medium text-slate-400 dark:text-slate-500">
+        <span *ngFor="let tick of histogramAxisLabels()">{{ tick.label }}</span>
       </div>
     </section>
 

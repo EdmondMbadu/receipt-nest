@@ -22,6 +22,18 @@ interface MonthGroup {
   receipts: Receipt[];
 }
 
+type GraphViewMode = 'daily' | 'histogram';
+type HistogramRange = 'this-year' | '5y' | 'all';
+
+interface HistogramMonthPoint {
+  monthKey: string;
+  month: number;
+  year: number;
+  label: string;
+  fullLabel: string;
+  amount: number;
+}
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -51,6 +63,9 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly showAllReceipts = signal(false);
   readonly hoveredDay = signal<{ day: number; amount: number; cumulative: number } | null>(null);
   readonly selectedDay = signal<{ day: number; month: number; year: number } | null>(null);
+  readonly graphViewMode = signal<GraphViewMode>('daily');
+  readonly histogramRange = signal<HistogramRange>('this-year');
+  readonly hoveredHistogramMonth = signal<HistogramMonthPoint | null>(null);
   readonly showShareModal = signal(false);
   readonly shareIncludeName = signal(true);
   readonly shareIncludeEmail = signal(true);
@@ -132,6 +147,101 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   // Chart data from service
   readonly dailySpendingData = this.receiptService.dailySpendingData;
   readonly chartPathData = this.receiptService.chartPathData;
+  readonly histogramMonthlyData = computed<HistogramMonthPoint[]>(() => {
+    const range = this.histogramRange();
+    const now = new Date();
+    const receipts = this.receipts();
+    const endMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthlyTotals = new Map<string, number>();
+    let earliestMonth: Date | null = null;
+
+    for (const receipt of receipts) {
+      if (receipt.totalAmount === undefined || receipt.totalAmount === null) {
+        continue;
+      }
+
+      const date = this.resolveReceiptDate(receipt);
+      if (!date) {
+        continue;
+      }
+
+      const monthDate = new Date(date.getFullYear(), date.getMonth(), 1);
+      if (!earliestMonth || monthDate.getTime() < earliestMonth.getTime()) {
+        earliestMonth = monthDate;
+      }
+
+      const key = this.getMonthKey(monthDate.getFullYear(), monthDate.getMonth());
+      monthlyTotals.set(key, (monthlyTotals.get(key) ?? 0) + (receipt.totalAmount || 0));
+    }
+
+    let startMonth = new Date(now.getFullYear(), 0, 1);
+    if (range === '5y') {
+      startMonth = new Date(endMonth.getFullYear(), endMonth.getMonth() - 59, 1);
+    } else if (range === 'all') {
+      startMonth = earliestMonth ? new Date(earliestMonth.getFullYear(), earliestMonth.getMonth(), 1) : endMonth;
+    }
+
+    if (startMonth.getTime() > endMonth.getTime()) {
+      startMonth = new Date(endMonth.getFullYear(), endMonth.getMonth(), 1);
+    }
+
+    const data: HistogramMonthPoint[] = [];
+    const cursor = new Date(startMonth.getFullYear(), startMonth.getMonth(), 1);
+
+    while (cursor.getTime() <= endMonth.getTime()) {
+      const year = cursor.getFullYear();
+      const month = cursor.getMonth();
+      const key = this.getMonthKey(year, month);
+      const label = range === 'this-year'
+        ? cursor.toLocaleDateString('en-US', { month: 'short' })
+        : cursor.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+
+      data.push({
+        monthKey: key,
+        month,
+        year,
+        label,
+        fullLabel: cursor.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+        amount: monthlyTotals.get(key) ?? 0
+      });
+
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+
+    return data;
+  });
+  readonly histogramMaxAmount = computed(() => {
+    const values = this.histogramMonthlyData().map((item) => item.amount);
+    return values.length ? Math.max(...values, 0) : 0;
+  });
+  readonly histogramTotalSpend = computed(() =>
+    this.histogramMonthlyData().reduce((sum, item) => sum + item.amount, 0)
+  );
+  readonly histogramRangeLabel = computed(() => {
+    const range = this.histogramRange();
+    if (range === 'this-year') return 'This year';
+    if (range === '5y') return 'Last 5 years';
+    return 'All time';
+  });
+  readonly histogramAxisLabels = computed(() => {
+    const data = this.histogramMonthlyData();
+    if (!data.length) {
+      return [];
+    }
+
+    const indexes = Array.from(new Set([
+      0,
+      Math.floor((data.length - 1) * 0.25),
+      Math.floor((data.length - 1) * 0.5),
+      Math.floor((data.length - 1) * 0.75),
+      data.length - 1
+    ]));
+
+    return indexes.map((index) => ({
+      key: `${data[index].monthKey}-${index}`,
+      label: data[index].label
+    }));
+  });
 
   // Keep for backward compatibility
   readonly currentMonthSpend = this.selectedMonthSpend;
@@ -1107,6 +1217,37 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  setGraphViewMode(mode: GraphViewMode): void {
+    this.graphViewMode.set(mode);
+    this.hoveredDay.set(null);
+    this.hoveredHistogramMonth.set(null);
+    if (mode === 'histogram') {
+      this.clearDaySelection();
+      this.closeMonthPickerGraph();
+    }
+  }
+
+  setHistogramRange(range: HistogramRange): void {
+    this.histogramRange.set(range);
+    this.hoveredHistogramMonth.set(null);
+  }
+
+  getHistogramBarHeight(amount: number): number {
+    const maxAmount = this.histogramMaxAmount();
+    if (maxAmount <= 0) {
+      return 1;
+    }
+    const normalized = (amount / maxAmount) * 100;
+    if (amount <= 0) {
+      return 1;
+    }
+    return Math.max(4, normalized);
+  }
+
+  trackHistogramMonth(index: number, month: HistogramMonthPoint): string {
+    return month.monthKey;
+  }
+
   // Click on a day in the graph to filter receipts
   onDayClick(day: { day: number; amount: number; cumulative: number }, event?: Event): void {
     // Stop propagation so backdrop doesn't immediately clear the selection
@@ -1204,6 +1345,30 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     const padding = 5;
     const chartHeight = height - padding * 2;
     return padding + chartHeight - (amount / maxValue) * chartHeight;
+  }
+
+  private resolveReceiptDate(receipt: Receipt): Date | null {
+    if (receipt.date) {
+      const parsed = new Date(receipt.date);
+      if (!Number.isNaN(parsed.getTime())) {
+        return parsed;
+      }
+    }
+
+    if (receipt.createdAt) {
+      const createdDate = (receipt.createdAt as any).toDate
+        ? (receipt.createdAt as any).toDate()
+        : new Date(receipt.createdAt as any);
+      if (!Number.isNaN(createdDate.getTime())) {
+        return createdDate;
+      }
+    }
+
+    return null;
+  }
+
+  private getMonthKey(year: number, month: number): string {
+    return `${year}-${String(month + 1).padStart(2, '0')}`;
   }
 
   @HostListener('document:click', ['$event'])
