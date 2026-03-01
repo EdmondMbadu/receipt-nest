@@ -96,6 +96,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/terms/terms.component').then((m) => m.TermsComponent)
   },
   {
+    path: 'goodbye',
+    loadComponent: () => import('./features/goodbye/goodbye.component').then((m) => m.GoodbyeComponent)
+  },
+  {
     path: '**',
     redirectTo: ''
   }

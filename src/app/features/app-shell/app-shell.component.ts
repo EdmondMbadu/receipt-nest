@@ -321,7 +321,7 @@ export class AppShellComponent {
       });
       this.clearClientDeletionArtifacts();
       this.closeSettingsModal();
-      await this.router.navigate(['/login']);
+      await this.router.navigate(['/goodbye']);
     } catch (error) {
       this.deleteAccountError.set(this.getErrorMessage(error, 'Unable to delete account right now.'));
     } finally {
