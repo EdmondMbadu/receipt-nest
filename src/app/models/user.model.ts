@@ -1,5 +1,11 @@
 import { Timestamp, serverTimestamp } from 'firebase/firestore';
 
+export interface NotificationSettings {
+  receiptProcessing: boolean;
+  productUpdates: boolean;
+  securityAlerts: boolean;
+}
+
 export interface UserProfile {
   id: string;
   firstName: string;
@@ -23,6 +29,7 @@ export interface UserProfile {
   receiptForwardingAddress?: string;
   receiptForwardingFallbackAddresses?: string[];
   receiptForwardingEnabled?: boolean;
+  notificationSettings?: NotificationSettings;
   createdAt?: Timestamp | ReturnType<typeof serverTimestamp>;
   updatedAt?: Timestamp | ReturnType<typeof serverTimestamp>;
 }

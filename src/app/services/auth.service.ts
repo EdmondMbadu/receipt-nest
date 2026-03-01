@@ -2,15 +2,18 @@ import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core
 import { isPlatformBrowser } from '@angular/common';
 import {
   Auth,
-  UserCredential,
+  EmailAuthProvider,
   GoogleAuthProvider,
+  UserCredential,
   createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
+  reauthenticateWithCredential,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
-  signOut
+  signOut,
+  updatePassword
 } from 'firebase/auth';
 import {
   Firestore,
@@ -18,12 +21,13 @@ import {
   getDoc,
   getFirestore,
   serverTimestamp,
-  setDoc
+  setDoc,
+  updateDoc
 } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 
 import { app } from '../../../environments/environments';
-import { UserProfile } from '../models/user.model';
+import { NotificationSettings, UserProfile } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -39,6 +43,11 @@ export class AuthService {
   private readonly initPromise: Promise<void>;
   private authStateReady: Promise<void> = Promise.resolve();
   private resolveAuthStateReady: (() => void) | null = null;
+  private readonly defaultNotificationSettings: NotificationSettings = {
+    receiptProcessing: true,
+    productUpdates: false,
+    securityAlerts: true
+  };
 
   readonly user = signal<UserProfile | null>(null);
   readonly isLoading = signal<boolean>(true);
@@ -111,7 +120,11 @@ export class AuthService {
 
     if (snapshot.exists()) {
       const data = snapshot.data() as UserProfile;
-      return { ...data, id: uid };
+      return {
+        ...data,
+        id: uid,
+        notificationSettings: this.getDefaultNotificationSettings(data)
+      };
     }
 
     const profile: UserProfile = {
@@ -120,6 +133,7 @@ export class AuthService {
       lastName: '',
       email,
       role: 'user',
+      notificationSettings: this.getDefaultNotificationSettings(),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
@@ -145,6 +159,7 @@ export class AuthService {
       lastName: form.lastName,
       email: form.email,
       role: 'user',
+      notificationSettings: this.getDefaultNotificationSettings(),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
@@ -214,6 +229,122 @@ export class AuthService {
     this.user.set(null);
   }
 
+  getDefaultNotificationSettings(profile?: { notificationSettings?: NotificationSettings } | null): NotificationSettings {
+    const settings = profile?.notificationSettings;
+    return {
+      receiptProcessing: settings?.receiptProcessing ?? this.defaultNotificationSettings.receiptProcessing,
+      productUpdates: settings?.productUpdates ?? this.defaultNotificationSettings.productUpdates,
+      securityAlerts: settings?.securityAlerts ?? this.defaultNotificationSettings.securityAlerts
+    };
+  }
+
+  isCurrentUserPasswordAuth(): boolean {
+    const currentUser = this.auth?.currentUser;
+    if (!currentUser) {
+      return false;
+    }
+    return currentUser.providerData.some((provider) => provider.providerId === 'password');
+  }
+
+  async updateProfileInfo(payload: { firstName: string; lastName: string }): Promise<void> {
+    const db = this.requireDb();
+    const user = this.user();
+    if (!user) {
+      throw new Error('User not authenticated.');
+    }
+
+    const firstName = payload.firstName.trim();
+    const lastName = payload.lastName.trim();
+
+    await updateDoc(doc(db, 'users', user.id), {
+      firstName,
+      lastName,
+      updatedAt: serverTimestamp()
+    });
+
+    this.user.update((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        firstName,
+        lastName,
+        updatedAt: serverTimestamp()
+      };
+    });
+  }
+
+  async updateNotificationSettings(notificationSettings: NotificationSettings): Promise<void> {
+    const db = this.requireDb();
+    const user = this.user();
+    if (!user) {
+      throw new Error('User not authenticated.');
+    }
+
+    const normalized = this.getDefaultNotificationSettings({ notificationSettings });
+    await updateDoc(doc(db, 'users', user.id), {
+      notificationSettings: normalized,
+      updatedAt: serverTimestamp()
+    });
+
+    this.user.update((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        notificationSettings: normalized,
+        updatedAt: serverTimestamp()
+      };
+    });
+  }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    if (!this.isCurrentUserPasswordAuth()) {
+      throw new Error('Password changes are only available for email/password accounts.');
+    }
+
+    const trimmedCurrentPassword = currentPassword.trim();
+    const trimmedNewPassword = newPassword.trim();
+
+    if (!trimmedCurrentPassword) {
+      throw new Error('Current password is required.');
+    }
+    if (trimmedNewPassword.length < 6) {
+      throw new Error('New password must be at least 6 characters.');
+    }
+
+    const currentUser = this.requireCurrentUser();
+    const email = currentUser.email;
+    if (!email) {
+      throw new Error('Current account is missing an email address.');
+    }
+
+    const credential = EmailAuthProvider.credential(email, trimmedCurrentPassword);
+    await reauthenticateWithCredential(currentUser, credential);
+    await updatePassword(currentUser, trimmedNewPassword);
+  }
+
+  async deleteAccount(payload?: { currentPassword?: string }): Promise<void> {
+    if (this.isCurrentUserPasswordAuth()) {
+      const currentPassword = payload?.currentPassword?.trim() ?? '';
+      if (!currentPassword) {
+        throw new Error('Current password is required to delete this account.');
+      }
+
+      const currentUser = this.requireCurrentUser();
+      const email = currentUser.email;
+      if (!email) {
+        throw new Error('Current account is missing an email address.');
+      }
+
+      const credential = EmailAuthProvider.credential(email, currentPassword);
+      await reauthenticateWithCredential(currentUser, credential);
+    }
+
+    const functions = this.requireFunctions();
+    const callable = httpsCallable(functions, 'deleteUserAccount');
+    await callable({});
+    await this.logout();
+  }
+
   async waitForInitialization(): Promise<void> {
     return this.initPromise;
   }
@@ -260,5 +391,16 @@ export class AuthService {
     }
 
     return this.functions;
+  }
+
+  private requireCurrentUser(): NonNullable<Auth['currentUser']> {
+    const auth = this.requireAuth();
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      const error: any = new Error('No signed-in user.');
+      error.code = 'auth/no-current-user';
+      throw error;
+    }
+    return currentUser;
   }
 }

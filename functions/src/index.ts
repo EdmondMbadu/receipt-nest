@@ -27,3 +27,4 @@ export { sendTestEmail } from "./admin";
 export { sendVerificationEmail, sendWelcomeEmail } from "./email";
 export { generateReceiptForwardingAddress, inboundEmailWebhook } from "./email-ingest";
 export { telegramWebhook, generateTelegramLinkToken, setupTelegramWebhook, onTelegramReceiptProcessed } from "./telegram";
+export { deleteUserAccount } from "./account";
