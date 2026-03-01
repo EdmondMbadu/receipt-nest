@@ -664,29 +664,18 @@
         </p>
       </div>
 
-      <div class="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-2">
+      <div class="mt-16 grid gap-6 grid-cols-2 lg:grid-cols-4">
         <!-- Screenshot 1 -->
         <div class="group">
           <div
-            class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:border-slate-300 dark:group-hover:border-slate-700">
-            <div
-              class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-slate-100 dark:border-slate-800">
-              <div class="text-center p-8">
-                <div
-                  class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg mb-4">
-                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                  </svg>
-                </div>
-                <p class="font-semibold text-slate-700 dark:text-slate-200">Monthly Dashboard</p>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Where did it all go? Now you know.</p>
-              </div>
+            class="relative rounded-2xl p-[2px] bg-gradient-to-br from-slate-200 via-slate-100 to-slate-300 dark:from-slate-700 dark:via-slate-800 dark:to-slate-600 transition-all duration-500 group-hover:from-emerald-400 group-hover:via-teal-400 group-hover:to-cyan-400 dark:group-hover:from-emerald-500 dark:group-hover:via-teal-500 dark:group-hover:to-cyan-500 group-hover:shadow-xl group-hover:shadow-emerald-500/20 dark:group-hover:shadow-emerald-500/30 group-hover:scale-[1.02]">
+            <div class="rounded-[14px] bg-white dark:bg-slate-900 p-2">
+              <img [src]="isDarkMode() ? 'assets/monthly-dashboard.png' : 'assets/monthly-light.png'" alt="Monthly Dashboard showing spending breakdown by category"
+                class="w-full rounded-xl transition-transform duration-500 group-hover:scale-[1.01]" />
             </div>
           </div>
-          <div class="mt-4 px-1">
-            <h3 class="font-semibold text-slate-900 dark:text-white">Monthly Dashboard</h3>
+          <div class="mt-3 px-1">
+            <h3 class="font-semibold text-slate-900 dark:text-white transition-colors duration-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">Monthly Dashboard</h3>
             <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Where did it all go? Now you know.</p>
           </div>
         </div>
@@ -694,26 +683,14 @@
         <!-- Screenshot 2 -->
         <div class="group">
           <div
-            class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:border-slate-300 dark:group-hover:border-slate-700">
-            <div
-              class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-slate-100 dark:border-slate-800">
-              <div class="text-center p-8">
-                <div
-                  class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg mb-4">
-                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
-                  </svg>
-                </div>
-                <p class="font-semibold text-slate-700 dark:text-slate-200">Auto-Organized</p>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Every receipt tagged and searchable, without
-                  lifting a finger.</p>
-              </div>
+            class="relative rounded-2xl p-[2px] bg-gradient-to-br from-slate-200 via-slate-100 to-slate-300 dark:from-slate-700 dark:via-slate-800 dark:to-slate-600 transition-all duration-500 group-hover:from-violet-400 group-hover:via-purple-400 group-hover:to-fuchsia-400 dark:group-hover:from-violet-500 dark:group-hover:via-purple-500 dark:group-hover:to-fuchsia-500 group-hover:shadow-xl group-hover:shadow-violet-500/20 dark:group-hover:shadow-violet-500/30 group-hover:scale-[1.02]">
+            <div class="rounded-[14px] bg-white dark:bg-slate-900 p-2">
+              <img [src]="isDarkMode() ? 'assets/auto-categorization.png' : 'assets/auto-light.png'" alt="Auto-organized receipts tagged and searchable"
+                class="w-full rounded-xl transition-transform duration-500 group-hover:scale-[1.01]" />
             </div>
           </div>
-          <div class="mt-4 px-1">
-            <h3 class="font-semibold text-slate-900 dark:text-white">Auto-Organized</h3>
+          <div class="mt-3 px-1">
+            <h3 class="font-semibold text-slate-900 dark:text-white transition-colors duration-300 group-hover:text-violet-600 dark:group-hover:text-violet-400">Auto-Organized</h3>
             <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Every receipt tagged and searchable, without
               lifting a finger.</p>
           </div>
@@ -722,25 +699,14 @@
         <!-- Screenshot 3 -->
         <div class="group">
           <div
-            class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:border-slate-300 dark:group-hover:border-slate-700">
-            <div
-              class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-slate-100 dark:border-slate-800">
-              <div class="text-center p-8">
-                <div
-                  class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg mb-4">
-                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                  </svg>
-                </div>
-                <p class="font-semibold text-slate-700 dark:text-slate-200">Capture Anything</p>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Email, photo, PDF. Whatever works for you.</p>
-              </div>
+            class="relative rounded-2xl p-[2px] bg-gradient-to-br from-slate-200 via-slate-100 to-slate-300 dark:from-slate-700 dark:via-slate-800 dark:to-slate-600 transition-all duration-500 group-hover:from-amber-400 group-hover:via-orange-400 group-hover:to-rose-400 dark:group-hover:from-amber-500 dark:group-hover:via-orange-500 dark:group-hover:to-rose-500 group-hover:shadow-xl group-hover:shadow-orange-500/20 dark:group-hover:shadow-orange-500/30 group-hover:scale-[1.02]">
+            <div class="rounded-[14px] bg-white dark:bg-slate-900 p-2">
+              <img [src]="isDarkMode() ? 'assets/capture-anything.png' : 'assets/capture-light.png'" alt="Capture receipts from email, photo, or PDF"
+                class="w-full rounded-xl transition-transform duration-500 group-hover:scale-[1.01]" />
             </div>
           </div>
-          <div class="mt-4 px-1">
-            <h3 class="font-semibold text-slate-900 dark:text-white">Capture Anything</h3>
+          <div class="mt-3 px-1">
+            <h3 class="font-semibold text-slate-900 dark:text-white transition-colors duration-300 group-hover:text-orange-600 dark:group-hover:text-orange-400">Capture Anything</h3>
             <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Email, photo, PDF. Whatever works for you.</p>
           </div>
         </div>
@@ -748,32 +714,20 @@
         <!-- Screenshot 4 (Pro) -->
         <div class="group">
           <div
-            class="relative rounded-2xl border border-emerald-200 dark:border-emerald-800/50 bg-white dark:bg-slate-900 p-3 shadow-lg shadow-emerald-500/5 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-emerald-500/10">
-            <div class="absolute top-5 right-5 z-10">
-              <span
-                class="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-3 py-1 text-xs font-bold text-white shadow-lg">
-                PRO
-              </span>
-            </div>
-            <div
-              class="aspect-[4/3] rounded-xl bg-gradient-to-br from-emerald-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/50">
-              <div class="text-center p-8">
-                <div
-                  class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-lg mb-4">
-                  <svg class="h-8 w-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
-                  </svg>
-                </div>
-                <p class="font-semibold text-slate-700 dark:text-slate-200">PRO - Spending Insights</p>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">See patterns, catch surprises, stay in
-                  control.</p>
+            class="relative rounded-2xl p-[2px] bg-gradient-to-br from-emerald-300 via-teal-200 to-emerald-300 dark:from-emerald-600 dark:via-teal-700 dark:to-emerald-600 transition-all duration-500 group-hover:from-emerald-400 group-hover:via-cyan-400 group-hover:to-teal-400 dark:group-hover:from-emerald-400 dark:group-hover:via-cyan-500 dark:group-hover:to-teal-400 group-hover:shadow-xl group-hover:shadow-emerald-500/25 dark:group-hover:shadow-emerald-500/40 group-hover:scale-[1.02]">
+            <div class="relative rounded-[14px] bg-white dark:bg-slate-900 p-2">
+              <div class="absolute top-4 right-4 z-10">
+                <span
+                  class="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-3 py-1 text-xs font-bold text-white shadow-lg shadow-emerald-500/30">
+                  PRO
+                </span>
               </div>
+              <img [src]="isDarkMode() ? 'assets/spend-insight.png' : 'assets/spend-light.png'" alt="Spending insights showing patterns and trends"
+                class="w-full rounded-xl transition-transform duration-500 group-hover:scale-[1.01]" />
             </div>
           </div>
-          <div class="mt-4 px-1">
-            <h3 class="font-semibold text-slate-900 dark:text-white">PRO - Spending Insights</h3>
+          <div class="mt-3 px-1">
+            <h3 class="font-semibold text-slate-900 dark:text-white transition-colors duration-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">PRO - Spending Insights</h3>
             <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">See patterns, catch surprises, stay in control.</p>
           </div>
         </div>

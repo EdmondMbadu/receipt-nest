@@ -113,6 +113,76 @@ svg {
   animation: pulse-slow-dark 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Animated gradient border for showcase cards */
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes rotate-gradient {
+  to {
+    --angle: 360deg;
+  }
+}
+
+.showcase-card {
+  --c1: #10b981;
+  --c2: #06b6d4;
+  --c3: #8b5cf6;
+  position: relative;
+  border-radius: 1rem;
+  padding: 2px;
+  background: conic-gradient(from var(--angle), var(--c1), var(--c2), var(--c3), var(--c1));
+  animation: rotate-gradient 6s linear infinite;
+}
+
+.showcase-card-1 {
+  --c1: #10b981;
+  --c2: #06b6d4;
+  --c3: #3b82f6;
+}
+
+.showcase-card-2 {
+  --c1: #8b5cf6;
+  --c2: #a855f7;
+  --c3: #ec4899;
+}
+
+.showcase-card-3 {
+  --c1: #f59e0b;
+  --c2: #f97316;
+  --c3: #ef4444;
+}
+
+.showcase-card-4 {
+  --c1: #10b981;
+  --c2: #14b8a6;
+  --c3: #06b6d4;
+  padding: 3px;
+}
+
+/* Soft ambient glow behind each card */
+.showcase-glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: 1rem;
+  background: conic-gradient(from var(--angle), var(--c1), var(--c2), var(--c3), var(--c1));
+  animation: rotate-gradient 6s linear infinite;
+  filter: blur(12px);
+  opacity: 0.35;
+  z-index: -1;
+}
+
+:host-context(.dark) .showcase-glow {
+  opacity: 0.5;
+}
+
+.showcase-card-inner {
+  border-radius: calc(1rem - 2px);
+  overflow: hidden;
+}
+
 @keyframes pulse-slow-dark {
 
   0%,
