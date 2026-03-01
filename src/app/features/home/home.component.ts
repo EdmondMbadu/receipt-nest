@@ -34,6 +34,12 @@ interface HistogramMonthPoint {
   amount: number;
 }
 
+interface HistogramYAxisTick {
+  key: string;
+  label: string;
+  position: number;
+}
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -240,6 +246,22 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     return indexes.map((index) => ({
       key: `${data[index].monthKey}-${index}`,
       label: data[index].label
+    }));
+  });
+  readonly histogramYAxisTicks = computed<HistogramYAxisTick[]>(() => {
+    const maxAmount = this.histogramMaxAmount();
+    if (maxAmount <= 0) {
+      return [{
+        key: 'hist-y-0',
+        label: this.formatCompactCurrency(0),
+        position: 0
+      }];
+    }
+
+    return [1, 0.75, 0.5, 0.25, 0].map((fraction, index) => ({
+      key: `hist-y-${index}`,
+      label: this.formatCompactCurrency(maxAmount * fraction),
+      position: fraction * 100
     }));
   });
 
@@ -1196,6 +1218,15 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     }).format(amount);
   }
 
+  formatCompactCurrency(amount: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      notation: 'compact',
+      maximumFractionDigits: amount >= 100 ? 0 : 1
+    }).format(amount);
+  }
+
   // Format date
   formatDate(dateString?: string): string {
     if (!dateString) return '-';
@@ -1246,6 +1277,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   trackHistogramMonth(index: number, month: HistogramMonthPoint): string {
     return month.monthKey;
+  }
+
+  trackHistogramYAxisTick(index: number, tick: HistogramYAxisTick): string {
+    return tick.key;
   }
 
   // Click on a day in the graph to filter receipts
