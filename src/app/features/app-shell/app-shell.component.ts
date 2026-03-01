@@ -49,6 +49,7 @@ export class AppShellComponent {
   readonly shareCopied = signal(false);
   readonly shareLoading = signal(false);
   readonly telegramLinked = this.aiService.telegramLinked;
+  readonly settingsDropUpOpen = signal(false);
   readonly settingsModalOpen = signal(false);
   readonly settingsActiveTab = signal<'general' | 'account' | 'notifications'>('general');
   readonly settingsFirstName = signal('');
@@ -130,6 +131,7 @@ export class AppShellComponent {
 
   closeSidebar(): void {
     this.sidebarOpen.set(false);
+    this.settingsDropUpOpen.set(false);
   }
 
   toggleSidebar(): void {
@@ -149,11 +151,20 @@ export class AppShellComponent {
     this.historyExpanded.update((expanded) => !expanded);
   }
 
+  toggleSettingsDropUp(): void {
+    this.settingsDropUpOpen.update((open) => !open);
+  }
+
+  closeSettingsDropUp(): void {
+    this.settingsDropUpOpen.set(false);
+  }
+
   toggleTheme(): void {
     this.theme.toggleTheme();
   }
 
   openSettingsModal(tab: 'general' | 'account' | 'notifications' = 'general'): void {
+    this.settingsDropUpOpen.set(false);
     const profile = this.user();
     const defaults = this.auth.getDefaultNotificationSettings(profile);
 
@@ -295,6 +306,7 @@ export class AppShellComponent {
   }
 
   async logout(): Promise<void> {
+    this.settingsDropUpOpen.set(false);
     await this.auth.logout();
     await this.router.navigate(['/login']);
   }

@@ -84,7 +84,36 @@
   background: rgba(30, 41, 59, 0.9);
 }
 
+.settings-dropup {
+  animation: dropup-in 150ms ease;
+}
+
+@keyframes dropup-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.settings-dropup-item + .settings-dropup-item {
+  border-top: 1px solid rgba(226, 232, 240, 0.7);
+}
+
+:host-context(.dark) .settings-dropup-item + .settings-dropup-item {
+  border-top-color: rgba(71, 85, 105, 0.5);
+}
+
 .settings-modal-panel {
+  background-image:
+    radial-gradient(circle at 5% -20%, rgba(16, 185, 129, 0.08), transparent 48%),
+    radial-gradient(circle at 100% 0%, rgba(20, 184, 166, 0.07), transparent 45%);
+}
+
+:host-context(.dark) .settings-modal-panel {
   background-image:
     radial-gradient(circle at 5% -20%, rgba(16, 185, 129, 0.15), transparent 48%),
     radial-gradient(circle at 100% 0%, rgba(20, 184, 166, 0.14), transparent 45%);
