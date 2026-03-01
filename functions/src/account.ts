@@ -34,6 +34,63 @@ const deleteByUserIdField = async (collectionName: string, userId: string): Prom
   return deletedCount;
 };
 
+const deleteByFieldValue = async (
+  collectionName: string,
+  fieldName: "userId" | "uid",
+  value: string
+): Promise<number> => {
+  const db = admin.firestore();
+  let deletedCount = 0;
+
+  while (true) {
+    const snapshot = await db
+      .collection(collectionName)
+      .where(fieldName, "==", value)
+      .limit(250)
+      .get();
+
+    if (snapshot.empty) {
+      break;
+    }
+
+    const batch = db.batch();
+    snapshot.docs.forEach((docSnapshot) => batch.delete(docSnapshot.ref));
+    await batch.commit();
+    deletedCount += snapshot.size;
+
+    if (snapshot.size < 250) {
+      break;
+    }
+  }
+
+  return deletedCount;
+};
+
+const deleteTopLevelUserLinkedDocuments = async (userId: string): Promise<Record<string, number>> => {
+  const db = admin.firestore();
+  const rootCollections = await db.listCollections();
+  const deletedByCollection: Record<string, number> = {};
+
+  for (const collectionRef of rootCollections) {
+    const name = collectionRef.id;
+    if (name === "users") {
+      continue;
+    }
+
+    const [byUserId, byUid] = await Promise.all([
+      deleteByFieldValue(name, "userId", userId),
+      deleteByFieldValue(name, "uid", userId)
+    ]);
+
+    const totalDeleted = byUserId + byUid;
+    if (totalDeleted > 0) {
+      deletedByCollection[name] = totalDeleted;
+    }
+  }
+
+  return deletedByCollection;
+};
+
 const deleteStoragePrefix = async (userId: string): Promise<void> => {
   try {
     await admin.storage().bucket().deleteFiles({
@@ -118,6 +175,9 @@ export const deleteUserAccount = onCall(
       );
     }
 
+    const deletedTopLevel = await deleteTopLevelUserLinkedDocuments(userId);
+
+    // Keep explicit cleanup for known share/link collections as a safety net.
     const [deletedGraphShares, deletedChatShares, deletedTelegramLinks] = await Promise.all([
       deleteByUserIdField("graphShares", userId),
       deleteByUserIdField("chatShares", userId),
@@ -143,6 +203,7 @@ export const deleteUserAccount = onCall(
     return {
       ok: true,
       deleted: {
+        topLevelByField: deletedTopLevel,
         graphShares: deletedGraphShares,
         chatShares: deletedChatShares,
         telegramLinks: deletedTelegramLinks

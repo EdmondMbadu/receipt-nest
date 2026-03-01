@@ -300,6 +300,15 @@ export class AppShellComponent {
       return;
     }
 
+    if (typeof window !== 'undefined') {
+      const confirmed = window.confirm(
+        'Are you absolutely sure you want to permanently delete your account and all associated data? This cannot be undone.'
+      );
+      if (!confirmed) {
+        return;
+      }
+    }
+
     this.deleteAccountPending.set(true);
     this.deleteAccountError.set(null);
 
@@ -307,6 +316,7 @@ export class AppShellComponent {
       await this.auth.deleteAccount({
         currentPassword: this.deleteAccountPassword()
       });
+      this.clearClientDeletionArtifacts();
       this.closeSettingsModal();
       await this.router.navigate(['/login']);
     } catch (error) {
@@ -513,5 +523,12 @@ export class AppShellComponent {
       return message;
     }
     return fallback;
+  }
+
+  private clearClientDeletionArtifacts(): void {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+    localStorage.removeItem('aiInsightsActiveChatId');
   }
 }
