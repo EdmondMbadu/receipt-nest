@@ -196,3 +196,22 @@ svg {
     transform: scale(1.05);
   }
 }
+
+/* Feature card styles */
+.feature-card {
+  will-change: transform, box-shadow;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.feature-card:hover::before {
+  opacity: 1;
+}
