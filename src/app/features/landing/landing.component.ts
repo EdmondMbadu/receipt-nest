@@ -25,6 +25,7 @@ export class LandingComponent {
   readonly currentYear = new Date().getFullYear();
   readonly isMobileMenuOpen = signal(false);
   readonly isDemoOpen = signal(false);
+  readonly openFaqIndex = signal<number | null>(null);
 
   readonly displayName = computed(() => {
     const profile = this.user();
@@ -63,5 +64,9 @@ export class LandingComponent {
 
   closeDemo() {
     this.isDemoOpen.set(false);
+  }
+
+  toggleFaq(index: number) {
+    this.openFaqIndex.update(current => current === index ? null : index);
   }
 }
