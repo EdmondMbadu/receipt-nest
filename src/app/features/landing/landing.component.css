@@ -197,6 +197,11 @@ svg {
   }
 }
 
+/* Testimonial card styles */
+.testimonial-card {
+  will-change: transform, box-shadow;
+}
+
 /* Feature card styles */
 .feature-card {
   will-change: transform, box-shadow;

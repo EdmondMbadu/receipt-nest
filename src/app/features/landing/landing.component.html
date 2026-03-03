@@ -671,44 +671,147 @@
   </section>
 
   <!-- Who Uses ReceiptNest AI -->
-  <section id="people" class="py-24 sm:py-32">
+  <section id="people" class="relative py-24 sm:py-32 overflow-hidden">
+    <div class="absolute inset-0 -z-10 pointer-events-none">
+      <div
+        class="absolute inset-0 bg-gradient-to-b from-transparent via-slate-50/80 to-transparent dark:via-slate-900/40">
+      </div>
+    </div>
+
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="max-w-2xl">
-        <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">Who uses
-          ReceiptNest AI</p>
-        <h2 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-          People like you use ReceiptNest AI
+      <!-- Centered header -->
+      <div class="text-center max-w-2xl mx-auto">
+        <div
+          class="inline-flex items-center gap-2.5 rounded-full bg-slate-100 dark:bg-slate-800 px-4 py-1.5 ring-1 ring-slate-200/60 dark:ring-slate-700/60">
+          <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+          </svg>
+          <span class="text-sm font-semibold text-slate-600 dark:text-slate-300">Real people, real results</span>
+        </div>
+        <h2
+          class="mt-6 text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+          People like you use <br class="hidden sm:block" />ReceiptNest AI
         </h2>
+        <p class="mt-5 text-lg text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
+          Freelancers, sellers, tutors, and consultants who got tired of the shoebox method.
+        </p>
       </div>
 
-      <div class="mt-16 grid gap-6 sm:grid-cols-2">
-        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 lg:p-8">
-          <h3 class="text-base font-semibold text-slate-900 dark:text-white">Freelance designer</h3>
-          <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
-            "I forward every client expense receipt to my ReceiptNest AI email. Tax time went from 2 days to 20 minutes."
-          </p>
+      <!-- Testimonial cards -->
+      <div class="mt-16 sm:mt-20 grid gap-6 sm:grid-cols-2 lg:gap-8">
+
+        <!-- Freelance designer -->
+        <div
+          class="testimonial-card group relative rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-8 lg:p-10 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/[0.04] dark:hover:shadow-black/20 hover:-translate-y-0.5">
+          <svg
+            class="absolute top-6 right-7 h-12 w-12 text-slate-100 dark:text-slate-800/60 transition-colors duration-300 group-hover:text-emerald-100 dark:group-hover:text-emerald-900/30"
+            fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151C7.546 6.068 5.983 8.789 5.983 11H10v10H0z" />
+          </svg>
+          <div class="flex items-center gap-4 mb-6">
+            <div
+              class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 ring-1 ring-slate-200/60 dark:ring-slate-700/60">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-slate-900 dark:text-white">Freelance designer</h3>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Creative professional</p>
+            </div>
+          </div>
+          <blockquote class="relative text-[17px] leading-relaxed text-slate-600 dark:text-slate-300">
+            "I forward every client expense receipt to my ReceiptNest AI email. Tax time went from <span
+              class="font-semibold text-slate-900 dark:text-white">2 days to 20 minutes</span>."
+          </blockquote>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 lg:p-8">
-          <h3 class="text-base font-semibold text-slate-900 dark:text-white">Etsy seller</h3>
-          <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
-            "I finally know my actual profit after materials and shipping. Turns out I was underpricing everything."
-          </p>
+        <!-- Etsy seller -->
+        <div
+          class="testimonial-card group relative rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-8 lg:p-10 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/[0.04] dark:hover:shadow-black/20 hover:-translate-y-0.5">
+          <svg
+            class="absolute top-6 right-7 h-12 w-12 text-slate-100 dark:text-slate-800/60 transition-colors duration-300 group-hover:text-emerald-100 dark:group-hover:text-emerald-900/30"
+            fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151C7.546 6.068 5.983 8.789 5.983 11H10v10H0z" />
+          </svg>
+          <div class="flex items-center gap-4 mb-6">
+            <div
+              class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 ring-1 ring-slate-200/60 dark:ring-slate-700/60">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-slate-900 dark:text-white">Etsy seller</h3>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Small business owner</p>
+            </div>
+          </div>
+          <blockquote class="relative text-[17px] leading-relaxed text-slate-600 dark:text-slate-300">
+            "I finally know my actual profit after materials and shipping. Turns out I was <span
+              class="font-semibold text-slate-900 dark:text-white">underpricing everything</span>."
+          </blockquote>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 lg:p-8">
-          <h3 class="text-base font-semibold text-slate-900 dark:text-white">Part-time tutor</h3>
-          <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
-            "I didn't think I needed expense tracking for my side income. Turns out I was missing $1,200 in
-            deductions."
-          </p>
+        <!-- Part-time tutor -->
+        <div
+          class="testimonial-card group relative rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-8 lg:p-10 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/[0.04] dark:hover:shadow-black/20 hover:-translate-y-0.5">
+          <svg
+            class="absolute top-6 right-7 h-12 w-12 text-slate-100 dark:text-slate-800/60 transition-colors duration-300 group-hover:text-emerald-100 dark:group-hover:text-emerald-900/30"
+            fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151C7.546 6.068 5.983 8.789 5.983 11H10v10H0z" />
+          </svg>
+          <div class="flex items-center gap-4 mb-6">
+            <div
+              class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 ring-1 ring-slate-200/60 dark:ring-slate-700/60">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-slate-900 dark:text-white">Part-time tutor</h3>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Side-income earner</p>
+            </div>
+          </div>
+          <blockquote class="relative text-[17px] leading-relaxed text-slate-600 dark:text-slate-300">
+            "I didn't think I needed expense tracking for my side income. Turns out I was missing <span
+              class="font-semibold text-slate-900 dark:text-white">$1,200 in deductions</span>."
+          </blockquote>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 lg:p-8">
-          <h3 class="text-base font-semibold text-slate-900 dark:text-white">Independent consultant</h3>
-          <p class="mt-3 text-slate-600 dark:text-slate-300 leading-relaxed">
-            "I can finally separate business spending from personal spending and see my monthly totals without spreadsheets."
-          </p>
+        <!-- Independent consultant -->
+        <div
+          class="testimonial-card group relative rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-8 lg:p-10 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/[0.04] dark:hover:shadow-black/20 hover:-translate-y-0.5">
+          <svg
+            class="absolute top-6 right-7 h-12 w-12 text-slate-100 dark:text-slate-800/60 transition-colors duration-300 group-hover:text-emerald-100 dark:group-hover:text-emerald-900/30"
+            fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151C7.546 6.068 5.983 8.789 5.983 11H10v10H0z" />
+          </svg>
+          <div class="flex items-center gap-4 mb-6">
+            <div
+              class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 ring-1 ring-slate-200/60 dark:ring-slate-700/60">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-slate-900 dark:text-white">Independent consultant</h3>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Self-employed professional</p>
+            </div>
+          </div>
+          <blockquote class="relative text-[17px] leading-relaxed text-slate-600 dark:text-slate-300">
+            "I can finally separate business from personal spending and see my <span
+              class="font-semibold text-slate-900 dark:text-white">monthly totals without spreadsheets</span>."
+          </blockquote>
         </div>
       </div>
     </div>
