@@ -465,6 +465,42 @@ export class ReceiptService {
       const trimmed = value.trim();
       if (!trimmed) return null;
 
+      const buildLocalDate = (year: number, month: number, day: number): Date | null => {
+        const parsed = new Date(year, month - 1, day, 12, 0, 0, 0);
+        if (
+          parsed.getFullYear() === year &&
+          parsed.getMonth() === month - 1 &&
+          parsed.getDate() === day
+        ) {
+          return parsed;
+        }
+        return null;
+      };
+
+      const isoDateOnlyMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (isoDateOnlyMatch) {
+        const year = Number(isoDateOnlyMatch[1]);
+        const month = Number(isoDateOnlyMatch[2]);
+        const day = Number(isoDateOnlyMatch[3]);
+        return buildLocalDate(year, month, day);
+      }
+
+      const slashOrDashDateMatch = trimmed.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);
+      if (slashOrDashDateMatch) {
+        const first = Number(slashOrDashDateMatch[1]);
+        const second = Number(slashOrDashDateMatch[2]);
+        const rawYear = Number(slashOrDashDateMatch[3]);
+        const year = rawYear < 100 ? (2000 + rawYear) : rawYear;
+
+        const monthFirst = buildLocalDate(year, first, second);
+        const dayFirst = buildLocalDate(year, second, first);
+
+        if (first > 12 && dayFirst) return dayFirst;
+        if (second > 12 && monthFirst) return monthFirst;
+        if (monthFirst) return monthFirst;
+        if (dayFirst) return dayFirst;
+      }
+
       const parsed = new Date(trimmed);
       if (!Number.isNaN(parsed.getTime())) {
         return parsed;
