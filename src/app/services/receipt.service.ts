@@ -415,6 +415,104 @@ export class ReceiptService {
     })) as MonthlySummary[];
   }
 
+  private parseAmount(value: unknown): number | null {
+    if (value === null || value === undefined) return null;
+    if (typeof value === 'number') {
+      return Number.isFinite(value) ? value : null;
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().replace(/[^0-9,.\-]/g, '');
+      if (!normalized || normalized === '-') return null;
+
+      const hasComma = normalized.includes(',');
+      const hasDot = normalized.includes('.');
+      let formatted = normalized;
+
+      if (hasComma && hasDot) {
+        formatted = normalized.lastIndexOf(',') > normalized.lastIndexOf('.')
+          ? normalized.replaceAll('.', '').replaceAll(',', '.')
+          : normalized.replaceAll(',', '');
+      } else if (hasComma) {
+        formatted = normalized.replaceAll(',', '.');
+      }
+
+      const parsed = Number.parseFloat(formatted);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    if (typeof value === 'object') {
+      const candidate = value as Record<string, unknown>;
+      return this.parseAmount(candidate['value'] ?? candidate['amount']);
+    }
+
+    return null;
+  }
+
+  private parseDateValue(value: unknown): Date | null {
+    if (value === null || value === undefined) return null;
+
+    if (value instanceof Date) {
+      return Number.isNaN(value.getTime()) ? null : value;
+    }
+
+    if (typeof value === 'number') {
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) return null;
+
+      const parsed = new Date(trimmed);
+      if (!Number.isNaN(parsed.getTime())) {
+        return parsed;
+      }
+    }
+
+    if (typeof value === 'object') {
+      const candidate = value as Record<string, unknown>;
+
+      if (typeof (candidate as any).toDate === 'function') {
+        const parsed = (candidate as any).toDate();
+        return parsed instanceof Date && !Number.isNaN(parsed.getTime())
+          ? parsed
+          : null;
+      }
+
+      if (typeof candidate['seconds'] === 'number') {
+        const nanos = typeof candidate['nanoseconds'] === 'number'
+          ? candidate['nanoseconds']
+          : 0;
+        const parsed = new Date((candidate['seconds'] * 1000) + Math.floor(nanos / 1_000_000));
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+      }
+
+      return this.parseDateValue(
+        candidate['value'] ?? candidate['date'] ?? candidate['rawText']
+      );
+    }
+
+    return null;
+  }
+
+  getEffectiveAmount(receipt: Receipt): number | null {
+    const normalizedTopLevel = this.parseAmount(receipt.totalAmount);
+    if (normalizedTopLevel !== null) return normalizedTopLevel;
+    return this.parseAmount(receipt.extraction?.totalAmount?.value);
+  }
+
+  getEffectiveDate(receipt: Receipt): Date | null {
+    const explicitDate = this.parseDateValue(receipt.date);
+    if (explicitDate) return explicitDate;
+
+    const extractedDate = this.parseDateValue(receipt.extraction?.date?.value);
+    if (extractedDate) return extractedDate;
+
+    return this.parseDateValue(receipt.createdAt);
+  }
+
   // Selected month for filtering (default: current month)
   readonly selectedMonth = signal(new Date().getMonth());
   readonly selectedYear = signal(new Date().getFullYear());
@@ -429,30 +527,13 @@ export class ReceiptService {
 
     return this.receipts()
       .filter(r => {
-        // Must have a total amount to count
-        if (r.totalAmount === undefined || r.totalAmount === null) {
-          return false;
-        }
-
-        // Use the extracted receipt date
-        if (r.date) {
-          const receiptDate = new Date(r.date);
-          return receiptDate.getMonth() === targetMonth &&
-            receiptDate.getFullYear() === targetYear;
-        }
-
-        // Fallback to createdAt if no extracted date
-        if (r.createdAt) {
-          const createdDate = (r.createdAt as any).toDate
-            ? (r.createdAt as any).toDate()
-            : new Date(r.createdAt as any);
-          return createdDate.getMonth() === targetMonth &&
-            createdDate.getFullYear() === targetYear;
-        }
-
-        return false;
+        const amount = this.getEffectiveAmount(r);
+        if (amount === null) return false;
+        const date = this.getEffectiveDate(r);
+        if (!date) return false;
+        return date.getMonth() === targetMonth && date.getFullYear() === targetYear;
       })
-      .reduce((sum, r) => sum + (r.totalAmount || 0), 0);
+      .reduce((sum, r) => sum + (this.getEffectiveAmount(r) ?? 0), 0);
   });
 
   /**
@@ -463,21 +544,9 @@ export class ReceiptService {
     const targetYear = this.selectedYear();
 
     return this.receipts().filter(r => {
-      if (r.date) {
-        const receiptDate = new Date(r.date);
-        return receiptDate.getMonth() === targetMonth &&
-          receiptDate.getFullYear() === targetYear;
-      }
-
-      if (r.createdAt) {
-        const createdDate = (r.createdAt as any).toDate
-          ? (r.createdAt as any).toDate()
-          : new Date(r.createdAt as any);
-        return createdDate.getMonth() === targetMonth &&
-          createdDate.getFullYear() === targetYear;
-      }
-
-      return false;
+      const date = this.getEffectiveDate(r);
+      if (!date) return false;
+      return date.getMonth() === targetMonth && date.getFullYear() === targetYear;
     });
   });
 
@@ -560,27 +629,13 @@ export class ReceiptService {
 
     return this.receipts()
       .filter(r => {
-        if (r.totalAmount === undefined || r.totalAmount === null) {
-          return false;
-        }
-
-        if (r.date) {
-          const receiptDate = new Date(r.date);
-          return receiptDate.getMonth() === prevMonth &&
-            receiptDate.getFullYear() === prevYear;
-        }
-
-        if (r.createdAt) {
-          const createdDate = (r.createdAt as any).toDate
-            ? (r.createdAt as any).toDate()
-            : new Date(r.createdAt as any);
-          return createdDate.getMonth() === prevMonth &&
-            createdDate.getFullYear() === prevYear;
-        }
-
-        return false;
+        const amount = this.getEffectiveAmount(r);
+        if (amount === null) return false;
+        const date = this.getEffectiveDate(r);
+        if (!date) return false;
+        return date.getMonth() === prevMonth && date.getFullYear() === prevYear;
       })
-      .reduce((sum, r) => sum + (r.totalAmount || 0), 0);
+      .reduce((sum, r) => sum + (this.getEffectiveAmount(r) ?? 0), 0);
   });
 
   /**
@@ -619,23 +674,13 @@ export class ReceiptService {
 
     // Sum up spending per day
     for (const receipt of this.selectedMonthReceipts()) {
-      if (!receipt.totalAmount) continue;
-
-      let day: number;
-      if (receipt.date) {
-        const receiptDate = new Date(receipt.date);
-        day = receiptDate.getDate();
-      } else if (receipt.createdAt) {
-        const createdDate = (receipt.createdAt as any).toDate
-          ? (receipt.createdAt as any).toDate()
-          : new Date(receipt.createdAt as any);
-        day = createdDate.getDate();
-      } else {
-        continue;
-      }
+      const amount = this.getEffectiveAmount(receipt);
+      const date = this.getEffectiveDate(receipt);
+      if (amount === null || !date) continue;
+      const day = date.getDate();
 
       if (day >= 1 && day <= daysInMonth) {
-        dailyTotals[day - 1] += receipt.totalAmount;
+        dailyTotals[day - 1] += amount;
       }
     }
 

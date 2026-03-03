@@ -162,7 +162,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     let earliestMonth: Date | null = null;
 
     for (const receipt of receipts) {
-      if (receipt.totalAmount === undefined || receipt.totalAmount === null) {
+      const amount = this.receiptService.getEffectiveAmount(receipt);
+      if (amount === null) {
         continue;
       }
 
@@ -177,7 +178,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       }
 
       const key = this.getMonthKey(monthDate.getFullYear(), monthDate.getMonth());
-      monthlyTotals.set(key, (monthlyTotals.get(key) ?? 0) + (receipt.totalAmount || 0));
+      monthlyTotals.set(key, (monthlyTotals.get(key) ?? 0) + amount);
     }
 
     let startMonth = new Date(now.getFullYear(), 0, 1);
@@ -357,10 +358,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         r.merchant?.rawName?.toLowerCase().includes(query);
 
       // Search by amount (as string)
-      const amountMatch = r.totalAmount?.toString().includes(query);
+      const amountMatch = this.receiptService.getEffectiveAmount(r)?.toString().includes(query);
 
       // Search by date
-      const dateMatch = r.date?.includes(query);
+      const dateValue = r.date || r.extraction?.date?.value || '';
+      const dateMatch = dateValue.toLowerCase().includes(query);
 
       // Search by file name
       const fileMatch = r.file?.originalName?.toLowerCase().includes(query);
@@ -408,24 +410,13 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     const groups: Map<string, MonthGroup> = new Map();
 
     for (const receipt of receipts) {
-      let year: number;
-      let month: number;
-
-      // Use receipt date if available, otherwise use createdAt
-      if (receipt.date) {
-        const date = new Date(receipt.date);
-        year = date.getFullYear();
-        month = date.getMonth();
-      } else if (receipt.createdAt) {
-        const date = (receipt.createdAt as any).toDate
-          ? (receipt.createdAt as any).toDate()
-          : new Date(receipt.createdAt as any);
-        year = date.getFullYear();
-        month = date.getMonth();
-      } else {
-        // Skip receipts without any date
+      const date = this.resolveReceiptDate(receipt);
+      if (!date) {
         continue;
       }
+
+      const year = date.getFullYear();
+      const month = date.getMonth();
 
       const key = `${year}-${month}`;
       if (!groups.has(key)) {
@@ -476,8 +467,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Filter receipts for current month with final status
     const monthReceipts = this.receipts().filter(r => {
-      if (!r.date || !r.totalAmount) return false;
-      const receiptDate = new Date(r.date);
+      const amount = this.receiptService.getEffectiveAmount(r);
+      if (amount === null) return false;
+      const receiptDate = this.resolveReceiptDate(r);
+      if (!receiptDate) return false;
       return receiptDate.getMonth() === currentMonth &&
         receiptDate.getFullYear() === currentYear &&
         (r.status === 'final' || r.status === 'extracted');
@@ -494,7 +487,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       if (!categoryTotals[categoryId]) {
         categoryTotals[categoryId] = { total: 0, category };
       }
-      categoryTotals[categoryId].total += receipt.totalAmount || 0;
+      categoryTotals[categoryId].total += this.receiptService.getEffectiveAmount(receipt) ?? 0;
       maxTotal = Math.max(maxTotal, categoryTotals[categoryId].total);
     }
 
@@ -734,8 +727,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
           || receipt.extraction?.supplierName?.value
           || 'Unknown';
         const date = receipt.date || receipt.extraction?.date?.value || '';
-        const amountValue = receipt.totalAmount ?? receipt.extraction?.totalAmount?.value;
-        const amount = typeof amountValue === 'number' ? amountValue : null;
+        const amount = this.receiptService.getEffectiveAmount(receipt);
         if (amount !== null) {
           total += amount;
         }
@@ -1080,15 +1072,14 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       parts.push(receipt.file.originalName);
     }
 
-    if (receipt.totalAmount !== undefined && receipt.totalAmount !== null) {
-      parts.push(this.formatCurrency(receipt.totalAmount));
+    const amount = this.receiptService.getEffectiveAmount(receipt);
+    if (amount !== null) {
+      parts.push(this.formatCurrency(amount));
     }
 
-    if (receipt.date) {
-      const parsed = new Date(receipt.date);
-      if (!Number.isNaN(parsed.getTime())) {
-        parts.push(parsed.toLocaleDateString('en-US'));
-      }
+    const date = this.resolveReceiptDate(receipt);
+    if (date) {
+      parts.push(date.toLocaleDateString('en-US'));
     }
 
     return parts.join(' • ') || 'Receipt';
@@ -1314,9 +1305,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     const selection = this.selectedDay();
     if (!selection) return true; // No selection means all receipts are "selected"
 
-    if (!receipt.date) return false;
-
-    const receiptDate = new Date(receipt.date);
+    const receiptDate = this.resolveReceiptDate(receipt);
+    if (!receiptDate) return false;
     return receiptDate.getDate() === selection.day &&
       receiptDate.getMonth() === selection.month &&
       receiptDate.getFullYear() === selection.year;
@@ -1335,9 +1325,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // If hovering, check against hovered day
     if (hovered) {
-      if (!receipt.date) return false;
-
-      const receiptDate = new Date(receipt.date);
+      const receiptDate = this.resolveReceiptDate(receipt);
+      if (!receiptDate) return false;
       const selectedMonth = this.receiptService.selectedMonth();
       const selectedYear = this.receiptService.selectedYear();
 
@@ -1387,24 +1376,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     return padding + chartHeight - (amount / maxValue) * chartHeight;
   }
 
+  getReceiptAmount(receipt: Receipt): number | null {
+    return this.receiptService.getEffectiveAmount(receipt);
+  }
+
   private resolveReceiptDate(receipt: Receipt): Date | null {
-    if (receipt.date) {
-      const parsed = new Date(receipt.date);
-      if (!Number.isNaN(parsed.getTime())) {
-        return parsed;
-      }
-    }
-
-    if (receipt.createdAt) {
-      const createdDate = (receipt.createdAt as any).toDate
-        ? (receipt.createdAt as any).toDate()
-        : new Date(receipt.createdAt as any);
-      if (!Number.isNaN(createdDate.getTime())) {
-        return createdDate;
-      }
-    }
-
-    return null;
+    return this.receiptService.getEffectiveDate(receipt);
   }
 
   private getMonthKey(year: number, month: number): string {
