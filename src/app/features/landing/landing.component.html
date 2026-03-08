@@ -1546,42 +1546,166 @@
   <section class="py-16 sm:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div
-        class="rounded-3xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/60 dark:bg-emerald-900/15 p-8 sm:p-12">
-        <div class="max-w-3xl">
-          <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300 tracking-wide uppercase">Privacy
-            promise</p>
-          <h2 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Your money. Your data. Period.
-          </h2>
-          <p class="mt-4 text-lg text-slate-700 dark:text-slate-300 leading-relaxed">
-            Most apps profit from your financial data. We don't. ReceiptNest AI is funded by subscriptions, not by
-            selling
-            what you spend.
-          </p>
+        class="relative overflow-hidden rounded-[2.5rem] border border-emerald-200/80 dark:border-emerald-800/60 bg-white/50 dark:bg-slate-900/50 p-8 sm:p-14 lg:p-16 shadow-2xl backdrop-blur-xl">
+        <!-- Background Glows -->
+        <div
+          class="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 blur-[80px]">
+        </div>
+        <div class="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-cyan-500/10 dark:bg-cyan-500/20 blur-[80px]">
         </div>
 
-        <ul class="mt-8 grid gap-3 sm:grid-cols-2 text-slate-700 dark:text-slate-300">
-          <li class="flex items-start gap-2"><span
-              class="text-emerald-600 dark:text-emerald-400">+</span><span>Encrypted
-              in transit and at rest</span></li>
-          <li class="flex items-start gap-2"><span class="text-emerald-600 dark:text-emerald-400">+</span><span>Never
-              sold to advertisers or data brokers</span></li>
-          <li class="flex items-start gap-2"><span class="text-emerald-600 dark:text-emerald-400">+</span><span>Never
-              used to train AI models</span></li>
-          <li class="flex items-start gap-2"><span class="text-emerald-600 dark:text-emerald-400">+</span><span>Full
-              export anytime - your data belongs to you</span></li>
-          <li class="flex items-start gap-2"><span
-              class="text-emerald-600 dark:text-emerald-400">+</span><span>Permanent
-              delete on request - we keep nothing</span></li>
-        </ul>
+        <div class="relative grid lg:grid-cols-2 gap-12 items-center">
 
-        <a routerLink="/terms"
-          class="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 dark:hover:text-emerald-200">
-          Read our privacy commitment
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-          </svg>
-        </a>
+          <!-- Text Content -->
+          <div class="max-w-2xl">
+            <div
+              class="inline-flex items-center gap-2 rounded-full bg-emerald-100 dark:bg-emerald-900/40 px-3 py-1 ring-1 ring-emerald-200 dark:ring-emerald-800/60 mb-6">
+              <svg class="h-4 w-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+              </svg>
+              <span class="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">Privacy
+                promise</span>
+            </div>
+
+            <h2 class="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+              Your money.<br />
+              Your data.<br />
+              <span class="text-emerald-500 dark:text-emerald-400">Period.</span>
+            </h2>
+            <p class="mt-6 text-lg sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed">
+              Most apps profit from your financial data. We don't. ReceiptNest AI is funded by subscriptions, not by
+              selling what you spend.
+            </p>
+
+            <ul class="mt-10 space-y-4 text-slate-700 dark:text-slate-200 text-base sm:text-lg">
+              <li class="flex items-center gap-3">
+                <div
+                  class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <span>Encrypted in transit and at rest</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <div
+                  class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <span>Never sold to advertisers or data brokers</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <div
+                  class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <span>Never used to train AI models</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <div
+                  class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <span>Full export anytime - your data is yours</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <div
+                  class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <span>Permanent delete on request</span>
+              </li>
+            </ul>
+
+            <a routerLink="/terms"
+              class="group mt-10 inline-flex items-center gap-2 text-base font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
+              Read our privacy commitment
+              <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </a>
+          </div>
+
+          <!-- Visual Illustration -->
+          <div class="relative lg:block flex justify-center -order-1 lg:order-1 mb-8 lg:mb-0">
+            <div class="relative w-64 h-64 sm:w-80 sm:h-80 flex items-center justify-center">
+
+              <!-- Outer glowing ring -->
+              <div
+                class="absolute inset-0 rounded-full border border-emerald-200 dark:border-emerald-800/80 shadow-[0_0_60px_rgba(16,185,129,0.15)] dark:shadow-[0_0_60px_rgba(16,185,129,0.25)] animate-[spin_10s_linear_infinite]">
+              </div>
+
+              <!-- Dashed middle ring -->
+              <div
+                class="absolute inset-4 rounded-full border border-dashed border-emerald-300 dark:border-emerald-700/60 animate-[spin_15s_linear_infinite_reverse]">
+              </div>
+
+              <!-- Core shield background -->
+              <div
+                class="absolute inset-10 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-900/60 dark:to-slate-900 shadow-inner flex items-center justify-center border border-emerald-200 dark:border-emerald-800">
+
+                <!-- Lock Icon -->
+                <div
+                  class="relative text-emerald-600 dark:text-emerald-400 hover:scale-110 transition-transform duration-500 cursor-default">
+                  <svg class="w-24 h-24 sm:w-32 sm:h-32 drop-shadow-xl" fill="none" stroke="currentColor"
+                    stroke-width="1.2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                  </svg>
+
+                  <!-- Keyhole glow -->
+                  <div class="absolute inset-0 flex items-center justify-center mt-6">
+                    <div
+                      class="w-3 h-3 bg-white dark:bg-emerald-300 rounded-full shadow-[0_0_15px_5px_rgba(255,255,255,0.8)] dark:shadow-[0_0_15px_5px_rgba(110,231,183,0.6)] animate-pulse">
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Floating Badges -->
+              <div
+                class="absolute -top-4 -right-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xl rounded-2xl p-3 flex items-center gap-3 animate-bounce-slow">
+                <div
+                  class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-1.5 0h12a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014.5 18v-6a1.5 1.5 0 011.5-1.5z" />
+                  </svg>
+                </div>
+                <div class="text-xs font-bold text-slate-700 dark:text-slate-200">AES-256<br /><span
+                    class="text-[10px] text-slate-500 dark:text-slate-400 font-normal">Encrypted</span></div>
+              </div>
+
+              <div
+                class="absolute -bottom-6 -left-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xl rounded-2xl p-3 flex items-center gap-3 animate-bounce-slow"
+                style="animation-delay: 1.5s;">
+                <div
+                  class="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center text-violet-600 dark:text-violet-400">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                  </svg>
+                </div>
+                <div class="text-xs font-bold text-slate-700 dark:text-slate-200">100%<br /><span
+                    class="text-[10px] text-slate-500 dark:text-slate-400 font-normal">Your Data</span></div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   </section>
