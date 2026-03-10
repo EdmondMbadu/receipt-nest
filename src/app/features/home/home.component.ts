@@ -40,6 +40,12 @@ interface TimeRangeChartPoint extends TimeRangeDayPoint {
   y: number;
 }
 
+interface TimeRangeAxisLabel {
+  key: string;
+  label: string;
+  position: number;
+}
+
 const SPENDING_TIME_RANGES: { key: SpendingTimeRange; label: string }[] = [
   { key: '1d', label: '1D' },
   { key: '1w', label: '1W' },
@@ -354,12 +360,47 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    if (range === '1d') {
+      const hourlyAmounts = new Map<number, number>();
+
+      for (const receipt of this.receipts()) {
+        const amount = this.receiptService.getEffectiveAmount(receipt);
+        const dateTime = this.resolveReceiptDateTime(receipt);
+        if (amount === null || !dateTime) continue;
+
+        if (
+          dateTime.getFullYear() !== today.getFullYear() ||
+          dateTime.getMonth() !== today.getMonth() ||
+          dateTime.getDate() !== today.getDate()
+        ) {
+          continue;
+        }
+
+        const hour = dateTime.getHours();
+        hourlyAmounts.set(hour, (hourlyAmounts.get(hour) ?? 0) + amount);
+      }
+
+      let cumulative = 0;
+      return Array.from({ length: 24 }, (_, hour) => {
+        const amount = hourlyAmounts.get(hour) ?? 0;
+        cumulative += amount;
+        const pointDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hour);
+
+        return {
+          day: pointDate.getDate(),
+          amount,
+          cumulative,
+          month: pointDate.getMonth(),
+          year: pointDate.getFullYear(),
+          date: pointDate
+        };
+      });
+    }
+
     let startDate: Date;
 
     switch (range) {
-      case '1d':
-        startDate = today;
-        break;
       case '1w':
         startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
         break;
@@ -416,6 +457,9 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   readonly timeRangeActiveData = computed<TimeRangeDayPoint[]>(() => {
     const points = this.spendingTimeRange() === '1m' ? [] : this.timeRangeData();
+    if (this.spendingTimeRange() === '1d') {
+      return points;
+    }
     const active = points.filter((point) => point.amount > 0);
     return active.length > 0 ? active : points.slice(-1);
   });
@@ -492,10 +536,29 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     return this.timeRangeChartPath().chartPoints.find((point) =>
-      point.day === hovered.day &&
-      point.month === hovered.month &&
-      point.year === hovered.year
+      point.date.getTime() === hovered.date.getTime()
     ) ?? null;
+  });
+
+  readonly timeRangeAxisLabels = computed<TimeRangeAxisLabel[]>(() => {
+    if (this.spendingTimeRange() !== '1d') {
+      return [];
+    }
+
+    const chartPoints = this.timeRangeChartPath().chartPoints;
+    if (!chartPoints.length) {
+      return [];
+    }
+
+    const indexes = [0, 6, 12, 18, 23].filter((index, position, values) =>
+      index < chartPoints.length && values.indexOf(index) === position
+    );
+
+    return indexes.map((index) => ({
+      key: `hour-${index}`,
+      label: chartPoints[index].date.toLocaleTimeString('en-US', { hour: 'numeric' }),
+      position: chartPoints[index].x / 200 * 100
+    }));
   });
 
   // Keep for backward compatibility
@@ -1607,7 +1670,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   getHoveredDayLabel(): string {
     const hovered = this.hoveredDay();
-    return hovered ? this.formatDateLabel(hovered.date) : '';
+    return hovered ? this.formatSpendingPointLabel(hovered) : '';
   }
 
   getSelectedDayLabel(): string {
@@ -1624,7 +1687,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getTimeRangePointAriaLabel(point: TimeRangeChartPoint): string {
-    return `${this.formatDateLabel(point.date)}: ${this.formatCurrency(point.amount)}`;
+    return `${this.formatSpendingPointLabel(point)}: ${this.formatCurrency(point.amount)}`;
   }
 
   isMonthGroupForActiveDay(month: number, year: number): boolean {
@@ -1656,6 +1719,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.receiptService.getEffectiveDate(receipt);
   }
 
+  private resolveReceiptDateTime(receipt: Receipt): Date | null {
+    return this.receiptService.getEffectiveDateTime(receipt);
+  }
+
   private getActiveSpendingDate(): { day: number; month: number; year: number } | null {
     const hovered = this.hoveredDay();
     if (hovered) {
@@ -1680,6 +1747,19 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       day: 'numeric',
       year: 'numeric'
     });
+  }
+
+  private formatSpendingPointLabel(point: TimeRangeDayPoint): string {
+    if (this.spendingTimeRange() === '1d') {
+      return point.date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric'
+      });
+    }
+
+    return this.formatDateLabel(point.date);
   }
 
   private getMonthKey(year: number, month: number): string {

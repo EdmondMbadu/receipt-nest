@@ -549,6 +549,36 @@ export class ReceiptService {
     return this.parseDateValue(receipt.createdAt);
   }
 
+  getEffectiveDateTime(receipt: Receipt): Date | null {
+    const explicitDate = this.parseDateValue(receipt.date);
+    const extractedDate = this.parseDateValue(receipt.extraction?.date?.value);
+    const timestamp = this.parseDateValue(receipt.createdAt)
+      ?? this.parseDateValue(receipt.file?.uploadedAt);
+    const baseDate = explicitDate ?? extractedDate ?? timestamp;
+
+    if (!baseDate) {
+      return null;
+    }
+
+    if (!timestamp || (!explicitDate && !extractedDate)) {
+      return baseDate;
+    }
+
+    if (!this.isSameCalendarDay(baseDate, timestamp)) {
+      return baseDate;
+    }
+
+    return new Date(
+      baseDate.getFullYear(),
+      baseDate.getMonth(),
+      baseDate.getDate(),
+      timestamp.getHours(),
+      timestamp.getMinutes(),
+      timestamp.getSeconds(),
+      timestamp.getMilliseconds()
+    );
+  }
+
   // Selected month for filtering (default: current month)
   readonly selectedMonth = signal(new Date().getMonth());
   readonly selectedYear = signal(new Date().getFullYear());
@@ -571,6 +601,12 @@ export class ReceiptService {
       })
       .reduce((sum, r) => sum + (this.getEffectiveAmount(r) ?? 0), 0);
   });
+
+  private isSameCalendarDay(a: Date, b: Date): boolean {
+    return a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
+  }
 
   /**
    * Get receipts for the selected month
