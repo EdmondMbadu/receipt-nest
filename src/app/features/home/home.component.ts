@@ -30,6 +30,9 @@ interface TimeRangeDayPoint {
   day: number;
   amount: number;
   cumulative: number;
+  month: number;
+  year: number;
+  date: Date;
 }
 
 interface TimeRangeChartPoint extends TimeRangeDayPoint {
@@ -88,7 +91,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly searchQuery = signal('');
   readonly searchFocused = signal(false);
   readonly showAllReceipts = signal(false);
-  readonly hoveredDay = signal<{ day: number; amount: number; cumulative: number } | null>(null);
+  readonly hoveredDay = signal<TimeRangeDayPoint | null>(null);
   readonly selectedDay = signal<{ day: number; month: number; year: number } | null>(null);
   readonly graphViewMode = signal<GraphViewMode>('daily');
   readonly histogramRange = signal<HistogramRange>('this-year');
@@ -395,13 +398,27 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     return Array.from({ length: totalDays }, (_, i) => {
       const amount = dayAmounts.get(i) ?? 0;
       cumulative += amount;
-      return { day: i + 1, amount, cumulative };
+      const pointDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + i);
+      return {
+        day: i + 1,
+        amount,
+        cumulative,
+        month: pointDate.getMonth(),
+        year: pointDate.getFullYear(),
+        date: pointDate
+      };
     });
   });
 
   readonly timeRangeTotal = computed(() =>
     this.timeRangeData().reduce((sum, p) => sum + p.amount, 0)
   );
+
+  readonly timeRangeActiveData = computed<TimeRangeDayPoint[]>(() => {
+    const points = this.spendingTimeRange() === '1m' ? [] : this.timeRangeData();
+    const active = points.filter((point) => point.amount > 0);
+    return active.length > 0 ? active : points.slice(-1);
+  });
 
   readonly timeRangeSubtitle = computed(() => {
     switch (this.spendingTimeRange()) {
@@ -415,15 +432,14 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   });
 
   readonly timeRangeChartPath = computed(() => {
-    const points = this.spendingTimeRange() === '1m' ? [] : this.timeRangeData();
-    const active = points.filter(p => p.amount > 0);
-    const data = active.length > 0 ? active : points.slice(0, 1);
+    const data = this.timeRangeActiveData();
 
     if (!data.length) {
       return {
         linePath: '',
         areaPath: '',
         hasData: false,
+        chartPoints: [] as TimeRangeChartPoint[],
         singlePointMarker: null as TimeRangeChartPoint | null
       };
     }
@@ -456,7 +472,30 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       ? chartPoints[0]
       : null;
 
-    return { linePath, areaPath, hasData: data.length > 0, singlePointMarker };
+    return {
+      linePath,
+      areaPath,
+      hasData: data.some((point) => point.amount > 0),
+      chartPoints,
+      singlePointMarker
+    };
+  });
+
+  readonly hoveredTimeRangeChartPoint = computed(() => {
+    if (this.spendingTimeRange() === '1m') {
+      return null;
+    }
+
+    const hovered = this.hoveredDay();
+    if (!hovered) {
+      return null;
+    }
+
+    return this.timeRangeChartPath().chartPoints.find((point) =>
+      point.day === hovered.day &&
+      point.month === hovered.month &&
+      point.year === hovered.year
+    ) ?? null;
   });
 
   // Keep for backward compatibility
@@ -1466,6 +1505,21 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.hoveredHistogramMonth.set(null);
   }
 
+  setHoveredMonthDay(day: { day: number; amount: number; cumulative: number }): void {
+    const year = this.receiptService.selectedYear();
+    const month = this.receiptService.selectedMonth();
+    this.hoveredDay.set({
+      ...day,
+      month,
+      year,
+      date: new Date(year, month, day.day)
+    });
+  }
+
+  setHoveredTimeRangePoint(point: TimeRangeChartPoint): void {
+    this.hoveredDay.set(point);
+  }
+
   getHistogramBarHeight(amount: number): number {
     const maxAmount = this.histogramMaxAmount();
     if (maxAmount <= 0 || amount <= 0) {
@@ -1518,27 +1572,15 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   // Check if a receipt matches the active day (selected or hovered)
   // Selected takes priority over hovered
   isReceiptForActiveDay(receipt: Receipt): boolean {
-    const selection = this.selectedDay();
-    const hovered = this.hoveredDay();
+    const activeDate = this.getActiveSpendingDate();
+    if (!activeDate) return true;
 
-    // If there's a selection, use that
-    if (selection) {
-      return this.isReceiptForSelectedDay(receipt);
-    }
+    const receiptDate = this.resolveReceiptDate(receipt);
+    if (!receiptDate) return false;
 
-    // If hovering, check against hovered day
-    if (hovered) {
-      const receiptDate = this.resolveReceiptDate(receipt);
-      if (!receiptDate) return false;
-      const selectedMonth = this.receiptService.selectedMonth();
-      const selectedYear = this.receiptService.selectedYear();
-
-      return receiptDate.getDate() === hovered.day &&
-        receiptDate.getMonth() === selectedMonth &&
-        receiptDate.getFullYear() === selectedYear;
-    }
-
-    return true; // No active day means all receipts are shown
+    return receiptDate.getDate() === activeDate.day &&
+      receiptDate.getMonth() === activeDate.month &&
+      receiptDate.getFullYear() === activeDate.year;
   }
 
   // Get amount for a specific day from daily spending data
@@ -1563,6 +1605,33 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     return 0;
   }
 
+  getHoveredDayLabel(): string {
+    const hovered = this.hoveredDay();
+    return hovered ? this.formatDateLabel(hovered.date) : '';
+  }
+
+  getSelectedDayLabel(): string {
+    const selection = this.selectedDay();
+    if (!selection) {
+      return '';
+    }
+
+    return this.formatDateLabel(new Date(selection.year, selection.month, selection.day));
+  }
+
+  getActiveDayLabel(): string {
+    return this.getHoveredDayLabel() || this.getSelectedDayLabel();
+  }
+
+  getTimeRangePointAriaLabel(point: TimeRangeChartPoint): string {
+    return `${this.formatDateLabel(point.date)}: ${this.formatCurrency(point.amount)}`;
+  }
+
+  isMonthGroupForActiveDay(month: number, year: number): boolean {
+    const activeDate = this.getActiveSpendingDate();
+    return !!activeDate && activeDate.month === month && activeDate.year === year;
+  }
+
   // Chart helper methods for Robinhood-style graph
   getChartX(day: number): number {
     const data = this.dailySpendingData();
@@ -1585,6 +1654,32 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private resolveReceiptDate(receipt: Receipt): Date | null {
     return this.receiptService.getEffectiveDate(receipt);
+  }
+
+  private getActiveSpendingDate(): { day: number; month: number; year: number } | null {
+    const hovered = this.hoveredDay();
+    if (hovered) {
+      return {
+        day: hovered.date.getDate(),
+        month: hovered.month,
+        year: hovered.year
+      };
+    }
+
+    const selection = this.selectedDay();
+    if (!selection) {
+      return null;
+    }
+
+    return selection;
+  }
+
+  private formatDateLabel(date: Date): string {
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   }
 
   private getMonthKey(year: number, month: number): string {
