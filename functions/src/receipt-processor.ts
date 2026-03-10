@@ -6,6 +6,7 @@
  */
 
 import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import { VertexAI } from "@google-cloud/vertexai";
@@ -26,6 +27,7 @@ interface ExtractionResult {
   currency?: ExtractedField<string>;
   date?: ExtractedField<string>;
   supplierName?: ExtractedField<string>;
+  aiCategory?: string;
   overallConfidence: number;
 }
 
@@ -68,17 +70,27 @@ const VERTEX_LOCATION = "us-central1"; // Vertex AI location
 
 // Default categories for classification
 const CATEGORIES = [
-  { id: "groceries", name: "Groceries", keywords: ["grocery", "supermarket", "food", "whole foods", "trader joe", "kroger"] },
-  { id: "restaurants", name: "Restaurants", keywords: ["restaurant", "cafe", "coffee", "starbucks", "mcdonalds", "uber eats"] },
-  { id: "shopping", name: "Shopping", keywords: ["amazon", "target", "walmart", "costco", "best buy", "retail"] },
-  { id: "transportation", name: "Transportation", keywords: ["gas", "fuel", "uber", "lyft", "parking", "transit"] },
-  { id: "entertainment", name: "Entertainment", keywords: ["movie", "netflix", "spotify", "gaming", "concert"] },
-  { id: "subscriptions", name: "Subscriptions", keywords: ["subscription", "monthly", "recurring", "membership"] },
-  { id: "utilities", name: "Utilities", keywords: ["electric", "water", "internet", "phone", "utility"] },
-  { id: "healthcare", name: "Healthcare", keywords: ["pharmacy", "doctor", "hospital", "cvs", "walgreens"] },
-  { id: "travel", name: "Travel", keywords: ["hotel", "flight", "airline", "airbnb", "booking"] },
+  { id: "groceries", name: "Groceries", keywords: ["grocery", "supermarket", "whole foods", "trader joe", "kroger", "aldi", "publix", "safeway", "piggly wiggly", "food lion", "h-e-b", "heb", "wegmans", "sprouts", "market basket"] },
+  { id: "restaurants", name: "Restaurants & Dining", keywords: ["restaurant", "cafe", "coffee", "starbucks", "mcdonalds", "uber eats", "doordash", "grubhub", "chipotle", "chick-fil-a", "wendy", "burger king", "subway", "pizza", "taco bell", "denny", "ihop", "waffle house", "panera", "panda express", "popeyes", "dunkin", "tim hortons", "five guys", "wingstop", "buffalo wild wings", "applebee", "olive garden", "red lobster", "outback", "cracker barrel", "cheesecake factory", "dine-in", "takeout", "bistro", "grill", "bakery", "deli", "sushi", "ramen", "pho", "thai", "wok", "kitchen"] },
+  { id: "shopping", name: "Shopping", keywords: ["amazon", "target", "walmart", "costco", "best buy", "retail", "dollar tree", "dollar general", "family dollar", "five below", "big lots", "sam's club", "bj's", "marshalls", "tj maxx", "ross", "burlington", "bed bath", "ikea", "wayfair", "etsy", "ebay"] },
+  { id: "transportation", name: "Transportation", keywords: ["uber", "lyft", "parking", "transit", "metro", "bus", "toll", "taxi", "cab", "rideshare", "train", "amtrak", "subway fare", "e-zpass", "sunpass"] },
+  { id: "gas_fuel", name: "Gas & Fuel", keywords: ["gas", "fuel", "shell", "chevron", "exxon", "mobil", "bp", "valero", "marathon", "citgo", "sunoco", "speedway", "racetrac", "quiktrip", "wawa", "sheetz", "casey", "pilot", "loves", "flying j", "circle k", "7-eleven", "petro", "gasoline", "diesel", "gallon"] },
+  { id: "entertainment", name: "Entertainment", keywords: ["movie", "netflix", "spotify", "gaming", "concert", "amc", "regal", "cinemark", "hulu", "disney+", "hbo", "paramount", "apple tv", "youtube premium", "twitch", "xbox", "playstation", "nintendo", "steam", "theater", "theatre", "museum", "zoo", "aquarium", "amusement", "theme park", "bowling", "arcade", "cinema", "ticket"] },
+  { id: "subscriptions", name: "Subscriptions", keywords: ["subscription", "monthly", "recurring", "membership", "adobe", "microsoft 365", "google one", "dropbox", "icloud", "aws", "premium", "annual plan", "autopay"] },
+  { id: "utilities", name: "Utilities & Bills", keywords: ["electric", "water", "internet", "phone", "utility", "gas bill", "sewage", "trash", "at&t", "verizon", "t-mobile", "comcast", "xfinity", "spectrum", "cox", "frontier", "windstream", "power", "energy", "pgn", "pg&e", "duke energy", "fpl", "cable", "broadband", "cellular", "wireless"] },
+  { id: "healthcare", name: "Healthcare", keywords: ["pharmacy", "doctor", "hospital", "cvs", "walgreens", "rite aid", "medical", "dental", "vision", "optometrist", "clinic", "urgent care", "lab", "prescription", "copay", "health", "therapy", "physical therapy", "chiropractic", "dermatology", "pediatric"] },
+  { id: "travel", name: "Travel & Hotels", keywords: ["hotel", "flight", "airline", "airbnb", "booking", "marriott", "hilton", "hyatt", "motel", "resort", "vrbo", "expedia", "kayak", "priceline", "delta", "united", "american airlines", "southwest", "jetblue", "spirit", "frontier airlines", "cruise", "hostel", "lodge", "inn"] },
+  { id: "education", name: "Education", keywords: ["school", "university", "college", "tuition", "textbook", "course", "udemy", "coursera", "skillshare", "masterclass", "training", "seminar", "workshop", "tutorial", "academy", "learning", "student", "campus bookstore"] },
+  { id: "personal", name: "Personal Care", keywords: ["salon", "barber", "spa", "massage", "nail", "hair", "beauty", "cosmetic", "skincare", "sephora", "ulta", "bath & body", "waxing", "facial", "manicure", "pedicure", "grooming", "lash"] },
+  { id: "home_garden", name: "Home & Garden", keywords: ["home depot", "lowes", "lowe's", "menards", "ace hardware", "true value", "hardware", "lumber", "plumbing", "electrical supply", "nursery", "garden center", "landscaping", "paint", "flooring", "renovation", "repair"] },
+  { id: "clothing", name: "Clothing & Apparel", keywords: ["nike", "adidas", "gap", "old navy", "h&m", "zara", "uniqlo", "forever 21", "nordstrom", "macy's", "macys", "jcpenney", "kohl's", "kohls", "aeropostale", "american eagle", "lululemon", "under armour", "puma", "foot locker", "shoes", "apparel", "clothing", "fashion", "dress", "suit", "tailor"] },
+  { id: "gifts_donations", name: "Gifts & Donations", keywords: ["gift", "donation", "charity", "church", "tithe", "offering", "gofundme", "nonprofit", "red cross", "salvation army", "goodwill", "united way", "hallmark", "card shop", "flower shop", "florist", "bouquet"] },
+  { id: "pets", name: "Pets", keywords: ["pet", "petsmart", "petco", "veterinarian", "vet", "animal hospital", "dog", "cat", "puppy", "kitten", "pet food", "chewy", "groomer", "kennel", "boarding"] },
+  { id: "fitness", name: "Fitness & Sports", keywords: ["gym", "fitness", "crossfit", "planet fitness", "la fitness", "anytime fitness", "orangetheory", "equinox", "ymca", "ywca", "peloton", "sporting goods", "dick's sporting", "rei", "sports authority", "athletic", "workout", "yoga studio", "martial arts", "swimming pool"] },
   { id: "other", name: "Other", keywords: [] },
 ];
+
+const VALID_CATEGORY_NAMES = CATEGORIES.map((c) => c.name);
 
 /**
  * Simple, robust Gemini extraction for receipts
@@ -114,13 +126,16 @@ async function extractWithGemini(
 
   const base64Image = fileBuffer.toString("base64");
 
+  const categoryList = VALID_CATEGORY_NAMES.join(", ");
+
   const prompt = `You are a receipt parser. Extract these fields from the receipt image:
 
 {
   "total": 123.45,
   "merchant": "Store Name",
   "date": "2024-01-15",
-  "currency": "USD"
+  "currency": "USD",
+  "category": "Groceries"
 }
 
 Instructions:
@@ -128,6 +143,7 @@ Instructions:
 - merchant: The store or business name, usually at the top of the receipt. Remove any store numbers like "#1234".
 - date: The transaction date in YYYY-MM-DD format.
 - currency: Default to "USD" for US receipts.
+- category: Classify the receipt into EXACTLY one of these categories: ${categoryList}. Examine the line items, merchant name, and overall context of the receipt to determine the best fit. Use "Other" ONLY if none of the categories fit.
 
 Return ONLY the JSON object, no other text.`;
 
@@ -239,6 +255,16 @@ Return ONLY the JSON object, no other text.`;
     parsed.currency_code;
   const currencyValue = currencyRaw ? String(currencyRaw).toUpperCase() : 'USD';
 
+  // Extract AI category
+  const categoryRaw = parsed.category ?? parsed.categoryName ?? parsed.category_name;
+  let aiCategory: string | undefined;
+  if (categoryRaw) {
+    const catStr = String(categoryRaw).trim();
+    if (catStr && !['null', 'unknown', 'n/a', 'none'].includes(catStr.toLowerCase())) {
+      aiCategory = catStr;
+    }
+  }
+
   // Calculate confidence - be generous to avoid needs_review
   let confidence = 0.85;
   if (!totalValue || totalValue <= 0) {
@@ -252,6 +278,7 @@ Return ONLY the JSON object, no other text.`;
     merchant: merchantValue,
     date: dateValue,
     currency: currencyValue,
+    aiCategory,
     confidence
   });
 
@@ -259,6 +286,7 @@ Return ONLY the JSON object, no other text.`;
     source: "gemini",
     processedAt: admin.firestore.FieldValue.serverTimestamp(),
     currency: { value: currencyValue, confidence: 0.9 },
+    aiCategory,
     overallConfidence: confidence,
   };
 
@@ -653,15 +681,49 @@ async function normalizeMerchant(
 }
 
 /**
- * Classify receipt into a category
+ * Classify receipt into a category.
+ *
+ * Priority:
+ *  1. Gemini AI classification (from the extraction prompt)
+ *  2. Keyword rules on merchant name
+ *  3. Default to "Other"
  */
 async function classifyCategory(
   merchantName: string,
   extraction: ExtractionResult
 ): Promise<ReceiptCategory> {
-  const lowerMerchant = merchantName.toLowerCase();
+  // 1. Try AI classification from Gemini
+  if (extraction.aiCategory) {
+    const aiName = extraction.aiCategory.trim();
+    const matched = CATEGORIES.find(
+      (c) => c.name.toLowerCase() === aiName.toLowerCase() || c.id === aiName.toLowerCase()
+    );
+    if (matched) {
+      return {
+        id: matched.id,
+        name: matched.name,
+        confidence: 0.85,
+        assignedBy: "ai",
+      };
+    }
+    // Fuzzy match: AI might return a slightly different name
+    const fuzzy = CATEGORIES.find(
+      (c) => aiName.toLowerCase().includes(c.name.toLowerCase()) ||
+             c.name.toLowerCase().includes(aiName.toLowerCase())
+    );
+    if (fuzzy && fuzzy.id !== "other") {
+      return {
+        id: fuzzy.id,
+        name: fuzzy.name,
+        confidence: 0.75,
+        assignedBy: "ai",
+      };
+    }
+    logger.warn(`AI returned unrecognized category: "${aiName}", falling back to keyword rules`);
+  }
 
-  // Try keyword matching first
+  // 2. Fall back to keyword rules on merchant name
+  const lowerMerchant = merchantName.toLowerCase();
   for (const cat of CATEGORIES) {
     if (cat.keywords.some((kw) => lowerMerchant.includes(kw))) {
       return {
@@ -673,7 +735,7 @@ async function classifyCategory(
     }
   }
 
-  // Default to "other" if no match
+  // 3. Default to "Other"
   return {
     id: "other",
     name: "Other",
@@ -813,3 +875,138 @@ function formatShortDate(isoDate?: string): string | null {
     year: "numeric",
   });
 }
+
+/**
+ * Backfill reclassification for receipts stuck in "Other".
+ *
+ * Re-downloads the receipt image, re-runs Gemini extraction to get an AI
+ * category, then updates the category field. Processes up to `batchSize`
+ * receipts per invocation (default 50) to stay within Cloud Function limits.
+ *
+ * Callable by authenticated admins only.
+ */
+export const backfillReceiptCategories = onCall(
+  {
+    region: "us-central1",
+    memory: "1GiB",
+    timeoutSeconds: 540,
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "User must be authenticated.");
+    }
+
+    const token = request.auth.token as Record<string, unknown>;
+    if (token?.admin !== true && token?.role !== "admin") {
+      const userSnap = await admin.firestore().doc(`users/${request.auth.uid}`).get();
+      const role = userSnap.get("role");
+      if (role !== "admin") {
+        throw new HttpsError("permission-denied", "Admin access required.");
+      }
+    }
+
+    const batchSize = (request.data?.batchSize as number) || 50;
+    const targetUserId = request.data?.userId as string | undefined;
+
+    const db = admin.firestore();
+    const bucket = admin.storage().bucket();
+
+    let usersToProcess: string[];
+    if (targetUserId) {
+      usersToProcess = [targetUserId];
+    } else {
+      const usersSnap = await db.collection("users").get();
+      usersToProcess = usersSnap.docs.map((doc) => doc.id);
+    }
+
+    let processed = 0;
+    let reclassified = 0;
+    let errors = 0;
+
+    for (const userId of usersToProcess) {
+      if (processed >= batchSize) break;
+
+      const receiptsSnap = await db
+        .collection(`users/${userId}/receipts`)
+        .where("category.assignedBy", "in", ["default", "rule"])
+        .limit(batchSize - processed)
+        .get();
+
+      for (const doc of receiptsSnap.docs) {
+        if (processed >= batchSize) break;
+        processed++;
+
+        const data = doc.data();
+        if (data.category?.assignedBy === "user") continue;
+
+        const storagePath = data.file?.storagePath;
+        if (!storagePath) {
+          logger.warn(`Backfill: No storagePath for receipt ${doc.id}`);
+          errors++;
+          continue;
+        }
+
+        try {
+          const file = bucket.file(storagePath);
+          const [fileBuffer] = await file.download();
+          let mimeType = data.file?.mimeType || "image/jpeg";
+
+          let processBuffer = fileBuffer;
+          let processMimeType = mimeType;
+
+          const isHeic =
+            mimeType === "image/heic" ||
+            mimeType === "image/heif" ||
+            storagePath.toLowerCase().endsWith(".heic") ||
+            storagePath.toLowerCase().endsWith(".heif");
+
+          if (isHeic) {
+            try {
+              processBuffer = await sharp(fileBuffer).jpeg({ quality: 90 }).toBuffer();
+              processMimeType = "image/jpeg";
+            } catch {
+              try {
+                const { width, height, data: rawData } = await heicDecode({ buffer: fileBuffer });
+                processBuffer = await sharp(Buffer.from(rawData), {
+                  raw: { width, height, channels: 4 },
+                }).jpeg({ quality: 90 }).toBuffer();
+                processMimeType = "image/jpeg";
+              } catch {
+                processMimeType = "image/jpeg";
+              }
+            }
+          }
+
+          const extraction = await extractWithGemini(processBuffer, processMimeType);
+
+          const merchantName =
+            data.merchant?.canonicalName ||
+            extraction.supplierName?.value ||
+            "Unknown";
+          const newCategory = await classifyCategory(merchantName, extraction);
+
+          if (newCategory.id !== "other" || newCategory.assignedBy === "ai") {
+            await db.doc(`users/${userId}/receipts/${doc.id}`).update({
+              category: newCategory,
+              updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
+            reclassified++;
+            logger.info(`Backfill: Reclassified receipt ${doc.id} -> ${newCategory.name}`, {
+              userId,
+              oldCategory: data.category?.name,
+              newCategory: newCategory.name,
+              assignedBy: newCategory.assignedBy,
+            });
+          }
+        } catch (error: unknown) {
+          const msg = error instanceof Error ? error.message : String(error);
+          logger.error(`Backfill: Error processing receipt ${doc.id}: ${msg}`);
+          errors++;
+        }
+      }
+    }
+
+    logger.info("Backfill complete", { processed, reclassified, errors });
+    return { processed, reclassified, errors };
+  }
+);

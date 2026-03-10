@@ -5,27 +5,52 @@
   </div>
 
   <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+    <!-- Header with tabs -->
     <section class="rounded-3xl border border-slate-200/80 bg-white/85 p-5 shadow-sm backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/80 sm:p-7">
       <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400">Organization</p>
           <h1 class="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">Folders</h1>
           <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            Open a folder to view and manage its receipts on a dedicated page.
+            Browse by category or manage custom folders.
           </p>
         </div>
+        @if (activeTab() === 'folders') {
+          <button
+            type="button"
+            (click)="openCreateModal()"
+            class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-slate-900/15 transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:shadow-white/10 dark:hover:bg-slate-100">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>Add Folder</span>
+          </button>
+        }
+      </div>
+
+      <!-- Tab switcher -->
+      <div class="mt-5 flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
         <button
           type="button"
-          (click)="openCreateModal()"
-          class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-slate-900/15 transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:shadow-white/10 dark:hover:bg-slate-100">
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          <span>Add Folder</span>
+          (click)="activeTab.set('categories')"
+          class="flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition"
+          [class]="activeTab() === 'categories'
+            ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
+            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+          Categories
+        </button>
+        <button
+          type="button"
+          (click)="activeTab.set('folders')"
+          class="flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition"
+          [class]="activeTab() === 'folders'
+            ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
+            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+          My Folders
         </button>
       </div>
 
-      @if (hasFolders()) {
+      @if (activeTab() === 'folders' && hasFolders()) {
         <div class="mt-4">
           <label class="sr-only" for="folder-search">Search folders</label>
           <div class="relative">
@@ -67,7 +92,59 @@
           <article class="h-24 animate-pulse rounded-2xl border border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-900"></article>
         }
       </section>
+    } @else if (activeTab() === 'categories') {
+      <!-- Categories tab -->
+      @if (categoryItems().length === 0) {
+        <section class="rounded-3xl border border-dashed border-slate-300 bg-white/80 p-10 text-center dark:border-slate-700 dark:bg-slate-900/60">
+          <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
+            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+            </svg>
+          </div>
+          <h2 class="mt-4 text-xl font-semibold text-slate-900 dark:text-white">No categorized receipts yet</h2>
+          <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Upload receipts to see them organized by category.</p>
+        </section>
+      } @else {
+        <!-- Summary -->
+        <section class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 dark:border-slate-800 dark:bg-slate-900/80">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ categoryItems().length }} categories</p>
+              <p class="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{{ formatCurrency(categoryGrandTotal()) }}</p>
+            </div>
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ receipts().length }} receipts</p>
+          </div>
+        </section>
+
+        <!-- Category cards -->
+        <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          @for (item of categoryItems(); track item.category.id) {
+            <a [routerLink]="['/app/categories', item.category.id]"
+               class="folder-list-item rounded-2xl border border-slate-200/80 bg-white/90 p-4 dark:border-slate-800 dark:bg-slate-900/80">
+              <div class="flex items-center gap-3">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl text-lg"
+                      [style.background-color]="item.category.color + '18'">
+                  {{ item.category.icon }}
+                </span>
+                <div class="min-w-0 flex-1">
+                  <h2 class="truncate text-base font-semibold text-slate-900 dark:text-white">{{ item.category.name }}</h2>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                    {{ item.receipts.length }} receipt{{ item.receipts.length === 1 ? '' : 's' }}
+                    · <span class="font-semibold" [style.color]="item.category.color">{{ getCategoryPercentage(item.total) }}%</span>
+                  </p>
+                </div>
+                <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ formatCurrency(item.total) }}</p>
+                <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6" />
+                </svg>
+              </div>
+            </a>
+          }
+        </section>
+      }
     } @else if (!hasFolders()) {
+      <!-- Folders tab - empty state -->
       <section class="rounded-3xl border border-dashed border-slate-300 bg-white/80 p-10 text-center dark:border-slate-700 dark:bg-slate-900/60">
         <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
           <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -92,14 +169,22 @@
         <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Try a different search term.</p>
       </section>
     } @else {
+      <!-- Folders tab - list -->
       <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         @for (item of filteredFolderItems(); track trackFolder($index, item)) {
           <div class="folder-list-item rounded-2xl border border-slate-200/80 bg-white/90 p-4 dark:border-slate-800 dark:bg-slate-900/80">
             <div class="flex items-center gap-3">
               <a [routerLink]="['/app/folders', item.folder.id]" class="min-w-0 flex flex-1 items-center gap-3">
-                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-900/25 dark:text-emerald-400">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl"
+                      [class]="item.folder.isAuto
+                        ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/25 dark:text-amber-400'
+                        : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/25 dark:text-emerald-400'">
                   <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 7.5A2.25 2.25 0 016 5.25h4.086a2.25 2.25 0 011.591.659l1.578 1.578a2.25 2.25 0 001.591.659H18a2.25 2.25 0 012.25 2.25v7.5A2.25 2.25 0 0118 20.25H6a2.25 2.25 0 01-2.25-2.25V7.5z" />
+                    @if (item.folder.isAuto) {
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.15c0 .415.336.75.75.75z" />
+                    } @else {
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 7.5A2.25 2.25 0 016 5.25h4.086a2.25 2.25 0 011.591.659l1.578 1.578a2.25 2.25 0 001.591.659H18a2.25 2.25 0 012.25 2.25v7.5A2.25 2.25 0 0118 20.25H6a2.25 2.25 0 01-2.25-2.25V7.5z" />
+                    }
                   </svg>
                 </span>
                 <div class="min-w-0 flex-1">
@@ -111,8 +196,8 @@
                     }
                   </p>
                   @if (item.folder.isAuto) {
-                    <span class="mt-1 inline-flex rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                      Auto
+                    <span class="mt-1 inline-flex rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                      Merchant
                     </span>
                   }
                 </div>

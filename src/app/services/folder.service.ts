@@ -328,7 +328,7 @@ export class FolderService {
   }
 
   private buildAutoGroups(receipts: Receipt[]): Array<{
-    type: 'merchant' | 'title' | 'category';
+    type: 'merchant';
     key: string;
     name: string;
     receiptIds: string[];
@@ -336,7 +336,7 @@ export class FolderService {
     const buckets = new Map<
       string,
       {
-        type: 'merchant' | 'title' | 'category';
+        type: 'merchant';
         key: string;
         label: string;
         receiptIds: Set<string>;
@@ -345,8 +345,6 @@ export class FolderService {
 
     for (const receipt of receipts) {
       this.addBucket(buckets, 'merchant', this.getMerchantLabel(receipt), receipt.id);
-      this.addBucket(buckets, 'title', this.getTitleLabel(receipt), receipt.id);
-      this.addBucket(buckets, 'category', this.getCategoryLabel(receipt), receipt.id);
     }
 
     return Array.from(buckets.values())
@@ -354,15 +352,15 @@ export class FolderService {
       .map((group) => ({
         type: group.type,
         key: group.key,
-        name: this.buildAutoFolderName(group.type, group.label),
+        name: group.label,
         receiptIds: Array.from(group.receiptIds).sort()
       }))
       .sort((a, b) => b.receiptIds.length - a.receiptIds.length || a.name.localeCompare(b.name));
   }
 
   private addBucket(
-    buckets: Map<string, { type: 'merchant' | 'title' | 'category'; key: string; label: string; receiptIds: Set<string> }>,
-    type: 'merchant' | 'title' | 'category',
+    buckets: Map<string, { type: 'merchant'; key: string; label: string; receiptIds: Set<string> }>,
+    type: 'merchant',
     label: string | null,
     receiptId: string
   ): void {
@@ -393,30 +391,6 @@ export class FolderService {
     return this.cleanLabel(label);
   }
 
-  private getCategoryLabel(receipt: Receipt): string | null {
-    return this.cleanLabel(receipt.category?.name);
-  }
-
-  private getTitleLabel(receipt: Receipt): string | null {
-    const originalName = receipt.file?.originalName;
-    if (!originalName) {
-      return null;
-    }
-
-    const withoutExtension = originalName.replace(/\.[^/.]+$/, '');
-    const normalizedTitle = withoutExtension.replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
-    if (!normalizedTitle) {
-      return null;
-    }
-
-    const genericTitle = /^(img|image|scan|scanned|photo|receipt|document)[\s_-]*\d*$/i;
-    if (genericTitle.test(normalizedTitle)) {
-      return null;
-    }
-
-    return this.cleanLabel(normalizedTitle);
-  }
-
   private cleanLabel(value?: string): string | null {
     if (!value) {
       return null;
@@ -438,12 +412,7 @@ export class FolderService {
       .trim();
   }
 
-  private buildAutoFolderName(type: 'merchant' | 'title' | 'category', label: string): string {
-    const prefix = type === 'merchant' ? 'Merchant' : type === 'category' ? 'Category' : 'Title';
-    return `${prefix}: ${label}`;
-  }
-
-  private getAutoCompositeKey(type: 'merchant' | 'title' | 'category', key: string): string {
+  private getAutoCompositeKey(type: 'merchant', key: string): string {
     return `${type}:${key}`;
   }
 

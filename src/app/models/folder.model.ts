@@ -18,7 +18,7 @@ export interface Folder {
   name: string;
   receiptIds: string[];
   isAuto?: boolean;
-  autoType?: 'merchant' | 'title' | 'category';
+  autoType?: 'merchant';
   autoKey?: string;
   mergedSources?: FolderMergeEntry[];
   createdAt: Timestamp | ReturnType<typeof serverTimestamp>;

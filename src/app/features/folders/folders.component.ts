@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
+import { Category, DEFAULT_CATEGORIES, getCategoryById } from '../../models/category.model';
 import { Folder } from '../../models/folder.model';
 import { Receipt } from '../../models/receipt.model';
 import { FolderService } from '../../services/folder.service';
@@ -49,6 +50,8 @@ export class FoldersComponent implements OnInit, OnDestroy {
   readonly selectedReceiptIds = signal<Set<string>>(new Set());
   readonly mergeSourceFolderId = signal<string | null>(null);
   readonly mergeTargetFolderId = signal<string | null>(null);
+
+  readonly activeTab = signal<'categories' | 'folders'>('categories');
 
   readonly mutationLoading = signal(false);
   readonly mutationError = signal<string | null>(null);
@@ -135,6 +138,37 @@ export class FoldersComponent implements OnInit, OnDestroy {
     });
   });
   readonly hasFilteredFolders = computed(() => this.filteredFolderItems().length > 0);
+
+  readonly categoryItems = computed(() => {
+    const receipts = this.receipts();
+    const byCategory = new Map<string, Receipt[]>();
+
+    for (const receipt of receipts) {
+      const catId = receipt.category?.id || 'other';
+      if (!byCategory.has(catId)) {
+        byCategory.set(catId, []);
+      }
+      byCategory.get(catId)!.push(receipt);
+    }
+
+    return DEFAULT_CATEGORIES
+      .map(cat => {
+        const list = byCategory.get(cat.id) || [];
+        const total = list.reduce((sum, r) => sum + (r.totalAmount || 0), 0);
+        return { category: cat, receipts: list, total };
+      })
+      .filter(entry => entry.receipts.length > 0)
+      .sort((a, b) => b.total - a.total);
+  });
+
+  readonly categoryGrandTotal = computed(() => {
+    return this.categoryItems().reduce((sum, item) => sum + item.total, 0);
+  });
+
+  getCategoryPercentage(total: number): number {
+    const grand = this.categoryGrandTotal();
+    return grand > 0 ? Math.round((total / grand) * 100) : 0;
+  }
 
   readonly selectedCount = computed(() => this.selectedReceiptIds().size);
   readonly mergeSourceFolder = computed(() => {

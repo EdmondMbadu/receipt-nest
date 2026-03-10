@@ -20,7 +20,7 @@ admin.firestore().settings({ ignoreUndefinedProperties: true });
 setGlobalOptions({ maxInstances: 10 });
 
 // Export all functions
-export { processReceipt, generateReceiptNote } from "./receipt-processor";
+export { processReceipt, generateReceiptNote, backfillReceiptCategories } from "./receipt-processor";
 export { createCheckoutSession, createPortalSession, stripeWebhook } from "./billing";
 export { generateAiInsights } from "./ai-insights";
 export { sendTestEmail } from "./admin";
