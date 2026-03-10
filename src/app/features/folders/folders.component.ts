@@ -551,10 +551,8 @@ export class FoldersComponent implements OnInit, OnDestroy {
 
   private extractReceiptDate(receipt: Receipt): Date | null {
     if (receipt.date) {
-      const parsed = new Date(receipt.date);
-      if (!Number.isNaN(parsed.getTime())) {
-        return parsed;
-      }
+      const parsed = this.parseLocalDate(receipt.date);
+      if (parsed) return parsed;
     }
 
     if (receipt.createdAt) {
@@ -568,6 +566,16 @@ export class FoldersComponent implements OnInit, OnDestroy {
     }
 
     return null;
+  }
+
+  private parseLocalDate(dateStr: string): Date | null {
+    // YYYY-MM-DD must be parsed as local time, not UTC
+    const iso = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (iso) {
+      return new Date(+iso[1], +iso[2] - 1, +iso[3]);
+    }
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? null : d;
   }
 
   private getReceiptDateValue(receipt: Receipt): number {

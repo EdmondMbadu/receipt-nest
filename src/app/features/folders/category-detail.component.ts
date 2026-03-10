@@ -321,6 +321,11 @@ export class CategoryDetailComponent implements OnInit, OnDestroy {
 
   private parseDate(dateStr?: string): Date | null {
     if (!dateStr) return null;
+    // YYYY-MM-DD must be parsed as local time, not UTC
+    const iso = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (iso) {
+      return new Date(+iso[1], +iso[2] - 1, +iso[3]);
+    }
     const d = new Date(dateStr);
     return isNaN(d.getTime()) ? null : d;
   }
