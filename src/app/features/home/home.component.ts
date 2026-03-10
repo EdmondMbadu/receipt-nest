@@ -24,6 +24,22 @@ interface MonthGroup {
 
 type GraphViewMode = 'daily' | 'histogram';
 type HistogramRange = 'this-year' | '5y' | 'all';
+type SpendingTimeRange = '1d' | '1w' | '1m' | '3m' | '1y' | 'all';
+
+interface TimeRangeDayPoint {
+  day: number;
+  amount: number;
+  cumulative: number;
+}
+
+const SPENDING_TIME_RANGES: { key: SpendingTimeRange; label: string }[] = [
+  { key: '1d', label: '1D' },
+  { key: '1w', label: '1W' },
+  { key: '1m', label: '1M' },
+  { key: '3m', label: '3M' },
+  { key: '1y', label: '1Y' },
+  { key: 'all', label: 'All' },
+];
 
 interface HistogramMonthPoint {
   monthKey: string;
@@ -71,6 +87,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly selectedDay = signal<{ day: number; month: number; year: number } | null>(null);
   readonly graphViewMode = signal<GraphViewMode>('daily');
   readonly histogramRange = signal<HistogramRange>('this-year');
+  readonly spendingTimeRange = signal<SpendingTimeRange>('1m');
+  readonly spendingTimeRanges = SPENDING_TIME_RANGES;
   readonly hoveredHistogramMonth = signal<HistogramMonthPoint | null>(null);
   readonly showShareModal = signal(false);
   readonly shareIncludeName = signal(true);
@@ -154,23 +172,59 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly dailySpendingData = this.receiptService.dailySpendingData;
   readonly chartPathData = this.receiptService.chartPathData;
   readonly histogramMonthlyData = computed<HistogramMonthPoint[]>(() => {
-    const range = this.histogramRange();
+    const timeRange = this.spendingTimeRange();
     const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const receipts = this.receipts();
-    const endMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const selectedMonth = this.receiptService.selectedMonth();
+    const selectedYear = this.receiptService.selectedYear();
+    const endMonth = timeRange === '1m'
+      ? new Date(selectedYear, selectedMonth, 1)
+      : new Date(now.getFullYear(), now.getMonth(), 1);
+
+    let rangeStart: Date;
+    let rangeEnd: Date;
+    switch (timeRange) {
+      case '1d':
+        rangeStart = today;
+        rangeEnd = today;
+        break;
+      case '1w':
+        rangeStart = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
+        rangeEnd = today;
+        break;
+      case '1m': {
+        rangeStart = new Date(selectedYear, selectedMonth, 1);
+        const lastDay = new Date(selectedYear, selectedMonth + 1, 0);
+        rangeEnd = lastDay;
+        break;
+      }
+      case '3m':
+        rangeStart = new Date(today.getFullYear(), today.getMonth() - 3, today.getDate());
+        rangeEnd = today;
+        break;
+      case '1y':
+        rangeStart = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+        rangeEnd = today;
+        break;
+      case 'all':
+        rangeStart = new Date(1900, 0, 1);
+        rangeEnd = today;
+        break;
+    }
+
     const monthlyTotals = new Map<string, number>();
     let earliestMonth: Date | null = null;
 
     for (const receipt of receipts) {
       const amount = this.receiptService.getEffectiveAmount(receipt);
-      if (amount === null) {
-        continue;
-      }
+      if (amount === null) continue;
 
       const date = this.resolveReceiptDate(receipt);
-      if (!date) {
-        continue;
-      }
+      if (!date) continue;
+
+      const receiptDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      if (receiptDay < rangeStart || receiptDay > rangeEnd) continue;
 
       const monthDate = new Date(date.getFullYear(), date.getMonth(), 1);
       if (!earliestMonth || monthDate.getTime() < earliestMonth.getTime()) {
@@ -181,17 +235,33 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       monthlyTotals.set(key, (monthlyTotals.get(key) ?? 0) + amount);
     }
 
-    let startMonth = new Date(now.getFullYear(), 0, 1);
-    if (range === '5y') {
-      startMonth = new Date(endMonth.getFullYear(), endMonth.getMonth() - 59, 1);
-    } else if (range === 'all') {
-      startMonth = earliestMonth ? new Date(earliestMonth.getFullYear(), earliestMonth.getMonth(), 1) : endMonth;
+    let startMonth: Date;
+    switch (timeRange) {
+      case '1d':
+        startMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      case '1w':
+        startMonth = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), 1);
+        break;
+      case '1m':
+        startMonth = new Date(selectedYear, selectedMonth, 1);
+        break;
+      case '3m':
+        startMonth = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), 1);
+        break;
+      case '1y':
+        startMonth = new Date(now.getFullYear(), 0, 1);
+        break;
+      case 'all':
+        startMonth = earliestMonth ?? endMonth;
+        break;
     }
 
     if (startMonth.getTime() > endMonth.getTime()) {
       startMonth = new Date(endMonth.getFullYear(), endMonth.getMonth(), 1);
     }
 
+    const showYear = timeRange === 'all' || timeRange === '1y';
     const data: HistogramMonthPoint[] = [];
     const cursor = new Date(startMonth.getFullYear(), startMonth.getMonth(), 1);
 
@@ -199,9 +269,9 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       const year = cursor.getFullYear();
       const month = cursor.getMonth();
       const key = this.getMonthKey(year, month);
-      const label = range === 'this-year'
-        ? cursor.toLocaleDateString('en-US', { month: 'short' })
-        : cursor.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+      const label = showYear
+        ? cursor.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })
+        : cursor.toLocaleDateString('en-US', { month: 'short' });
 
       data.push({
         monthKey: key,
@@ -225,10 +295,14 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.histogramMonthlyData().reduce((sum, item) => sum + item.amount, 0)
   );
   readonly histogramRangeLabel = computed(() => {
-    const range = this.histogramRange();
-    if (range === 'this-year') return 'This year';
-    if (range === '5y') return 'Last 5 years';
-    return 'All time';
+    switch (this.spendingTimeRange()) {
+      case '1d': return 'Today';
+      case '1w': return 'This week';
+      case '1m': return this.selectedMonthLabel();
+      case '3m': return 'Last 3 months';
+      case '1y': return 'This year';
+      case 'all': return 'All time';
+    }
   });
   readonly histogramAxisLabels = computed(() => {
     const data = this.histogramMonthlyData();
@@ -264,6 +338,105 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       label: this.formatCompactCurrency(maxAmount * fraction),
       position: fraction * 100
     }));
+  });
+
+  readonly timeRangeData = computed<TimeRangeDayPoint[]>(() => {
+    const range = this.spendingTimeRange();
+    if (range === '1m') return [];
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    let startDate: Date;
+
+    switch (range) {
+      case '1d':
+        startDate = today;
+        break;
+      case '1w':
+        startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
+        break;
+      case '3m':
+        startDate = new Date(today.getFullYear(), today.getMonth() - 3, today.getDate());
+        break;
+      case '1y':
+        startDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+        break;
+      case 'all': {
+        let earliest: Date | null = null;
+        for (const r of this.receipts()) {
+          const d = this.resolveReceiptDate(r);
+          if (d && (!earliest || d.getTime() < earliest.getTime())) earliest = d;
+        }
+        startDate = earliest ?? today;
+        break;
+      }
+    }
+
+    const totalDays = Math.max(1, Math.floor((today.getTime() - startDate.getTime()) / 86400000) + 1);
+    const dayAmounts = new Map<number, number>();
+
+    for (const receipt of this.receipts()) {
+      const amount = this.receiptService.getEffectiveAmount(receipt);
+      const date = this.resolveReceiptDate(receipt);
+      if (amount === null || !date) continue;
+
+      const receiptDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      if (receiptDay < startDate || receiptDay > today) continue;
+      const dayIndex = Math.floor((receiptDay.getTime() - startDate.getTime()) / 86400000);
+      dayAmounts.set(dayIndex, (dayAmounts.get(dayIndex) ?? 0) + amount);
+    }
+
+    let cumulative = 0;
+    return Array.from({ length: totalDays }, (_, i) => {
+      const amount = dayAmounts.get(i) ?? 0;
+      cumulative += amount;
+      return { day: i + 1, amount, cumulative };
+    });
+  });
+
+  readonly timeRangeTotal = computed(() =>
+    this.timeRangeData().reduce((sum, p) => sum + p.amount, 0)
+  );
+
+  readonly timeRangeSubtitle = computed(() => {
+    switch (this.spendingTimeRange()) {
+      case '1d': return 'Today';
+      case '1w': return 'Past 7 days';
+      case '1m': return '';
+      case '3m': return 'Past 3 months';
+      case '1y': return 'Past year';
+      case 'all': return 'All time';
+    }
+  });
+
+  readonly timeRangeChartPath = computed(() => {
+    const points = this.spendingTimeRange() === '1m' ? [] : this.timeRangeData();
+    const active = points.filter(p => p.amount > 0);
+    const data = active.length > 0 ? active : points.slice(0, 1);
+
+    if (!data.length) return { linePath: '', areaPath: '', hasData: false };
+
+    const maxAmount = Math.max(...data.map(d => d.amount), 1);
+    const width = 200;
+    const height = 100;
+    const padding = 5;
+
+    const getX = (i: number) => data.length <= 1 ? width / 2 : (i / (data.length - 1)) * width;
+    const getY = (amount: number) => padding + (height - padding * 2) - (amount / maxAmount) * (height - padding * 2);
+
+    let linePath = `M ${getX(0)} ${getY(data[0].amount)}`;
+    for (let i = 0; i < data.length - 1; i++) {
+      const x1 = getX(i), y1 = getY(data[i].amount);
+      const x2 = getX(i + 1), y2 = getY(data[i + 1].amount);
+      const mx = (x1 + x2) / 2;
+      linePath += ` C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`;
+    }
+
+    const lastX = getX(data.length - 1);
+    const firstX = getX(0);
+    const areaPath = `${linePath} L ${lastX} ${height} L ${firstX} ${height} Z`;
+
+    return { linePath, areaPath, hasData: data.length > 0 };
   });
 
   // Keep for backward compatibility
@@ -1254,6 +1427,16 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.hoveredHistogramMonth.set(null);
     if (mode === 'histogram') {
       this.clearDaySelection();
+      this.closeMonthPickerGraph();
+    }
+  }
+
+  setSpendingTimeRange(range: SpendingTimeRange): void {
+    this.spendingTimeRange.set(range);
+    this.hoveredDay.set(null);
+    this.hoveredHistogramMonth.set(null);
+    this.clearDaySelection();
+    if (range !== '1m') {
       this.closeMonthPickerGraph();
     }
   }
