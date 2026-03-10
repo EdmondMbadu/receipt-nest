@@ -658,6 +658,10 @@
           <path [attr.d]="timeRangeChartPath().areaPath" fill="url(#spendingGradientRange)" />
           <path [attr.d]="timeRangeChartPath().linePath" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round"
             stroke-linejoin="round" />
+          <circle *ngIf="timeRangeChartPath().singlePointMarker as marker" [attr.cx]="marker.x" [attr.cy]="marker.y" r="7"
+            fill="#10b981" fill-opacity="0.18" />
+          <circle *ngIf="timeRangeChartPath().singlePointMarker as marker" [attr.cx]="marker.x" [attr.cy]="marker.y" r="4.5"
+            fill="#10b981" stroke="white" stroke-width="2" class="drop-shadow-md" />
         </svg>
       </div>
 

@@ -32,6 +32,11 @@ interface TimeRangeDayPoint {
   cumulative: number;
 }
 
+interface TimeRangeChartPoint extends TimeRangeDayPoint {
+  x: number;
+  y: number;
+}
+
 const SPENDING_TIME_RANGES: { key: SpendingTimeRange; label: string }[] = [
   { key: '1d', label: '1D' },
   { key: '1w', label: '1W' },
@@ -414,7 +419,14 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     const active = points.filter(p => p.amount > 0);
     const data = active.length > 0 ? active : points.slice(0, 1);
 
-    if (!data.length) return { linePath: '', areaPath: '', hasData: false };
+    if (!data.length) {
+      return {
+        linePath: '',
+        areaPath: '',
+        hasData: false,
+        singlePointMarker: null as TimeRangeChartPoint | null
+      };
+    }
 
     const maxAmount = Math.max(...data.map(d => d.amount), 1);
     const width = 200;
@@ -423,20 +435,28 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const getX = (i: number) => data.length <= 1 ? width / 2 : (i / (data.length - 1)) * width;
     const getY = (amount: number) => padding + (height - padding * 2) - (amount / maxAmount) * (height - padding * 2);
+    const chartPoints = data.map((point, index) => ({
+      ...point,
+      x: getX(index),
+      y: getY(point.amount)
+    }));
 
-    let linePath = `M ${getX(0)} ${getY(data[0].amount)}`;
+    let linePath = `M ${chartPoints[0].x} ${chartPoints[0].y}`;
     for (let i = 0; i < data.length - 1; i++) {
-      const x1 = getX(i), y1 = getY(data[i].amount);
-      const x2 = getX(i + 1), y2 = getY(data[i + 1].amount);
+      const x1 = chartPoints[i].x, y1 = chartPoints[i].y;
+      const x2 = chartPoints[i + 1].x, y2 = chartPoints[i + 1].y;
       const mx = (x1 + x2) / 2;
       linePath += ` C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`;
     }
 
-    const lastX = getX(data.length - 1);
-    const firstX = getX(0);
+    const lastX = chartPoints[chartPoints.length - 1].x;
+    const firstX = chartPoints[0].x;
     const areaPath = `${linePath} L ${lastX} ${height} L ${firstX} ${height} Z`;
+    const singlePointMarker = chartPoints.length === 1 && chartPoints[0].amount > 0
+      ? chartPoints[0]
+      : null;
 
-    return { linePath, areaPath, hasData: data.length > 0 };
+    return { linePath, areaPath, hasData: data.length > 0, singlePointMarker };
   });
 
   // Keep for backward compatibility
