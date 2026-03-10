@@ -10,6 +10,13 @@ import { FolderService } from '../../services/folder.service';
 import { PdfThumbnailService } from '../../services/pdf-thumbnail.service';
 import { ReceiptService } from '../../services/receipt.service';
 
+type CatTimeRange = 'month' | 'year' | 'allTime';
+
+interface PeriodOption {
+  key: string;
+  label: string;
+}
+
 interface MonthGroup {
   key: string;
   year: number;
@@ -52,6 +59,10 @@ export class FoldersComponent implements OnInit, OnDestroy {
   readonly mergeTargetFolderId = signal<string | null>(null);
 
   readonly activeTab = signal<'categories' | 'folders'>('categories');
+
+  readonly catTimeRange = signal<CatTimeRange>('month');
+  readonly catSelectedPeriod = signal<string | null>(null);
+  readonly catPickerOpen = signal(false);
 
   readonly mutationLoading = signal(false);
   readonly mutationError = signal<string | null>(null);
@@ -139,8 +150,77 @@ export class FoldersComponent implements OnInit, OnDestroy {
   });
   readonly hasFilteredFolders = computed(() => this.filteredFolderItems().length > 0);
 
-  readonly categoryItems = computed(() => {
+  readonly catPeriods = computed<PeriodOption[]>(() => {
+    const range = this.catTimeRange();
+    if (range === 'allTime') return [];
+
+    const seen = new Map<string, PeriodOption>();
+    for (const r of this.receipts()) {
+      const d = this.extractReceiptDate(r);
+      if (!d) continue;
+      const key = range === 'month'
+        ? `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`
+        : `${d.getFullYear()}`;
+      if (!seen.has(key)) {
+        const label = range === 'month'
+          ? d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+          : `${d.getFullYear()}`;
+        seen.set(key, { key, label });
+      }
+    }
+    return Array.from(seen.values()).sort((a, b) => b.key.localeCompare(a.key));
+  });
+
+  readonly catActivePeriod = computed<string | null>(() => {
+    const range = this.catTimeRange();
+    if (range === 'allTime') return null;
+    const periods = this.catPeriods();
+    const selected = this.catSelectedPeriod();
+    if (selected && periods.some(p => p.key === selected)) return selected;
+    return periods.length > 0 ? periods[0].key : null;
+  });
+
+  readonly catActivePeriodLabel = computed(() => {
+    const key = this.catActivePeriod();
+    if (!key) return '';
+    const periods = this.catPeriods();
+    return periods.find(p => p.key === key)?.label ?? '';
+  });
+
+  readonly catActivePeriodIndex = computed(() => {
+    const key = this.catActivePeriod();
+    return this.catPeriods().findIndex(p => p.key === key);
+  });
+
+  readonly catHasPrevPeriod = computed(() => {
+    const idx = this.catActivePeriodIndex();
+    return idx < this.catPeriods().length - 1;
+  });
+
+  readonly catHasNextPeriod = computed(() => {
+    return this.catActivePeriodIndex() > 0;
+  });
+
+  readonly filteredCatReceipts = computed(() => {
+    const range = this.catTimeRange();
     const receipts = this.receipts();
+    if (range === 'allTime') return receipts;
+
+    const period = this.catActivePeriod();
+    if (!period) return [];
+
+    return receipts.filter(r => {
+      const d = this.extractReceiptDate(r);
+      if (!d) return false;
+      const key = range === 'month'
+        ? `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`
+        : `${d.getFullYear()}`;
+      return key === period;
+    });
+  });
+
+  readonly categoryItems = computed(() => {
+    const receipts = this.filteredCatReceipts();
     const byCategory = new Map<string, Receipt[]>();
 
     for (const receipt of receipts) {
@@ -165,9 +245,44 @@ export class FoldersComponent implements OnInit, OnDestroy {
     return this.categoryItems().reduce((sum, item) => sum + item.total, 0);
   });
 
+  readonly categoryAllTimeTotal = computed(() => {
+    return this.receipts().reduce((sum, r) => sum + (r.totalAmount || 0), 0);
+  });
+
   getCategoryPercentage(total: number): number {
     const grand = this.categoryGrandTotal();
     return grand > 0 ? Math.round((total / grand) * 100) : 0;
+  }
+
+  setCatTimeRange(range: CatTimeRange): void {
+    this.catTimeRange.set(range);
+    this.catSelectedPeriod.set(null);
+    this.catPickerOpen.set(false);
+  }
+
+  catPrevPeriod(): void {
+    const periods = this.catPeriods();
+    const idx = this.catActivePeriodIndex();
+    if (idx < periods.length - 1) {
+      this.catSelectedPeriod.set(periods[idx + 1].key);
+    }
+  }
+
+  catNextPeriod(): void {
+    const periods = this.catPeriods();
+    const idx = this.catActivePeriodIndex();
+    if (idx > 0) {
+      this.catSelectedPeriod.set(periods[idx - 1].key);
+    }
+  }
+
+  catSelectPeriod(key: string): void {
+    this.catSelectedPeriod.set(key);
+    this.catPickerOpen.set(false);
+  }
+
+  toggleCatPicker(): void {
+    this.catPickerOpen.update(v => !v);
   }
 
   readonly selectedCount = computed(() => this.selectedReceiptIds().size);

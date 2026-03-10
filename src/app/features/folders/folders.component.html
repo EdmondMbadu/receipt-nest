@@ -94,6 +94,79 @@
       </section>
     } @else if (activeTab() === 'categories') {
       <!-- Categories tab -->
+
+      <!-- Time range selector + Period navigator -->
+      <section class="rounded-2xl border border-slate-200/80 bg-white/90 p-4 dark:border-slate-800 dark:bg-slate-900/80 space-y-3">
+        <!-- Segmented control -->
+        <div class="flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+          <button type="button" (click)="setCatTimeRange('month')"
+            class="flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition"
+            [class]="catTimeRange() === 'month'
+              ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
+              : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+            Month
+          </button>
+          <button type="button" (click)="setCatTimeRange('year')"
+            class="flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition"
+            [class]="catTimeRange() === 'year'
+              ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
+              : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+            Year
+          </button>
+          <button type="button" (click)="setCatTimeRange('allTime')"
+            class="flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition"
+            [class]="catTimeRange() === 'allTime'
+              ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
+              : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
+            All Time
+          </button>
+        </div>
+
+        <!-- Period navigator -->
+        @if (catTimeRange() !== 'allTime' && catPeriods().length > 0) {
+          <div class="relative flex items-center rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+            <button type="button" (click)="catPrevPeriod()" [disabled]="!catHasPrevPeriod()"
+              class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-l-xl transition hover:bg-slate-50 disabled:opacity-20 dark:hover:bg-slate-800">
+              <svg class="h-5 w-5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button type="button" (click)="toggleCatPicker()" class="flex min-w-0 flex-1 items-center justify-center gap-1.5 py-2.5 transition hover:bg-slate-50 dark:hover:bg-slate-800">
+              <span class="text-sm font-bold text-slate-900 dark:text-white">{{ catActivePeriodLabel() }}</span>
+              <svg class="h-4 w-4 text-slate-400 transition" [class.rotate-180]="catPickerOpen()" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </button>
+            <button type="button" (click)="catNextPeriod()" [disabled]="!catHasNextPeriod()"
+              class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-r-xl transition hover:bg-slate-50 disabled:opacity-20 dark:hover:bg-slate-800">
+              <svg class="h-5 w-5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            <!-- Dropdown picker -->
+            @if (catPickerOpen()) {
+              <div class="absolute left-0 right-0 top-full z-30 mt-1 max-h-64 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                @for (p of catPeriods(); track p.key) {
+                  <button type="button" (click)="catSelectPeriod(p.key)"
+                    class="flex w-full items-center justify-between px-4 py-3 text-left text-sm transition hover:bg-slate-50 dark:hover:bg-slate-800"
+                    [class]="p.key === catActivePeriod()
+                      ? 'bg-emerald-50 font-bold text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
+                      : 'text-slate-700 dark:text-slate-300'">
+                    <span>{{ p.label }}</span>
+                    @if (p.key === catActivePeriod()) {
+                      <svg class="h-4 w-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                    }
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </section>
+
       @if (categoryItems().length === 0) {
         <section class="rounded-3xl border border-dashed border-slate-300 bg-white/80 p-10 text-center dark:border-slate-700 dark:bg-slate-900/60">
           <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
@@ -102,8 +175,12 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
             </svg>
           </div>
-          <h2 class="mt-4 text-xl font-semibold text-slate-900 dark:text-white">No categorized receipts yet</h2>
-          <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Upload receipts to see them organized by category.</p>
+          <h2 class="mt-4 text-xl font-semibold text-slate-900 dark:text-white">
+            {{ catTimeRange() === 'allTime' ? 'No categorized receipts yet' : 'No receipts for this period' }}
+          </h2>
+          @if (catTimeRange() === 'allTime') {
+            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Upload receipts to see them organized by category.</p>
+          }
         </section>
       } @else {
         <!-- Summary -->
@@ -112,8 +189,11 @@
             <div>
               <p class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ categoryItems().length }} categories</p>
               <p class="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{{ formatCurrency(categoryGrandTotal()) }}</p>
+              @if (catTimeRange() !== 'allTime') {
+                <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">All time: {{ formatCurrency(categoryAllTimeTotal()) }}</p>
+              }
             </div>
-            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ receipts().length }} receipts</p>
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ filteredCatReceipts().length }} receipts</p>
           </div>
         </section>
 
