@@ -1,16 +1,4 @@
 <div class="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 antialiased">
-  <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-    <div
-      class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-500/[0.08] dark:bg-emerald-500/[0.12] blur-[120px] animate-pulse-slow">
-    </div>
-    <div
-      class="absolute bottom-[-10%] right-[-10%] w-[35%] h-[35%] rounded-full bg-emerald-400/[0.06] dark:bg-emerald-400/[0.1] blur-[100px] animate-pulse-slow-delay">
-    </div>
-    <div
-      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] rounded-full bg-emerald-300/[0.03] dark:bg-emerald-300/[0.05] blur-[150px]">
-    </div>
-  </div>
-
   <!-- Floating Nav -->
   <header class="fixed top-0 left-0 right-0 z-50">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
@@ -20,7 +8,7 @@
           <img src="assets/receipt-nest.png" alt="ReceiptNest AI Logo" class="h-9 w-9 object-contain" />
           <span class="text-base font-semibold tracking-tight">
             <span class="text-slate-900 dark:text-white">Receipt</span><span
-              class="text-emerald-600 dark:text-emerald-400">Nest</span><span
+              class="text-emerald-700 dark:text-emerald-300">Nest</span><span
               class="ml-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">AI</span>
           </span>
         </a>
@@ -104,7 +92,7 @@
           <img src="assets/receipt-nest.png" alt="ReceiptNest AI" class="h-8 w-8 object-contain" />
           <span class="text-base font-semibold">
             <span class="text-slate-900 dark:text-white">Receipt</span><span
-              class="text-emerald-600 dark:text-emerald-400">Nest</span><span
+              class="text-emerald-700 dark:text-emerald-300">Nest</span><span
               class="ml-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">AI</span>
           </span>
         </div>
@@ -180,18 +168,6 @@
       <div class="flex flex-col lg:flex-row lg:items-center lg:gap-20">
         <!-- Hero Text -->
         <div class="max-w-2xl lg:flex-1">
-          <!-- Badge -->
-          <div
-            class="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 px-4 py-1.5 mb-8 ring-1 ring-emerald-500/20">
-            <span class="relative flex h-2 w-2">
-              <span
-                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">For people who work for
-              themselves</span>
-          </div>
-
           <h1
             class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.05]">
             Finally know where your money goes.
@@ -215,7 +191,7 @@
             <button type="button" (click)="openDemo()"
               class="group inline-flex items-center justify-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 px-8 py-4 text-base font-semibold text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-white dark:hover:bg-slate-800 transition-all duration-200">
               <span
-                class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-emerald-700 dark:group-hover:bg-emerald-600 group-hover:text-white dark:group-hover:text-white transition-colors">
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
@@ -268,7 +244,7 @@
                 </div>
                 <div class="flex items-center gap-1 text-xs">
                   <button
-                    class="rounded-lg bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1.5 text-emerald-700 dark:text-emerald-300 font-medium">Oct</button>
+                    class="rounded-lg border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-3 py-1.5 text-emerald-900 dark:text-emerald-200 font-semibold">Oct</button>
                   <button
                     class="rounded-lg px-3 py-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Nov</button>
                 </div>
@@ -276,12 +252,12 @@
 
               <!-- Total spend card -->
               <div
-                class="rounded-xl border border-slate-100 dark:border-slate-800 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/50 dark:to-slate-900/50 p-5 mb-4">
+                class="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-5 mb-4">
                 <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total spend</p>
                 <div class="mt-2 flex items-baseline gap-3">
                   <p class="text-4xl font-bold text-slate-900 dark:text-white">$2,437.19</p>
                   <span
-                    class="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                    class="inline-flex items-center gap-1 rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-2 py-1 text-xs font-semibold text-emerald-900 dark:text-emerald-200">
                     <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round"
                         d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
@@ -294,15 +270,9 @@
                 <!-- Mini Chart -->
                 <div class="mt-4 h-24 w-full">
                   <svg class="w-full h-full" viewBox="0 0 200 80" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" style="stop-color:rgb(16, 185, 129);stop-opacity:0.2" />
-                        <stop offset="100%" style="stop-color:rgb(16, 185, 129);stop-opacity:0" />
-                      </linearGradient>
-                    </defs>
                     <path
                       d="M 0,65 C 20,63 40,58 60,52 C 80,46 100,40 120,35 C 140,30 160,26 180,22 C 190,20 195,18 200,16 L 200,80 L 0,80 Z"
-                      fill="url(#chartGradient)" />
+                      fill="rgb(16 185 129 / 0.1)" />
                     <path
                       d="M 0,65 C 20,63 40,58 60,52 C 80,46 100,40 120,35 C 140,30 160,26 180,22 C 190,20 195,18 200,16"
                       stroke="rgb(16, 185, 129)" stroke-width="2.5" fill="none" stroke-linecap="round" />
@@ -313,7 +283,7 @@
               </div>
 
               <div
-                class="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200/80 dark:border-emerald-800/80 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                class="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-3 py-1.5 text-xs font-semibold text-emerald-900 dark:text-emerald-200">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round"
                     d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-1.5 0h12a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014.5 18v-6a1.5 1.5 0 011.5-1.5z" />
@@ -326,7 +296,7 @@
                 <div class="flex items-center justify-between text-sm">
                   <span class="font-medium text-slate-700 dark:text-slate-200">Recent receipts</span>
                   <button
-                    class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">View
+                    class="text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 dark:hover:text-emerald-200 font-semibold transition-colors">View
                     all</button>
                 </div>
 
@@ -335,7 +305,7 @@
                     class="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 px-4 py-3 transition-colors hover:bg-slate-100/50 dark:hover:bg-slate-800/50">
                     <div class="flex items-center gap-3">
                       <span
-                        class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 text-sm font-bold">WF</span>
+                        class="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200 text-sm font-bold">WF</span>
                       <div>
                         <p class="text-sm font-medium text-slate-900 dark:text-white">Whole Foods Market</p>
                         <p class="text-xs text-slate-500 dark:text-slate-400">Groceries • Nov 14</p>
@@ -402,32 +372,12 @@
 
   <!-- Features Section -->
   <section id="features" class="relative py-16 sm:py-20 overflow-hidden">
-    <!-- Decorative background -->
-    <div class="absolute inset-0 -z-10 pointer-events-none">
-      <div
-        class="absolute top-1/4 -left-40 w-[500px] h-[500px] rounded-full bg-emerald-500/[0.04] dark:bg-emerald-500/[0.07] blur-[120px]">
-      </div>
-      <div
-        class="absolute bottom-0 -right-40 w-[400px] h-[400px] rounded-full bg-violet-500/[0.03] dark:bg-violet-500/[0.05] blur-[120px]">
-      </div>
-    </div>
-
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <!-- Section header -->
       <div class="max-w-2xl lg:max-w-3xl">
-        <div
-          class="inline-flex items-center gap-2.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 px-4 py-1.5 ring-1 ring-emerald-500/20">
-          <svg class="h-4 w-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-          </svg>
-          <span class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Why ReceiptNest AI</span>
-        </div>
-        <h2 class="mt-6 text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+        <h2 class="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
           Stop wondering where <br class="hidden sm:block" />
-          <span
-            class="bg-gradient-to-r from-emerald-600 via-emerald-500 to-cyan-500 dark:from-emerald-400 dark:via-emerald-300 dark:to-cyan-400 bg-clip-text text-transparent">it
-            all went</span>
+          <span class="text-emerald-700 dark:text-emerald-300">it all went</span>
         </h2>
         <p class="mt-6 text-lg sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
           You're not looking for accounting software. You just want to know: where did my money go this month?
@@ -441,13 +391,13 @@
         <div
           class="feature-card group relative rounded-2xl border border-slate-200/80 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-8 transition-all duration-500 hover:border-emerald-300/60 dark:hover:border-emerald-700/60 hover:shadow-2xl hover:shadow-emerald-500/[0.08] dark:hover:shadow-emerald-500/[0.12] hover:-translate-y-1">
           <div
-            class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+            class="absolute inset-x-8 top-0 h-px bg-emerald-200 dark:bg-emerald-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
           </div>
           <!-- Feature 1 Visual -->
           <div
             class="w-full h-44 mb-6 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-700/50 overflow-hidden relative group-hover:border-emerald-500/30 transition-colors duration-500">
             <div
-              class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              class="absolute inset-0 bg-emerald-50/80 dark:bg-emerald-950/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
             </div>
 
             <!-- Center Icon -->
@@ -487,7 +437,7 @@
           </p>
           <div class="mt-5 flex items-center gap-2">
             <span
-              class="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200/60 dark:ring-emerald-800/60">
+              class="inline-flex items-center gap-1 rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-2.5 py-1 text-[11px] font-semibold text-emerald-900 dark:text-emerald-200">
               <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
@@ -495,7 +445,7 @@
               Email
             </span>
             <span
-              class="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200/60 dark:ring-emerald-800/60">
+              class="inline-flex items-center gap-1 rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-2.5 py-1 text-[11px] font-semibold text-emerald-900 dark:text-emerald-200">
               <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
@@ -505,7 +455,7 @@
               Photo
             </span>
             <span
-              class="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200/60 dark:ring-emerald-800/60">
+              class="inline-flex items-center gap-1 rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-2.5 py-1 text-[11px] font-semibold text-emerald-900 dark:text-emerald-200">
               <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -519,13 +469,13 @@
         <div
           class="feature-card group relative rounded-2xl border border-slate-200/80 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-8 transition-all duration-500 hover:border-violet-300/60 dark:hover:border-violet-700/60 hover:shadow-2xl hover:shadow-violet-500/[0.08] dark:hover:shadow-violet-500/[0.12] hover:-translate-y-1">
           <div
-            class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+            class="absolute inset-x-8 top-0 h-px bg-violet-200 dark:bg-violet-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
           </div>
           <!-- Feature 2 Visual -->
           <div
             class="w-full h-44 mb-6 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-700/50 overflow-hidden relative group-hover:border-violet-500/30 transition-colors duration-500">
             <div
-              class="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              class="absolute inset-0 bg-violet-50/80 dark:bg-violet-950/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
             </div>
 
             <!-- Center Receipt -->
@@ -572,19 +522,19 @@
           </p>
           <div class="mt-5 flex flex-wrap items-center gap-2">
             <span
-              class="inline-flex items-center rounded-full bg-violet-50 dark:bg-violet-900/30 px-2.5 py-1 text-[11px] font-semibold text-violet-700 dark:text-violet-300 ring-1 ring-violet-200/60 dark:ring-violet-800/60">
+              class="inline-flex items-center rounded-full border border-violet-300 dark:border-violet-700 bg-violet-100 dark:bg-violet-950 px-2.5 py-1 text-[11px] font-semibold text-violet-900 dark:text-violet-200">
               Merchant
             </span>
             <span
-              class="inline-flex items-center rounded-full bg-violet-50 dark:bg-violet-900/30 px-2.5 py-1 text-[11px] font-semibold text-violet-700 dark:text-violet-300 ring-1 ring-violet-200/60 dark:ring-violet-800/60">
+              class="inline-flex items-center rounded-full border border-violet-300 dark:border-violet-700 bg-violet-100 dark:bg-violet-950 px-2.5 py-1 text-[11px] font-semibold text-violet-900 dark:text-violet-200">
               Category
             </span>
             <span
-              class="inline-flex items-center rounded-full bg-violet-50 dark:bg-violet-900/30 px-2.5 py-1 text-[11px] font-semibold text-violet-700 dark:text-violet-300 ring-1 ring-violet-200/60 dark:ring-violet-800/60">
+              class="inline-flex items-center rounded-full border border-violet-300 dark:border-violet-700 bg-violet-100 dark:bg-violet-950 px-2.5 py-1 text-[11px] font-semibold text-violet-900 dark:text-violet-200">
               Amount
             </span>
             <span
-              class="inline-flex items-center rounded-full bg-violet-50 dark:bg-violet-900/30 px-2.5 py-1 text-[11px] font-semibold text-violet-700 dark:text-violet-300 ring-1 ring-violet-200/60 dark:ring-violet-800/60">
+              class="inline-flex items-center rounded-full border border-violet-300 dark:border-violet-700 bg-violet-100 dark:bg-violet-950 px-2.5 py-1 text-[11px] font-semibold text-violet-900 dark:text-violet-200">
               Tax
             </span>
           </div>
@@ -594,13 +544,13 @@
         <div
           class="feature-card group relative rounded-2xl border border-slate-200/80 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-8 transition-all duration-500 hover:border-amber-300/60 dark:hover:border-amber-700/60 hover:shadow-2xl hover:shadow-amber-500/[0.08] dark:hover:shadow-amber-500/[0.12] hover:-translate-y-1">
           <div
-            class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+            class="absolute inset-x-8 top-0 h-px bg-amber-200 dark:bg-amber-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
           </div>
           <!-- Feature 3 Visual -->
           <div
             class="w-full h-44 mb-6 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-700/50 overflow-hidden relative group-hover:border-amber-500/30 transition-colors duration-500 flex items-center justify-center">
             <div
-              class="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              class="absolute inset-0 bg-amber-50/80 dark:bg-amber-950/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
             </div>
 
             <!-- Mini Chart -->
@@ -651,13 +601,13 @@
         <div
           class="feature-card group relative rounded-2xl border border-slate-200/80 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-8 transition-all duration-500 hover:border-sky-300/60 dark:hover:border-sky-700/60 hover:shadow-2xl hover:shadow-sky-500/[0.08] dark:hover:shadow-sky-500/[0.12] hover:-translate-y-1">
           <div
-            class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-500/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+            class="absolute inset-x-8 top-0 h-px bg-sky-200 dark:bg-sky-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
           </div>
           <!-- Feature 4 Visual -->
           <div
             class="w-full h-44 mb-6 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-700/50 overflow-hidden relative group-hover:border-sky-500/30 transition-colors duration-500 flex items-center justify-center">
             <div
-              class="absolute inset-0 bg-gradient-to-br from-sky-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              class="absolute inset-0 bg-sky-50/80 dark:bg-sky-950/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
             </div>
 
             <!-- Glowing Shield -->
@@ -711,7 +661,7 @@
   <section id="how-it-works" class="py-16 sm:py-20 bg-slate-50/50 dark:bg-slate-900/30">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="max-w-2xl">
-        <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">How it works</p>
+        <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300 tracking-wide uppercase">How it works</p>
         <h2 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
           From inbox chaos to a calm monthly snapshot
         </h2>
@@ -726,14 +676,14 @@
               class="showcase-card-inner bg-slate-50 dark:bg-slate-900 p-6 h-full flex flex-col items-center justify-center relative overflow-hidden group aspect-square">
               <!-- Ambient background -->
               <div
-                class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-cyan-500/5 dark:from-emerald-500/10 dark:to-cyan-500/10 z-0">
+                class="absolute inset-0 bg-emerald-50/70 dark:bg-emerald-950/20 z-0">
               </div>
 
               <!-- The "Nest" (Inbox Tray) -->
               <div
                 class="absolute bottom-6 w-[80%] max-w-[240px] h-24 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-2xl md:rounded-3xl border border-slate-200/50 dark:border-slate-700/50 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.2)] z-10 flex items-end justify-center pb-3 overflow-hidden">
                 <div
-                  class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-emerald-400/20 dark:from-emerald-400/10 to-transparent">
+                  class="absolute inset-x-0 bottom-0 h-16 bg-emerald-100/60 dark:bg-emerald-950/20">
                 </div>
                 <div
                   class="w-1/2 h-1 bg-emerald-400/80 rounded-full blur-[2px] relative z-10 shadow-[0_0_12px_2px_rgba(52,211,153,0.5)]">
@@ -822,9 +772,9 @@
           </div>
           <div class="mt-8 flex flex-col items-center text-center">
             <div
-              class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200/60 dark:border-emerald-700/50 shadow-[0_4px_20px_rgba(16,185,129,0.15)] mb-4">
-              <div class="absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-400/20 to-transparent"></div>
-              <span class="relative text-sm font-bold text-emerald-700 dark:text-emerald-400">1</span>
+              class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-700 shadow-[0_4px_20px_rgba(16,185,129,0.15)] mb-4">
+              <div class="absolute inset-0 rounded-xl bg-emerald-200/70 dark:bg-emerald-900/50"></div>
+              <span class="relative text-sm font-bold text-emerald-900 dark:text-emerald-200">1</span>
             </div>
             <h3 class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">Toss it in the nest</h3>
             <p class="mt-3 text-[15px] leading-relaxed text-slate-600 dark:text-slate-400 max-w-[280px]">
@@ -834,8 +784,8 @@
           </div>
           <!-- Connector arrow -->
           <div class="hidden lg:flex absolute top-1/3 -right-6 z-10 items-center">
-            <div class="w-12 h-[2px] bg-gradient-to-r from-emerald-400 to-violet-400"></div>
-            <svg class="h-4 w-4 -ml-1 text-violet-400" fill="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-[2px] bg-slate-300 dark:bg-slate-600"></div>
+            <svg class="h-4 w-4 -ml-1 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" />
             </svg>
           </div>
@@ -849,7 +799,7 @@
               class="showcase-card-inner bg-slate-50 dark:bg-slate-900 p-6 h-full flex flex-col items-center justify-center relative overflow-hidden group aspect-square">
               <!-- Ambient background -->
               <div
-                class="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-fuchsia-500/5 dark:from-violet-500/10 dark:to-fuchsia-500/10 z-0">
+                class="absolute inset-0 bg-violet-50/70 dark:bg-violet-950/20 z-0">
               </div>
 
               <!-- Main Receipt being scanned -->
@@ -897,26 +847,12 @@
               <!-- Connecting flow lines -->
               <svg
                 class="absolute inset-0 w-full h-full z-0 pointer-events-none opacity-100 transition-opacity duration-700">
-                <path d="M 120 100 Q 180 80 200 60" fill="none" stroke="url(#flowGrad1)" stroke-width="2"
+                <path d="M 120 100 Q 180 80 200 60" fill="none" stroke="rgba(139,92,246,0.45)" stroke-width="2"
                   stroke-dasharray="4" class="animate-[dash_20s_linear_infinite]" />
-                <path d="M 130 140 Q 190 140 210 140" fill="none" stroke="url(#flowGrad2)" stroke-width="2"
+                <path d="M 130 140 Q 190 140 210 140" fill="none" stroke="rgba(168,85,247,0.45)" stroke-width="2"
                   stroke-dasharray="4" class="animate-[dash_20s_linear_infinite]" />
-                <path d="M 120 180 Q 180 200 200 220" fill="none" stroke="url(#flowGrad3)" stroke-width="2"
+                <path d="M 120 180 Q 180 200 200 220" fill="none" stroke="rgba(236,72,153,0.45)" stroke-width="2"
                   stroke-dasharray="4" class="animate-[dash_20s_linear_infinite]" />
-                <defs>
-                  <linearGradient id="flowGrad1">
-                    <stop offset="0%" stop-color="rgba(139,92,246,0)" />
-                    <stop offset="100%" stop-color="rgba(139,92,246,0.6)" />
-                  </linearGradient>
-                  <linearGradient id="flowGrad2">
-                    <stop offset="0%" stop-color="rgba(168,85,247,0)" />
-                    <stop offset="100%" stop-color="rgba(168,85,247,0.6)" />
-                  </linearGradient>
-                  <linearGradient id="flowGrad3">
-                    <stop offset="0%" stop-color="rgba(236,72,153,0)" />
-                    <stop offset="100%" stop-color="rgba(236,72,153,0.6)" />
-                  </linearGradient>
-                </defs>
               </svg>
 
               <!-- Extracted Data Widgets -->
@@ -955,10 +891,10 @@
               </div>
 
               <div
-                class="absolute right-6 xl:right-8 bottom-10 w-32 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-xl border border-emerald-500/30 shadow-[0_4px_20px_rgba(16,185,129,0.15)] p-2.5 z-10 opacity-100 translate-x-0 group-hover:-translate-y-1 transition-all duration-500 flex items-center justify-between">
+                class="absolute right-6 xl:right-8 bottom-10 w-32 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-xl border border-emerald-300 dark:border-emerald-700 shadow-[0_4px_20px_rgba(16,185,129,0.15)] p-2.5 z-10 opacity-100 translate-x-0 group-hover:-translate-y-1 transition-all duration-500 flex items-center justify-between">
                 <div class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Total
                 </div>
-                <div class="text-sm font-bold text-emerald-600 dark:text-emerald-400">$12.40</div>
+                <div class="text-sm font-bold text-emerald-700 dark:text-emerald-300">$12.40</div>
               </div>
               <style>
                 @keyframes scanLarge {
@@ -983,9 +919,9 @@
           </div>
           <div class="mt-8 flex flex-col items-center text-center">
             <div
-              class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 dark:bg-violet-900/30 border border-violet-200/60 dark:border-violet-700/50 shadow-[0_4px_20px_rgba(139,92,246,0.15)] mb-4">
-              <div class="absolute inset-0 rounded-xl bg-gradient-to-br from-violet-400/20 to-transparent"></div>
-              <span class="relative text-sm font-bold text-violet-700 dark:text-violet-400">2</span>
+              class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-950 border border-violet-300 dark:border-violet-700 shadow-[0_4px_20px_rgba(139,92,246,0.15)] mb-4">
+              <div class="absolute inset-0 rounded-xl bg-violet-200/70 dark:bg-violet-900/50"></div>
+              <span class="relative text-sm font-bold text-violet-900 dark:text-violet-200">2</span>
             </div>
             <h3 class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">We do the boring part</h3>
             <p class="mt-3 text-[15px] leading-relaxed text-slate-600 dark:text-slate-400 max-w-[280px]">
@@ -995,8 +931,8 @@
           </div>
           <!-- Connector arrow -->
           <div class="hidden lg:flex absolute top-1/3 -right-6 z-10 items-center">
-            <div class="w-12 h-[2px] bg-gradient-to-r from-violet-400 to-amber-400"></div>
-            <svg class="h-4 w-4 -ml-1 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-[2px] bg-slate-300 dark:bg-slate-600"></div>
+            <svg class="h-4 w-4 -ml-1 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" />
             </svg>
           </div>
@@ -1011,7 +947,7 @@
 
               <!-- Ambient background for dashboard -->
               <div
-                class="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-rose-500/5 dark:from-amber-500/10 dark:to-rose-500/10 z-0">
+                class="absolute inset-0 bg-amber-50/70 dark:bg-amber-950/20 z-0">
               </div>
 
               <!-- Dashboard Glass Panel -->
@@ -1022,7 +958,7 @@
                   class="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-700/50 pb-3">
                   <div class="flex items-center gap-2">
                     <div
-                      class="h-8 w-8 rounded-full bg-gradient-to-br from-amber-400 to-rose-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                      class="h-8 w-8 rounded-full bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
                       <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" stroke-width="2"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z">
@@ -1140,9 +1076,9 @@
           </div>
           <div class="mt-8 flex flex-col items-center text-center">
             <div
-              class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-900/30 border border-amber-200/60 dark:border-amber-700/50 shadow-[0_4px_20px_rgba(245,158,11,0.15)] mb-4">
-              <div class="absolute inset-0 rounded-xl bg-gradient-to-br from-amber-400/20 to-transparent"></div>
-              <span class="relative text-sm font-bold text-amber-700 dark:text-amber-400">3</span>
+              class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950 border border-amber-300 dark:border-amber-700 shadow-[0_4px_20px_rgba(245,158,11,0.15)] mb-4">
+              <div class="absolute inset-0 rounded-xl bg-amber-200/70 dark:bg-amber-900/50"></div>
+              <span class="relative text-sm font-bold text-amber-900 dark:text-amber-200">3</span>
             </div>
             <h3 class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">See the full picture</h3>
             <p class="mt-3 text-[15px] leading-relaxed text-slate-600 dark:text-slate-400 max-w-[280px]">
@@ -1158,24 +1094,13 @@
   <!-- Who Uses ReceiptNest AI -->
   <section id="people" class="relative py-16 sm:py-20 overflow-hidden">
     <div class="absolute inset-0 -z-10 pointer-events-none">
-      <div
-        class="absolute inset-0 bg-gradient-to-b from-transparent via-slate-50/80 to-transparent dark:via-slate-900/40">
-      </div>
+      <div class="absolute inset-0 bg-slate-50/70 dark:bg-slate-900/20"></div>
     </div>
 
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <!-- Centered header -->
       <div class="text-center max-w-2xl mx-auto">
-        <div
-          class="inline-flex items-center gap-2.5 rounded-full bg-slate-100 dark:bg-slate-800 px-4 py-1.5 ring-1 ring-slate-200/60 dark:ring-slate-700/60">
-          <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" stroke-width="2"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-          </svg>
-          <span class="text-sm font-semibold text-slate-600 dark:text-slate-300">Real people, real results</span>
-        </div>
-        <h2 class="mt-6 text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+        <h2 class="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
           People like you use <br class="hidden sm:block" />ReceiptNest AI
         </h2>
         <p class="mt-5 text-lg text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
@@ -1315,7 +1240,7 @@
   <section class="py-16 sm:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="max-w-2xl mx-auto text-center">
-        <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">See it in action
+        <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300 tracking-wide uppercase">See it in action
         </p>
         <h2 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
           Your receipts, beautifully organized
@@ -1379,7 +1304,7 @@
             <div class="showcase-card-inner bg-white dark:bg-slate-900 p-2 relative">
               <div class="absolute top-4 right-4 z-10">
                 <span
-                  class="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-3 py-1 text-xs font-bold text-white shadow-lg shadow-emerald-500/30">
+                  class="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white shadow-lg shadow-emerald-500/30">
                   PRO
                 </span>
               </div>
@@ -1402,7 +1327,7 @@
   <section id="pricing" class="py-16 sm:py-20 bg-slate-50/50 dark:bg-slate-900/30">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="max-w-2xl">
-        <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">Pricing</p>
+        <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300 tracking-wide uppercase">Pricing</p>
         <h2 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
           Free forever. Pay only if you want more.
         </h2>
@@ -1546,33 +1471,15 @@
   <section class="py-16 sm:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div
-        class="relative overflow-hidden rounded-[2.5rem] border border-emerald-200/80 dark:border-emerald-800/60 bg-white/50 dark:bg-slate-900/50 p-8 sm:p-14 lg:p-16 shadow-2xl backdrop-blur-xl">
-        <!-- Background Glows -->
-        <div
-          class="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 blur-[80px]">
-        </div>
-        <div class="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-cyan-500/10 dark:bg-cyan-500/20 blur-[80px]">
-        </div>
-
+        class="relative overflow-hidden rounded-[2.5rem] border border-emerald-300 dark:border-emerald-700 bg-white/50 dark:bg-slate-900/50 p-8 sm:p-14 lg:p-16 shadow-2xl backdrop-blur-xl">
         <div class="relative grid lg:grid-cols-2 gap-12 items-center">
 
           <!-- Text Content -->
           <div class="max-w-2xl">
-            <div
-              class="inline-flex items-center gap-2 rounded-full bg-emerald-100 dark:bg-emerald-900/40 px-3 py-1 ring-1 ring-emerald-200 dark:ring-emerald-800/60 mb-6">
-              <svg class="h-4 w-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor"
-                stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-              </svg>
-              <span class="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">Privacy
-                promise</span>
-            </div>
-
             <h2 class="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
               Your money.<br />
               Your data.<br />
-              <span class="text-emerald-500 dark:text-emerald-400">Period.</span>
+              <span class="text-emerald-700 dark:text-emerald-300">Period.</span>
             </h2>
             <p class="mt-6 text-lg sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed">
               Most apps profit from your financial data. We don't. ReceiptNest AI is funded by subscriptions, not by
@@ -1582,7 +1489,7 @@
             <ul class="mt-10 space-y-4 text-slate-700 dark:text-slate-200 text-base sm:text-lg">
               <li class="flex items-center gap-3">
                 <div
-                  class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">
+                  class="flex h-6 w-6 items-center justify-center rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200">
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
@@ -1591,7 +1498,7 @@
               </li>
               <li class="flex items-center gap-3">
                 <div
-                  class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">
+                  class="flex h-6 w-6 items-center justify-center rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200">
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
@@ -1600,7 +1507,7 @@
               </li>
               <li class="flex items-center gap-3">
                 <div
-                  class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">
+                  class="flex h-6 w-6 items-center justify-center rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200">
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
@@ -1609,7 +1516,7 @@
               </li>
               <li class="flex items-center gap-3">
                 <div
-                  class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">
+                  class="flex h-6 w-6 items-center justify-center rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200">
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
@@ -1618,7 +1525,7 @@
               </li>
               <li class="flex items-center gap-3">
                 <div
-                  class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">
+                  class="flex h-6 w-6 items-center justify-center rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200">
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
@@ -1628,7 +1535,7 @@
             </ul>
 
             <a routerLink="/terms"
-              class="group mt-10 inline-flex items-center gap-2 text-base font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
+              class="group mt-10 inline-flex items-center gap-2 text-base font-semibold text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 dark:hover:text-emerald-200 transition-colors">
               Read our privacy commitment
               <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor"
                 stroke-width="2" viewBox="0 0 24 24">
@@ -1653,7 +1560,7 @@
               <div
                 class="absolute inset-14 rounded-full bg-white dark:bg-slate-900 shadow-2xl flex items-center justify-center border border-slate-100 dark:border-slate-800 z-10 overflow-hidden">
                 <div
-                  class="absolute inset-0 bg-gradient-to-tr from-emerald-100/50 to-transparent dark:from-emerald-900/30">
+                  class="absolute inset-0 bg-emerald-50/80 dark:bg-emerald-950/20">
                 </div>
 
                 <!-- Fingerprint / Biometric Icon -->
@@ -1789,10 +1696,10 @@
 
               <!-- Privacy text badge -->
               <div
-                class="absolute -bottom-4 -left-4 bg-emerald-50/90 dark:bg-slate-800/90 backdrop-blur border border-emerald-200 dark:border-emerald-800 shadow-lg rounded-full px-4 py-2 flex items-center gap-2 z-20 animate-pulse"
+                class="absolute -bottom-4 -left-4 bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-700 shadow-lg rounded-full px-4 py-2 flex items-center gap-2 z-20 animate-pulse"
                 style="animation-duration: 3s;">
                 <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                <span class="text-xs font-semibold text-emerald-800 dark:text-emerald-300 tracking-wide">PRIVATE
+                <span class="text-xs font-semibold text-emerald-900 dark:text-emerald-200 tracking-wide">PRIVATE
                   VAULT</span>
               </div>
 
@@ -1808,16 +1715,7 @@
   <section id="faq" class="py-16 sm:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="max-w-2xl mx-auto text-center">
-        <div
-          class="inline-flex items-center gap-2.5 rounded-full bg-slate-100 dark:bg-slate-800 px-4 py-1.5 ring-1 ring-slate-200/60 dark:ring-slate-700/60">
-          <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" stroke-width="2"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-          </svg>
-          <span class="text-sm font-semibold text-slate-600 dark:text-slate-300">FAQ</span>
-        </div>
-        <h2 class="mt-6 text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+        <h2 class="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
           Questions, meet answers
         </h2>
         <p class="mt-5 text-lg text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
@@ -2070,14 +1968,7 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="relative rounded-3xl overflow-hidden">
         <!-- Background -->
-        <div
-          class="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900">
-        </div>
-        <div
-          class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxIDAgNiAyLjY5IDYgNnMtMi42OSA2LTYgNi02LTIuNjktNi02IDIuNjktNiA2LTZ6IiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiIHN0cm9rZS13aWR0aD0iMiIvPjwvZz48L3N2Zz4=')] opacity-40">
-        </div>
-        <div class="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl"></div>
+        <div class="absolute inset-0 bg-slate-900 dark:bg-slate-800"></div>
 
         <!-- Content -->
         <div class="relative px-8 py-20 sm:px-16 sm:py-28 text-center">
@@ -2109,7 +2000,7 @@
           <img src="assets/receipt-nest.png" alt="ReceiptNest AI" class="h-8 w-8 object-contain" />
           <span class="font-semibold">
             <span class="text-slate-900 dark:text-white">Receipt</span><span
-              class="text-emerald-600 dark:text-emerald-400">Nest</span><span
+              class="text-emerald-700 dark:text-emerald-300">Nest</span><span
               class="ml-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">AI</span>
           </span>
         </div>
@@ -2134,7 +2025,6 @@
       class="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl">
       <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-4 py-3">
         <div>
-          <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Demo</p>
           <h3 class="text-sm font-semibold text-slate-900 dark:text-white">ReceiptNest AI in 60 seconds</h3>
         </div>
         <button type="button" (click)="closeDemo()"
