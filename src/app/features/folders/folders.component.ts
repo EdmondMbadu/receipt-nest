@@ -399,7 +399,7 @@ export class FoldersComponent implements OnInit, OnDestroy {
       );
       this.closeCreateModal();
     } catch (error: any) {
-      this.mutationError.set(error?.message || 'Unable to create folder.');
+      this.mutationError.set(error?.message || 'Unable to create collection.');
       this.mutationLoading.set(false);
     }
   }
@@ -422,7 +422,7 @@ export class FoldersComponent implements OnInit, OnDestroy {
       await this.folderService.mergeFolders(sourceId, targetId);
       this.closeMergeModal();
     } catch (error: any) {
-      this.mutationError.set(error?.message || 'Unable to merge folders.');
+      this.mutationError.set(error?.message || 'Unable to merge collections.');
       this.mutationLoading.set(false);
     }
   }

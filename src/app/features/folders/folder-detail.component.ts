@@ -213,7 +213,7 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
       await this.folderService.addReceiptsToFolder(targetFolder, Array.from(this.selectedReceiptIds()));
       this.closeAllModals();
     } catch (error: any) {
-      this.mutationError.set(error?.message || 'Unable to add pictures to this folder.');
+      this.mutationError.set(error?.message || 'Unable to add pictures to this collection.');
       this.mutationLoading.set(false);
     }
   }
@@ -235,7 +235,7 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
       await this.folderService.removeReceiptsFromFolder(targetFolder, Array.from(this.selectedReceiptIds()));
       this.closeAllModals();
     } catch (error: any) {
-      this.mutationError.set(error?.message || 'Unable to remove pictures from this folder.');
+      this.mutationError.set(error?.message || 'Unable to remove pictures from this collection.');
       this.mutationLoading.set(false);
     }
   }
@@ -258,7 +258,7 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
       this.closeAllModals();
       await this.router.navigate(['/app/folders']);
     } catch (error: any) {
-      this.mutationError.set(error?.message || 'Unable to delete folder.');
+      this.mutationError.set(error?.message || 'Unable to delete collection.');
       this.mutationLoading.set(false);
     }
   }
@@ -275,7 +275,7 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
 
     const nextName = this.renameFolderName().trim();
     if (!nextName) {
-      this.mutationError.set('Folder name is required.');
+      this.mutationError.set('Collection name is required.');
       return;
     }
 
@@ -291,7 +291,7 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
       await this.folderService.renameFolder(targetFolder.id, nextName);
       this.closeAllModals();
     } catch (error: any) {
-      this.mutationError.set(error?.message || 'Unable to rename folder.');
+      this.mutationError.set(error?.message || 'Unable to rename collection.');
       this.mutationLoading.set(false);
     }
   }
@@ -313,18 +313,18 @@ export class FolderDetailComponent implements OnInit, OnDestroy {
       await this.folderService.unmergeFolder(targetFolder.id, mergeEntry.mergeId);
       this.mutationLoading.set(false);
     } catch (error: any) {
-      this.mutationError.set(error?.message || 'Unable to unmerge this folder.');
+      this.mutationError.set(error?.message || 'Unable to unmerge this collection.');
       this.mutationLoading.set(false);
     }
   }
 
   downloadFolderCsv(): void {
-    const folderName = this.folder()?.name || 'Folder';
+    const folderName = this.folder()?.name || 'Collection';
     this.downloadReceiptsCsv(this.folderReceipts(), `${folderName} receipts`, 'folder');
   }
 
   async downloadFolderPdf(): Promise<void> {
-    const folderName = this.folder()?.name || 'Folder';
+    const folderName = this.folder()?.name || 'Collection';
     await this.downloadReceiptsPdf(this.folderReceipts(), `${folderName} receipts`, 'folder');
   }
 

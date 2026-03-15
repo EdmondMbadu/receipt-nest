@@ -10,9 +10,9 @@
       <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400">Organization</p>
-          <h1 class="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">Folders</h1>
+          <h1 class="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">Collections</h1>
           <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            Browse by category or manage custom folders.
+            Browse by category or manage custom collections.
           </p>
         </div>
         @if (activeTab() === 'folders') {
@@ -23,7 +23,7 @@
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
-            <span>Add Folder</span>
+            <span>Add Collection</span>
           </button>
         }
       </div>
@@ -46,20 +46,20 @@
           [class]="activeTab() === 'folders'
             ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'">
-          My Folders
+          My Collections
         </button>
       </div>
 
       @if (activeTab() === 'folders' && hasFolders()) {
         <div class="mt-4">
-          <label class="sr-only" for="folder-search">Search folders</label>
+          <label class="sr-only" for="folder-search">Search collections</label>
           <div class="relative">
             <input
               id="folder-search"
               type="search"
               [ngModel]="folderSearchQuery()"
               (ngModelChange)="folderSearchQuery.set($event)"
-              placeholder="Search folders..."
+              placeholder="Search collections..."
               class="w-full rounded-xl border border-slate-200 bg-white px-10 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
             <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35m1.35-5.15a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" />
@@ -231,8 +231,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 7.5A2.25 2.25 0 016 5.25h4.086a2.25 2.25 0 011.591.659l1.578 1.578a2.25 2.25 0 001.591.659H18a2.25 2.25 0 012.25 2.25v7.5A2.25 2.25 0 0118 20.25H6a2.25 2.25 0 01-2.25-2.25V7.5z" />
           </svg>
         </div>
-        <h2 class="mt-4 text-xl font-semibold text-slate-900 dark:text-white">No folders yet</h2>
-        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Create your first folder and pick receipts grouped by month.</p>
+        <h2 class="mt-4 text-xl font-semibold text-slate-900 dark:text-white">No collections yet</h2>
+        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Create your first collection and pick receipts grouped by month.</p>
         <button
           type="button"
           (click)="openCreateModal()"
@@ -240,12 +240,12 @@
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          <span>Add Folder</span>
+          <span>Add Collection</span>
         </button>
       </section>
     } @else if (!hasFilteredFolders()) {
       <section class="rounded-3xl border border-dashed border-slate-300 bg-white/80 p-10 text-center dark:border-slate-700 dark:bg-slate-900/60">
-        <h2 class="text-xl font-semibold text-slate-900 dark:text-white">No matching folders</h2>
+        <h2 class="text-xl font-semibold text-slate-900 dark:text-white">No matching collections</h2>
         <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Try a different search term.</p>
       </section>
     } @else {
@@ -307,8 +307,8 @@
       <div class="modal-panel" (click)="$event.stopPropagation()">
         <div class="flex items-start justify-between gap-4">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-400">New folder</p>
-            <h3 class="mt-1 text-xl font-semibold text-slate-900 dark:text-white">Create folder</h3>
+            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-400">New collection</p>
+            <h3 class="mt-1 text-xl font-semibold text-slate-900 dark:text-white">Create collection</h3>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Select receipts grouped by month.</p>
           </div>
           <button type="button" (click)="closeCreateModal()" class="close-btn" aria-label="Close">
@@ -319,7 +319,7 @@
         </div>
 
         <label class="mt-5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-          Folder name
+          Collection name
           <input
             type="text"
             [ngModel]="folderName()"
@@ -376,7 +376,7 @@
         <div class="mt-5 flex justify-end gap-2">
           <button type="button" (click)="closeCreateModal()" class="btn-secondary">Cancel</button>
           <button type="button" (click)="createFolder()" [disabled]="!canCreateFolder()" class="btn-primary">
-            {{ mutationLoading() ? 'Creating...' : 'Create Folder' }}
+            {{ mutationLoading() ? 'Creating...' : 'Create Collection' }}
           </button>
         </div>
       </div>
@@ -388,10 +388,10 @@
       <div class="modal-panel" (click)="$event.stopPropagation()">
         <div class="flex items-start justify-between gap-4">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-400">Merge folders</p>
-            <h3 class="mt-1 text-xl font-semibold text-slate-900 dark:text-white">Combine duplicate folders</h3>
+            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-400">Merge collections</p>
+            <h3 class="mt-1 text-xl font-semibold text-slate-900 dark:text-white">Combine duplicate collections</h3>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              All receipts from <span class="font-semibold text-slate-900 dark:text-white">{{ mergeSourceFolder()?.name }}</span> will be moved into another folder.
+              All receipts from <span class="font-semibold text-slate-900 dark:text-white">{{ mergeSourceFolder()?.name }}</span> will be moved into another collection.
             </p>
           </div>
           <button type="button" (click)="closeMergeModal()" class="close-btn" aria-label="Close">
@@ -402,7 +402,7 @@
         </div>
 
         <div class="mt-5">
-          <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Selected folder to merge from</p>
+          <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Selected collection to merge from</p>
           <div class="mt-2 rounded-xl border border-sky-200 bg-sky-50/70 p-3 dark:border-sky-800 dark:bg-sky-950/20">
             <div class="flex items-center gap-3">
               <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-900/35 dark:text-sky-300">
@@ -419,14 +419,14 @@
 
           <div class="mt-4 rounded-2xl border border-slate-200 dark:border-slate-700">
             <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
-              <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Choose folder to keep (name stays)</p>
+              <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Choose collection to keep (name stays)</p>
               <p class="text-xs text-slate-500 dark:text-slate-400">{{ mergeTargetCandidates().length }} options</p>
             </div>
 
             <div class="max-h-[24rem] overflow-y-auto p-4">
               @if (mergeTargetCandidates().length === 0) {
                 <p class="rounded-xl border border-dashed border-slate-300 px-3 py-4 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                  No other folders available.
+                  No other collections available.
                 </p>
               } @else {
                 <div class="grid grid-cols-4 gap-2 sm:grid-cols-5">
@@ -455,7 +455,7 @@
           </div>
 
           <p class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-            The source folder will be deleted after merge.
+            The source collection will be deleted after merge.
           </p>
         </div>
 
@@ -466,7 +466,7 @@
         <div class="mt-5 flex justify-end gap-2">
           <button type="button" (click)="closeMergeModal()" class="btn-secondary">Cancel</button>
           <button type="button" (click)="mergeFolders()" [disabled]="!canMergeFolders()" class="btn-primary">
-            {{ mutationLoading() ? 'Merging...' : 'Merge folders' }}
+            {{ mutationLoading() ? 'Merging...' : 'Merge collections' }}
           </button>
         </div>
       </div>

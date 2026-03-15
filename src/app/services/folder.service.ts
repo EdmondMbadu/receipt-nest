@@ -74,13 +74,13 @@ export class FolderService {
         },
         (error) => {
           console.error('Error subscribing to folders:', error);
-          this.error.set('Failed to load folders');
+          this.error.set('Failed to load collections');
           this.isLoading.set(false);
         }
       );
     } catch (error) {
       console.error('Error setting up folder subscription:', error);
-      this.error.set('Failed to load folders');
+      this.error.set('Failed to load collections');
       this.isLoading.set(false);
     }
   }
@@ -98,7 +98,7 @@ export class FolderService {
 
     const cleanedName = name.trim();
     if (!cleanedName) {
-      throw new Error('Folder name is required.');
+      throw new Error('Collection name is required.');
     }
 
     const uniqueReceiptIds = Array.from(new Set(receiptIds));
@@ -153,7 +153,7 @@ export class FolderService {
   async renameFolder(folderId: string, name: string): Promise<void> {
     const cleanedName = name.trim();
     if (!cleanedName) {
-      throw new Error('Folder name is required.');
+      throw new Error('Collection name is required.');
     }
 
     const folderRef = doc(this.db, this.getFoldersPath(), folderId);
@@ -165,14 +165,14 @@ export class FolderService {
 
   async mergeFolders(sourceFolderId: string, targetFolderId: string): Promise<void> {
     if (sourceFolderId === targetFolderId) {
-      throw new Error('Choose two different folders to merge.');
+      throw new Error('Choose two different collections to merge.');
     }
 
     const sourceFolder = this.folders().find((folder) => folder.id === sourceFolderId);
     const targetFolder = this.folders().find((folder) => folder.id === targetFolderId);
 
     if (!sourceFolder || !targetFolder) {
-      throw new Error('One or both folders no longer exist.');
+      throw new Error('One or both collections no longer exist.');
     }
 
     const targetReceiptSet = new Set(targetFolder.receiptIds || []);
@@ -215,7 +215,7 @@ export class FolderService {
   async unmergeFolder(targetFolderId: string, mergeId: string): Promise<void> {
     const targetFolder = this.folders().find((folder) => folder.id === targetFolderId);
     if (!targetFolder) {
-      throw new Error('Destination folder no longer exists.');
+      throw new Error('Destination collection no longer exists.');
     }
 
     const mergedSources = targetFolder.mergedSources || [];

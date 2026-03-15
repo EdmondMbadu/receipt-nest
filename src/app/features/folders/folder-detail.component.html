@@ -12,9 +12,9 @@
             <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
-            Folders
+            Collections
           </a>
-          <h1 class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ folder()?.name || 'Folder' }}</h1>
+          <h1 class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ folder()?.name || 'Collection' }}</h1>
           <div class="mt-3 flex flex-wrap items-center gap-2.5">
             <div class="folder-stat">
               <p class="folder-stat__label">Total</p>
@@ -35,7 +35,7 @@
                 (click)="toggleDownloadMenu('folder')"
                 [disabled]="!folderReceipts().length || !!downloadingPdfKey() || !!downloadingCsvKey()"
                 class="download-btn group"
-                aria-label="Download folder exports">
+                aria-label="Download collection exports">
                 <svg class="h-[20px] w-[20px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V6.75m0 9.75l-3-3m3 3l3-3M4.5 18.75h15" />
                 </svg>
@@ -67,18 +67,18 @@
               </svg>
               <span class="action-tooltip">Remove pictures</span>
             </button>
-            <button type="button" (click)="openRenameModal()" class="action-icon action-icon--rename group" aria-label="Rename folder">
+            <button type="button" (click)="openRenameModal()" class="action-icon action-icon--rename group" aria-label="Rename collection">
               <svg class="h-[20px] w-[20px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.1 2.1 0 112.97 2.97L9.31 16.98a3 3 0 01-1.23.753l-3.205.916.916-3.205a3 3 0 01.753-1.23L16.862 3.487z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 4.5l3.75 3.75" />
               </svg>
-              <span class="action-tooltip">Rename folder</span>
+              <span class="action-tooltip">Rename collection</span>
             </button>
-            <button type="button" (click)="openDeleteModal()" class="action-icon action-icon--delete group" aria-label="Delete folder">
+            <button type="button" (click)="openDeleteModal()" class="action-icon action-icon--delete group" aria-label="Delete collection">
               <svg class="h-[20px] w-[20px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5h6m-7.5 3h9m-7.875 0v9.375c0 .621.504 1.125 1.125 1.125h4.5c.621 0 1.125-.504 1.125-1.125V7.5M10.5 10.5v4.5m3-4.5v4.5" />
               </svg>
-              <span class="action-tooltip">Delete folder</span>
+              <span class="action-tooltip">Delete collection</span>
             </button>
           </div>
         }
@@ -108,9 +108,9 @@
           (click)="toggleMergedSources()"
           class="flex w-full items-center justify-between gap-3 text-left">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700 dark:text-amber-300">Merged folders</p>
+            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700 dark:text-amber-300">Merged collections</p>
             <p class="mt-1 text-sm text-amber-800 dark:text-amber-200">
-              These folders were merged into this one. You can unmerge any entry.
+              These collections were merged into this one. You can unmerge any entry.
             </p>
           </div>
           <div class="flex items-center gap-2 text-amber-700 dark:text-amber-300">
@@ -150,16 +150,16 @@
       </section>
     } @else if (!folder()) {
       <section class="rounded-3xl border border-dashed border-slate-300 bg-white/80 p-10 text-center dark:border-slate-700 dark:bg-slate-900/60">
-        <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Folder not found</h2>
-        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">This folder was deleted or does not exist.</p>
+        <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Collection not found</h2>
+        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">This collection was deleted or does not exist.</p>
         <a routerLink="/app/folders" class="mt-6 inline-flex rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
-          Back to folders
+          Back to collections
         </a>
       </section>
     } @else if (folderReceiptsByMonth().length === 0) {
       <section class="rounded-3xl border border-dashed border-slate-300 bg-white/80 p-10 text-center dark:border-slate-700 dark:bg-slate-900/60">
-        <h2 class="text-xl font-semibold text-slate-900 dark:text-white">No pictures in this folder</h2>
-        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Add receipts to start organizing this folder.</p>
+        <h2 class="text-xl font-semibold text-slate-900 dark:text-white">No pictures in this collection</h2>
+        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Add receipts to start organizing this collection.</p>
       </section>
     } @else {
       @for (group of folderReceiptsByMonth(); track trackGroup($index, group)) {
@@ -279,7 +279,7 @@
                         }
                         @if (isReceiptInFolder(receipt.id)) {
                           <div class="absolute inset-0 flex items-center justify-center bg-slate-950/45 backdrop-blur-[1px]">
-                            <span class="rounded-md bg-white/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700">In folder</span>
+                            <span class="rounded-md bg-white/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700">In collection</span>
                           </div>
                         }
                         @if (isPdf(receipt)) {
@@ -315,7 +315,7 @@
           <div>
             <p class="text-xs font-semibold uppercase tracking-[0.14em] text-amber-600 dark:text-amber-400">Remove pictures</p>
             <h3 class="mt-1 text-xl font-semibold text-slate-900 dark:text-white">{{ folder()?.name }}</h3>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Only pictures in this folder are shown.</p>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Only pictures in this collection are shown.</p>
           </div>
           <button type="button" (click)="closeAllModals()" class="close-btn" aria-label="Close">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -326,14 +326,14 @@
 
         <div class="mt-5 rounded-2xl border border-slate-200 dark:border-slate-700">
           <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
-            <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Folder pictures</p>
+            <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Collection pictures</p>
             <p class="text-xs text-slate-500 dark:text-slate-400">{{ selectedCount() }} selected</p>
           </div>
 
           <div class="max-h-[24rem] space-y-5 overflow-y-auto p-4">
             @if (folderReceiptsByMonth().length === 0) {
               <p class="rounded-xl border border-dashed border-slate-300 px-3 py-4 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                Folder is empty.
+                Collection is empty.
               </p>
             } @else {
               @for (group of folderReceiptsByMonth(); track trackGroup($index, group)) {
@@ -382,9 +382,9 @@
   @if (deleteModalOpen()) {
     <div class="modal-backdrop" (click)="closeAllModals()">
       <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-700 dark:bg-slate-900" (click)="$event.stopPropagation()">
-        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Delete folder?</h3>
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Delete collection?</h3>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-          This deletes folder <span class="font-semibold text-slate-900 dark:text-white">{{ folder()?.name }}</span>.
+          This deletes collection <span class="font-semibold text-slate-900 dark:text-white">{{ folder()?.name }}</span>.
           Pictures remain in your library.
         </p>
 
@@ -395,7 +395,7 @@
         <div class="mt-6 flex justify-end gap-2">
           <button type="button" (click)="closeAllModals()" class="btn-secondary">Cancel</button>
           <button type="button" (click)="deleteFolder()" [disabled]="mutationLoading()" class="btn-danger">
-            {{ mutationLoading() ? 'Deleting...' : 'Delete Folder' }}
+            {{ mutationLoading() ? 'Deleting...' : 'Delete Collection' }}
           </button>
         </div>
       </div>
@@ -405,13 +405,13 @@
   @if (renameModalOpen()) {
     <div class="modal-backdrop" (click)="closeAllModals()">
       <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-700 dark:bg-slate-900" (click)="$event.stopPropagation()">
-        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Rename folder</h3>
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Rename collection</h3>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-          Update the folder name without changing its pictures.
+          Update the collection name without changing its pictures.
         </p>
 
         <label class="mt-4 block text-sm font-medium text-slate-700 dark:text-slate-300">
-          Folder name
+          Collection name
           <input
             type="text"
             [ngModel]="renameFolderName()"
