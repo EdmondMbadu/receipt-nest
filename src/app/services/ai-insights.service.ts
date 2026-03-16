@@ -183,12 +183,14 @@ export class AiInsightsService {
     await this.loadHistoryBatch(initialBatchSize, false);
 
     const preferredChatId = this.readStoredActiveChatId(userId);
-    if (preferredChatId) {
+    if (preferredChatId === '_telegram') {
+      this.storeActiveChatId(null);
+    } else if (preferredChatId) {
       const found = await this.openChat(preferredChatId, false);
       if (found) return;
     }
 
-    const latest = this.chatHistory()[0];
+    const latest = this.chatHistory().find((item) => item.id !== '_telegram');
     if (latest) {
       await this.openChat(latest.id, true);
       return;

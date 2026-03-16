@@ -48,7 +48,9 @@ export class AppShellComponent {
   readonly shareError = signal<string | null>(null);
   readonly shareCopied = signal(false);
   readonly shareLoading = signal(false);
-  readonly telegramLinked = this.aiService.telegramLinked;
+  readonly visibleChatHistory = computed(() =>
+    this.chatHistory().filter((chat) => chat.id !== '_telegram')
+  );
   readonly settingsDropUpOpen = signal(false);
   readonly settingsModalOpen = signal(false);
   readonly settingsActiveTab = signal<'general' | 'account' | 'notifications'>('general');
@@ -453,32 +455,6 @@ export class AppShellComponent {
       month: 'short',
       day: 'numeric'
     }).format(date);
-  }
-
-  async openTelegramConnect(): Promise<void> {
-    if (!this.isInsightsRoute()) {
-      await this.router.navigate(['/app/insights']);
-    }
-    // Small delay to ensure component is loaded
-    setTimeout(() => {
-      this.aiService.generateTelegramLink();
-    }, 200);
-    this.closeSidebar();
-  }
-
-  async openTelegramChat(): Promise<void> {
-    if (!this.isInsightsRoute()) {
-      await this.router.navigate(['/app/insights']);
-    }
-    // Small delay to ensure component is loaded
-    setTimeout(() => {
-      this.aiService.openTelegramChat();
-    }, 200);
-    this.closeSidebar();
-  }
-
-  async unlinkTelegram(): Promise<void> {
-    await this.aiService.unlinkTelegram();
   }
 
   private buildShareUrl(shareId: string): string {
