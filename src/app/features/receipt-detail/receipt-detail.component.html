@@ -90,24 +90,30 @@
 
             <!-- Image Preview -->
             <div class="relative bg-slate-100 dark:bg-slate-800 min-h-[300px] flex items-center justify-center">
-              <div *ngIf="!imageUrl()" class="text-center p-8">
+              <div *ngIf="!imageUrl() && !hasHtmlPreview()" class="text-center p-8">
                 <div class="text-4xl mb-2">📄</div>
                 <p class="text-sm text-slate-500 dark:text-slate-400">Loading preview...</p>
               </div>
 
+              <!-- HTML email preview -->
+              <div *ngIf="hasHtmlPreview()" class="w-full h-[520px] bg-white">
+                <iframe *ngIf="safeHtmlPreviewUrl()" [src]="safeHtmlPreviewUrl()!" class="w-full h-full rounded"
+                  title="HTML Email Preview"></iframe>
+              </div>
+
               <!-- Regular image preview (not HEIC, not PDF) -->
-              <img *ngIf="imageUrl() && !isPdf() && !isHeic()" [src]="imageUrl()" alt="Receipt"
+              <img *ngIf="imageUrl() && !hasHtmlPreview() && !isPdf() && !isHeic()" [src]="imageUrl()" alt="Receipt"
                 class="max-h-[400px] w-full object-contain cursor-pointer hover:opacity-90 transition-opacity"
                 (click)="openImageModal()" />
 
               <!-- PDF preview with embedded viewer -->
-              <div *ngIf="imageUrl() && isPdf()" class="w-full h-[400px]">
+              <div *ngIf="imageUrl() && !hasHtmlPreview() && isPdf()" class="w-full h-[400px]">
                 <iframe *ngIf="safeImageUrl()" [src]="safeImageUrl()!" class="w-full h-full rounded"
                   title="PDF Preview"></iframe>
               </div>
 
               <!-- HEIC preview (converted to JPEG) -->
-              <div *ngIf="imageUrl() && isHeic()">
+              <div *ngIf="imageUrl() && !hasHtmlPreview() && isHeic()">
                 <!-- Show converted preview if available -->
                 <img *ngIf="heicPreviewUrl()" [src]="heicPreviewUrl()!" alt="Receipt"
                   class="max-h-[400px] w-full object-contain cursor-pointer hover:opacity-90 transition-opacity"
@@ -135,6 +141,9 @@
                 <div class="text-xs text-slate-600 dark:text-slate-400 min-w-0 flex-1 mr-3">
                   <p class="truncate">{{ receipt()!.file.originalName }}</p>
                   <p class="mt-0.5">{{ (receipt()!.file.sizeBytes || 0) / 1024 | number:'1.0-0' }} KB</p>
+                  <p *ngIf="hasHtmlPreview()" class="mt-1 text-[11px] text-emerald-600 dark:text-emerald-400">
+                    Showing the stored HTML email preview for closer visual fidelity.
+                  </p>
                 </div>
                 <button type="button" (click)="downloadReceipt()" *ngIf="imageUrl()"
                   class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors flex-shrink-0">
@@ -290,14 +299,17 @@
       </svg>
     </button>
 
-    <img *ngIf="!isPdf() && !isHeic()" [src]="imageUrl()" alt="Receipt"
+    <iframe *ngIf="hasHtmlPreview() && safeHtmlPreviewUrl()" [src]="safeHtmlPreviewUrl()!"
+      class="w-[920px] h-[85vh] rounded-lg bg-white" title="HTML Email Document"></iframe>
+
+    <img *ngIf="!hasHtmlPreview() && !isPdf() && !isHeic()" [src]="imageUrl()" alt="Receipt"
       class="max-w-full max-h-[85vh] object-contain rounded-lg" />
 
-    <iframe *ngIf="isPdf() && safeImageUrl()" [src]="safeImageUrl()!" class="w-[800px] h-[85vh] rounded-lg bg-white"
+    <iframe *ngIf="!hasHtmlPreview() && isPdf() && safeImageUrl()" [src]="safeImageUrl()!" class="w-[800px] h-[85vh] rounded-lg bg-white"
       title="PDF Document"></iframe>
 
     <!-- HEIC in modal - show converted preview -->
-    <img *ngIf="isHeic() && heicPreviewUrl()" [src]="heicPreviewUrl()!" alt="Receipt"
+    <img *ngIf="!hasHtmlPreview() && isHeic() && heicPreviewUrl()" [src]="heicPreviewUrl()!" alt="Receipt"
       class="max-w-full max-h-[85vh] object-contain rounded-lg" />
   </div>
 </div>

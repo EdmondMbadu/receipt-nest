@@ -329,12 +329,20 @@ export class ReceiptService {
     if (!receipt) throw new Error('Receipt not found');
 
     // Delete from Storage
-    if (receipt.file?.storagePath) {
+    const storagePaths = Array.from(new Set([
+      receipt.file?.storagePath,
+      receipt.email?.textStoragePath || undefined,
+      receipt.email?.htmlStoragePath || undefined,
+      receipt.email?.pdfStoragePath || undefined,
+      receipt.email?.previewStoragePath || undefined
+    ].filter((path): path is string => !!path)));
+
+    for (const storagePath of storagePaths) {
       try {
-        const storageRef = ref(this.storage, receipt.file.storagePath);
+        const storageRef = ref(this.storage, storagePath);
         await deleteObject(storageRef);
       } catch (error) {
-        console.warn('Failed to delete file from storage:', error);
+        console.warn('Failed to delete file from storage:', { storagePath, error });
         // Continue with Firestore deletion even if storage fails
       }
     }

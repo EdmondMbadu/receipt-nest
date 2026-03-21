@@ -33,6 +33,8 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
   readonly error = signal<string | null>(null);
   readonly imageUrl = signal<string | null>(null);
   readonly safeImageUrl = signal<SafeResourceUrl | null>(null);
+  readonly htmlPreviewUrl = signal<string | null>(null);
+  readonly safeHtmlPreviewUrl = signal<SafeResourceUrl | null>(null);
   readonly showImageModal = signal(false);
   readonly heicPreviewUrl = signal<string | null>(null); // Converted HEIC preview
 
@@ -62,6 +64,8 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
     return r?.status === 'needs_review' || r?.status === 'extracted';
   });
 
+  readonly hasHtmlPreview = computed(() => !!this.htmlPreviewUrl());
+
   private receiptId: string = '';
 
   ngOnInit(): void {
@@ -88,6 +92,11 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
 
       this.receipt.set(receipt);
       this.initEditForm(receipt);
+      this.imageUrl.set(null);
+      this.safeImageUrl.set(null);
+      this.htmlPreviewUrl.set(null);
+      this.safeHtmlPreviewUrl.set(null);
+      this.heicPreviewUrl.set(null);
 
       // Load image URL
       if (receipt.file?.storagePath) {
@@ -103,6 +112,16 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
           }
         } catch (e) {
           console.warn('Could not load receipt image:', e);
+        }
+      }
+
+      if (receipt.email?.htmlStoragePath) {
+        try {
+          const htmlUrl = await this.receiptService.getReceiptFileUrl(receipt.email.htmlStoragePath);
+          this.htmlPreviewUrl.set(htmlUrl);
+          this.safeHtmlPreviewUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(htmlUrl));
+        } catch (e) {
+          console.warn('Could not load HTML receipt preview:', e);
         }
       }
     } catch (e: any) {
@@ -186,7 +205,7 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
   }
 
   openImageModal(): void {
-    if (this.imageUrl()) {
+    if (this.imageUrl() || this.htmlPreviewUrl()) {
       this.showImageModal.set(true);
     }
   }
@@ -378,5 +397,4 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
     });
   }
 }
-
 

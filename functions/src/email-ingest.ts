@@ -1747,12 +1747,15 @@ function sanitizeStoredEmailHtmlBody(value: string): string {
   const bodyMatch = normalized.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
   const bodyHtml = bodyMatch?.[1] || normalized;
 
-  return bodyHtml
+  return sanitizeEmailCssUrls(
+    bodyHtml
     .replace(/<!--[\s\S]*?-->/g, "")
     .replace(/<(script|iframe|object|embed|form|input|button|textarea|select|video|audio|source|link|meta|base)[\s\S]*?<\/\1>/gi, "")
     .replace(/<(script|iframe|object|embed|form|input|button|textarea|select|video|audio|source|link|meta|base)[^>]*\/?>/gi, "")
+    .replace(/\son[a-z]+\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, "")
     .replace(/<img\b[^>]*>/gi, "")
-    .trim();
+    .trim()
+  );
 }
 
 function escapeHtmlContent(value: string): string {
@@ -1766,6 +1769,12 @@ function escapeHtmlContent(value: string): string {
 
 function escapeHtmlAttribute(value: string): string {
   return escapeHtmlContent(value);
+}
+
+function sanitizeEmailCssUrls(value: string): string {
+  return value
+    .replace(/@import\s+[^;]+;/gi, "")
+    .replace(/url\(\s*(['"]?)(?!data:)[^)]+\1\s*\)/gi, "none");
 }
 
 function inferMerchantFromSender(senderField: string): string | null {

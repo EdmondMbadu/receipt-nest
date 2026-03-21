@@ -88,6 +88,21 @@ export interface ReceiptCategory {
   assignedBy: CategoryAssignmentType;
 }
 
+export interface ReceiptEmailMetadata {
+  from?: string;
+  to?: string;
+  subject?: string;
+  messageId?: string | null;
+  ingestMode?: 'attachment' | 'text_fallback';
+  textStoragePath?: string | null;
+  htmlStoragePath?: string | null;
+  pdfStoragePath?: string | null;
+  previewStoragePath?: string | null;
+  pdfGenerated?: boolean;
+  previewGenerated?: boolean;
+  ingestedAt?: Timestamp | ReturnType<typeof serverTimestamp>;
+}
+
 /**
  * Main Receipt document stored in Firestore
  * Collection: users/{userId}/receipts/{receiptId}
@@ -119,6 +134,7 @@ export interface Receipt {
   // User-editable fields
   notes?: string;
   tags?: string[];
+  email?: ReceiptEmailMetadata;
 
   // Timestamps
   createdAt: Timestamp | ReturnType<typeof serverTimestamp>;
@@ -142,5 +158,4 @@ export function createReceiptDocument(
     updatedAt: serverTimestamp()
   };
 }
-
 
