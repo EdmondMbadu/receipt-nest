@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../services/auth.service';
 
@@ -16,6 +16,7 @@ export class LoginComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
 
   readonly form = this.formBuilder.group({
@@ -42,7 +43,7 @@ export class LoginComponent {
       const { email, password } = this.form.getRawValue();
       await this.authService.login(email ?? '', password ?? '');
       await this.authService.waitForAuthState();
-      await this.router.navigateByUrl('/app');
+      await this.router.navigateByUrl(this.getRedirectUrl());
     } catch (error: any) {
       if (error?.code === 'auth/email-not-verified') {
         this.errorMessage = 'Please verify your email to sign in.';
@@ -115,7 +116,7 @@ export class LoginComponent {
     try {
       await this.authService.loginWithGoogle();
       await this.authService.waitForAuthState();
-      await this.router.navigateByUrl('/app');
+      await this.router.navigateByUrl(this.getRedirectUrl());
     } catch (error: any) {
       this.errorMessage = error?.message ?? 'Unable to sign you in with Google right now.';
     } finally {
@@ -126,5 +127,13 @@ export class LoginComponent {
   private detectChanges() {
     this.cdr.detectChanges();
   }
-}
 
+  private getRedirectUrl(): string {
+    const redirect = this.route.snapshot.queryParamMap.get('redirect');
+    if (redirect && redirect.startsWith('/')) {
+      return redirect;
+    }
+
+    return '/app';
+  }
+}

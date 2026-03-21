@@ -77,6 +77,7 @@ type SummaryLinks = {
   dashboardUrl?: string;
   supportUrl?: string;
   termsUrl?: string;
+  unsubscribeUrl?: string;
 };
 
 type WeeklyScheduleConfig = {
@@ -1132,6 +1133,7 @@ const renderFooter = (links: SummaryLinks) => {
     links.dashboardUrl ? `<a href="${escapeHtml(links.dashboardUrl)}" style="color:#404944; text-decoration:underline; text-underline-offset:4px;">Open Dashboard</a>` : "",
     links.supportUrl ? `<a href="${escapeHtml(links.supportUrl)}" style="color:#404944; text-decoration:underline; text-underline-offset:4px;">Support</a>` : "",
     links.termsUrl ? `<a href="${escapeHtml(links.termsUrl)}" style="color:#404944; text-decoration:underline; text-underline-offset:4px;">Terms</a>` : "",
+    links.unsubscribeUrl ? `<a href="${escapeHtml(links.unsubscribeUrl)}" style="color:#404944; text-decoration:underline; text-underline-offset:4px;">Unsubscribe</a>` : "",
   ].filter(Boolean).join("&nbsp;&nbsp;&nbsp;&nbsp;");
 
   return `
@@ -1468,6 +1470,7 @@ const getSummaryLinks = (): SummaryLinks => {
     dashboardUrl: `${normalizedBaseUrl}/app`,
     supportUrl: `${normalizedBaseUrl}/support`,
     termsUrl: `${normalizedBaseUrl}/terms`,
+    unsubscribeUrl: `${normalizedBaseUrl}/app?settings=notifications&summaryEmails=1`,
   };
 };
 
@@ -1575,6 +1578,15 @@ const dispatchSummaryPeriodToAllUsers = async (
     const userData = userDoc.data();
     const email = String(userData.email ?? "").trim();
     if (!email) {
+      continue;
+    }
+
+    const notificationSettings = (userData.notificationSettings ?? {}) as Record<string, unknown>;
+    const wantsThisEmail = period.type === "week"
+      ? (notificationSettings.weeklySummaryEmails ?? true) !== false
+      : (notificationSettings.monthlySummaryEmails ?? true) !== false;
+
+    if (!wantsThisEmail) {
       continue;
     }
 

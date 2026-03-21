@@ -46,7 +46,9 @@ export class AuthService {
   private readonly defaultNotificationSettings: NotificationSettings = {
     receiptProcessing: true,
     productUpdates: false,
-    securityAlerts: true
+    securityAlerts: true,
+    weeklySummaryEmails: true,
+    monthlySummaryEmails: true
   };
 
   readonly user = signal<UserProfile | null>(null);
@@ -234,7 +236,9 @@ export class AuthService {
     return {
       receiptProcessing: settings?.receiptProcessing ?? this.defaultNotificationSettings.receiptProcessing,
       productUpdates: settings?.productUpdates ?? this.defaultNotificationSettings.productUpdates,
-      securityAlerts: settings?.securityAlerts ?? this.defaultNotificationSettings.securityAlerts
+      securityAlerts: settings?.securityAlerts ?? this.defaultNotificationSettings.securityAlerts,
+      weeklySummaryEmails: settings?.weeklySummaryEmails ?? this.defaultNotificationSettings.weeklySummaryEmails,
+      monthlySummaryEmails: settings?.monthlySummaryEmails ?? this.defaultNotificationSettings.monthlySummaryEmails
     };
   }
 

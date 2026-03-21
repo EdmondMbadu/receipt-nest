@@ -1,6 +1,6 @@
 import { Component, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -23,6 +23,7 @@ export class AppShellComponent {
   private readonly auth = inject(AuthService);
   private readonly theme = inject(ThemeService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly aiService = inject(AiInsightsService);
   private readonly shareService = inject(ShareService);
 
@@ -63,6 +64,8 @@ export class AppShellComponent {
   readonly notificationsReceiptProcessing = signal(true);
   readonly notificationsProductUpdates = signal(false);
   readonly notificationsSecurityAlerts = signal(true);
+  readonly notificationsWeeklySummaryEmails = signal(true);
+  readonly notificationsMonthlySummaryEmails = signal(true);
   readonly notificationsSaving = signal(false);
   readonly notificationsError = signal<string | null>(null);
   readonly notificationsSuccess = signal<string | null>(null);
@@ -93,6 +96,9 @@ export class AppShellComponent {
     ),
     { initialValue: this.router.url }
   );
+  private readonly settingsQueryParams = toSignal(this.route.queryParamMap, {
+    initialValue: this.route.snapshot.queryParamMap
+  });
   readonly isInsightsRoute = computed(() => this.currentUrl().startsWith('/app/insights'));
 
   readonly isFreePlan = computed(() => {
@@ -136,6 +142,28 @@ export class AppShellComponent {
   private readonly syncAuthProviderState = effect(() => {
     this.user();
     this.usesPasswordAuth.set(this.auth.isCurrentUserPasswordAuth());
+  });
+
+  private readonly handleSettingsDeepLink = effect(() => {
+    const queryParamMap = this.settingsQueryParams();
+    const settingsParam = queryParamMap.get('settings');
+    const summaryEmailsParam = queryParamMap.get('summaryEmails');
+    const hasDeepLink = settingsParam === 'notifications' || summaryEmailsParam === '1';
+
+    if (!hasDeepLink || !this.user()) {
+      return;
+    }
+
+    this.openSettingsModal('notifications');
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        settings: null,
+        summaryEmails: null
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
   });
 
   closeSidebar(): void {
@@ -189,6 +217,8 @@ export class AppShellComponent {
     this.notificationsReceiptProcessing.set(defaults.receiptProcessing);
     this.notificationsProductUpdates.set(defaults.productUpdates);
     this.notificationsSecurityAlerts.set(defaults.securityAlerts);
+    this.notificationsWeeklySummaryEmails.set(defaults.weeklySummaryEmails);
+    this.notificationsMonthlySummaryEmails.set(defaults.monthlySummaryEmails);
 
     this.settingsActiveTab.set(tab);
     this.settingsModalOpen.set(true);
@@ -238,7 +268,9 @@ export class AppShellComponent {
     const settings: NotificationSettings = {
       receiptProcessing: this.notificationsReceiptProcessing(),
       productUpdates: this.notificationsProductUpdates(),
-      securityAlerts: this.notificationsSecurityAlerts()
+      securityAlerts: this.notificationsSecurityAlerts(),
+      weeklySummaryEmails: this.notificationsWeeklySummaryEmails(),
+      monthlySummaryEmails: this.notificationsMonthlySummaryEmails()
     };
 
     try {

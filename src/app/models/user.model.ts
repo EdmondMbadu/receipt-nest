@@ -4,6 +4,8 @@ export interface NotificationSettings {
   receiptProcessing: boolean;
   productUpdates: boolean;
   securityAlerts: boolean;
+  weeklySummaryEmails: boolean;
+  monthlySummaryEmails: boolean;
 }
 
 export interface UserProfile {

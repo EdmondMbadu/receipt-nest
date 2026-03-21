@@ -3,7 +3,7 @@ import { CanActivateFn, Router, UrlTree } from '@angular/router';
 
 import { AuthService } from '../services/auth.service';
 
-export const authGuard: CanActivateFn = async (): Promise<boolean | UrlTree> => {
+export const authGuard: CanActivateFn = async (_route, state): Promise<boolean | UrlTree> => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
@@ -14,8 +14,11 @@ export const authGuard: CanActivateFn = async (): Promise<boolean | UrlTree> => 
     return true;
   }
 
-  return router.parseUrl('/login');
+  return router.createUrlTree(['/login'], {
+    queryParams: {
+      redirect: state.url
+    }
+  });
 };
-
 
 
