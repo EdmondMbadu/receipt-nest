@@ -167,17 +167,8 @@ const formatDateKey = (
 ) => new Intl.DateTimeFormat("en-US", { timeZone, ...options }).format(dateFromKey(dateKey));
 
 const formatDateRange = (startKey: string, endKey: string, timeZone: string) => {
-  const startDate = dateFromKey(startKey);
-  const endDate = dateFromKey(endKey);
-  const sameYear = startDate.getUTCFullYear() === endDate.getUTCFullYear();
-  const sameMonth = sameYear && startDate.getUTCMonth() === endDate.getUTCMonth();
-
   const startLabel = formatDateKey(startKey, timeZone, { month: "short", day: "numeric", year: "numeric" });
-  const endLabel = formatDateKey(
-    endKey,
-    timeZone,
-    sameMonth ? { day: "numeric", year: "numeric" } : { month: "short", day: "numeric", year: "numeric" },
-  );
+  const endLabel = formatDateKey(endKey, timeZone, { month: "long", day: "numeric", year: "numeric" });
 
   return `${startLabel} - ${endLabel}`;
 };
@@ -630,19 +621,6 @@ const buildSummaryData = (
   };
 };
 
-const renderHeroPill = (label: string, value: string) => `
-  <td style="padding:0 8px 0 0;">
-    <table role="presentation" cellpadding="0" cellspacing="0" style="border:1px solid rgba(255,255,255,0.18); border-radius:999px; background:rgba(255,255,255,0.08);">
-      <tr>
-        <td style="padding:8px 12px; font-family:Inter, Arial, sans-serif;">
-          <p style="margin:0; font-size:10px; line-height:1.2; color:#a7f3d0; text-transform:uppercase; letter-spacing:0.14em; font-weight:700;">${escapeHtml(label)}</p>
-          <p style="margin:4px 0 0; font-size:13px; line-height:1.3; color:#ffffff; font-weight:600;">${escapeHtml(value)}</p>
-        </td>
-      </tr>
-    </table>
-  </td>
-`;
-
 const getBadgeLabel = (value: string, fallback: string) => {
   const words = value
     .replace(/[^A-Za-z0-9 ]/g, " ")
@@ -1038,20 +1016,6 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
               <td style="padding:24px 16px 16px;">
                 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-radius:24px; overflow:hidden; box-shadow:0 28px 60px rgba(13, 28, 45, 0.10);">
                   <tr>
-                    <td style="padding:14px 30px; background:linear-gradient(90deg,#d9f99d 0%, #a7f3d0 48%, #bfdbfe 100%);">
-                      <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-                        <tr>
-                          <td style="font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.4; color:#0f172a; text-transform:uppercase; letter-spacing:0.22em; font-weight:800;">
-                            ReceiptNest AI Spending Summary
-                          </td>
-                          <td align="right" style="font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.4; color:#0f172a; font-weight:700;">
-                            ${escapeHtml(periodDescriptor)}
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                  <tr>
                     <td style="padding:34px 34px 30px; background:
                       radial-gradient(circle at top left, rgba(16, 185, 129, 0.28), transparent 34%),
                       radial-gradient(circle at top right, rgba(191, 219, 254, 0.18), transparent 26%),
@@ -1087,13 +1051,6 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
                         </tr>
                       </table>
 
-                      <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:22px;">
-                        <tr>
-                          ${renderHeroPill("Top category", metrics.topCategory ? metrics.topCategory.name : "No category data")}
-                          ${renderHeroPill("Top merchant", metrics.topMerchant ? metrics.topMerchant.name : "No merchant data")}
-                          ${renderHeroPill("Active days", formatCountLabel(metrics.activeDays, "day"))}
-                        </tr>
-                      </table>
                     </td>
                   </tr>
                 </table>
