@@ -591,9 +591,9 @@ async function saveTextOnlyReceipt(
   const recipient = fields.to || "";
   const htmlSource = extractHtmlFromEmailFields(fields);
   const readableBodySource =
-    htmlToReadableText(htmlSource) ||
     fields.text ||
     fields["stripped-text"] ||
+    htmlToReadableText(htmlSource) ||
     extractReadableTextFromRawEmail(fields.email || "");
   const text = normalizeEmailText(readableBodySource);
   const documentBodyText = normalizeEmailDocumentText(readableBodySource);
@@ -604,7 +604,12 @@ async function saveTextOnlyReceipt(
   const extraction = await extractFromEmailContent(subject, sender, text);
   const merchantName = extraction.supplierName?.value || inferMerchantFromSender(sender) || "Email Receipt";
   const merchant = await normalizeMerchant(userId, merchantName, extraction.supplierName?.confidence || 0.5);
-  const category = classifyCategory(merchant.canonicalName);
+  const category = classifyCategory({
+    merchantName: merchant.canonicalName,
+    rawMerchantName: merchant.rawName,
+    sender,
+    subject,
+  });
   const hasTotal = extraction.totalAmount?.value !== undefined && extraction.totalAmount.value > 0;
   const status = hasTotal ? "final" : "needs_review";
 
@@ -1517,16 +1522,31 @@ async function normalizeMerchant(
   };
 }
 
-function classifyCategory(merchantName: string): ReceiptCategory {
-  const lowerMerchant = merchantName.toLowerCase();
-  for (const category of CATEGORIES) {
-    if (category.keywords.some((keyword) => lowerMerchant.includes(keyword))) {
-      return {
-        id: category.id,
-        name: category.name,
-        confidence: 0.9,
-        assignedBy: "rule",
-      };
+function classifyCategory(input: {
+  merchantName?: string;
+  rawMerchantName?: string;
+  sender?: string;
+  subject?: string;
+}): ReceiptCategory {
+  const candidateValues = [
+    input.merchantName,
+    input.rawMerchantName,
+    inferMerchantFromSender(input.sender || ""),
+    input.subject,
+  ]
+    .map((value) => String(value || "").toLowerCase().trim())
+    .filter((value, index, array) => !!value && array.indexOf(value) === index);
+
+  for (const candidate of candidateValues) {
+    for (const category of CATEGORIES) {
+      if (category.keywords.some((keyword) => candidate.includes(keyword))) {
+        return {
+          id: category.id,
+          name: category.name,
+          confidence: candidate === (input.merchantName || "").toLowerCase().trim() ? 0.9 : 0.78,
+          assignedBy: "rule",
+        };
+      }
     }
   }
 
