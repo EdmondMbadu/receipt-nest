@@ -674,7 +674,7 @@ const renderHighlightCard = (
   name: string,
   amountText: string,
   caption: string,
-  badgeText: string,
+  badgeSymbol: string,
   accentColor: string,
   badgeBackground: string,
 ) => `
@@ -683,8 +683,8 @@ const renderHighlightCard = (
       <td style="padding:26px 26px 24px; font-family:Inter, Arial, sans-serif;">
         <table role="presentation" cellpadding="0" cellspacing="0">
           <tr>
-            <td style="width:48px; height:48px; border-radius:12px; background:${accentColor}; color:#ffffff; text-align:center; font-size:11px; font-weight:800; letter-spacing:0.12em;">
-              ${escapeHtml(badgeText)}
+            <td style="width:48px; height:48px; border-radius:12px; background:${accentColor}; color:#ffffff; text-align:center; font-size:22px; font-weight:800;">
+              ${badgeSymbol}
             </td>
           </tr>
         </table>
@@ -1043,9 +1043,6 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
                             <p style="margin:16px 0 0; font-size:18px; line-height:1.7; color:#d1fae5; max-width:420px; font-family:Inter, Arial, sans-serif; font-weight:600;">
                               ${escapeHtml(introLine)}
                             </p>
-                            <p style="margin:10px 0 0; font-size:15px; line-height:1.7; color:#ecfdf5; font-family:Inter, Arial, sans-serif;">
-                              ${escapeHtml(data.userName)} spent ${escapeHtml(formatCurrency(metrics.totalSpend, data.currency))} across ${escapeHtml(formatCountLabel(metrics.receiptCount, "receipt"))} during ${escapeHtml(data.period.rangeLabel)}.
-                            </p>
                           </td>
                           <td align="right" style="vertical-align:top;">
                             <table role="presentation" cellpadding="0" cellspacing="0" style="border-radius:22px; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.12); min-width:230px;">
@@ -1093,7 +1090,7 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
                               metrics.topCategory ? metrics.topCategory.name : "No category data",
                               metrics.topCategory ? formatCurrency(metrics.topCategory.total, data.currency) : formatCurrency(0, data.currency),
                               metrics.topCategory ? `${Math.round(metrics.topCategory.share * 100)}% of total` : "No spend data",
-                              "CAT",
+                              "&#128179;",
                               "#064e3b",
                               "#d6fae8",
                             )}
@@ -1104,7 +1101,7 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
                               metrics.topMerchant ? metrics.topMerchant.name : "No merchant data",
                               metrics.topMerchant ? formatCurrency(metrics.topMerchant.total, data.currency) : formatCurrency(0, data.currency),
                               metrics.topMerchant ? formatCountLabel(metrics.topMerchant.count, "transaction") : "No activity",
-                              "MER",
+                              "&#127980;",
                               "#0d1c2d",
                               "#dbe9ff",
                             )}
