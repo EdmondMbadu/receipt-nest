@@ -764,28 +764,41 @@ const renderBreakdownTable = (title: string, items: BreakdownItem[], currency: s
 
 const renderSpendChart = (data: SpendSummaryData) => {
   const maxAmount = Math.max(...data.activity.map((item) => item.amount), 1);
-  const bars = data.activity.map((item) => {
-    const height = item.amount <= 0 ? 8 : Math.max(18, Math.round((item.amount / maxAmount) * 132));
+  const title = data.period.type === "week" ? "Daily Spend Volume" : "Weekly Spend Movement";
+  const subtitle = data.period.type === "week"
+    ? `Activity breakdown for ${data.period.rangeLabel}`
+    : `Grouped weekly movement across ${data.period.label}`;
+  const rows = data.activity.map((item) => {
     const active = item.amount === maxAmount && maxAmount > 0;
-    const barColor = active ? "#006c49" : "#d4e4fa";
-    const labelColor = active ? "#0d1c2d" : "#5b6471";
+    const barWidth = item.amount <= 0 ? 0 : Math.max(6, Math.round((item.amount / maxAmount) * 100));
+    const barColor = active ? "#006c49" : "#7ebea7";
+    const trackColor = "#dbe9ff";
+    const valueColor = active ? "#006c49" : "#0d1c2d";
 
     return `
-      <td valign="bottom" align="center" style="padding:0 4px; width:${(100 / Math.max(data.activity.length, 1)).toFixed(2)}%;">
-        <p style="margin:0 0 8px; font-family:Inter, Arial, sans-serif; font-size:10px; line-height:1.2; color:#0d1c2d; font-weight:800;">
-          ${escapeHtml(formatCurrency(item.amount, data.currency))}
-        </p>
-        <div style="height:144px; position:relative;">
-          <div style="position:absolute; left:50%; bottom:0; transform:translateX(-50%); width:84%; height:${height}px; border-radius:10px 10px 0 0; background:${barColor};"></div>
-          <div style="position:absolute; left:50%; bottom:0; transform:translateX(-50%); width:84%; height:144px; border-radius:12px 12px 0 0; border:1px solid #dbe9ff;"></div>
-        </div>
-        <p style="margin:10px 0 0; font-family:Inter, Arial, sans-serif; font-size:10px; line-height:1.2; color:${labelColor}; font-weight:800; letter-spacing:0.12em;">
-          ${escapeHtml(item.label)}
-        </p>
-        <p style="margin:4px 0 0; font-family:Inter, Arial, sans-serif; font-size:10px; line-height:1.2; color:#5b6471; font-weight:700;">
-          ${escapeHtml(item.sublabel)}
-        </p>
-      </td>
+      <tr>
+        <td style="padding:12px 0; border-bottom:1px solid #e2e8f0; width:27%; vertical-align:middle; font-family:Inter, Arial, sans-serif;">
+          <p style="margin:0; font-size:13px; line-height:1.3; color:#0d1c2d; font-weight:900; letter-spacing:0.08em; text-transform:uppercase;">
+            ${escapeHtml(item.label)}
+          </p>
+          <p style="margin:4px 0 0; font-size:12px; line-height:1.5; color:#5b6471; font-weight:600;">
+            ${escapeHtml(item.sublabel)}
+          </p>
+        </td>
+        <td style="padding:12px 16px; border-bottom:1px solid #e2e8f0; width:45%; vertical-align:middle;">
+          <div style="height:12px; border-radius:999px; background:${trackColor}; overflow:hidden;">
+            <div style="height:12px; border-radius:999px; background:${barColor}; width:${barWidth}%;"></div>
+          </div>
+        </td>
+        <td align="right" style="padding:12px 0; border-bottom:1px solid #e2e8f0; width:28%; vertical-align:middle; font-family:Inter, Arial, sans-serif;">
+          <p style="margin:0; font-size:14px; line-height:1.3; color:${valueColor}; font-weight:900;">
+            ${escapeHtml(formatCurrency(item.amount, data.currency))}
+          </p>
+          <p style="margin:4px 0 0; font-size:11px; line-height:1.4; color:#5b6471; font-weight:700;">
+            ${escapeHtml(formatCountLabel(item.receiptCount, "receipt"))}
+          </p>
+        </td>
+      </tr>
     `;
   }).join("");
 
@@ -796,9 +809,9 @@ const renderSpendChart = (data: SpendSummaryData) => {
           <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
             <tr>
               <td>
-                <p style="margin:0; font-size:26px; line-height:1.2; color:#0d1c2d; font-weight:900;">Daily Spend Volume</p>
+                <p style="margin:0; font-size:26px; line-height:1.2; color:#0d1c2d; font-weight:900;">${escapeHtml(title)}</p>
                 <p style="margin:6px 0 0; font-size:13px; line-height:1.6; color:#5b6471; font-weight:600;">
-                  ${escapeHtml(data.period.type === "week" ? `Activity breakdown for ${data.period.rangeLabel}` : `Weekly movement across ${data.period.label}`)}
+                  ${escapeHtml(subtitle)}
                 </p>
               </td>
               <td align="right">
@@ -808,10 +821,8 @@ const renderSpendChart = (data: SpendSummaryData) => {
               </td>
             </tr>
           </table>
-          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-top:22px;">
-            <tr>
-              ${bars}
-            </tr>
+          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-top:20px;">
+            ${rows}
           </table>
         </td>
       </tr>
@@ -884,12 +895,12 @@ const renderSecuritySection = (links: SummaryLinks) => {
   const settingsLink = links.dashboardUrl
     ? `
       <a href="${escapeHtml(links.dashboardUrl)}" style="display:inline-block; padding:12px 20px; border-radius:10px; background:#006c49; color:#ffffff; text-decoration:none; font-family:Inter, Arial, sans-serif; font-size:12px; line-height:1.2; font-weight:900; letter-spacing:0.12em;">
-        REVIEW SETTINGS
+        REVIEW SECURITY SETTINGS
       </a>
     `
     : `
       <span style="display:inline-block; padding:12px 20px; border-radius:10px; background:#006c49; color:#ffffff; font-family:Inter, Arial, sans-serif; font-size:12px; line-height:1.2; font-weight:900; letter-spacing:0.12em;">
-        REVIEW SETTINGS
+        REVIEW SECURITY SETTINGS
       </span>
     `;
 
@@ -903,8 +914,8 @@ const renderSecuritySection = (links: SummaryLinks) => {
               <td style="vertical-align:middle;">
                 <table role="presentation" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td style="width:54px; height:54px; border-radius:999px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.14); color:#6ffbbe; text-align:center; line-height:54px; font-family:Inter, Arial, sans-serif; font-size:12px; font-weight:900; letter-spacing:0.16em;">
-                      SEC
+                    <td style="width:54px; height:54px; border-radius:999px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.14); color:#6ffbbe; text-align:center; line-height:54px; font-family:Inter, Arial, sans-serif; font-size:24px;">
+                      &#128274;
                     </td>
                     <td style="padding-left:18px; font-family:Inter, Arial, sans-serif;">
                       <p style="margin:0; font-size:22px; line-height:1.2; color:#ffffff; font-weight:800;">Encrypted &amp; Secure</p>
@@ -915,7 +926,9 @@ const renderSecuritySection = (links: SummaryLinks) => {
                   </tr>
                 </table>
               </td>
-              <td align="right" style="vertical-align:middle;">
+            </tr>
+            <tr>
+              <td style="padding-top:18px;">
                 ${settingsLink}
               </td>
             </tr>
