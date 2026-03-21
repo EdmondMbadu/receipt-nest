@@ -3,6 +3,7 @@ import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import { VertexAI } from "@google-cloud/vertexai";
+import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 import * as crypto from "crypto";
 import type { Request } from "express";
 import sharp from "sharp";
@@ -17,6 +18,8 @@ const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
 const MAX_ATTACHMENTS_PER_EMAIL = 6;
 const FREE_PLAN_RECEIPT_LIMIT = 200;
 const MAX_EMAIL_TEXT_LENGTH = 12000;
+const MAX_EMAIL_HTML_LENGTH = 250000;
+const MAX_EMAIL_DOCUMENT_TEXT_LENGTH = 50000;
 const MAX_ALIAS_LOCAL_PART_LENGTH = 64;
 
 const ALLOWED_ATTACHMENT_TYPES = new Set([
@@ -103,6 +106,18 @@ interface ReceiptCategory {
 interface EmailPreviewImageInput {
   subject: string;
   sender: string;
+  merchantName: string;
+  totalAmount?: number;
+  currency?: string;
+  transactionDate?: string;
+  bodyText: string;
+  status: "final" | "needs_review";
+}
+
+interface EmailDocumentPdfInput {
+  subject: string;
+  sender: string;
+  recipient: string;
   merchantName: string;
   totalAmount?: number;
   currency?: string;
@@ -573,12 +588,15 @@ async function saveTextOnlyReceipt(
 ): Promise<boolean> {
   const subject = fields.subject || "";
   const sender = fields.from || "";
-  const textSource =
+  const recipient = fields.to || "";
+  const htmlSource = extractHtmlFromEmailFields(fields);
+  const readableBodySource =
+    htmlToReadableText(htmlSource) ||
     fields.text ||
     fields["stripped-text"] ||
-    stripHtml(fields.html || fields["stripped-html"] || "") ||
     extractReadableTextFromRawEmail(fields.email || "");
-  const text = normalizeEmailText(textSource);
+  const text = normalizeEmailText(readableBodySource);
+  const documentBodyText = normalizeEmailDocumentText(readableBodySource);
   if (!subject && !text) {
     return false;
   }
@@ -594,50 +612,97 @@ async function saveTextOnlyReceipt(
   const textPayload = [
     `Subject: ${subject || "(none)"}`,
     `From: ${sender || "(unknown)"}`,
+    `To: ${recipient || "(unknown recipient)"}`,
     "",
-    text || "(empty body)",
+    documentBodyText || "(empty body)",
   ].join("\n");
   const textStoragePath = `users/${userId}/receipts/${timestamp}_email_body.txt`;
+  const htmlStoragePath = htmlSource ? `users/${userId}/receipts/${timestamp}_email_body.html` : null;
+  const pdfStoragePath = `users/${userId}/receipts/${timestamp}_email_rendered.pdf`;
   const previewStoragePath = `users/${userId}/receipts/${timestamp}_email_preview.png`;
 
   const bucket = admin.storage().bucket();
   await bucket.file(textStoragePath).save(Buffer.from(textPayload, "utf8"), {
     metadata: { contentType: "text/plain; charset=utf-8" },
   });
+  if (htmlStoragePath && htmlSource) {
+    const htmlPayload = buildStoredEmailHtmlDocument({
+      subject,
+      sender,
+      recipient,
+      htmlBody: htmlSource,
+    });
+    await bucket.file(htmlStoragePath).save(Buffer.from(htmlPayload, "utf8"), {
+      metadata: { contentType: "text/html; charset=utf-8" },
+    });
+  }
 
   let receiptFileStoragePath = textStoragePath;
   let receiptFileOriginalName = `${sanitizeFileName(subject || "forwarded-email")}.txt`;
   let receiptFileMimeType = "text/plain";
   let receiptFileSizeBytes = Buffer.byteLength(textPayload, "utf8");
+  let pdfGenerated = false;
   let previewGenerated = false;
 
   try {
-    const previewBuffer = await generateEmailPreviewImage({
+    const pdfBuffer = await generateEmailDocumentPdf({
       subject,
       sender,
+      recipient,
       merchantName: merchant.canonicalName || merchantName,
       totalAmount: extraction.totalAmount?.value,
       currency: extraction.currency?.value,
       transactionDate: extraction.date?.value,
-      bodyText: text,
+      bodyText: documentBodyText || text,
       status,
     });
 
-    await bucket.file(previewStoragePath).save(previewBuffer, {
-      metadata: { contentType: "image/png" },
+    await bucket.file(pdfStoragePath).save(pdfBuffer, {
+      metadata: { contentType: "application/pdf" },
     });
 
-    receiptFileStoragePath = previewStoragePath;
-    receiptFileOriginalName = `${sanitizeFileName(subject || "forwarded-email")}_preview.png`;
-    receiptFileMimeType = "image/png";
-    receiptFileSizeBytes = previewBuffer.length;
-    previewGenerated = true;
+    receiptFileStoragePath = pdfStoragePath;
+    receiptFileOriginalName = `${sanitizeFileName(subject || "forwarded-email")}_email.pdf`;
+    receiptFileMimeType = "application/pdf";
+    receiptFileSizeBytes = pdfBuffer.length;
+    pdfGenerated = true;
   } catch (error) {
-    logger.warn("Failed to generate text-email preview image. Falling back to text file.", {
+    logger.warn("Failed to generate email PDF document. Falling back to preview image.", {
       userId,
       messageId: extractMessageId(fields),
       error,
     });
+  }
+
+  if (!pdfGenerated) {
+    try {
+      const previewBuffer = await generateEmailPreviewImage({
+        subject,
+        sender,
+        merchantName: merchant.canonicalName || merchantName,
+        totalAmount: extraction.totalAmount?.value,
+        currency: extraction.currency?.value,
+        transactionDate: extraction.date?.value,
+        bodyText: documentBodyText || text,
+        status,
+      });
+
+      await bucket.file(previewStoragePath).save(previewBuffer, {
+        metadata: { contentType: "image/png" },
+      });
+
+      receiptFileStoragePath = previewStoragePath;
+      receiptFileOriginalName = `${sanitizeFileName(subject || "forwarded-email")}_preview.png`;
+      receiptFileMimeType = "image/png";
+      receiptFileSizeBytes = previewBuffer.length;
+      previewGenerated = true;
+    } catch (error) {
+      logger.warn("Failed to generate text-email preview image. Falling back to text file.", {
+        userId,
+        messageId: extractMessageId(fields),
+        error,
+      });
+    }
   }
 
   const updateData: Record<string, unknown> = {
@@ -657,12 +722,15 @@ async function saveTextOnlyReceipt(
     category,
     email: {
       from: sender,
-      to: fields.to || "",
+      to: recipient,
       subject,
       messageId: extractMessageId(fields),
       ingestMode: "text_fallback",
       textStoragePath,
+      htmlStoragePath,
+      pdfStoragePath: pdfGenerated ? pdfStoragePath : null,
       previewStoragePath: previewGenerated ? previewStoragePath : null,
+      pdfGenerated,
       previewGenerated,
       ingestedAt: admin.firestore.FieldValue.serverTimestamp(),
     },
@@ -810,6 +878,289 @@ ${bodyExcerpt}`;
 
     return extraction;
   }
+}
+
+async function generateEmailDocumentPdf(input: EmailDocumentPdfInput): Promise<Buffer> {
+  const pdfDoc = await PDFDocument.create();
+  pdfDoc.setTitle(input.subject || "Forwarded Email Receipt");
+  pdfDoc.setAuthor("ReceiptNest AI");
+  pdfDoc.setCreator("ReceiptNest AI inbound email ingestion");
+  pdfDoc.setProducer("ReceiptNest AI");
+  pdfDoc.setSubject("Forwarded email receipt");
+  pdfDoc.setKeywords(["receipt", "email", "forwarded"]);
+
+  const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+
+  const pageWidth = 612;
+  const pageHeight = 792;
+  const margin = 44;
+  const contentWidth = pageWidth - margin * 2;
+  const bodyTopY = pageHeight - 252;
+  const bodyBottomY = 62;
+  const lineGap = 5;
+  const paragraphGap = 12;
+  const footerHeight = 22;
+  const statusColor = input.status === "final" ? rgb(0.04, 0.46, 0.43) : rgb(0.71, 0.36, 0.03);
+  const statusBg = input.status === "final" ? rgb(0.88, 0.98, 0.96) : rgb(0.99, 0.95, 0.82);
+  const statusLabel = input.status === "final" ? "Auto-classified" : "Review required";
+  const pages: PDFPage[] = [];
+
+  const addPage = () => {
+    const page = pdfDoc.addPage([pageWidth, pageHeight]);
+    pages.push(page);
+    return page;
+  };
+
+  const drawHeader = (page: PDFPage) => {
+    page.drawRectangle({
+      x: 0,
+      y: pageHeight - 170,
+      width: pageWidth,
+      height: 170,
+      color: rgb(0.95, 0.97, 0.99),
+    });
+    page.drawRectangle({
+      x: margin,
+      y: pageHeight - 122,
+      width: contentWidth,
+      height: 1,
+      color: rgb(0.87, 0.9, 0.94),
+    });
+
+    page.drawText("Forwarded Email Receipt", {
+      x: margin,
+      y: pageHeight - 56,
+      size: 20,
+      font: boldFont,
+      color: rgb(0.06, 0.09, 0.16),
+    });
+    page.drawText("Captured from the original forwarded email content", {
+      x: margin,
+      y: pageHeight - 78,
+      size: 10.5,
+      font: regularFont,
+      color: rgb(0.39, 0.45, 0.53),
+    });
+
+    page.drawRectangle({
+      x: pageWidth - margin - 118,
+      y: pageHeight - 62,
+      width: 118,
+      height: 24,
+      color: statusBg,
+    });
+    page.drawText(statusLabel, {
+      x: pageWidth - margin - 108,
+      y: pageHeight - 54,
+      size: 10,
+      font: boldFont,
+      color: statusColor,
+    });
+
+    const summaryLabelSize = 9;
+    const summaryValueSize = 11.5;
+    const summaryTop = pageHeight - 104;
+    const summaryColumns = [
+      { label: "Merchant", value: input.merchantName || "Email Receipt" },
+      { label: "Detected total", value: formatEmailPreviewAmount(input.totalAmount, input.currency) },
+      { label: "Date", value: formatEmailPreviewDate(input.transactionDate) },
+    ];
+
+    summaryColumns.forEach((column, index) => {
+      const x = margin + index * (contentWidth / 3);
+      page.drawText(column.label, {
+        x,
+        y: summaryTop,
+        size: summaryLabelSize,
+        font: boldFont,
+        color: rgb(0.39, 0.45, 0.53),
+      });
+      const wrappedValue = wrapPdfText(column.value, boldFont, summaryValueSize, contentWidth / 3 - 16).slice(0, 2);
+      wrappedValue.forEach((line, lineIndex) => {
+        page.drawText(line, {
+          x,
+          y: summaryTop - 16 - lineIndex * 14,
+          size: summaryValueSize,
+          font: lineIndex === 0 ? boldFont : regularFont,
+          color: rgb(0.06, 0.09, 0.16),
+        });
+      });
+    });
+
+    let cursorY = pageHeight - 150;
+    cursorY = drawPdfMetadataBlock(page, "Subject", input.subject || "(no subject)", margin, cursorY, contentWidth, regularFont, boldFont);
+    cursorY = drawPdfMetadataBlock(page, "From", input.sender || "(unknown sender)", margin, cursorY, contentWidth, regularFont, boldFont);
+    drawPdfMetadataBlock(page, "To", input.recipient || "(unknown recipient)", margin, cursorY, contentWidth, regularFont, boldFont);
+  };
+
+  let currentPage = addPage();
+  drawHeader(currentPage);
+  let cursorY = bodyTopY;
+
+  const paragraphs = buildPdfParagraphs(input.bodyText);
+  if (paragraphs.length === 0) {
+    paragraphs.push("No readable email body content was detected.");
+  }
+
+  currentPage.drawText("Email content", {
+    x: margin,
+    y: cursorY,
+    size: 13,
+    font: boldFont,
+    color: rgb(0.06, 0.09, 0.16),
+  });
+  cursorY -= 24;
+
+  const bodyTextSize = 11.25;
+  const paragraphSpacing = bodyTextSize + lineGap;
+  const minY = bodyBottomY + footerHeight;
+
+  for (const paragraph of paragraphs) {
+    const wrappedLines = paragraph
+      ? wrapPdfText(paragraph, regularFont, bodyTextSize, contentWidth)
+      : [""];
+
+    const paragraphHeight = wrappedLines.length * paragraphSpacing + (paragraph ? paragraphGap : 0);
+    if (cursorY - paragraphHeight < minY) {
+      currentPage = addPage();
+      drawHeader(currentPage);
+      cursorY = bodyTopY;
+    }
+
+    if (!paragraph) {
+      cursorY -= paragraphGap;
+      continue;
+    }
+
+    for (const line of wrappedLines) {
+      currentPage.drawText(line, {
+        x: margin,
+        y: cursorY,
+        size: bodyTextSize,
+        font: regularFont,
+        color: rgb(0.11, 0.16, 0.23),
+      });
+      cursorY -= paragraphSpacing;
+    }
+
+    cursorY -= paragraphGap;
+  }
+
+  pages.forEach((page, index) => {
+    const footerText = `ReceiptNest AI • Forwarded email • Page ${index + 1} of ${pages.length}`;
+    page.drawLine({
+      start: { x: margin, y: bodyBottomY + 8 },
+      end: { x: pageWidth - margin, y: bodyBottomY + 8 },
+      thickness: 1,
+      color: rgb(0.9, 0.93, 0.96),
+    });
+    page.drawText(footerText, {
+      x: margin,
+      y: bodyBottomY - 4,
+      size: 9.5,
+      font: italicFont,
+      color: rgb(0.45, 0.5, 0.57),
+    });
+  });
+
+  const pdfBytes = await pdfDoc.save();
+  return Buffer.from(pdfBytes);
+}
+
+function drawPdfMetadataBlock(
+  page: PDFPage,
+  label: string,
+  value: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  regularFont: PDFFont,
+  boldFont: PDFFont
+): number {
+  page.drawText(label, {
+    x,
+    y,
+    size: 9,
+    font: boldFont,
+    color: rgb(0.39, 0.45, 0.53),
+  });
+
+  const wrappedLines = wrapPdfText(value, regularFont, 11, maxWidth - 54).slice(0, 3);
+  wrappedLines.forEach((line, index) => {
+    page.drawText(line, {
+      x: x + 54,
+      y: y - index * 13,
+      size: 11,
+      font: regularFont,
+      color: rgb(0.06, 0.09, 0.16),
+    });
+  });
+
+  return y - Math.max(wrappedLines.length, 1) * 13 - 10;
+}
+
+function wrapPdfText(value: string, font: PDFFont, size: number, maxWidth: number): string[] {
+  const normalized = value.replace(/\s+/g, " ").trim();
+  if (!normalized) {
+    return [];
+  }
+
+  const words = normalized.split(" ");
+  const lines: string[] = [];
+  let current = "";
+
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (font.widthOfTextAtSize(candidate, size) <= maxWidth) {
+      current = candidate;
+      continue;
+    }
+
+    if (current) {
+      lines.push(current);
+      current = "";
+    }
+
+    if (font.widthOfTextAtSize(word, size) <= maxWidth) {
+      current = word;
+      continue;
+    }
+
+    let segment = "";
+    for (const char of word) {
+      const charCandidate = `${segment}${char}`;
+      if (font.widthOfTextAtSize(charCandidate, size) <= maxWidth) {
+        segment = charCandidate;
+        continue;
+      }
+
+      if (segment) {
+        lines.push(segment);
+      }
+      segment = char;
+    }
+    current = segment;
+  }
+
+  if (current) {
+    lines.push(current);
+  }
+
+  return lines;
+}
+
+function buildPdfParagraphs(value: string): string[] {
+  const normalized = normalizeEmailDocumentText(value);
+  if (!normalized) {
+    return [];
+  }
+
+  return normalized
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.replace(/\s*\n\s*/g, " ").trim())
+    .filter((paragraph) => !!paragraph);
 }
 
 async function generateEmailPreviewImage(input: EmailPreviewImageInput): Promise<Buffer> {
@@ -1269,16 +1620,56 @@ function parseDate(value: string): string | null {
   return null;
 }
 
+function extractHtmlFromEmailFields(fields: Record<string, string>): string {
+  const directHtml = normalizeEmailHtml(fields.html || fields["stripped-html"] || "");
+  if (directHtml) {
+    return directHtml;
+  }
+
+  return extractHtmlFromRawEmail(fields.email || "");
+}
+
+function normalizeEmailHtml(value: string): string {
+  if (!value) {
+    return "";
+  }
+
+  const compact = value.replace(/\u0000/g, "").trim();
+  if (!compact) {
+    return "";
+  }
+
+  return compact.length > MAX_EMAIL_HTML_LENGTH ? compact.slice(0, MAX_EMAIL_HTML_LENGTH) : compact;
+}
+
+function htmlToReadableText(html: string): string {
+  if (!html) {
+    return "";
+  }
+
+  const normalized = html
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<(script|style|noscript|svg|canvas)[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<(br|hr)\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|section|article|header|footer|aside|blockquote|pre|tr|table|h[1-6])>/gi, "\n\n")
+    .replace(/<(p|div|section|article|header|footer|aside|blockquote|pre|table|h[1-6])[^>]*>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "\n• ")
+    .replace(/<\/li>/gi, "\n")
+    .replace(/<(td|th)[^>]*>/gi, " ")
+    .replace(/<\/(td|th)>/gi, "    ")
+    .replace(/<[^>]+>/g, " ");
+
+  return decodeHtmlEntities(normalized)
+    .replace(/\r/g, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function stripHtml(html: string): string {
-  if (!html) return "";
-  return decodeHtmlEntities(
-    html
-      .replace(/<style[\s\S]*?<\/style>/gi, " ")
-      .replace(/<script[\s\S]*?<\/script>/gi, " ")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/\s+/g, " ")
-      .trim()
-  );
+  return htmlToReadableText(html).replace(/\s+/g, " ").trim();
 }
 
 function normalizeEmailText(value: string): string {
@@ -1287,6 +1678,94 @@ function normalizeEmailText(value: string): string {
   }
   const compact = value.replace(/\u0000/g, "").replace(/\s+/g, " ").trim();
   return compact.length > MAX_EMAIL_TEXT_LENGTH ? compact.slice(0, MAX_EMAIL_TEXT_LENGTH) : compact;
+}
+
+function normalizeEmailDocumentText(value: string): string {
+  if (!value) {
+    return "";
+  }
+
+  const compact = value
+    .replace(/\u0000/g, "")
+    .replace(/\r/g, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  if (!compact) {
+    return "";
+  }
+
+  return compact.length > MAX_EMAIL_DOCUMENT_TEXT_LENGTH
+    ? `${compact.slice(0, MAX_EMAIL_DOCUMENT_TEXT_LENGTH)}\n\n[Email content truncated]`
+    : compact;
+}
+
+function buildStoredEmailHtmlDocument(input: {
+  subject: string;
+  sender: string;
+  recipient: string;
+  htmlBody: string;
+}): string {
+  const safeTitle = escapeHtmlAttribute(input.subject || "Forwarded Email Receipt");
+  const headerHtml = `
+    <section style="margin:0 0 24px; padding:20px 24px; border-radius:16px; border:1px solid #dbe3ee; background:#f8fafc; font-family:Arial,sans-serif;">
+      <div style="font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:12px;">ReceiptNest AI Email Capture</div>
+      <div style="font-size:13px; color:#334155; line-height:1.6;">
+        <div><strong>Subject:</strong> ${escapeHtmlContent(input.subject || "(no subject)")}</div>
+        <div><strong>From:</strong> ${escapeHtmlContent(input.sender || "(unknown sender)")}</div>
+        <div><strong>To:</strong> ${escapeHtmlContent(input.recipient || "(unknown recipient)")}</div>
+      </div>
+    </section>
+  `;
+  const sanitizedBody = sanitizeStoredEmailHtmlBody(input.htmlBody);
+
+  return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${safeTitle}</title>
+  </head>
+  <body style="margin:0; padding:24px; background:#eef2f7; color:#0f172a;">
+    <main style="max-width:860px; margin:0 auto; background:#ffffff; border-radius:20px; padding:24px; box-shadow:0 16px 40px rgba(15, 23, 42, 0.08);">
+      ${headerHtml}
+      ${sanitizedBody}
+    </main>
+  </body>
+</html>`;
+}
+
+function sanitizeStoredEmailHtmlBody(value: string): string {
+  const normalized = normalizeEmailHtml(value);
+  if (!normalized) {
+    return `<p style="font-family:Arial,sans-serif; color:#475569;">No HTML body was available for this email.</p>`;
+  }
+
+  const bodyMatch = normalized.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  const bodyHtml = bodyMatch?.[1] || normalized;
+
+  return bodyHtml
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<(script|iframe|object|embed|form|input|button|textarea|select|video|audio|source|link|meta|base)[\s\S]*?<\/\1>/gi, "")
+    .replace(/<(script|iframe|object|embed|form|input|button|textarea|select|video|audio|source|link|meta|base)[^>]*\/?>/gi, "")
+    .replace(/<img\b[^>]*>/gi, "")
+    .trim();
+}
+
+function escapeHtmlContent(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function escapeHtmlAttribute(value: string): string {
+  return escapeHtmlContent(value);
 }
 
 function inferMerchantFromSender(senderField: string): string | null {
@@ -1540,6 +2019,57 @@ function extractReadableTextFromRawEmail(rawEmail: string): string {
     .replace(/\s+/g, " ")
     .trim();
   return fallback;
+}
+
+function extractHtmlFromRawEmail(rawEmail: string): string {
+  if (!rawEmail) {
+    return "";
+  }
+
+  const normalized = rawEmail.replace(/\r\n/g, "\n");
+  const lower = normalized.toLowerCase();
+  const chunks: string[] = [];
+  let cursor = 0;
+  const needle = "content-type: text/html";
+
+  while (cursor < normalized.length) {
+    const contentTypeIndex = lower.indexOf(needle, cursor);
+    if (contentTypeIndex < 0) {
+      break;
+    }
+
+    const headerStart = Math.max(
+      normalized.lastIndexOf("\n--", contentTypeIndex),
+      normalized.lastIndexOf("\ncontent-type:", contentTypeIndex)
+    );
+    const headerBlockStart = headerStart >= 0 ? headerStart + 1 : contentTypeIndex;
+    const headerEnd = normalized.indexOf("\n\n", contentTypeIndex);
+    if (headerEnd < 0) {
+      break;
+    }
+
+    const headerBlock = normalized.slice(headerBlockStart, headerEnd);
+    const headerBlockLower = headerBlock.toLowerCase();
+    if (headerBlockLower.includes("content-disposition: attachment")) {
+      cursor = headerEnd + 2;
+      continue;
+    }
+
+    const bodyStart = headerEnd + 2;
+    const nextBoundary = normalized.indexOf("\n--", bodyStart);
+    const bodyEnd = nextBoundary >= 0 ? nextBoundary : normalized.length;
+    const encodedBody = normalized.slice(bodyStart, bodyEnd).trim();
+    cursor = bodyEnd;
+
+    const transferEncoding = (extractPrimaryHeaderValue(headerBlock, "content-transfer-encoding") || "7bit").toLowerCase();
+    const decodedHtml = decodeMimeBodyToText(encodedBody, transferEncoding);
+    const compact = normalizeEmailHtml(decodedHtml);
+    if (compact) {
+      chunks.push(compact);
+    }
+  }
+
+  return chunks.join("\n");
 }
 
 function extractHeaderValue(headerBlock: string, headerName: string, paramName: string): string | null {

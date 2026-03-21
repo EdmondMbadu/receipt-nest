@@ -10,7 +10,7 @@ This project now supports receipt ingestion from forwarded emails without creati
 - A single public webhook (`inboundEmailWebhook`) receives all inbound mail from your email provider.
 - The webhook maps recipient alias token -> user account, then:
   - saves supported attachments (PDF/images) to Storage and creates normal receipt docs (`status: uploaded`)
-  - or, if no attachment exists, extracts from email text and creates a generated PNG preview card for gallery thumbnails (`skipProcessing: true`)
+  - or, if no attachment exists, extracts from the email body/HTML and creates a generated PDF email document for previewing (`skipProcessing: true`)
 - Existing `processReceipt` pipeline handles attachment-based receipts exactly as before.
 
 ## Why this is low-cost
@@ -53,4 +53,7 @@ Set these Firebase function secrets:
 - In Firestore receipt docs, inspect `email.ingestMode`:
   - `attachment` means file ingestion path was used.
   - `text_fallback` means no valid attachment was accepted.
-    - In this mode, `file.mimeType` is usually `image/png` (generated preview card), and `email.textStoragePath` stores raw extracted email text.
+    - In this mode, `file.mimeType` is usually `application/pdf` (generated email document).
+    - `email.textStoragePath` stores the normalized body text used for extraction.
+    - `email.htmlStoragePath` is populated when HTML content was available from the inbound email.
+    - `email.pdfStoragePath` is populated when the generated PDF succeeded.
