@@ -24,7 +24,12 @@ export { processReceipt, generateReceiptNote, backfillReceiptCategories } from "
 export { createCheckoutSession, createPortalSession, stripeWebhook } from "./billing";
 export { generateAiInsights } from "./ai-insights";
 export { sendTestEmail } from "./admin";
-export { sendSpendSummaryEmail } from "./spend-summary-email";
+export {
+  sendSpendSummaryEmail,
+  getSpendSummaryEmailSchedule,
+  updateSpendSummaryEmailSchedule,
+  dispatchScheduledSpendSummaryEmails,
+} from "./spend-summary-email";
 export { sendVerificationEmail, sendWelcomeEmail } from "./email";
 export { generateReceiptForwardingAddress, inboundEmailWebhook } from "./email-ingest";
 export { telegramWebhook, generateTelegramLinkToken, setupTelegramWebhook, onTelegramReceiptProcessed } from "./telegram";

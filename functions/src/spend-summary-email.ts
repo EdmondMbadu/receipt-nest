@@ -1,4 +1,5 @@
 import { HttpsError, onCall } from "firebase-functions/v2/https";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
@@ -9,8 +10,11 @@ const appBaseUrl = defineSecret("APP_BASE_URL");
 const fromEmail = "info@receipt-nest.com";
 const FALLBACK_TIME_ZONE = "America/Los_Angeles";
 const FALLBACK_CURRENCY = "USD";
+const SCHEDULE_CONFIG_PATH = "systemConfig/spendSummaryEmailSchedule";
+const WEEKDAY_VALUES = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] as const;
 
 type SummaryPeriodType = "week" | "month";
+type WeekdayValue = (typeof WEEKDAY_VALUES)[number];
 
 type NormalizedReceipt = {
   amount: number;
@@ -75,6 +79,42 @@ type SummaryLinks = {
   termsUrl?: string;
 };
 
+type WeeklyScheduleConfig = {
+  enabled: boolean;
+  dayOfWeek: WeekdayValue;
+  time: string;
+};
+
+type MonthlyScheduleConfig = {
+  enabled: boolean;
+  dayOfMonth: number;
+  time: string;
+};
+
+type SpendSummaryScheduleConfig = {
+  timeZone: string;
+  weekly: WeeklyScheduleConfig;
+  monthly: MonthlyScheduleConfig;
+  lastWeeklyPeriodSent?: string | null;
+  lastWeeklySentAt?: admin.firestore.Timestamp | null;
+  lastMonthlyPeriodSent?: string | null;
+  lastMonthlySentAt?: admin.firestore.Timestamp | null;
+  updatedAt?: admin.firestore.Timestamp | admin.firestore.FieldValue | null;
+  updatedBy?: string | null;
+};
+
+type SpendSummaryScheduleResponse = {
+  timeZone: string;
+  weekly: WeeklyScheduleConfig & {
+    lastPeriodSent: string | null;
+    lastSentAt: string | null;
+  };
+  monthly: MonthlyScheduleConfig & {
+    lastPeriodSent: string | null;
+    lastSentAt: string | null;
+  };
+};
+
 const assertAdmin = async (uid: string, token: Record<string, unknown>) => {
   if (token?.admin === true || token?.role === "admin") {
     return;
@@ -88,6 +128,101 @@ const assertAdmin = async (uid: string, token: Record<string, unknown>) => {
 
   throw new HttpsError("permission-denied", "Admin access required.");
 };
+
+const getScheduleConfigRef = () => admin.firestore().doc(SCHEDULE_CONFIG_PATH);
+
+const getDefaultScheduleConfig = (): SpendSummaryScheduleConfig => ({
+  timeZone: FALLBACK_TIME_ZONE,
+  weekly: {
+    enabled: false,
+    dayOfWeek: "monday",
+    time: "08:00",
+  },
+  monthly: {
+    enabled: false,
+    dayOfMonth: 1,
+    time: "08:00",
+  },
+  lastWeeklyPeriodSent: null,
+  lastWeeklySentAt: null,
+  lastMonthlyPeriodSent: null,
+  lastMonthlySentAt: null,
+});
+
+const normalizeTimeValue = (value: unknown, fallback: string) => {
+  if (typeof value !== "string") {
+    return fallback;
+  }
+
+  const trimmed = value.trim();
+  return /^([01]\d|2[0-3]):([0-5]\d)$/.test(trimmed) ? trimmed : fallback;
+};
+
+const normalizeDayOfWeek = (value: unknown, fallback: WeekdayValue): WeekdayValue => {
+  if (typeof value !== "string") {
+    return fallback;
+  }
+
+  const normalized = value.trim().toLowerCase() as WeekdayValue;
+  return (WEEKDAY_VALUES as readonly string[]).includes(normalized) ? normalized : fallback;
+};
+
+const normalizeDayOfMonth = (value: unknown, fallback: number) => {
+  const numeric = typeof value === "number" ? value : Number(value);
+  if (!Number.isInteger(numeric)) {
+    return fallback;
+  }
+
+  return Math.min(31, Math.max(1, numeric));
+};
+
+const normalizeTimeZone = (value: unknown, fallback: string) => {
+  if (typeof value !== "string" || !value.trim()) {
+    return fallback;
+  }
+
+  return value.trim();
+};
+
+const normalizeScheduleConfig = (data?: admin.firestore.DocumentData | null): SpendSummaryScheduleConfig => {
+  const defaults = getDefaultScheduleConfig();
+  const weeklyData = (data?.weekly ?? {}) as Record<string, unknown>;
+  const monthlyData = (data?.monthly ?? {}) as Record<string, unknown>;
+
+  return {
+    timeZone: normalizeTimeZone(data?.timeZone, defaults.timeZone),
+    weekly: {
+      enabled: Boolean(weeklyData.enabled ?? defaults.weekly.enabled),
+      dayOfWeek: normalizeDayOfWeek(weeklyData.dayOfWeek, defaults.weekly.dayOfWeek),
+      time: normalizeTimeValue(weeklyData.time, defaults.weekly.time),
+    },
+    monthly: {
+      enabled: Boolean(monthlyData.enabled ?? defaults.monthly.enabled),
+      dayOfMonth: normalizeDayOfMonth(monthlyData.dayOfMonth, defaults.monthly.dayOfMonth),
+      time: normalizeTimeValue(monthlyData.time, defaults.monthly.time),
+    },
+    lastWeeklyPeriodSent: typeof data?.lastWeeklyPeriodSent === "string" ? data.lastWeeklyPeriodSent : null,
+    lastWeeklySentAt: data?.lastWeeklySentAt instanceof admin.firestore.Timestamp ? data.lastWeeklySentAt : null,
+    lastMonthlyPeriodSent: typeof data?.lastMonthlyPeriodSent === "string" ? data.lastMonthlyPeriodSent : null,
+    lastMonthlySentAt: data?.lastMonthlySentAt instanceof admin.firestore.Timestamp ? data.lastMonthlySentAt : null,
+    updatedAt: data?.updatedAt instanceof admin.firestore.Timestamp ? data.updatedAt : null,
+    updatedBy: typeof data?.updatedBy === "string" ? data.updatedBy : null,
+  };
+};
+
+const toScheduleResponse = (config: SpendSummaryScheduleConfig): SpendSummaryScheduleResponse => ({
+  timeZone: config.timeZone,
+  weekly: {
+    ...config.weekly,
+    lastPeriodSent: config.lastWeeklyPeriodSent ?? null,
+    lastSentAt: config.lastWeeklySentAt?.toDate().toISOString() ?? null,
+  },
+  monthly: {
+    ...config.monthly,
+    lastPeriodSent: config.lastMonthlyPeriodSent ?? null,
+    lastSentAt: config.lastMonthlySentAt?.toDate().toISOString() ?? null,
+  },
+});
 
 const escapeHtml = (value: string) =>
   value
@@ -132,6 +267,35 @@ const getFormatterParts = (date: Date, timeZone: string) => {
     year: getPart("year"),
     month: getPart("month"),
     day: getPart("day"),
+  };
+};
+
+const getDateTimeParts = (date: Date, timeZone: string) => {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    weekday: "long",
+  }).formatToParts(date);
+
+  const getNumberPart = (type: "year" | "month" | "day" | "hour" | "minute") =>
+    Number(parts.find((part) => part.type === type)?.value ?? "0");
+
+  const weekday = String(parts.find((part) => part.type === "weekday")?.value ?? "")
+    .trim()
+    .toLowerCase() as WeekdayValue;
+
+  return {
+    year: getNumberPart("year"),
+    month: getNumberPart("month"),
+    day: getNumberPart("day"),
+    hour: getNumberPart("hour"),
+    minute: getNumberPart("minute"),
+    weekday: (WEEKDAY_VALUES as readonly string[]).includes(weekday) ? weekday : "monday",
   };
 };
 
@@ -246,6 +410,30 @@ function getIsoWeekValue(date: Date) {
   const weekNumber = Math.ceil((((utcDate.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
   return `${utcDate.getUTCFullYear()}-W${String(weekNumber).padStart(2, "0")}`;
 }
+
+const getPreviousCompletedWeekValue = (date: Date, timeZone: string) => {
+  const todayKey = toDateKey(date, timeZone);
+  const previousWeekDate = addDays(dateFromKey(todayKey), -7);
+  return getIsoWeekValue(previousWeekDate);
+};
+
+const getPreviousCompletedMonthValue = (date: Date, timeZone: string) => {
+  const parts = getFormatterParts(date, timeZone);
+  let year = parts.year;
+  let month = parts.month - 1;
+
+  if (month < 1) {
+    year -= 1;
+    month = 12;
+  }
+
+  return `${year}-${String(month).padStart(2, "0")}`;
+};
+
+const getEffectiveDayOfMonth = (year: number, month: number, dayOfMonth: number) => {
+  const daysInMonth = new Date(Date.UTC(year, month, 0, 12)).getUTCDate();
+  return Math.min(dayOfMonth, daysInMonth);
+};
 
 const parseAmount = (value: unknown): number | null => {
   if (value === null || value === undefined) {
@@ -1188,6 +1376,22 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
 </html>`;
 };
 
+const buildSummarySubject = (summary: SpendSummaryData) =>
+  `${summary.period.type === "week" ? "Weekly" : "Monthly"} spend summary • ${summary.period.label}`;
+
+const getSummaryLinks = (): SummaryLinks => {
+  const normalizedBaseUrl = appBaseUrl.value()?.trim().replace(/\/+$/, "");
+  if (!normalizedBaseUrl) {
+    return {};
+  }
+
+  return {
+    dashboardUrl: `${normalizedBaseUrl}/app`,
+    supportUrl: `${normalizedBaseUrl}/support`,
+    termsUrl: `${normalizedBaseUrl}/terms`,
+  };
+};
+
 const buildEmailText = (data: SpendSummaryData) => {
   const lines = [
     `${data.period.heroEyebrow} (${data.period.label})`,
@@ -1225,6 +1429,222 @@ const buildEmailText = (data: SpendSummaryData) => {
 
   return lines.join("\n");
 };
+
+const sendSummaryEmailMessage = async (to: string, summary: SpendSummaryData, links: SummaryLinks) => {
+  sgMail.setApiKey(sendgridApiKey.value());
+
+  await sgMail.send({
+    to,
+    from: { email: fromEmail, name: "ReceiptNest AI" },
+    replyTo: { email: fromEmail, name: "ReceiptNest AI" },
+    subject: buildSummarySubject(summary),
+    text: buildEmailText(summary),
+    html: buildEmailHtml(summary, links),
+  });
+};
+
+const loadUserSpendSummary = async (
+  userId: string,
+  userData: admin.firestore.DocumentData,
+  period: SummaryPeriod,
+  timeZone: string,
+) => {
+  const receiptsSnap = await admin.firestore().collection(`users/${userId}/receipts`).get();
+  const normalizedReceipts = receiptsSnap.docs
+    .map((doc) => normalizeReceipt(doc.data(), timeZone, FALLBACK_CURRENCY))
+    .filter((receipt): receipt is NormalizedReceipt => receipt !== null);
+
+  return buildSummaryData(period, userData, normalizedReceipts, timeZone);
+};
+
+const getScheduleSummaryPeriodKey = (period: SummaryPeriod) =>
+  period.type === "week" ? getIsoWeekValue(dateFromKey(period.startKey)) : period.startKey.slice(0, 7);
+
+const isWeeklyScheduleDue = (config: SpendSummaryScheduleConfig, date: Date) => {
+  if (!config.weekly.enabled) {
+    return false;
+  }
+
+  const parts = getDateTimeParts(date, config.timeZone);
+  const currentTime = `${String(parts.hour).padStart(2, "0")}:${String(parts.minute).padStart(2, "0")}`;
+  return parts.weekday === config.weekly.dayOfWeek && currentTime === config.weekly.time;
+};
+
+const isMonthlyScheduleDue = (config: SpendSummaryScheduleConfig, date: Date) => {
+  if (!config.monthly.enabled) {
+    return false;
+  }
+
+  const parts = getDateTimeParts(date, config.timeZone);
+  const currentTime = `${String(parts.hour).padStart(2, "0")}:${String(parts.minute).padStart(2, "0")}`;
+  const effectiveDay = getEffectiveDayOfMonth(parts.year, parts.month, config.monthly.dayOfMonth);
+  return parts.day === effectiveDay && currentTime === config.monthly.time;
+};
+
+const dispatchSummaryPeriodToAllUsers = async (
+  period: SummaryPeriod,
+  timeZone: string,
+) => {
+  const links = getSummaryLinks();
+  const usersSnap = await admin.firestore().collection("users").get();
+
+  let eligibleUsers = 0;
+  let sentCount = 0;
+  let failedCount = 0;
+
+  for (const userDoc of usersSnap.docs) {
+    const userData = userDoc.data();
+    const email = String(userData.email ?? "").trim();
+    if (!email) {
+      continue;
+    }
+
+    eligibleUsers += 1;
+
+    try {
+      const summary = await loadUserSpendSummary(userDoc.id, userData, period, timeZone);
+      await sendSummaryEmailMessage(email, summary, links);
+      sentCount += 1;
+    } catch (error) {
+      failedCount += 1;
+      logger.error("Failed to send automated spend summary email", {
+        userId: userDoc.id,
+        email,
+        periodType: period.type,
+        periodKey: getScheduleSummaryPeriodKey(period),
+        error,
+      });
+    }
+  }
+
+  return {
+    eligibleUsers,
+    sentCount,
+    failedCount,
+  };
+};
+
+export const getSpendSummaryEmailSchedule = onCall(
+  { region: "us-central1" },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "User must be authenticated.");
+    }
+
+    await assertAdmin(request.auth.uid, request.auth.token as Record<string, unknown>);
+
+    const scheduleSnap = await getScheduleConfigRef().get();
+    const config = normalizeScheduleConfig(scheduleSnap.data());
+    return toScheduleResponse(config);
+  },
+);
+
+export const updateSpendSummaryEmailSchedule = onCall(
+  { region: "us-central1" },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "User must be authenticated.");
+    }
+
+    await assertAdmin(request.auth.uid, request.auth.token as Record<string, unknown>);
+
+    const currentSnap = await getScheduleConfigRef().get();
+    const currentConfig = normalizeScheduleConfig(currentSnap.data());
+    const incomingWeekly = (request.data?.weekly ?? {}) as Record<string, unknown>;
+    const incomingMonthly = (request.data?.monthly ?? {}) as Record<string, unknown>;
+
+    const nextConfig: SpendSummaryScheduleConfig = {
+      ...currentConfig,
+      timeZone: normalizeTimeZone(request.data?.timeZone, currentConfig.timeZone),
+      weekly: {
+        enabled: Boolean(incomingWeekly.enabled ?? currentConfig.weekly.enabled),
+        dayOfWeek: normalizeDayOfWeek(incomingWeekly.dayOfWeek, currentConfig.weekly.dayOfWeek),
+        time: normalizeTimeValue(incomingWeekly.time, currentConfig.weekly.time),
+      },
+      monthly: {
+        enabled: Boolean(incomingMonthly.enabled ?? currentConfig.monthly.enabled),
+        dayOfMonth: normalizeDayOfMonth(incomingMonthly.dayOfMonth, currentConfig.monthly.dayOfMonth),
+        time: normalizeTimeValue(incomingMonthly.time, currentConfig.monthly.time),
+      },
+    };
+
+    await getScheduleConfigRef().set(
+      {
+        timeZone: nextConfig.timeZone,
+        weekly: nextConfig.weekly,
+        monthly: nextConfig.monthly,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedBy: request.auth.uid,
+      },
+      { merge: true },
+    );
+
+    const savedSnap = await getScheduleConfigRef().get();
+    return toScheduleResponse(normalizeScheduleConfig(savedSnap.data()));
+  },
+);
+
+export const dispatchScheduledSpendSummaryEmails = onSchedule(
+  {
+    region: "us-central1",
+    schedule: "every 1 minutes",
+    secrets: [sendgridApiKey, appBaseUrl],
+  },
+  async (event) => {
+    if (!sendgridApiKey.value()) {
+      logger.error("Spend summary automation skipped because SendGrid is not configured.");
+      return;
+    }
+
+    const scheduleSnap = await getScheduleConfigRef().get();
+    const config = normalizeScheduleConfig(scheduleSnap.data());
+    const now = event.scheduleTime ? new Date(event.scheduleTime) : new Date();
+
+    if (!isWeeklyScheduleDue(config, now) && !isMonthlyScheduleDue(config, now)) {
+      return;
+    }
+
+    if (isWeeklyScheduleDue(config, now)) {
+      const weekValue = getPreviousCompletedWeekValue(now, config.timeZone);
+      const period = getWeekPeriod(weekValue, config.timeZone);
+      const periodKey = getScheduleSummaryPeriodKey(period);
+
+      if (config.lastWeeklyPeriodSent !== periodKey) {
+        const result = await dispatchSummaryPeriodToAllUsers(period, config.timeZone);
+        await getScheduleConfigRef().set(
+          {
+            lastWeeklyPeriodSent: periodKey,
+            lastWeeklySentAt: admin.firestore.FieldValue.serverTimestamp(),
+            lastWeeklySentCount: result.sentCount,
+            lastWeeklyFailedCount: result.failedCount,
+          },
+          { merge: true },
+        );
+        logger.info("Weekly spend summaries dispatched", { periodKey, ...result });
+      }
+    }
+
+    if (isMonthlyScheduleDue(config, now)) {
+      const monthValue = getPreviousCompletedMonthValue(now, config.timeZone);
+      const period = getMonthPeriod(monthValue, config.timeZone);
+      const periodKey = getScheduleSummaryPeriodKey(period);
+
+      if (config.lastMonthlyPeriodSent !== periodKey) {
+        const result = await dispatchSummaryPeriodToAllUsers(period, config.timeZone);
+        await getScheduleConfigRef().set(
+          {
+            lastMonthlyPeriodSent: periodKey,
+            lastMonthlySentAt: admin.firestore.FieldValue.serverTimestamp(),
+            lastMonthlySentCount: result.sentCount,
+            lastMonthlyFailedCount: result.failedCount,
+          },
+          { merge: true },
+        );
+        logger.info("Monthly spend summaries dispatched", { periodKey, ...result });
+      }
+    }
+  },
+);
 
 export const sendSpendSummaryEmail = onCall(
   { region: "us-central1", secrets: [sendgridApiKey, appBaseUrl] },
@@ -1266,35 +1686,12 @@ export const sendSpendSummaryEmail = onCall(
       throw new HttpsError("not-found", "Source user was not found.");
     }
 
-    const receiptsSnap = await db.collection(`users/${userId}/receipts`).get();
-    const normalizedReceipts = receiptsSnap.docs
-      .map((doc) => normalizeReceipt(doc.data(), timeZone, FALLBACK_CURRENCY))
-      .filter((receipt): receipt is NormalizedReceipt => receipt !== null);
-
-    const summary = buildSummaryData(period, userSnap.data() ?? {}, normalizedReceipts, timeZone);
-    const normalizedBaseUrl = appBaseUrl.value()?.trim().replace(/\/+$/, "");
-    const links: SummaryLinks = normalizedBaseUrl
-      ? {
-          dashboardUrl: `${normalizedBaseUrl}/app`,
-          supportUrl: `${normalizedBaseUrl}/support`,
-          termsUrl: `${normalizedBaseUrl}/terms`,
-        }
-      : {};
-    const subject = `${summary.period.type === "week" ? "Weekly" : "Monthly"} spend summary • ${summary.period.label}`;
-    const text = buildEmailText(summary);
-    const html = buildEmailHtml(summary, links);
-
-    sgMail.setApiKey(sendgridApiKey.value());
+    const summary = await loadUserSpendSummary(userId, userSnap.data() ?? {}, period, timeZone);
+    const links = getSummaryLinks();
+    const subject = buildSummarySubject(summary);
 
     try {
-      await sgMail.send({
-        to,
-        from: { email: fromEmail, name: "ReceiptNest AI" },
-        replyTo: { email: fromEmail, name: "ReceiptNest AI" },
-        subject,
-        text,
-        html,
-      });
+      await sendSummaryEmailMessage(to, summary, links);
     } catch (error) {
       logger.error("Failed to send spend summary email", error);
       throw new HttpsError("internal", "Failed to send summary email.");

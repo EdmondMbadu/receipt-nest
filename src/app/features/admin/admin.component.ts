@@ -20,6 +20,25 @@ import { AuthService } from '../../services/auth.service';
 
 type AdminUser = UserProfile;
 type SummaryEmailPeriod = 'week' | 'month';
+type WeeklyScheduleDay = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
+
+interface SpendSummaryScheduleResponse {
+  timeZone: string;
+  weekly: {
+    enabled: boolean;
+    dayOfWeek: WeeklyScheduleDay;
+    time: string;
+    lastPeriodSent: string | null;
+    lastSentAt: string | null;
+  };
+  monthly: {
+    enabled: boolean;
+    dayOfMonth: number;
+    time: string;
+    lastPeriodSent: string | null;
+    lastSentAt: string | null;
+  };
+}
 
 @Component({
   selector: 'app-admin',
@@ -51,6 +70,21 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly monthlySummarySending = signal(false);
   readonly summaryEmailError = signal<string | null>(null);
   readonly summaryEmailSuccess = signal<string | null>(null);
+  readonly scheduleLoading = signal(true);
+  readonly scheduleSaving = signal<'week' | 'month' | null>(null);
+  readonly scheduleError = signal<string | null>(null);
+  readonly scheduleSuccess = signal<string | null>(null);
+  readonly scheduleTimeZone = signal(this.getBrowserTimeZone());
+  readonly weeklyAutomationEnabled = signal(false);
+  readonly weeklyAutomationDay = signal<WeeklyScheduleDay>('monday');
+  readonly weeklyAutomationTime = signal('08:00');
+  readonly weeklyAutomationLastPeriod = signal<string | null>(null);
+  readonly weeklyAutomationLastSentAt = signal<string | null>(null);
+  readonly monthlyAutomationEnabled = signal(false);
+  readonly monthlyAutomationDay = signal(1);
+  readonly monthlyAutomationTime = signal('08:00');
+  readonly monthlyAutomationLastPeriod = signal<string | null>(null);
+  readonly monthlyAutomationLastSentAt = signal<string | null>(null);
 
   readonly totalUsers = computed(() => this.users().length);
   readonly adminCount = computed(() => this.users().filter((user) => user.role === 'admin').length);
@@ -63,6 +97,22 @@ export class AdminComponent implements OnInit, OnDestroy {
   );
   readonly weeklySummaryLabel = computed(() => this.getWeekRangeLabel(this.selectedSummaryWeek()));
   readonly monthlySummaryLabel = computed(() => this.getMonthLabel(this.selectedSummaryMonth()));
+  readonly weeklyAutomationDescription = computed(() =>
+    `${this.getWeekdayLabel(this.weeklyAutomationDay())} at ${this.formatTimeLabel(this.weeklyAutomationTime())}`
+  );
+  readonly monthlyAutomationDescription = computed(() =>
+    `Day ${this.monthlyAutomationDay()} at ${this.formatTimeLabel(this.monthlyAutomationTime())}`
+  );
+  readonly weekdayOptions: Array<{ value: WeeklyScheduleDay; label: string }> = [
+    { value: 'sunday', label: 'Sunday' },
+    { value: 'monday', label: 'Monday' },
+    { value: 'tuesday', label: 'Tuesday' },
+    { value: 'wednesday', label: 'Wednesday' },
+    { value: 'thursday', label: 'Thursday' },
+    { value: 'friday', label: 'Friday' },
+    { value: 'saturday', label: 'Saturday' }
+  ];
+  readonly monthDayOptions = Array.from({ length: 31 }, (_, index) => index + 1);
 
   constructor() {
     effect(() => {
@@ -86,6 +136,8 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    void this.loadSpendSummarySchedule();
+
     const usersRef = collection(this.db, 'users');
     const usersQuery = query(usersRef, orderBy('createdAt', 'desc'));
 
@@ -114,6 +166,46 @@ export class AdminComponent implements OnInit, OnDestroy {
   displayName(user: AdminUser): string {
     const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
     return fullName || user.email;
+  }
+
+  async saveSpendSummarySchedule(period: 'week' | 'month'): Promise<void> {
+    this.scheduleError.set(null);
+    this.scheduleSuccess.set(null);
+    this.scheduleSaving.set(period);
+
+    try {
+      const callable = httpsCallable<{
+        timeZone: string;
+        weekly: { enabled: boolean; dayOfWeek: WeeklyScheduleDay; time: string };
+        monthly: { enabled: boolean; dayOfMonth: number; time: string };
+      }, SpendSummaryScheduleResponse>(this.functions, 'updateSpendSummaryEmailSchedule');
+
+      const response = await callable({
+        timeZone: this.scheduleTimeZone(),
+        weekly: {
+          enabled: this.weeklyAutomationEnabled(),
+          dayOfWeek: this.weeklyAutomationDay(),
+          time: this.weeklyAutomationTime()
+        },
+        monthly: {
+          enabled: this.monthlyAutomationEnabled(),
+          dayOfMonth: this.monthlyAutomationDay(),
+          time: this.monthlyAutomationTime()
+        }
+      });
+
+      this.applyScheduleResponse(response.data);
+      this.scheduleSuccess.set(
+        period === 'week'
+          ? 'Weekly automation schedule saved.'
+          : 'Monthly automation schedule saved.'
+      );
+    } catch (error) {
+      console.error(`Failed to save ${period} summary automation schedule`, error);
+      this.scheduleError.set('Unable to save the automation schedule right now.');
+    } finally {
+      this.scheduleSaving.set(null);
+    }
   }
 
   async sendSpendSummaryEmail(period: SummaryEmailPeriod): Promise<void> {
@@ -215,6 +307,36 @@ export class AdminComponent implements OnInit, OnDestroy {
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
   }
 
+  private async loadSpendSummarySchedule(): Promise<void> {
+    this.scheduleLoading.set(true);
+    this.scheduleError.set(null);
+
+    try {
+      const callable = httpsCallable<void, SpendSummaryScheduleResponse>(this.functions, 'getSpendSummaryEmailSchedule');
+      const response = await callable();
+      this.applyScheduleResponse(response.data);
+    } catch (error) {
+      console.error('Failed to load spend summary automation schedule', error);
+      this.scheduleError.set('Unable to load the automation schedule right now.');
+    } finally {
+      this.scheduleLoading.set(false);
+    }
+  }
+
+  private applyScheduleResponse(schedule: SpendSummaryScheduleResponse): void {
+    this.scheduleTimeZone.set(schedule.timeZone || this.getBrowserTimeZone());
+    this.weeklyAutomationEnabled.set(schedule.weekly.enabled);
+    this.weeklyAutomationDay.set(schedule.weekly.dayOfWeek);
+    this.weeklyAutomationTime.set(schedule.weekly.time);
+    this.weeklyAutomationLastPeriod.set(schedule.weekly.lastPeriodSent);
+    this.weeklyAutomationLastSentAt.set(schedule.weekly.lastSentAt);
+    this.monthlyAutomationEnabled.set(schedule.monthly.enabled);
+    this.monthlyAutomationDay.set(schedule.monthly.dayOfMonth);
+    this.monthlyAutomationTime.set(schedule.monthly.time);
+    this.monthlyAutomationLastPeriod.set(schedule.monthly.lastPeriodSent);
+    this.monthlyAutomationLastSentAt.set(schedule.monthly.lastSentAt);
+  }
+
   private getCurrentWeekValue(): string {
     return this.formatIsoWeek(new Date());
   }
@@ -278,5 +400,42 @@ export class AdminComponent implements OnInit, OnDestroy {
     } catch {
       return 'America/Los_Angeles';
     }
+  }
+
+  private getWeekdayLabel(day: WeeklyScheduleDay): string {
+    return this.weekdayOptions.find((option) => option.value === day)?.label ?? day;
+  }
+
+  private formatTimeLabel(value: string): string {
+    if (!/^\d{2}:\d{2}$/.test(value)) {
+      return value;
+    }
+
+    const [hours, minutes] = value.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  }
+
+  formatScheduleTimestamp(value: string | null): string {
+    if (!value) {
+      return 'Not sent yet';
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return 'Not sent yet';
+    }
+
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
   }
 }
