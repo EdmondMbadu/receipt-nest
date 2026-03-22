@@ -20,8 +20,10 @@ import {
   doc,
   getDoc,
   getFirestore,
+  onSnapshot,
   serverTimestamp,
   setDoc,
+  Unsubscribe,
   updateDoc
 } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
@@ -43,6 +45,7 @@ export class AuthService {
   private readonly initPromise: Promise<void>;
   private authStateReady: Promise<void> = Promise.resolve();
   private resolveAuthStateReady: (() => void) | null = null;
+  private userProfileUnsubscribe: Unsubscribe | null = null;
   private readonly defaultNotificationSettings: NotificationSettings = {
     receiptProcessing: true,
     productUpdates: false,
@@ -75,17 +78,20 @@ export class AuthService {
       onAuthStateChanged(auth, async (firebaseUser) => {
         try {
           if (!firebaseUser) {
+            this.clearUserProfileSubscription();
             this.user.set(null);
             return;
           }
 
           if (!firebaseUser.emailVerified) {
+            this.clearUserProfileSubscription();
             this.user.set(null);
             return;
           }
 
           const userProfile = await this.loadOrCreateUserProfile(firebaseUser.uid, firebaseUser.email ?? '');
           this.user.set(userProfile);
+          this.subscribeToUserProfile(firebaseUser.uid);
           if (firebaseUser.emailVerified) {
             await this.sendWelcomeEmailIfNeeded();
           }
@@ -227,6 +233,7 @@ export class AuthService {
 
   async logout() {
     const auth = this.requireAuth();
+    this.clearUserProfileSubscription();
     await signOut(auth);
     this.user.set(null);
   }
@@ -355,6 +362,35 @@ export class AuthService {
 
   async waitForAuthState(): Promise<void> {
     return this.authStateReady;
+  }
+
+  private subscribeToUserProfile(uid: string): void {
+    const db = this.requireDb();
+    this.clearUserProfileSubscription();
+
+    this.userProfileUnsubscribe = onSnapshot(
+      doc(db, 'users', uid),
+      (snapshot) => {
+        if (!snapshot.exists()) {
+          return;
+        }
+
+        const data = snapshot.data() as UserProfile;
+        this.user.set({
+          ...data,
+          id: uid,
+          notificationSettings: this.getDefaultNotificationSettings(data)
+        });
+      },
+      (error) => {
+        console.error('Failed to sync user profile', error);
+      }
+    );
+  }
+
+  private clearUserProfileSubscription(): void {
+    this.userProfileUnsubscribe?.();
+    this.userProfileUnsubscribe = null;
   }
 
   private async sendWelcomeEmailIfNeeded(): Promise<void> {
