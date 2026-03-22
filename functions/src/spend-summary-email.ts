@@ -12,6 +12,8 @@ const MAIN_SITE_URL = "https://receipt-nest.com";
 const FALLBACK_TIME_ZONE = "America/Los_Angeles";
 const FALLBACK_CURRENCY = "USD";
 const SCHEDULE_CONFIG_PATH = "systemConfig/spendSummaryEmailSchedule";
+const SUMMARY_NOTIFICATION_START_HOUR = 8;
+const SUMMARY_NOTIFICATION_END_HOUR = 10;
 const WEEKDAY_VALUES = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] as const;
 
 type SummaryPeriodType = "week" | "month";
@@ -116,6 +118,12 @@ type SpendSummaryScheduleResponse = {
     lastPeriodSent: string | null;
     lastSentAt: string | null;
   };
+};
+
+type NotificationSendResult = {
+  sentCount: number;
+  failedCount: number;
+  invalidTokens: string[];
 };
 
 const assertAdmin = async (uid: string, token: Record<string, unknown>) => {
@@ -1513,6 +1521,34 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
 const buildSummarySubject = (summary: SpendSummaryData) =>
   `${summary.period.type === "week" ? "Weekly" : "Monthly"} spend summary • ${summary.period.label}`;
 
+const buildSummaryNotificationTitle = (summary: SpendSummaryData) => {
+  if (summary.mixedCurrencies) {
+    return summary.period.type === "week"
+      ? "Your weekly spend summary is ready"
+      : "Your monthly spend summary is ready";
+  }
+
+  const amount = formatCurrency(summary.metrics.totalSpend, summary.currency);
+  return summary.period.type === "week"
+    ? `You spent ${amount} last week`
+    : `You spent ${amount} last month`;
+};
+
+const buildSummaryNotificationBody = (summary: SpendSummaryData) => {
+  const parts = [
+    summary.period.compactLabel,
+    formatCountLabel(summary.metrics.receiptCount, "receipt"),
+  ];
+
+  if (summary.mixedCurrencies) {
+    parts.push("Multiple currencies detected");
+  } else if (summary.metrics.topCategory?.name) {
+    parts.push(`Top category: ${summary.metrics.topCategory.name}`);
+  }
+
+  return parts.join(" • ");
+};
+
 const getSummaryLinks = (): SummaryLinks => {
   const normalizedBaseUrl = appBaseUrl.value()?.trim().replace(/\/+$/, "");
   if (!normalizedBaseUrl) {
@@ -1578,6 +1614,90 @@ const sendSummaryEmailMessage = async (to: string, summary: SpendSummaryData, li
   });
 };
 
+const chunkValues = <T,>(values: T[], size: number) => {
+  if (values.length <= size) {
+    return [values];
+  }
+
+  const chunks: T[][] = [];
+  for (let index = 0; index < values.length; index += size) {
+    chunks.push(values.slice(index, index + size));
+  }
+  return chunks;
+};
+
+const sendSummaryNotificationMessage = async (
+  tokens: string[],
+  summary: SpendSummaryData,
+): Promise<NotificationSendResult> => {
+  const uniqueTokens = Array.from(new Set(tokens.filter((token) => token.trim().length > 0)));
+  if (uniqueTokens.length === 0) {
+    return {
+      sentCount: 0,
+      failedCount: 0,
+      invalidTokens: [],
+    };
+  }
+
+  let sentCount = 0;
+  let failedCount = 0;
+  const invalidTokens: string[] = [];
+
+  for (const tokenChunk of chunkValues(uniqueTokens, 500)) {
+    const response = await admin.messaging().sendEachForMulticast({
+      tokens: tokenChunk,
+      notification: {
+        title: buildSummaryNotificationTitle(summary),
+        body: buildSummaryNotificationBody(summary),
+      },
+      data: {
+        type: "spend_summary",
+        periodType: summary.period.type,
+        periodLabel: summary.period.label,
+        periodRange: summary.period.rangeLabel,
+        periodStartKey: summary.period.startKey,
+        periodEndKey: summary.period.endKey,
+        totalSpend: summary.metrics.totalSpend.toFixed(2),
+        receiptCount: String(summary.metrics.receiptCount),
+        currency: summary.currency,
+        mixedCurrencies: String(summary.mixedCurrencies),
+      },
+      android: {
+        priority: "high",
+      },
+      apns: {
+        headers: {
+          "apns-priority": "10",
+        },
+        payload: {
+          aps: {
+            sound: "default",
+          },
+        },
+      },
+    });
+
+    response.responses.forEach((result, index) => {
+      if (result.success) {
+        sentCount += 1;
+        return;
+      }
+
+      failedCount += 1;
+      const code = result.error?.code ?? "";
+      if (code === "messaging/invalid-registration-token" || code === "messaging/registration-token-not-registered") {
+        invalidTokens.push(tokenChunk[index]);
+      }
+    });
+  }
+
+  return {
+    sentCount,
+    failedCount,
+    invalidTokens,
+  };
+};
+
 const loadUserSpendSummary = async (
   userId: string,
   userData: admin.firestore.DocumentData,
@@ -1614,6 +1734,92 @@ const isMonthlyScheduleDue = (config: SpendSummaryScheduleConfig, date: Date) =>
   const currentTime = `${String(parts.hour).padStart(2, "0")}:${String(parts.minute).padStart(2, "0")}`;
   const effectiveDay = getEffectiveDayOfMonth(parts.year, parts.month, config.monthly.dayOfMonth);
   return parts.day === effectiveDay && currentTime === config.monthly.time;
+};
+
+const getUserNotificationTokens = (userData: admin.firestore.DocumentData) =>
+  Array.from(
+    new Set(
+      (Array.isArray(userData.notificationTokens) ? userData.notificationTokens : [])
+        .filter((token): token is string => typeof token === "string")
+        .map((token) => token.trim())
+        .filter(Boolean),
+    ),
+  );
+
+const getUserNotificationTimeZone = (userData: admin.firestore.DocumentData) =>
+  normalizeTimeZone(userData.notificationTimeZone, FALLBACK_TIME_ZONE);
+
+const isWithinSummaryNotificationWindow = (date: Date, timeZone: string) => {
+  const parts = getDateTimeParts(date, timeZone);
+  return parts.hour >= SUMMARY_NOTIFICATION_START_HOUR && parts.hour < SUMMARY_NOTIFICATION_END_HOUR;
+};
+
+const wantsSummaryNotification = (
+  userData: admin.firestore.DocumentData,
+  periodType: SummaryPeriodType,
+) => {
+  const notificationSettings = (userData.notificationSettings ?? {}) as Record<string, unknown>;
+  if (periodType === "week") {
+    return (notificationSettings.weeklySummaryPush ?? notificationSettings.weeklySummaryEmails ?? true) !== false;
+  }
+
+  return (notificationSettings.monthlySummaryPush ?? notificationSettings.monthlySummaryEmails ?? true) !== false;
+};
+
+const isUserWeeklyNotificationDue = (
+  config: SpendSummaryScheduleConfig,
+  userData: admin.firestore.DocumentData,
+  date: Date,
+) => {
+  if (!config.weekly.enabled || !wantsSummaryNotification(userData, "week")) {
+    return false;
+  }
+
+  const timeZone = getUserNotificationTimeZone(userData);
+  if (!isWithinSummaryNotificationWindow(date, timeZone)) {
+    return false;
+  }
+
+  return getDateTimeParts(date, timeZone).weekday === config.weekly.dayOfWeek;
+};
+
+const isUserMonthlyNotificationDue = (
+  config: SpendSummaryScheduleConfig,
+  userData: admin.firestore.DocumentData,
+  date: Date,
+) => {
+  if (!config.monthly.enabled || !wantsSummaryNotification(userData, "month")) {
+    return false;
+  }
+
+  const timeZone = getUserNotificationTimeZone(userData);
+  if (!isWithinSummaryNotificationWindow(date, timeZone)) {
+    return false;
+  }
+
+  const parts = getDateTimeParts(date, timeZone);
+  return parts.day === getEffectiveDayOfMonth(parts.year, parts.month, config.monthly.dayOfMonth);
+};
+
+const getUserNotificationPeriodStateKey = (
+  userData: admin.firestore.DocumentData,
+  periodType: SummaryPeriodType,
+) => {
+  const state = (userData.summaryNotificationState ?? {}) as Record<string, unknown>;
+  const periodState = (
+    periodType === "week" ? state.weekly : state.monthly
+  ) as Record<string, unknown> | undefined;
+  return typeof periodState?.lastPeriodSent === "string" ? periodState.lastPeriodSent : null;
+};
+
+const dispatchSummaryNotificationToUser = async (
+  userId: string,
+  userData: admin.firestore.DocumentData,
+  period: SummaryPeriod,
+  timeZone: string,
+) => {
+  const summary = await loadUserSpendSummary(userId, userData, period, timeZone);
+  return sendSummaryNotificationMessage(getUserNotificationTokens(userData), summary);
 };
 
 const dispatchSummaryPeriodToAllUsers = async (
@@ -1790,6 +1996,131 @@ export const dispatchScheduledSpendSummaryEmails = onSchedule(
   },
 );
 
+export const dispatchScheduledSpendSummaryNotifications = onSchedule(
+  {
+    region: "us-central1",
+    schedule: "every 10 minutes",
+  },
+  async (event) => {
+    const scheduleSnap = await getScheduleConfigRef().get();
+    const config = normalizeScheduleConfig(scheduleSnap.data());
+    if (!config.weekly.enabled && !config.monthly.enabled) {
+      return;
+    }
+
+    const now = event.scheduleTime ? new Date(event.scheduleTime) : new Date();
+    const usersSnap = await admin.firestore().collection("users").get();
+
+    let weeklyEligibleUsers = 0;
+    let weeklySentUsers = 0;
+    let monthlyEligibleUsers = 0;
+    let monthlySentUsers = 0;
+    let invalidTokenCount = 0;
+
+    for (const userDoc of usersSnap.docs) {
+      const userData = userDoc.data();
+      const tokens = getUserNotificationTokens(userData);
+      if (tokens.length === 0) {
+        continue;
+      }
+
+      const timeZone = getUserNotificationTimeZone(userData);
+
+      if (isUserWeeklyNotificationDue(config, userData, now)) {
+        weeklyEligibleUsers += 1;
+        const period = getWeekPeriod(getPreviousCompletedWeekValue(now, timeZone), timeZone);
+        const periodKey = getScheduleSummaryPeriodKey(period);
+
+        if (getUserNotificationPeriodStateKey(userData, "week") !== periodKey) {
+          try {
+            const result = await dispatchSummaryNotificationToUser(userDoc.id, userData, period, timeZone);
+            invalidTokenCount += result.invalidTokens.length;
+
+            if (result.invalidTokens.length > 0) {
+              await userDoc.ref.set({
+                notificationTokens: admin.firestore.FieldValue.arrayRemove(...result.invalidTokens),
+                notificationTokenUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+              }, { merge: true });
+            }
+
+            if (result.sentCount > 0) {
+              weeklySentUsers += 1;
+              await userDoc.ref.set({
+                notificationTimeZone: timeZone,
+                summaryNotificationState: {
+                  weekly: {
+                    lastPeriodSent: periodKey,
+                    lastSentAt: admin.firestore.FieldValue.serverTimestamp(),
+                    lastSentCount: result.sentCount,
+                    lastFailedCount: result.failedCount,
+                  },
+                },
+              }, { merge: true });
+            }
+          } catch (error) {
+            logger.error("Failed to send automated weekly spend summary notification", {
+              userId: userDoc.id,
+              periodKey,
+              timeZone,
+              error,
+            });
+          }
+        }
+      }
+
+      if (isUserMonthlyNotificationDue(config, userData, now)) {
+        monthlyEligibleUsers += 1;
+        const period = getMonthPeriod(getPreviousCompletedMonthValue(now, timeZone), timeZone);
+        const periodKey = getScheduleSummaryPeriodKey(period);
+
+        if (getUserNotificationPeriodStateKey(userData, "month") !== periodKey) {
+          try {
+            const result = await dispatchSummaryNotificationToUser(userDoc.id, userData, period, timeZone);
+            invalidTokenCount += result.invalidTokens.length;
+
+            if (result.invalidTokens.length > 0) {
+              await userDoc.ref.set({
+                notificationTokens: admin.firestore.FieldValue.arrayRemove(...result.invalidTokens),
+                notificationTokenUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+              }, { merge: true });
+            }
+
+            if (result.sentCount > 0) {
+              monthlySentUsers += 1;
+              await userDoc.ref.set({
+                notificationTimeZone: timeZone,
+                summaryNotificationState: {
+                  monthly: {
+                    lastPeriodSent: periodKey,
+                    lastSentAt: admin.firestore.FieldValue.serverTimestamp(),
+                    lastSentCount: result.sentCount,
+                    lastFailedCount: result.failedCount,
+                  },
+                },
+              }, { merge: true });
+            }
+          } catch (error) {
+            logger.error("Failed to send automated monthly spend summary notification", {
+              userId: userDoc.id,
+              periodKey,
+              timeZone,
+              error,
+            });
+          }
+        }
+      }
+    }
+
+    logger.info("Scheduled spend summary notifications processed", {
+      weeklyEligibleUsers,
+      weeklySentUsers,
+      monthlyEligibleUsers,
+      monthlySentUsers,
+      invalidTokenCount,
+    });
+  },
+);
+
 export const sendSpendSummaryEmail = onCall(
   { region: "us-central1", secrets: [sendgridApiKey, appBaseUrl] },
   async (request) => {
@@ -1848,5 +2179,104 @@ export const sendSpendSummaryEmail = onCall(
       receiptCount: summary.metrics.receiptCount,
       totalSpend: summary.metrics.totalSpend,
     };
+  },
+);
+
+export const sendSpendSummaryNotification = onCall(
+  { region: "us-central1" },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "User must be authenticated.");
+    }
+
+    await assertAdmin(request.auth.uid, request.auth.token as Record<string, unknown>);
+
+    const userId = String(request.data?.userId ?? "").trim();
+    const periodType = String(request.data?.periodType ?? "").trim() as SummaryPeriodType;
+    const timeZone = String(request.data?.timeZone ?? FALLBACK_TIME_ZONE).trim() || FALLBACK_TIME_ZONE;
+    const dryRun = request.data?.dryRun === true;
+
+    if (!userId) {
+      throw new HttpsError("invalid-argument", "A source user is required.");
+    }
+
+    if (periodType !== "week" && periodType !== "month") {
+      throw new HttpsError("invalid-argument", "Period type must be week or month.");
+    }
+
+    const period = periodType === "week"
+      ? getWeekPeriod(String(request.data?.week ?? ""), timeZone)
+      : getMonthPeriod(String(request.data?.month ?? ""), timeZone);
+
+    const db = admin.firestore();
+    const userRef = db.doc(`users/${userId}`);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      throw new HttpsError("not-found", "Source user was not found.");
+    }
+
+    const userData = userSnap.data() ?? {};
+    const summary = await loadUserSpendSummary(userId, userData, period, timeZone);
+    const title = buildSummaryNotificationTitle(summary);
+    const body = buildSummaryNotificationBody(summary);
+    const tokens = getUserNotificationTokens(userData);
+
+    if (dryRun) {
+      return {
+        ok: true,
+        dryRun: true,
+        title,
+        body,
+        rangeLabel: summary.period.rangeLabel,
+        receiptCount: summary.metrics.receiptCount,
+        totalSpend: summary.metrics.totalSpend,
+        tokenCount: tokens.length,
+      };
+    }
+
+    if (tokens.length === 0) {
+      throw new HttpsError(
+        "failed-precondition",
+        "The selected user does not have any registered notification devices.",
+      );
+    }
+
+    try {
+      const result = await sendSummaryNotificationMessage(tokens, summary);
+
+      if (result.invalidTokens.length > 0) {
+        await userRef.set({
+          notificationTokens: admin.firestore.FieldValue.arrayRemove(...result.invalidTokens),
+          notificationTokenUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+      }
+
+      if (result.sentCount === 0) {
+        throw new HttpsError(
+          "failed-precondition",
+          "Notification could not be delivered to any registered device.",
+        );
+      }
+
+      return {
+        ok: true,
+        dryRun: false,
+        title,
+        body,
+        rangeLabel: summary.period.rangeLabel,
+        receiptCount: summary.metrics.receiptCount,
+        totalSpend: summary.metrics.totalSpend,
+        tokenCount: tokens.length,
+        sentCount: result.sentCount,
+        failedCount: result.failedCount,
+      };
+    } catch (error) {
+      if (error instanceof HttpsError) {
+        throw error;
+      }
+
+      logger.error("Failed to send spend summary notification", error);
+      throw new HttpsError("internal", "Failed to send spend summary notification.");
+    }
   },
 );

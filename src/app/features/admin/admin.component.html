@@ -126,6 +126,13 @@
           <span class="text-emerald-700 dark:text-emerald-300">({{ selectedSummaryUser()!.email }})</span>.
         </div>
 
+        <div *ngIf="selectedSummaryUser()"
+          class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 px-4 py-3 text-sm text-slate-700 dark:text-slate-300">
+          <span class="font-semibold text-slate-900 dark:text-white">Push status:</span>
+          {{ selectedSummaryUserDeviceCount() }} registered device{{ selectedSummaryUserDeviceCount() === 1 ? '' : 's' }}
+          <span class="text-slate-500 dark:text-slate-400">• timezone {{ selectedSummaryUserNotificationTimeZone() }}</span>
+        </div>
+
         <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 p-4 space-y-4">
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -351,12 +358,80 @@
           </div>
         </div>
 
+        <div class="grid gap-4 xl:grid-cols-2">
+          <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 p-4 space-y-4">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400">Weekly push</p>
+                <h3 class="mt-1 text-lg font-semibold text-slate-900 dark:text-white">Weekly spend notification</h3>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  Uses the same weekly spend-summary data, but sends it as a push notification to the selected user’s app devices.
+                </p>
+              </div>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-3 space-y-1">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Preview</p>
+              <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ weeklyNotificationPreviewTitle() || 'Load a preview to see the push title.' }}</p>
+              <p class="text-sm text-slate-600 dark:text-slate-300">{{ weeklyNotificationPreviewBody() || 'The push body will appear here.' }}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">{{ weeklyNotificationPreviewMeta() || weeklySummaryLabel() }}</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+              <button type="button" (click)="previewSpendSummaryNotification('week')" [disabled]="weeklyNotificationPreviewLoading()"
+                class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
+                <span>{{ weeklyNotificationPreviewLoading() ? 'Loading preview...' : 'Preview weekly push' }}</span>
+              </button>
+              <button type="button" (click)="sendSpendSummaryNotification('week')" [disabled]="weeklyNotificationSending()"
+                class="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60">
+                <span>{{ weeklyNotificationSending() ? 'Sending weekly push...' : 'Send weekly push' }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 p-4 space-y-4">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400">Monthly push</p>
+                <h3 class="mt-1 text-lg font-semibold text-slate-900 dark:text-white">Monthly spend notification</h3>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  Sends the monthly spend-summary message to the selected user’s registered app devices right away.
+                </p>
+              </div>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-3 space-y-1">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Preview</p>
+              <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ monthlyNotificationPreviewTitle() || 'Load a preview to see the push title.' }}</p>
+              <p class="text-sm text-slate-600 dark:text-slate-300">{{ monthlyNotificationPreviewBody() || 'The push body will appear here.' }}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">{{ monthlyNotificationPreviewMeta() || monthlySummaryLabel() }}</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+              <button type="button" (click)="previewSpendSummaryNotification('month')" [disabled]="monthlyNotificationPreviewLoading()"
+                class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
+                <span>{{ monthlyNotificationPreviewLoading() ? 'Loading preview...' : 'Preview monthly push' }}</span>
+              </button>
+              <button type="button" (click)="sendSpendSummaryNotification('month')" [disabled]="monthlyNotificationSending()"
+                class="inline-flex items-center gap-2 rounded-xl bg-slate-900 dark:bg-white px-4 py-2 text-sm font-semibold text-white dark:text-slate-900 shadow-sm transition-colors hover:bg-slate-800 dark:hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60">
+                <span>{{ monthlyNotificationSending() ? 'Sending monthly push...' : 'Send monthly push' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="flex flex-wrap items-center gap-3">
           <span *ngIf="summaryEmailSuccess()" class="text-sm text-emerald-600 dark:text-emerald-400">
             {{ summaryEmailSuccess() }}
           </span>
           <span *ngIf="summaryEmailError()" class="text-sm text-rose-600 dark:text-rose-400">
             {{ summaryEmailError() }}
+          </span>
+          <span *ngIf="summaryNotificationSuccess()" class="text-sm text-emerald-600 dark:text-emerald-400">
+            {{ summaryNotificationSuccess() }}
+          </span>
+          <span *ngIf="summaryNotificationError()" class="text-sm text-rose-600 dark:text-rose-400">
+            {{ summaryNotificationError() }}
           </span>
         </div>
       </div>

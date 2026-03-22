@@ -26,9 +26,11 @@ export { generateAiInsights } from "./ai-insights";
 export { sendTestEmail } from "./admin";
 export {
   sendSpendSummaryEmail,
+  sendSpendSummaryNotification,
   getSpendSummaryEmailSchedule,
   updateSpendSummaryEmailSchedule,
   dispatchScheduledSpendSummaryEmails,
+  dispatchScheduledSpendSummaryNotifications,
 } from "./spend-summary-email";
 export { sendVerificationEmail, sendWelcomeEmail } from "./email";
 export { generateReceiptForwardingAddress, inboundEmailWebhook } from "./email-ingest";

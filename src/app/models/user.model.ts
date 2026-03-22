@@ -6,6 +6,8 @@ export interface NotificationSettings {
   securityAlerts: boolean;
   weeklySummaryEmails: boolean;
   monthlySummaryEmails: boolean;
+  weeklySummaryPush: boolean;
+  monthlySummaryPush: boolean;
 }
 
 export interface UserProfile {
@@ -31,6 +33,8 @@ export interface UserProfile {
   receiptForwardingAddress?: string;
   receiptForwardingFallbackAddresses?: string[];
   receiptForwardingEnabled?: boolean;
+  notificationTokens?: string[];
+  notificationTimeZone?: string;
   notificationSettings?: NotificationSettings;
   createdAt?: Timestamp | ReturnType<typeof serverTimestamp>;
   updatedAt?: Timestamp | ReturnType<typeof serverTimestamp>;

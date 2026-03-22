@@ -20,6 +20,7 @@ import { AuthService } from '../../services/auth.service';
 
 type AdminUser = UserProfile;
 type SummaryEmailPeriod = 'week' | 'month';
+type SummaryNotificationPeriod = 'week' | 'month';
 type WeeklyScheduleDay = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
 
 interface SpendSummaryScheduleResponse {
@@ -38,6 +39,19 @@ interface SpendSummaryScheduleResponse {
     lastPeriodSent: string | null;
     lastSentAt: string | null;
   };
+}
+
+interface SpendSummaryNotificationResponse {
+  ok: boolean;
+  dryRun: boolean;
+  title: string;
+  body: string;
+  rangeLabel: string;
+  receiptCount: number;
+  totalSpend: number;
+  tokenCount: number;
+  sentCount?: number;
+  failedCount?: number;
 }
 
 @Component({
@@ -70,6 +84,18 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly monthlySummarySending = signal(false);
   readonly summaryEmailError = signal<string | null>(null);
   readonly summaryEmailSuccess = signal<string | null>(null);
+  readonly weeklyNotificationSending = signal(false);
+  readonly monthlyNotificationSending = signal(false);
+  readonly weeklyNotificationPreviewLoading = signal(false);
+  readonly monthlyNotificationPreviewLoading = signal(false);
+  readonly summaryNotificationError = signal<string | null>(null);
+  readonly summaryNotificationSuccess = signal<string | null>(null);
+  readonly weeklyNotificationPreviewTitle = signal<string | null>(null);
+  readonly weeklyNotificationPreviewBody = signal<string | null>(null);
+  readonly weeklyNotificationPreviewMeta = signal<string | null>(null);
+  readonly monthlyNotificationPreviewTitle = signal<string | null>(null);
+  readonly monthlyNotificationPreviewBody = signal<string | null>(null);
+  readonly monthlyNotificationPreviewMeta = signal<string | null>(null);
   readonly scheduleLoading = signal(true);
   readonly scheduleSaving = signal<'week' | 'month' | null>(null);
   readonly scheduleError = signal<string | null>(null);
@@ -94,6 +120,10 @@ export class AdminComponent implements OnInit, OnDestroy {
   );
   readonly selectedSummaryUser = computed(() =>
     this.summaryUsers().find((user) => user.id === this.summaryUserId()) ?? null
+  );
+  readonly selectedSummaryUserDeviceCount = computed(() => this.selectedSummaryUser()?.notificationTokens?.length ?? 0);
+  readonly selectedSummaryUserNotificationTimeZone = computed(() =>
+    this.selectedSummaryUser()?.notificationTimeZone || 'Not captured yet'
   );
   readonly weeklySummaryLabel = computed(() => this.getWeekRangeLabel(this.selectedSummaryWeek()));
   readonly monthlySummaryLabel = computed(() => this.getMonthLabel(this.selectedSummaryMonth()));
@@ -258,6 +288,14 @@ export class AdminComponent implements OnInit, OnDestroy {
     } finally {
       setSending.set(false);
     }
+  }
+
+  async previewSpendSummaryNotification(period: SummaryNotificationPeriod): Promise<void> {
+    await this.runSpendSummaryNotification(period, true);
+  }
+
+  async sendSpendSummaryNotification(period: SummaryNotificationPeriod): Promise<void> {
+    await this.runSpendSummaryNotification(period, false);
   }
 
   async sendTestEmail(): Promise<void> {
@@ -437,5 +475,91 @@ export class AdminComponent implements OnInit, OnDestroy {
       hour: 'numeric',
       minute: '2-digit'
     });
+  }
+
+  private async runSpendSummaryNotification(
+    period: SummaryNotificationPeriod,
+    dryRun: boolean
+  ): Promise<void> {
+    this.summaryNotificationError.set(null);
+    this.summaryNotificationSuccess.set(null);
+
+    const userId = this.summaryUserId().trim();
+    if (!userId) {
+      this.summaryNotificationError.set('Please choose which user account should receive the notification.');
+      return;
+    }
+
+    const selectedValue = period === 'week' ? this.selectedSummaryWeek().trim() : this.selectedSummaryMonth().trim();
+    if (!selectedValue) {
+      this.summaryNotificationError.set(period === 'week' ? 'Please choose a week.' : 'Please choose a month.');
+      return;
+    }
+
+    const selectedUser = this.selectedSummaryUser();
+    const setLoading = dryRun
+      ? (period === 'week' ? this.weeklyNotificationPreviewLoading : this.monthlyNotificationPreviewLoading)
+      : (period === 'week' ? this.weeklyNotificationSending : this.monthlyNotificationSending);
+    setLoading.set(true);
+
+    try {
+      const callable = httpsCallable<{
+        userId: string;
+        periodType: SummaryNotificationPeriod;
+        week?: string;
+        month?: string;
+        timeZone: string;
+        dryRun: boolean;
+      }, SpendSummaryNotificationResponse>(this.functions, 'sendSpendSummaryNotification');
+
+      const response = await callable({
+        userId,
+        periodType: period,
+        week: period === 'week' ? selectedValue : undefined,
+        month: period === 'month' ? selectedValue : undefined,
+        timeZone: this.getBrowserTimeZone(),
+        dryRun
+      });
+
+      this.applyNotificationPreview(period, response.data);
+
+      const periodLabel = period === 'week' ? this.weeklySummaryLabel() : this.monthlySummaryLabel();
+      const userLabel = selectedUser ? `${this.displayName(selectedUser)} (${selectedUser.email})` : userId;
+      if (dryRun) {
+        this.summaryNotificationSuccess.set(
+          `${period === 'week' ? 'Weekly' : 'Monthly'} notification preview loaded for ${userLabel} (${periodLabel}).`
+        );
+      } else {
+        this.summaryNotificationSuccess.set(
+          `${period === 'week' ? 'Weekly' : 'Monthly'} notification sent to ${userLabel}. Delivered to ${response.data.sentCount ?? 0} device${(response.data.sentCount ?? 0) === 1 ? '' : 's'}.`
+        );
+      }
+    } catch (error: any) {
+      console.error(`Failed to ${dryRun ? 'preview' : 'send'} ${period} summary notification`, error);
+      this.summaryNotificationError.set(
+        error?.message ||
+          `Unable to ${dryRun ? 'preview' : 'send'} the ${period === 'week' ? 'weekly' : 'monthly'} notification right now.`
+      );
+    } finally {
+      setLoading.set(false);
+    }
+  }
+
+  private applyNotificationPreview(
+    period: SummaryNotificationPeriod,
+    response: SpendSummaryNotificationResponse
+  ): void {
+    const meta = `${response.rangeLabel} • ${response.receiptCount} receipt${response.receiptCount === 1 ? '' : 's'} • ${response.tokenCount} registered device${response.tokenCount === 1 ? '' : 's'}`;
+
+    if (period === 'week') {
+      this.weeklyNotificationPreviewTitle.set(response.title);
+      this.weeklyNotificationPreviewBody.set(response.body);
+      this.weeklyNotificationPreviewMeta.set(meta);
+      return;
+    }
+
+    this.monthlyNotificationPreviewTitle.set(response.title);
+    this.monthlyNotificationPreviewBody.set(response.body);
+    this.monthlyNotificationPreviewMeta.set(meta);
   }
 }

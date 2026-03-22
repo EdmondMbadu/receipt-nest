@@ -66,6 +66,8 @@ export class AppShellComponent {
   readonly notificationsSecurityAlerts = signal(true);
   readonly notificationsWeeklySummaryEmails = signal(true);
   readonly notificationsMonthlySummaryEmails = signal(true);
+  readonly notificationsWeeklySummaryPush = signal(true);
+  readonly notificationsMonthlySummaryPush = signal(true);
   readonly notificationsSaving = signal(false);
   readonly notificationsError = signal<string | null>(null);
   readonly notificationsSuccess = signal<string | null>(null);
@@ -219,6 +221,8 @@ export class AppShellComponent {
     this.notificationsSecurityAlerts.set(defaults.securityAlerts);
     this.notificationsWeeklySummaryEmails.set(defaults.weeklySummaryEmails);
     this.notificationsMonthlySummaryEmails.set(defaults.monthlySummaryEmails);
+    this.notificationsWeeklySummaryPush.set(defaults.weeklySummaryPush);
+    this.notificationsMonthlySummaryPush.set(defaults.monthlySummaryPush);
 
     this.settingsActiveTab.set(tab);
     this.settingsModalOpen.set(true);
@@ -270,7 +274,9 @@ export class AppShellComponent {
       productUpdates: this.notificationsProductUpdates(),
       securityAlerts: this.notificationsSecurityAlerts(),
       weeklySummaryEmails: this.notificationsWeeklySummaryEmails(),
-      monthlySummaryEmails: this.notificationsMonthlySummaryEmails()
+      monthlySummaryEmails: this.notificationsMonthlySummaryEmails(),
+      weeklySummaryPush: this.notificationsWeeklySummaryPush(),
+      monthlySummaryPush: this.notificationsMonthlySummaryPush()
     };
 
     try {

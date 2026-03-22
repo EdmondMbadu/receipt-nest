@@ -751,12 +751,30 @@
               </button>
 
               <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-900/60">
-                <p class="text-sm font-semibold text-slate-900 dark:text-white">Summary emails</p>
+                <p class="text-sm font-semibold text-slate-900 dark:text-white">Spend summaries</p>
                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Control whether ReceiptNest AI sends your automated weekly and monthly spend summaries.
+                  Control whether ReceiptNest AI sends your automated weekly and monthly spend summaries by push and email.
                 </p>
 
                 <div class="mt-4 space-y-3">
+                  <button type="button" (click)="notificationsWeeklySummaryPush.set(!notificationsWeeklySummaryPush())"
+                    class="settings-toggle-row">
+                    <div>
+                      <p class="text-sm font-medium text-slate-800 dark:text-slate-100">Weekly app notifications</p>
+                      <p class="text-xs text-slate-400 dark:text-slate-500">Send a morning push recap for the completed week.</p>
+                    </div>
+                    <span class="settings-toggle" [class.settings-toggle--on]="notificationsWeeklySummaryPush()"></span>
+                  </button>
+
+                  <button type="button" (click)="notificationsMonthlySummaryPush.set(!notificationsMonthlySummaryPush())"
+                    class="settings-toggle-row">
+                    <div>
+                      <p class="text-sm font-medium text-slate-800 dark:text-slate-100">Monthly app notifications</p>
+                      <p class="text-xs text-slate-400 dark:text-slate-500">Send a morning push recap for the completed month.</p>
+                    </div>
+                    <span class="settings-toggle" [class.settings-toggle--on]="notificationsMonthlySummaryPush()"></span>
+                  </button>
+
                   <button type="button" (click)="notificationsWeeklySummaryEmails.set(!notificationsWeeklySummaryEmails())"
                     class="settings-toggle-row">
                     <div>

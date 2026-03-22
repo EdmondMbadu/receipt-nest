@@ -51,7 +51,9 @@ export class AuthService {
     productUpdates: false,
     securityAlerts: true,
     weeklySummaryEmails: true,
-    monthlySummaryEmails: true
+    monthlySummaryEmails: true,
+    weeklySummaryPush: true,
+    monthlySummaryPush: true
   };
 
   readonly user = signal<UserProfile | null>(null);
@@ -240,12 +242,16 @@ export class AuthService {
 
   getDefaultNotificationSettings(profile?: { notificationSettings?: NotificationSettings } | null): NotificationSettings {
     const settings = profile?.notificationSettings;
+    const weeklySummaryEmails = settings?.weeklySummaryEmails ?? this.defaultNotificationSettings.weeklySummaryEmails;
+    const monthlySummaryEmails = settings?.monthlySummaryEmails ?? this.defaultNotificationSettings.monthlySummaryEmails;
     return {
       receiptProcessing: settings?.receiptProcessing ?? this.defaultNotificationSettings.receiptProcessing,
       productUpdates: settings?.productUpdates ?? this.defaultNotificationSettings.productUpdates,
       securityAlerts: settings?.securityAlerts ?? this.defaultNotificationSettings.securityAlerts,
-      weeklySummaryEmails: settings?.weeklySummaryEmails ?? this.defaultNotificationSettings.weeklySummaryEmails,
-      monthlySummaryEmails: settings?.monthlySummaryEmails ?? this.defaultNotificationSettings.monthlySummaryEmails
+      weeklySummaryEmails,
+      monthlySummaryEmails,
+      weeklySummaryPush: settings?.weeklySummaryPush ?? weeklySummaryEmails,
+      monthlySummaryPush: settings?.monthlySummaryPush ?? monthlySummaryEmails
     };
   }
 
