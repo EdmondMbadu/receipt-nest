@@ -8,6 +8,7 @@ import sgMail from "@sendgrid/mail";
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
 const appBaseUrl = defineSecret("APP_BASE_URL");
 const fromEmail = "info@receipt-nest.com";
+const MAIN_SITE_URL = "https://receipt-nest.com";
 const FALLBACK_TIME_ZONE = "America/Los_Angeles";
 const FALLBACK_CURRENCY = "USD";
 const SCHEDULE_CONFIG_PATH = "systemConfig/spendSummaryEmailSchedule";
@@ -53,6 +54,7 @@ type SummaryMetrics = {
 type SummaryPeriod = {
   type: SummaryPeriodType;
   label: string;
+  compactLabel: string;
   heroEyebrow: string;
   rangeLabel: string;
   startKey: string;
@@ -338,6 +340,29 @@ const formatDateRange = (startKey: string, endKey: string, timeZone: string) => 
   return `${startLabel} - ${endLabel}`;
 };
 
+const formatCompactDateRange = (startKey: string, endKey: string, timeZone: string) => {
+  const startDate = dateFromKey(startKey);
+  const endDate = dateFromKey(endKey);
+  const startParts = getFormatterParts(startDate, timeZone);
+  const endParts = getFormatterParts(endDate, timeZone);
+
+  if (startParts.year === endParts.year && startParts.month === endParts.month) {
+    const monthLabel = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      month: "long",
+    }).format(startDate);
+    return `${monthLabel} ${startParts.day}-${endParts.day}, ${startParts.year}`;
+  }
+
+  if (startParts.year === endParts.year) {
+    const startLabel = formatDateKey(startKey, timeZone, { month: "short", day: "numeric" });
+    const endLabel = formatDateKey(endKey, timeZone, { month: "short", day: "numeric", year: "numeric" });
+    return `${startLabel} - ${endLabel}`;
+  }
+
+  return `${formatDateKey(startKey, timeZone, { month: "short", day: "numeric", year: "numeric" })} - ${formatDateKey(endKey, timeZone, { month: "short", day: "numeric", year: "numeric" })}`;
+};
+
 const getMonthPeriod = (monthValue: string, timeZone: string): SummaryPeriod => {
   const match = monthValue.trim().match(/^(\d{4})-(\d{2})$/);
   if (!match) {
@@ -361,6 +386,7 @@ const getMonthPeriod = (monthValue: string, timeZone: string): SummaryPeriod => 
   return {
     type: "month",
     label,
+    compactLabel: label,
     heroEyebrow: "Monthly spend summary",
     rangeLabel: formatDateRange(startKey, endKey, timeZone),
     startKey,
@@ -396,6 +422,7 @@ const getWeekPeriod = (weekValue: string, timeZone: string): SummaryPeriod => {
   return {
     type: "week",
     label: `Week of ${formatDateKey(startKey, timeZone, { month: "long", day: "numeric", year: "numeric" })}`,
+    compactLabel: formatCompactDateRange(startKey, endKey, timeZone),
     heroEyebrow: "Weekly spend summary",
     rangeLabel: formatDateRange(startKey, endKey, timeZone),
     startKey,
@@ -1184,8 +1211,8 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
   const introLine = data.period.type === "week"
     ? "Here is your weekly ReceiptNest AI spend summary, organized and ready to scan."
     : "Here is your monthly ReceiptNest AI spend summary, organized and ready for review.";
-  const periodDescriptor = data.period.type === "week" ? "Weekly Statement" : "Monthly Statement";
   const greetingName = data.userName.split(" ")[0] || data.userName;
+  const heroPeriodLabel = data.period.compactLabel;
   const dashboardCta = links.dashboardUrl
     ? `
       <a href="${escapeHtml(links.dashboardUrl)}" style="display:inline-block; padding:11px 16px; border-radius:10px; background:#006c49; color:#ffffff; text-decoration:none; font-family:Inter, Arial, sans-serif; font-size:12px; line-height:1.2; font-weight:900; letter-spacing:0.08em;">
@@ -1206,28 +1233,20 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
           width: 100% !important;
         }
 
-        .topbar-brand,
-        .topbar-badge-cell {
-          display: block !important;
-          width: 100% !important;
-          text-align: left !important;
-          box-sizing: border-box !important;
-        }
-
-        .topbar-badge-cell {
-          padding-top: 12px !important;
-        }
-
         .topbar-brand {
           font-size: 22px !important;
           line-height: 1.15 !important;
         }
 
-        .topbar-badge {
-          font-size: 11px !important;
-          line-height: 1.2 !important;
-          letter-spacing: 0.06em !important;
-          white-space: normal !important;
+        .topbar-link {
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 10px !important;
+        }
+
+        .topbar-logo {
+          width: 28px !important;
+          height: 28px !important;
         }
 
         .mobile-px {
@@ -1317,12 +1336,10 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
                 <table class="container" role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:740px;">
                   <tr>
                     <td class="topbar-brand" style="font-family:Inter, Arial, sans-serif; font-size:26px; line-height:1.1; color:#ffffff; font-weight:900; letter-spacing:-0.03em;">
-                      ReceiptNest AI
-                    </td>
-                    <td class="topbar-badge-cell" align="right">
-                      <span class="topbar-badge" style="display:inline-block; padding:10px 14px; border-radius:10px; background:#006c49; color:#ffffff; font-family:Inter, Arial, sans-serif; font-size:12px; line-height:1.2; font-weight:900; letter-spacing:0.08em;">
-                        ${escapeHtml(periodDescriptor)}
-                      </span>
+                      <a class="topbar-link" href="${MAIN_SITE_URL}" style="display:inline-flex; align-items:center; gap:12px; color:#ffffff; text-decoration:none;">
+                        <img class="topbar-logo" src="${MAIN_SITE_URL}/receipt-nest.png" alt="ReceiptNest AI" width="32" height="32" style="display:block; width:32px; height:32px; border-radius:8px;" />
+                        <span style="display:inline-block; vertical-align:middle;">ReceiptNest AI</span>
+                      </a>
                     </td>
                   </tr>
                 </table>
@@ -1342,7 +1359,7 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
                         <tr>
                           <td class="stack-cell">
                             <div class="mobile-date" style="display:inline-block; padding:7px 12px; border-radius:999px; background:rgba(255,255,255,0.10); color:#d1fae5; font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.4; font-weight:900; letter-spacing:0.16em; text-transform:uppercase;">
-                              ${escapeHtml(data.period.type === "week" ? `Week of ${data.period.rangeLabel}` : data.period.label)}
+                              ${escapeHtml(heroPeriodLabel)}
                             </div>
                             <h1 class="hero-title" style="margin:20px 0 0; font-size:44px; line-height:1.02; color:#ffffff; font-weight:900; letter-spacing:-0.04em; font-family:Inter, Arial, sans-serif;">Hi, ${escapeHtml(greetingName)}.</h1>
                             <p class="hero-copy" style="margin:16px 0 0; font-size:18px; line-height:1.7; color:#d1fae5; max-width:420px; font-family:Inter, Arial, sans-serif; font-weight:600;">
