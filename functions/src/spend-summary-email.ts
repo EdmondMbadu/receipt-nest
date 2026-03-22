@@ -1206,6 +1206,30 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
           width: 100% !important;
         }
 
+        .topbar-brand,
+        .topbar-badge-cell {
+          display: block !important;
+          width: 100% !important;
+          text-align: left !important;
+          box-sizing: border-box !important;
+        }
+
+        .topbar-badge-cell {
+          padding-top: 12px !important;
+        }
+
+        .topbar-brand {
+          font-size: 22px !important;
+          line-height: 1.15 !important;
+        }
+
+        .topbar-badge {
+          font-size: 11px !important;
+          line-height: 1.2 !important;
+          letter-spacing: 0.06em !important;
+          white-space: normal !important;
+        }
+
         .mobile-px {
           padding-left: 16px !important;
           padding-right: 16px !important;
@@ -1292,11 +1316,11 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
               <td align="center" style="padding:20px 20px;">
                 <table class="container" role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:740px;">
                   <tr>
-                    <td style="font-family:Inter, Arial, sans-serif; font-size:26px; line-height:1.1; color:#ffffff; font-weight:900; letter-spacing:-0.03em;">
+                    <td class="topbar-brand" style="font-family:Inter, Arial, sans-serif; font-size:26px; line-height:1.1; color:#ffffff; font-weight:900; letter-spacing:-0.03em;">
                       ReceiptNest AI
                     </td>
-                    <td align="right">
-                      <span style="display:inline-block; padding:10px 14px; border-radius:10px; background:#006c49; color:#ffffff; font-family:Inter, Arial, sans-serif; font-size:12px; line-height:1.2; font-weight:900; letter-spacing:0.08em;">
+                    <td class="topbar-badge-cell" align="right">
+                      <span class="topbar-badge" style="display:inline-block; padding:10px 14px; border-radius:10px; background:#006c49; color:#ffffff; font-family:Inter, Arial, sans-serif; font-size:12px; line-height:1.2; font-weight:900; letter-spacing:0.08em;">
                         ${escapeHtml(periodDescriptor)}
                       </span>
                     </td>
