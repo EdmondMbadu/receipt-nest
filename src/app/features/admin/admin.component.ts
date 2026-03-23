@@ -416,6 +416,24 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
 
+  formatDateTime(value?: UserProfile['lastLoginAt'] | null): string {
+    if (!value || !(value instanceof Timestamp)) {
+      return 'Never';
+    }
+
+    try {
+      return value.toDate().toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+    } catch {
+      return 'Never';
+    }
+  }
+
   private async backfillMissingReceiptCounts(users: AdminUser[]): Promise<void> {
     if (this.receiptCountSyncing()) {
       return;

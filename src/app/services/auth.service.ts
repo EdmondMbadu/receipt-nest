@@ -17,6 +17,7 @@ import {
 } from 'firebase/auth';
 import {
   Firestore,
+  Timestamp,
   doc,
   getDoc,
   getFirestore,
@@ -91,7 +92,9 @@ export class AuthService {
             return;
           }
 
-          const userProfile = await this.loadOrCreateUserProfile(firebaseUser.uid, firebaseUser.email ?? '');
+          const lastLoginAt = this.parseLastLoginTimestamp(firebaseUser.metadata.lastSignInTime);
+          const userProfile = await this.loadOrCreateUserProfile(firebaseUser.uid, firebaseUser.email ?? '', lastLoginAt);
+          await this.syncLastLoginAt(firebaseUser.uid, userProfile.lastLoginAt, lastLoginAt);
           this.user.set(userProfile);
           this.subscribeToUserProfile(firebaseUser.uid);
           if (firebaseUser.emailVerified) {
@@ -123,7 +126,11 @@ export class AuthService {
     }
   }
 
-  private async loadOrCreateUserProfile(uid: string, email: string): Promise<UserProfile> {
+  private async loadOrCreateUserProfile(
+    uid: string,
+    email: string,
+    lastLoginAt: Timestamp | null
+  ): Promise<UserProfile> {
     const db = this.requireDb();
     const userRef = doc(db, 'users', uid);
     const snapshot = await getDoc(userRef);
@@ -143,6 +150,7 @@ export class AuthService {
       lastName: '',
       email,
       receiptCount: 0,
+      lastLoginAt: lastLoginAt ?? undefined,
       role: 'user',
       notificationSettings: this.getDefaultNotificationSettings(),
       createdAt: serverTimestamp(),
@@ -151,6 +159,44 @@ export class AuthService {
 
     await setDoc(userRef, profile);
     return profile;
+  }
+
+  private async syncLastLoginAt(
+    uid: string,
+    currentValue: UserProfile['lastLoginAt'] | undefined,
+    nextValue: Timestamp | null
+  ): Promise<void> {
+    if (!nextValue) {
+      return;
+    }
+
+    const currentMillis = currentValue instanceof Timestamp ? currentValue.toMillis() : null;
+    if (currentMillis === nextValue.toMillis()) {
+      return;
+    }
+
+    const db = this.requireDb();
+    await setDoc(
+      doc(db, 'users', uid),
+      {
+        lastLoginAt: nextValue,
+        updatedAt: serverTimestamp()
+      },
+      { merge: true }
+    );
+  }
+
+  private parseLastLoginTimestamp(value: string | undefined): Timestamp | null {
+    if (!value) {
+      return null;
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return null;
+    }
+
+    return Timestamp.fromDate(parsed);
   }
 
   async registerUser(form: {
