@@ -7,6 +7,7 @@ import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf
 import * as crypto from "crypto";
 import type { Request } from "express";
 import sharp from "sharp";
+import { getFreePlanReceiptLimit } from "./app-config";
 
 const receiptInboundDomain = defineSecret("RECEIPT_INBOUND_DOMAIN");
 const emailIngestWebhookKey = defineSecret("EMAIL_INGEST_WEBHOOK_KEY");
@@ -16,7 +17,6 @@ const VERTEX_LOCATION = "us-central1";
 
 const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
 const MAX_ATTACHMENTS_PER_EMAIL = 6;
-const FREE_PLAN_RECEIPT_LIMIT = 50;
 const MAX_EMAIL_TEXT_LENGTH = 12000;
 const MAX_EMAIL_HTML_LENGTH = 250000;
 const MAX_EMAIL_DOCUMENT_TEXT_LENGTH = 50000;
@@ -2439,9 +2439,10 @@ async function canUserAcceptNewReceipt(userId: string): Promise<boolean> {
   }
 
   try {
+    const freePlanReceiptLimit = await getFreePlanReceiptLimit();
     const countSnap = await db.collection(`users/${userId}/receipts`).count().get();
     const count = countSnap.data().count;
-    return count < FREE_PLAN_RECEIPT_LIMIT;
+    return count < freePlanReceiptLimit;
   } catch (error) {
     logger.warn("Failed to enforce free plan cap for inbound email. Allowing upload.", { userId, error });
     return true;

@@ -21,6 +21,7 @@ import {
   handleChat,
   formatCurrency,
 } from "./ai-insights";
+import { getFreePlanReceiptLimit } from "./app-config";
 
 // ─── Secrets & Configuration ────────────────────────────────────────────────
 
@@ -31,6 +32,20 @@ const telegramBotToken = defineSecret("TELEGRAM_BOT_TOKEN");
  * Update this after creating your bot via @BotFather.
  */
 const BOT_USERNAME = "receiptnestbot";
+
+async function canUserAcceptNewReceipt(userId: string): Promise<{ allowed: boolean; limit: number }> {
+  const db = admin.firestore();
+  const userSnap = await db.doc(`users/${userId}`).get();
+  const limit = await getFreePlanReceiptLimit();
+  const plan = userSnap.get("subscriptionPlan");
+  if (plan === "pro") {
+    return { allowed: true, limit };
+  }
+
+  const countSnap = await db.collection(`users/${userId}/receipts`).count().get();
+  const count = countSnap.data().count;
+  return { allowed: count < limit, limit };
+}
 
 // ─── Telegram API Types ─────────────────────────────────────────────────────
 
@@ -661,6 +676,16 @@ async function handlePhotoMessage(
   );
 
   try {
+    const receiptAccess = await canUserAcceptNewReceipt(userId);
+    if (!receiptAccess.allowed) {
+      await sendTelegramMessage(
+        token,
+        chatId,
+        `Free plan includes up to ${receiptAccess.limit} receipts total. Upgrade to continue adding more.`
+      );
+      return;
+    }
+
     // Get the largest photo (last in the array)
     const largestPhoto = photos[photos.length - 1];
 
@@ -786,6 +811,16 @@ async function handleDocumentMessage(
   );
 
   try {
+    const receiptAccess = await canUserAcceptNewReceipt(userId);
+    if (!receiptAccess.allowed) {
+      await sendTelegramMessage(
+        token,
+        chatId,
+        `Free plan includes up to ${receiptAccess.limit} receipts total. Upgrade to continue adding more.`
+      );
+      return;
+    }
+
     const fileInfo = await getFileInfo(token, document.file_id);
     if (!fileInfo.ok || !fileInfo.result?.file_path) {
       throw new Error("Failed to get file info from Telegram");

@@ -4,9 +4,9 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
 import { doc, getFirestore, onSnapshot, Timestamp } from 'firebase/firestore';
 import { httpsCallable, getFunctions } from 'firebase/functions';
+import { AppConfigService } from '../../services/app-config.service';
 import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../services/auth.service';
-import { FREE_PLAN_RECEIPT_LIMIT } from '../../config/subscription.constants';
 import { app } from '../../../../environments/environments';
 import { Subscription } from 'rxjs';
 
@@ -22,6 +22,7 @@ export class PricingComponent implements OnDestroy {
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
   private readonly auth = inject(AuthService);
+  private readonly appConfig = inject(AppConfigService);
   private readonly db = getFirestore(app);
   private readonly functions = getFunctions(app);
   private readonly route = inject(ActivatedRoute);
@@ -32,7 +33,7 @@ export class PricingComponent implements OnDestroy {
   readonly checkoutError = signal<string | null>(null);
   readonly portalError = signal<string | null>(null);
   readonly limitReachedNotice = signal(false);
-  readonly freePlanReceiptLimit = FREE_PLAN_RECEIPT_LIMIT;
+  readonly freePlanReceiptLimit = this.appConfig.freePlanReceiptLimit;
 
   readonly subscriptionPlan = signal<'free' | 'pro'>('free');
   readonly subscriptionStatus = signal<string>('inactive');

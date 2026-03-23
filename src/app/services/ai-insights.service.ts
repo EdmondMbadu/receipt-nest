@@ -20,9 +20,9 @@ import {
   updateDoc
 } from 'firebase/firestore';
 import { app } from '../../../environments/environments';
+import { AppConfigService } from './app-config.service';
 import { AuthService } from './auth.service';
 import { ReceiptService } from './receipt.service';
-import { FREE_PLAN_RECEIPT_LIMIT } from '../config/subscription.constants';
 import { Receipt } from '../models/receipt.model';
 
 export interface ChatMessage {
@@ -96,6 +96,7 @@ interface StoredChatMessage {
   providedIn: 'root'
 })
 export class AiInsightsService {
+  private readonly appConfig = inject(AppConfigService);
   private readonly functions = getFunctions(app);
   private readonly db = getFirestore(app);
   private readonly auth = inject(AuthService);
@@ -362,7 +363,7 @@ export class AiInsightsService {
     } catch (err: any) {
       console.error('Failed to upload receipt from chat:', err);
       const errorContent = err?.message === 'FREE_PLAN_LIMIT_REACHED'
-        ? `You've reached the free plan limit of ${FREE_PLAN_RECEIPT_LIMIT} receipts. Upgrade to Pro for unlimited uploads.`
+        ? `You've reached the free plan limit of ${this.appConfig.freePlanReceiptLimit()} receipts. Upgrade to Pro for unlimited uploads.`
         : `Sorry, I had trouble uploading that file. ${err?.message || 'Please try again.'}`;
 
       const errorMessage: ChatMessage = {

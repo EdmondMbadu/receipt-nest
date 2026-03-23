@@ -65,6 +65,12 @@ service cloud.firestore {
       allow write: if false; // Admin only via console
     }
 
+    // Public app config
+    match /publicConfig/{configId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Public graph share links
     match /graphShares/{shareId} {
       allow read: if true;

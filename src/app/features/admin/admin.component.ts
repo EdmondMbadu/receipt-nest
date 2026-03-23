@@ -7,14 +7,23 @@ import {
   Firestore,
   Timestamp,
   collection,
+  doc,
   getFirestore,
   onSnapshot,
   orderBy,
   query,
+  serverTimestamp,
+  setDoc,
   Unsubscribe
 } from 'firebase/firestore';
 
 import { app } from '../../../../environments/environments';
+import {
+  DEFAULT_FREE_PLAN_RECEIPT_LIMIT,
+  PUBLIC_BILLING_CONFIG_COLLECTION,
+  PUBLIC_BILLING_CONFIG_DOC_ID,
+  normalizeFreePlanReceiptLimit
+} from '../../config/subscription.constants';
 import { UserProfile } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
 
@@ -66,6 +75,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   private readonly db: Firestore = getFirestore(app);
   private readonly functions = getFunctions(app);
   private usersUnsubscribe: Unsubscribe | null = null;
+  private billingConfigUnsubscribe: Unsubscribe | null = null;
 
   readonly users = signal<AdminUser[]>([]);
   readonly isLoading = signal(true);
@@ -111,6 +121,11 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly monthlyAutomationTime = signal('08:00');
   readonly monthlyAutomationLastPeriod = signal<string | null>(null);
   readonly monthlyAutomationLastSentAt = signal<string | null>(null);
+  readonly freePlanReceiptLimit = signal(DEFAULT_FREE_PLAN_RECEIPT_LIMIT);
+  readonly freePlanReceiptLimitInput = signal(DEFAULT_FREE_PLAN_RECEIPT_LIMIT);
+  readonly freePlanReceiptLimitSaving = signal(false);
+  readonly freePlanReceiptLimitError = signal<string | null>(null);
+  readonly freePlanReceiptLimitSuccess = signal<string | null>(null);
 
   readonly totalUsers = computed(() => this.users().length);
   readonly adminCount = computed(() => this.users().filter((user) => user.role === 'admin').length);
@@ -170,6 +185,20 @@ export class AdminComponent implements OnInit, OnDestroy {
 
     const usersRef = collection(this.db, 'users');
     const usersQuery = query(usersRef, orderBy('createdAt', 'desc'));
+    const billingConfigRef = doc(this.db, PUBLIC_BILLING_CONFIG_COLLECTION, PUBLIC_BILLING_CONFIG_DOC_ID);
+
+    this.billingConfigUnsubscribe = onSnapshot(
+      billingConfigRef,
+      (snapshot) => {
+        const limit = normalizeFreePlanReceiptLimit(snapshot.data()?.['freePlanReceiptLimit']);
+        this.freePlanReceiptLimit.set(limit);
+        this.freePlanReceiptLimitInput.set(limit);
+      },
+      (error) => {
+        console.error('Failed to load billing config', error);
+        this.freePlanReceiptLimitError.set('Unable to load the free-plan receipt limit right now.');
+      }
+    );
 
     this.usersUnsubscribe = onSnapshot(
       usersQuery,
@@ -191,11 +220,47 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.usersUnsubscribe?.();
+    this.billingConfigUnsubscribe?.();
   }
 
   displayName(user: AdminUser): string {
     const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
     return fullName || user.email;
+  }
+
+  setFreePlanReceiptLimitInput(value: string | number): void {
+    const parsed = typeof value === 'string' ? Number.parseInt(value, 10) : Number(value);
+    this.freePlanReceiptLimitInput.set(Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0);
+  }
+
+  async saveFreePlanReceiptLimit(): Promise<void> {
+    this.freePlanReceiptLimitError.set(null);
+    this.freePlanReceiptLimitSuccess.set(null);
+
+    const rawValue = this.freePlanReceiptLimitInput();
+    if (!Number.isFinite(rawValue) || rawValue < 1) {
+      this.freePlanReceiptLimitError.set('Enter a whole number greater than 0.');
+      return;
+    }
+
+    this.freePlanReceiptLimitSaving.set(true);
+    try {
+      await setDoc(
+        doc(this.db, PUBLIC_BILLING_CONFIG_COLLECTION, PUBLIC_BILLING_CONFIG_DOC_ID),
+        {
+          freePlanReceiptLimit: Math.floor(rawValue),
+          updatedAt: serverTimestamp(),
+          updatedBy: this.auth.user()?.id ?? null
+        },
+        { merge: true }
+      );
+      this.freePlanReceiptLimitSuccess.set('Free-plan receipt limit saved.');
+    } catch (error) {
+      console.error('Failed to save free-plan receipt limit', error);
+      this.freePlanReceiptLimitError.set('Unable to save the free-plan receipt limit right now.');
+    } finally {
+      this.freePlanReceiptLimitSaving.set(false);
+    }
   }
 
   async saveSpendSummarySchedule(period: 'week' | 'month'): Promise<void> {

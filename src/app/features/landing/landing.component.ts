@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
 
+import { AppConfigService } from '../../services/app-config.service';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
-import { FREE_PLAN_RECEIPT_LIMIT } from '../../config/subscription.constants';
 
 @Component({
   selector: 'app-landing',
@@ -20,6 +20,7 @@ export class LandingComponent {
   private readonly router = inject(Router);
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
+  private readonly appConfig = inject(AppConfigService);
 
   readonly user = this.auth.user;
   readonly isDarkMode = this.theme.isDarkMode;
@@ -28,7 +29,7 @@ export class LandingComponent {
   readonly isDemoOpen = signal(false);
   readonly openFaqIndex = signal<number | null>(null);
   readonly demoVideo = viewChild<ElementRef<HTMLVideoElement>>('demoVideo');
-  readonly freePlanReceiptLimit = FREE_PLAN_RECEIPT_LIMIT;
+  readonly freePlanReceiptLimit = this.appConfig.freePlanReceiptLimit;
 
   readonly displayName = computed(() => {
     const profile = this.user();

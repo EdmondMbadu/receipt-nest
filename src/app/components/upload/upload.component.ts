@@ -14,8 +14,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+import { AppConfigService } from '../../services/app-config.service';
 import { ReceiptService, UploadProgress, MAX_FILE_SIZE } from '../../services/receipt.service';
-import { FREE_PLAN_RECEIPT_LIMIT } from '../../config/subscription.constants';
 import { Receipt } from '../../models/receipt.model';
 
 @Component({
@@ -26,6 +26,7 @@ import { Receipt } from '../../models/receipt.model';
   styleUrl: './upload.component.css'
 })
 export class UploadComponent implements AfterViewInit, OnDestroy {
+  private readonly appConfig = inject(AppConfigService);
   private readonly receiptService = inject(ReceiptService);
 
   @Input() autoOpenScannerOnTouch = true;
@@ -224,7 +225,9 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
       this.reset();
     } catch (error: any) {
       if (error?.message === 'FREE_PLAN_LIMIT_REACHED') {
-        this.errorMessage.set(`Free plan includes up to ${FREE_PLAN_RECEIPT_LIMIT} receipts total. Upgrade to add more.`);
+        this.errorMessage.set(
+          `Free plan includes up to ${this.appConfig.freePlanReceiptLimit()} receipts total. Upgrade to add more.`
+        );
         this.uploadError.emit('FREE_PLAN_LIMIT_REACHED');
       } else {
         this.errorMessage.set(error.message || 'Upload failed');

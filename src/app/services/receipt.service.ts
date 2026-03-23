@@ -30,8 +30,8 @@ import {
 } from 'firebase/storage';
 
 import { app } from '../../../environments/environments';
+import { AppConfigService } from './app-config.service';
 import { AuthService } from './auth.service';
-import { FREE_PLAN_RECEIPT_LIMIT } from '../config/subscription.constants';
 import {
   Receipt,
   ReceiptStatus,
@@ -78,6 +78,7 @@ export interface UploadProgress {
 export class ReceiptService {
   private readonly db: Firestore = getFirestore(app);
   private readonly storage: FirebaseStorage = getStorage(app);
+  private readonly appConfig = inject(AppConfigService);
   private readonly auth = inject(AuthService);
 
   // Receipts state
@@ -153,7 +154,7 @@ export class ReceiptService {
     if (plan !== 'pro') {
       const receiptsRef = collection(this.db, this.getReceiptsPath());
       const countSnapshot = await getCountFromServer(receiptsRef);
-      if (countSnapshot.data().count >= FREE_PLAN_RECEIPT_LIMIT) {
+      if (countSnapshot.data().count >= this.appConfig.freePlanReceiptLimit()) {
         throw new Error('FREE_PLAN_LIMIT_REACHED');
       }
     }
