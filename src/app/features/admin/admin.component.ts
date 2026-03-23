@@ -63,6 +63,13 @@ interface SpendSummaryNotificationResponse {
   failedCount?: number;
 }
 
+interface ReceiptCountBackfillResponse {
+  ok: boolean;
+  updatedCount: number;
+}
+
+const RECEIPT_COUNT_BACKFILL_BATCH_SIZE = 50;
+
 @Component({
   selector: 'app-admin',
   standalone: true,
@@ -76,10 +83,13 @@ export class AdminComponent implements OnInit, OnDestroy {
   private readonly functions = getFunctions(app);
   private usersUnsubscribe: Unsubscribe | null = null;
   private billingConfigUnsubscribe: Unsubscribe | null = null;
+  private readonly backfilledReceiptCountUserIds = new Set<string>();
 
   readonly users = signal<AdminUser[]>([]);
   readonly isLoading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly receiptCountSyncing = signal(false);
+  readonly receiptCountSyncError = signal<string | null>(null);
   readonly testEmailTo = signal('');
   readonly testEmailSubject = signal('Test Email');
   readonly testEmailMessage = signal('This is a test email from ReceiptNest AI.');
@@ -209,6 +219,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
         this.users.set(users);
         this.isLoading.set(false);
+        void this.backfillMissingReceiptCounts(users);
       },
       (error) => {
         console.error('Failed to load users', error);
@@ -402,6 +413,39 @@ export class AdminComponent implements OnInit, OnDestroy {
       });
     } catch {
       return '—';
+    }
+  }
+
+  private async backfillMissingReceiptCounts(users: AdminUser[]): Promise<void> {
+    if (this.receiptCountSyncing()) {
+      return;
+    }
+
+    const userIds = users
+      .filter((user) => user.receiptCount == null && !this.backfilledReceiptCountUserIds.has(user.id))
+      .map((user) => user.id)
+      .slice(0, RECEIPT_COUNT_BACKFILL_BATCH_SIZE);
+
+    if (userIds.length === 0) {
+      return;
+    }
+
+    this.receiptCountSyncError.set(null);
+    this.receiptCountSyncing.set(true);
+    userIds.forEach((userId) => this.backfilledReceiptCountUserIds.add(userId));
+
+    try {
+      const callable = httpsCallable<{ userIds: string[] }, ReceiptCountBackfillResponse>(
+        this.functions,
+        'backfillUserReceiptCounts'
+      );
+      await callable({ userIds });
+    } catch (error) {
+      console.error('Failed to backfill user receipt counts', error);
+      userIds.forEach((userId) => this.backfilledReceiptCountUserIds.delete(userId));
+      this.receiptCountSyncError.set('Unable to sync receipt counts for some legacy users right now.');
+    } finally {
+      this.receiptCountSyncing.set(false);
     }
   }
 

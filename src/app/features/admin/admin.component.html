@@ -488,6 +488,16 @@
         <span class="text-xs text-slate-500 dark:text-slate-400" *ngIf="isLoading()">Loading...</span>
       </div>
 
+      <div *ngIf="receiptCountSyncing() || receiptCountSyncError()"
+        class="border-b border-slate-100 dark:border-slate-800 px-4 py-3 text-xs">
+        <span *ngIf="receiptCountSyncing()" class="text-slate-500 dark:text-slate-400">
+          Syncing cached receipt counts for older users...
+        </span>
+        <span *ngIf="receiptCountSyncError()" class="text-rose-600 dark:text-rose-400">
+          {{ receiptCountSyncError() }}
+        </span>
+      </div>
+
       <div *ngIf="error()"
         class="px-4 py-6 text-sm text-rose-600 dark:text-rose-400">
         {{ error() }}
@@ -506,6 +516,7 @@
               <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Email</th>
               <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Role</th>
               <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Plan</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Receipts</th>
               <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Created</th>
             </tr>
           </thead>
@@ -533,6 +544,9 @@
               </td>
               <td class="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
                 {{ user.subscriptionPlan || 'free' }}
+              </td>
+              <td class="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
+                {{ user.receiptCount ?? 'Syncing...' }}
               </td>
               <td class="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
                 {{ formatDate(user.createdAt) }}

@@ -21,6 +21,8 @@ const assertAdmin = async (uid: string, token: Record<string, unknown>) => {
   throw new HttpsError("permission-denied", "Admin access required.");
 };
 
+const MAX_RECEIPT_COUNT_BACKFILL_USERS = 50;
+
 export const sendTestEmail = onCall(
   { region: "us-central1", secrets: [sendgridApiKey] },
   async (request) => {
@@ -138,5 +140,58 @@ export const sendTestEmail = onCall(
     }
 
     return { ok: true };
+  }
+);
+
+export const backfillUserReceiptCounts = onCall(
+  { region: "us-central1" },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "User must be authenticated.");
+    }
+
+    await assertAdmin(request.auth.uid, request.auth.token as Record<string, unknown>);
+
+    const requestedUserIds = Array.isArray(request.data?.userIds)
+      ? request.data.userIds.filter((value: unknown): value is string => typeof value === "string")
+      : [];
+    const userIds = Array.from(
+      new Set(
+        requestedUserIds
+          .map((value: string) => value.trim())
+          .filter((value: string) => value.length > 0)
+      )
+    ).slice(0, MAX_RECEIPT_COUNT_BACKFILL_USERS);
+
+    if (userIds.length === 0) {
+      throw new HttpsError("invalid-argument", "At least one userId is required.");
+    }
+
+    const db = admin.firestore();
+    const updatedUsers = await Promise.all(
+      userIds.map(async (userId) => {
+        const userRef = db.doc(`users/${userId}`);
+        const countSnap = await db.collection(`users/${userId}/receipts`).count().get();
+        const receiptCount = countSnap.data().count;
+
+        await userRef.set(
+          {
+            receiptCount,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        );
+
+        return userId;
+      })
+    );
+
+    logger.info("Backfilled user receipt counts", {
+      requestedBy: request.auth.uid,
+      updatedCount: updatedUsers.length,
+      userIds,
+    });
+
+    return { ok: true, updatedCount: updatedUsers.length };
   }
 );

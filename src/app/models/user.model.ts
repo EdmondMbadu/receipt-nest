@@ -15,6 +15,7 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   email: string;
+  receiptCount?: number;
   role?: 'admin' | 'user';
   subscriptionPlan?: 'free' | 'pro';
   subscriptionStatus?: string;

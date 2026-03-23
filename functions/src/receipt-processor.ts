@@ -5,7 +5,7 @@
  * Uses a two-pass Gemini extraction for accurate receipt parsing.
  */
 
-import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { onDocumentCreated, onDocumentDeleted, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
@@ -91,6 +91,61 @@ const CATEGORIES = [
 ];
 
 const VALID_CATEGORY_NAMES = CATEGORIES.map((c) => c.name);
+
+const updateUserReceiptCount = async (userId: string, delta: number) => {
+  const userRef = admin.firestore().doc(`users/${userId}`);
+  await userRef.set(
+    {
+      receiptCount: admin.firestore.FieldValue.increment(delta),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    },
+    { merge: true }
+  );
+};
+
+export const onReceiptCreatedUpdateUserCount = onDocumentCreated(
+  {
+    document: "users/{userId}/receipts/{receiptId}",
+    region: "us-central1",
+  },
+  async (event) => {
+    const { userId, receiptId } = event.params;
+
+    try {
+      await updateUserReceiptCount(userId, 1);
+    } catch (error) {
+      logger.error("Failed to increment user receipt count", { userId, receiptId, error });
+    }
+  }
+);
+
+export const onReceiptDeletedUpdateUserCount = onDocumentDeleted(
+  {
+    document: "users/{userId}/receipts/{receiptId}",
+    region: "us-central1",
+  },
+  async (event) => {
+    const { userId, receiptId } = event.params;
+
+    try {
+      const userRef = admin.firestore().doc(`users/${userId}`);
+      await admin.firestore().runTransaction(async (transaction) => {
+        const userSnap = await transaction.get(userRef);
+        const currentCount = Number(userSnap.get("receiptCount") ?? 0);
+        transaction.set(
+          userRef,
+          {
+            receiptCount: Math.max(0, currentCount - 1),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        );
+      });
+    } catch (error) {
+      logger.error("Failed to decrement user receipt count", { userId, receiptId, error });
+    }
+  }
+);
 
 /**
  * Simple, robust Gemini extraction for receipts
