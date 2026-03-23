@@ -28,6 +28,7 @@ export interface UserProfile {
   welcomeEmailSent?: boolean;
   welcomeEmailSentAt?: Timestamp | ReturnType<typeof serverTimestamp>;
   lastLoginAt?: Timestamp | ReturnType<typeof serverTimestamp>;
+  lastSeenAt?: Timestamp | ReturnType<typeof serverTimestamp>;
   telegramChatId?: number;
   telegramLinkedAt?: Timestamp | ReturnType<typeof serverTimestamp>;
   receiptEmailToken?: string;

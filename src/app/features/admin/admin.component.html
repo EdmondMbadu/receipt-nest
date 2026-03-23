@@ -518,6 +518,7 @@
               <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Plan</th>
               <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Receipts</th>
               <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Last login</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Last seen</th>
               <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Created</th>
             </tr>
           </thead>
@@ -551,6 +552,9 @@
               </td>
               <td class="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
                 {{ formatDateTime(user.lastLoginAt) }}
+              </td>
+              <td class="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
+                {{ formatDateTime(user.lastSeenAt) }}
               </td>
               <td class="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
                 {{ formatDate(user.createdAt) }}

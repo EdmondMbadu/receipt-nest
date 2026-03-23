@@ -32,6 +32,8 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app } from '../../../environments/environments';
 import { NotificationSettings, UserProfile } from '../models/user.model';
 
+const LAST_SEEN_UPDATE_INTERVAL_MS = 5 * 60 * 1000;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -47,6 +49,8 @@ export class AuthService {
   private authStateReady: Promise<void> = Promise.resolve();
   private resolveAuthStateReady: (() => void) | null = null;
   private userProfileUnsubscribe: Unsubscribe | null = null;
+  private lastSeenWriteAt = 0;
+  private lastSeenUpdateInFlight = false;
   private readonly defaultNotificationSettings: NotificationSettings = {
     receiptProcessing: true,
     productUpdates: false,
@@ -75,6 +79,7 @@ export class AuthService {
     this.auth = getAuth(app);
     this.db = getFirestore(app);
     this.functions = getFunctions(app);
+    this.registerLastSeenTracking();
 
     const auth = this.requireAuth();
     this.initPromise = new Promise((resolve) => {
@@ -97,6 +102,7 @@ export class AuthService {
           await this.syncLastLoginAt(firebaseUser.uid, userProfile.lastLoginAt, lastLoginAt);
           this.user.set(userProfile);
           this.subscribeToUserProfile(firebaseUser.uid);
+          await this.syncLastSeenAt(firebaseUser.uid, true);
           if (firebaseUser.emailVerified) {
             await this.sendWelcomeEmailIfNeeded();
           }
@@ -285,6 +291,7 @@ export class AuthService {
     const auth = this.requireAuth();
     this.clearUserProfileSubscription();
     await signOut(auth);
+    this.lastSeenWriteAt = 0;
     this.user.set(null);
   }
 
@@ -445,6 +452,66 @@ export class AuthService {
   private clearUserProfileSubscription(): void {
     this.userProfileUnsubscribe?.();
     this.userProfileUnsubscribe = null;
+  }
+
+  private registerLastSeenTracking(): void {
+    if (!this.isBrowser) {
+      return;
+    }
+
+    globalThis.document.addEventListener('visibilitychange', this.handleVisibilityChange);
+    globalThis.addEventListener('focus', this.handleWindowFocus);
+  }
+
+  private readonly handleVisibilityChange = () => {
+    if (!this.isBrowser || globalThis.document.visibilityState !== 'visible') {
+      return;
+    }
+
+    const currentUser = this.auth?.currentUser;
+    if (!currentUser?.emailVerified) {
+      return;
+    }
+
+    void this.syncLastSeenAt(currentUser.uid);
+  };
+
+  private readonly handleWindowFocus = () => {
+    const currentUser = this.auth?.currentUser;
+    if (!currentUser?.emailVerified) {
+      return;
+    }
+
+    void this.syncLastSeenAt(currentUser.uid);
+  };
+
+  private async syncLastSeenAt(uid: string, force = false): Promise<void> {
+    const now = Date.now();
+    if (!force && now - this.lastSeenWriteAt < LAST_SEEN_UPDATE_INTERVAL_MS) {
+      return;
+    }
+
+    if (this.lastSeenUpdateInFlight) {
+      return;
+    }
+
+    this.lastSeenUpdateInFlight = true;
+
+    try {
+      const db = this.requireDb();
+      await setDoc(
+        doc(db, 'users', uid),
+        {
+          lastSeenAt: serverTimestamp()
+        },
+        { merge: true }
+      );
+      this.lastSeenWriteAt = now;
+    } catch (error) {
+      console.error('Failed to sync last seen timestamp', error);
+    } finally {
+      this.lastSeenUpdateInFlight = false;
+    }
   }
 
   private async sendWelcomeEmailIfNeeded(): Promise<void> {
