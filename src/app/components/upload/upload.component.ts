@@ -15,6 +15,7 @@ import {
 import { CommonModule } from '@angular/common';
 
 import { ReceiptService, UploadProgress, MAX_FILE_SIZE } from '../../services/receipt.service';
+import { FREE_PLAN_RECEIPT_LIMIT } from '../../config/subscription.constants';
 import { Receipt } from '../../models/receipt.model';
 
 @Component({
@@ -223,7 +224,7 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
       this.reset();
     } catch (error: any) {
       if (error?.message === 'FREE_PLAN_LIMIT_REACHED') {
-        this.errorMessage.set('Free plan includes up to 200 receipts total. Upgrade to add more.');
+        this.errorMessage.set(`Free plan includes up to ${FREE_PLAN_RECEIPT_LIMIT} receipts total. Upgrade to add more.`);
         this.uploadError.emit('FREE_PLAN_LIMIT_REACHED');
       } else {
         this.errorMessage.set(error.message || 'Upload failed');

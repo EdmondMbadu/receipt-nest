@@ -5,6 +5,7 @@ import { Meta, Title } from '@angular/platform-browser';
 
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
+import { FREE_PLAN_RECEIPT_LIMIT } from '../../config/subscription.constants';
 
 @Component({
   selector: 'app-landing',
@@ -27,6 +28,7 @@ export class LandingComponent {
   readonly isDemoOpen = signal(false);
   readonly openFaqIndex = signal<number | null>(null);
   readonly demoVideo = viewChild<ElementRef<HTMLVideoElement>>('demoVideo');
+  readonly freePlanReceiptLimit = FREE_PLAN_RECEIPT_LIMIT;
 
   readonly displayName = computed(() => {
     const profile = this.user();

@@ -31,6 +31,7 @@ import {
 
 import { app } from '../../../environments/environments';
 import { AuthService } from './auth.service';
+import { FREE_PLAN_RECEIPT_LIMIT } from '../config/subscription.constants';
 import {
   Receipt,
   ReceiptStatus,
@@ -152,7 +153,7 @@ export class ReceiptService {
     if (plan !== 'pro') {
       const receiptsRef = collection(this.db, this.getReceiptsPath());
       const countSnapshot = await getCountFromServer(receiptsRef);
-      if (countSnapshot.data().count >= 200) {
+      if (countSnapshot.data().count >= FREE_PLAN_RECEIPT_LIMIT) {
         throw new Error('FREE_PLAN_LIMIT_REACHED');
       }
     }

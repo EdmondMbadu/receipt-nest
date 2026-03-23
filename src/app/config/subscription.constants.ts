@@ -1,0 +1,1 @@
+export const FREE_PLAN_RECEIPT_LIMIT = 50;

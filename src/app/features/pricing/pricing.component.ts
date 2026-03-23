@@ -6,6 +6,7 @@ import { doc, getFirestore, onSnapshot, Timestamp } from 'firebase/firestore';
 import { httpsCallable, getFunctions } from 'firebase/functions';
 import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../services/auth.service';
+import { FREE_PLAN_RECEIPT_LIMIT } from '../../config/subscription.constants';
 import { app } from '../../../../environments/environments';
 import { Subscription } from 'rxjs';
 
@@ -31,6 +32,7 @@ export class PricingComponent implements OnDestroy {
   readonly checkoutError = signal<string | null>(null);
   readonly portalError = signal<string | null>(null);
   readonly limitReachedNotice = signal(false);
+  readonly freePlanReceiptLimit = FREE_PLAN_RECEIPT_LIMIT;
 
   readonly subscriptionPlan = signal<'free' | 'pro'>('free');
   readonly subscriptionStatus = signal<string>('inactive');
