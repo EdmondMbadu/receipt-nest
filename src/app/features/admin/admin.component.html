@@ -512,18 +512,74 @@
         <table class="min-w-full divide-y divide-slate-100 dark:divide-slate-800">
           <thead class="bg-slate-50 dark:bg-slate-900/60">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Name</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Email</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Role</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Plan</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Receipts</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Last login</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Last seen</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Created</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <button type="button" (click)="toggleUserSort('name')"
+                  class="inline-flex items-center gap-2 transition-colors hover:text-slate-700 dark:hover:text-slate-200"
+                  [class.text-slate-700]="isUserSortActive('name')" [class.dark:text-slate-200]="isUserSortActive('name')">
+                  <span>Name</span>
+                  <span aria-hidden="true">{{ userSortIndicator('name') }}</span>
+                </button>
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <button type="button" (click)="toggleUserSort('email')"
+                  class="inline-flex items-center gap-2 transition-colors hover:text-slate-700 dark:hover:text-slate-200"
+                  [class.text-slate-700]="isUserSortActive('email')" [class.dark:text-slate-200]="isUserSortActive('email')">
+                  <span>Email</span>
+                  <span aria-hidden="true">{{ userSortIndicator('email') }}</span>
+                </button>
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <button type="button" (click)="toggleUserSort('role')"
+                  class="inline-flex items-center gap-2 transition-colors hover:text-slate-700 dark:hover:text-slate-200"
+                  [class.text-slate-700]="isUserSortActive('role')" [class.dark:text-slate-200]="isUserSortActive('role')">
+                  <span>Role</span>
+                  <span aria-hidden="true">{{ userSortIndicator('role') }}</span>
+                </button>
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <button type="button" (click)="toggleUserSort('plan')"
+                  class="inline-flex items-center gap-2 transition-colors hover:text-slate-700 dark:hover:text-slate-200"
+                  [class.text-slate-700]="isUserSortActive('plan')" [class.dark:text-slate-200]="isUserSortActive('plan')">
+                  <span>Plan</span>
+                  <span aria-hidden="true">{{ userSortIndicator('plan') }}</span>
+                </button>
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <button type="button" (click)="toggleUserSort('receipts')"
+                  class="inline-flex items-center gap-2 transition-colors hover:text-slate-700 dark:hover:text-slate-200"
+                  [class.text-slate-700]="isUserSortActive('receipts')" [class.dark:text-slate-200]="isUserSortActive('receipts')">
+                  <span>Receipts</span>
+                  <span aria-hidden="true">{{ userSortIndicator('receipts') }}</span>
+                </button>
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <button type="button" (click)="toggleUserSort('lastLogin')"
+                  class="inline-flex items-center gap-2 transition-colors hover:text-slate-700 dark:hover:text-slate-200"
+                  [class.text-slate-700]="isUserSortActive('lastLogin')" [class.dark:text-slate-200]="isUserSortActive('lastLogin')">
+                  <span>Last login</span>
+                  <span aria-hidden="true">{{ userSortIndicator('lastLogin') }}</span>
+                </button>
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <button type="button" (click)="toggleUserSort('lastSeen')"
+                  class="inline-flex items-center gap-2 transition-colors hover:text-slate-700 dark:hover:text-slate-200"
+                  [class.text-slate-700]="isUserSortActive('lastSeen')" [class.dark:text-slate-200]="isUserSortActive('lastSeen')">
+                  <span>Last seen</span>
+                  <span aria-hidden="true">{{ userSortIndicator('lastSeen') }}</span>
+                </button>
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <button type="button" (click)="toggleUserSort('created')"
+                  class="inline-flex items-center gap-2 transition-colors hover:text-slate-700 dark:hover:text-slate-200"
+                  [class.text-slate-700]="isUserSortActive('created')" [class.dark:text-slate-200]="isUserSortActive('created')">
+                  <span>Created</span>
+                  <span aria-hidden="true">{{ userSortIndicator('created') }}</span>
+                </button>
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-            <tr *ngFor="let user of users()" class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
+            <tr *ngFor="let user of sortedUsers()" class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
               <td class="px-4 py-3 text-sm font-medium text-slate-900 dark:text-white">
                 {{ displayName(user) }}
               </td>

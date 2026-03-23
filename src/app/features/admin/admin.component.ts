@@ -31,6 +31,8 @@ type AdminUser = UserProfile;
 type SummaryEmailPeriod = 'week' | 'month';
 type SummaryNotificationPeriod = 'week' | 'month';
 type WeeklyScheduleDay = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
+type UserSortColumn = 'name' | 'email' | 'role' | 'plan' | 'receipts' | 'lastLogin' | 'lastSeen' | 'created';
+type SortDirection = 'asc' | 'desc';
 
 interface SpendSummaryScheduleResponse {
   timeZone: string;
@@ -136,10 +138,19 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly freePlanReceiptLimitSaving = signal(false);
   readonly freePlanReceiptLimitError = signal<string | null>(null);
   readonly freePlanReceiptLimitSuccess = signal<string | null>(null);
+  readonly userSortColumn = signal<UserSortColumn>('created');
+  readonly userSortDirection = signal<SortDirection>('desc');
 
   readonly totalUsers = computed(() => this.users().length);
   readonly adminCount = computed(() => this.users().filter((user) => user.role === 'admin').length);
   readonly proCount = computed(() => this.users().filter((user) => user.subscriptionPlan === 'pro').length);
+  readonly sortedUsers = computed(() => {
+    const column = this.userSortColumn();
+    const direction = this.userSortDirection();
+    const multiplier = direction === 'asc' ? 1 : -1;
+
+    return [...this.users()].sort((a, b) => this.compareUsers(a, b, column) * multiplier);
+  });
   readonly summaryUsers = computed(() =>
     [...this.users()].sort((a, b) => this.displayName(a).localeCompare(this.displayName(b)))
   );
@@ -434,6 +445,28 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
 
+  toggleUserSort(column: UserSortColumn): void {
+    if (this.userSortColumn() === column) {
+      this.userSortDirection.set(this.userSortDirection() === 'asc' ? 'desc' : 'asc');
+      return;
+    }
+
+    this.userSortColumn.set(column);
+    this.userSortDirection.set(column === 'created' || column === 'lastLogin' || column === 'lastSeen' ? 'desc' : 'asc');
+  }
+
+  isUserSortActive(column: UserSortColumn): boolean {
+    return this.userSortColumn() === column;
+  }
+
+  userSortIndicator(column: UserSortColumn): string {
+    if (!this.isUserSortActive(column)) {
+      return '↕';
+    }
+
+    return this.userSortDirection() === 'asc' ? '↑' : '↓';
+  }
+
   private async backfillMissingReceiptCounts(users: AdminUser[]): Promise<void> {
     if (this.receiptCountSyncing()) {
       return;
@@ -470,6 +503,40 @@ export class AdminComponent implements OnInit, OnDestroy {
   private getCurrentMonthValue(): string {
     const today = new Date();
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  private compareUsers(a: AdminUser, b: AdminUser, column: UserSortColumn): number {
+    switch (column) {
+      case 'name':
+        return this.compareText(this.displayName(a), this.displayName(b));
+      case 'email':
+        return this.compareText(a.email, b.email);
+      case 'role':
+        return this.compareText(a.role || 'user', b.role || 'user');
+      case 'plan':
+        return this.compareText(a.subscriptionPlan || 'free', b.subscriptionPlan || 'free');
+      case 'receipts':
+        return (a.receiptCount ?? -1) - (b.receiptCount ?? -1);
+      case 'lastLogin':
+        return this.compareTimestamp(a.lastLoginAt, b.lastLoginAt);
+      case 'lastSeen':
+        return this.compareTimestamp(a.lastSeenAt, b.lastSeenAt);
+      case 'created':
+        return this.compareTimestamp(a.createdAt, b.createdAt);
+    }
+  }
+
+  private compareText(a: string | undefined, b: string | undefined): number {
+    return (a || '').localeCompare(b || '', undefined, { sensitivity: 'base' });
+  }
+
+  private compareTimestamp(
+    a: UserProfile['createdAt'] | UserProfile['lastLoginAt'] | UserProfile['lastSeenAt'] | null | undefined,
+    b: UserProfile['createdAt'] | UserProfile['lastLoginAt'] | UserProfile['lastSeenAt'] | null | undefined
+  ): number {
+    const aMillis = a instanceof Timestamp ? a.toMillis() : -1;
+    const bMillis = b instanceof Timestamp ? b.toMillis() : -1;
+    return aMillis - bMillis;
   }
 
   private async loadSpendSummarySchedule(): Promise<void> {
