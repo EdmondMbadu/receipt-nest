@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
@@ -26,6 +26,7 @@ export class LandingComponent {
   readonly isMobileMenuOpen = signal(false);
   readonly isDemoOpen = signal(false);
   readonly openFaqIndex = signal<number | null>(null);
+  readonly demoVideo = viewChild<ElementRef<HTMLVideoElement>>('demoVideo');
 
   readonly displayName = computed(() => {
     const profile = this.user();
@@ -60,9 +61,17 @@ export class LandingComponent {
 
   openDemo() {
     this.isDemoOpen.set(true);
+    requestAnimationFrame(() => {
+      this.demoVideo()?.nativeElement.play().catch(() => undefined);
+    });
   }
 
   closeDemo() {
+    const video = this.demoVideo()?.nativeElement;
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+    }
     this.isDemoOpen.set(false);
   }
 
