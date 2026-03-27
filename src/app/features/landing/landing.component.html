@@ -170,12 +170,13 @@
         <div class="max-w-2xl lg:flex-1">
           <h1
             class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.05]">
-            Finally know where your money goes.
+            ReceiptNest AI organizes receipts so you know where your money goes.
           </h1>
 
           <p class="mt-8 text-lg sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl">
-            Stop guessing. ReceiptNest AI turns your scattered receipts into a clear picture of your spending -
-            auto-organized, tax-ready, and private by default.
+            ReceiptNest AI is an AI receipt organizer, receipt scanner, and expense tracker for freelancers,
+            self-employed people, and small teams. Forward email receipts, upload PDFs, snap photos, and export
+            tax-ready reports without spreadsheet cleanup.
           </p>
 
           <!-- CTA Buttons -->
@@ -366,6 +367,56 @@
           <p class="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white">0</p>
           <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Third parties who see your data</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search Intent / SEO Copy -->
+  <section class="py-16 sm:py-20 border-b border-slate-100 dark:border-slate-800/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-start">
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+            Receipt organization
+          </p>
+          <h2 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+            ReceiptNest AI is a receipt organizer, receipt scanner, and receipt tracker built for real monthly life.
+          </h2>
+        </div>
+
+        <div class="space-y-4 text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
+          <p>
+            Use ReceiptNest AI to capture receipts from email, photos, and PDFs, then automatically sort merchants,
+            categories, taxes, totals, and payment methods in one searchable receipt inbox.
+          </p>
+          <p>
+            Whether you need business receipt organization, personal expense tracking, or tax-ready receipt reports,
+            ReceiptNest AI gives you a simple way to keep every receipt organized without full accounting software.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-8 flex flex-wrap gap-3">
+        <span
+          class="inline-flex items-center rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-3 py-1.5 text-xs font-semibold text-emerald-900 dark:text-emerald-200">
+          AI receipt organizer
+        </span>
+        <span
+          class="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+          Receipt scanner
+        </span>
+        <span
+          class="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+          Receipt tracker
+        </span>
+        <span
+          class="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+          Receipt management software
+        </span>
+        <span
+          class="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+          Tax-ready receipt reports
+        </span>
       </div>
     </div>
   </section>
@@ -1760,8 +1811,8 @@
             <button type="button" (click)="toggleFaq(1)"
               class="flex w-full items-center justify-between gap-4 py-6 text-left transition-colors"
               [attr.aria-expanded]="openFaqIndex() === 1">
-              <span class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">How do receipts get
-                into ReceiptNest AI?</span>
+              <span class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">What is ReceiptNest
+                AI?</span>
               <span
                 class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 transition-colors"
                 [class.bg-slate-900]="openFaqIndex() === 1" [class.dark:bg-white]="openFaqIndex() === 1"
@@ -1775,11 +1826,12 @@
               </span>
             </button>
             <div class="faq-answer overflow-hidden transition-all duration-300 ease-in-out"
-              [style.max-height]="openFaqIndex() === 1 ? '200px' : '0'"
+              [style.max-height]="openFaqIndex() === 1 ? '260px' : '0'"
               [style.opacity]="openFaqIndex() === 1 ? '1' : '0'">
               <p class="pb-6 text-[15px] sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed pr-12">
-                You can forward emails, upload PDF or photo receipts, or connect supported integrations. Everything
-                lands in one organized inbox.
+                ReceiptNest AI is an AI receipt organizer, receipt scanner, and expense tracker for freelancers,
+                self-employed people, and small teams. It captures receipts from email, photos, and PDFs, then turns
+                them into a searchable monthly expense inbox.
               </p>
             </div>
           </div>
@@ -1789,8 +1841,8 @@
             <button type="button" (click)="toggleFaq(2)"
               class="flex w-full items-center justify-between gap-4 py-6 text-left transition-colors"
               [attr.aria-expanded]="openFaqIndex() === 2">
-              <span class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">Can I export for
-                taxes or accounting?</span>
+              <span class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">How do receipts get
+                into ReceiptNest AI?</span>
               <span
                 class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 transition-colors"
                 [class.bg-slate-900]="openFaqIndex() === 2" [class.dark:bg-white]="openFaqIndex() === 2"
@@ -1807,7 +1859,8 @@
               [style.max-height]="openFaqIndex() === 2 ? '200px' : '0'"
               [style.opacity]="openFaqIndex() === 2 ? '1' : '0'">
               <p class="pb-6 text-[15px] sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed pr-12">
-                Absolutely. Export any time by month, category, or tag to CSV or PDF and share with your accountant.
+                You can forward emails, upload PDF or photo receipts, or connect supported integrations. Everything
+                lands in one organized inbox.
               </p>
             </div>
           </div>
@@ -1817,8 +1870,8 @@
             <button type="button" (click)="toggleFaq(3)"
               class="flex w-full items-center justify-between gap-4 py-6 text-left transition-colors"
               [attr.aria-expanded]="openFaqIndex() === 3">
-              <span class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">What happens if I
-                cancel?</span>
+              <span class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">Can I export for
+                taxes or accounting?</span>
               <span
                 class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 transition-colors"
                 [class.bg-slate-900]="openFaqIndex() === 3" [class.dark:bg-white]="openFaqIndex() === 3"
@@ -1835,8 +1888,7 @@
               [style.max-height]="openFaqIndex() === 3 ? '200px' : '0'"
               [style.opacity]="openFaqIndex() === 3 ? '1' : '0'">
               <p class="pb-6 text-[15px] sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed pr-12">
-                You keep access to your data. Pro features are disabled, but you can still view and export your
-                existing receipts.
+                Absolutely. Export any time by month, category, or tag to CSV or PDF and share with your accountant.
               </p>
             </div>
           </div>
@@ -1846,8 +1898,8 @@
             <button type="button" (click)="toggleFaq(4)"
               class="flex w-full items-center justify-between gap-4 py-6 text-left transition-colors"
               [attr.aria-expanded]="openFaqIndex() === 4">
-              <span class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">Is this accounting
-                software?</span>
+              <span class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">What happens if I
+                cancel?</span>
               <span
                 class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 transition-colors"
                 [class.bg-slate-900]="openFaqIndex() === 4" [class.dark:bg-white]="openFaqIndex() === 4"
@@ -1861,12 +1913,11 @@
               </span>
             </button>
             <div class="faq-answer overflow-hidden transition-all duration-300 ease-in-out"
-              [style.max-height]="openFaqIndex() === 4 ? '300px' : '0'"
+              [style.max-height]="openFaqIndex() === 4 ? '200px' : '0'"
               [style.opacity]="openFaqIndex() === 4 ? '1' : '0'">
               <p class="pb-6 text-[15px] sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed pr-12">
-                No. ReceiptNest AI is a spending clarity tool, not a bookkeeping platform. If you need invoicing,
-                payroll, or double-entry accounting, tools like Wave or QuickBooks are better suited. ReceiptNest AI
-                is for people who just want to know where their money went — and be organized when tax time comes.
+                You keep access to your data. Pro features are disabled, but you can still view and export your
+                existing receipts.
               </p>
             </div>
           </div>
@@ -1876,8 +1927,8 @@
             <button type="button" (click)="toggleFaq(5)"
               class="flex w-full items-center justify-between gap-4 py-6 text-left transition-colors"
               [attr.aria-expanded]="openFaqIndex() === 5">
-              <span class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">How is this
-                different from Wave or Expensify?</span>
+              <span class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">Is ReceiptNest AI
+                accounting software or a receipt tracker?</span>
               <span
                 class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 transition-colors"
                 [class.bg-slate-900]="openFaqIndex() === 5" [class.dark:bg-white]="openFaqIndex() === 5"
@@ -1891,12 +1942,13 @@
               </span>
             </button>
             <div class="faq-answer overflow-hidden transition-all duration-300 ease-in-out"
-              [style.max-height]="openFaqIndex() === 5 ? '300px' : '0'"
+              [style.max-height]="openFaqIndex() === 5 ? '320px' : '0'"
               [style.opacity]="openFaqIndex() === 5 ? '1' : '0'">
               <p class="pb-6 text-[15px] sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed pr-12">
-                Wave and Expensify are accounting and expense management platforms built for businesses. ReceiptNest
-                AI is built for individuals who work for themselves and want spending clarity without the complexity.
-                We're also privacy-first — we never sell or share your financial data.
+                ReceiptNest AI is a receipt tracker and receipt organizer focused on capture, search, exports, and
+                spending clarity. If you need invoicing, payroll, or double-entry accounting, tools like Wave or
+                QuickBooks are better suited. ReceiptNest AI is for people who want every receipt organized and easy to
+                review when tax time comes.
               </p>
             </div>
           </div>
@@ -1906,8 +1958,8 @@
             <button type="button" (click)="toggleFaq(6)"
               class="flex w-full items-center justify-between gap-4 py-6 text-left transition-colors"
               [attr.aria-expanded]="openFaqIndex() === 6">
-              <span class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">Can I switch plans
-                later?</span>
+              <span class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">How is ReceiptNest
+                AI different from Wave, Expensify, or other receipt apps?</span>
               <span
                 class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 transition-colors"
                 [class.bg-slate-900]="openFaqIndex() === 6" [class.dark:bg-white]="openFaqIndex() === 6"
@@ -1921,10 +1973,12 @@
               </span>
             </button>
             <div class="faq-answer overflow-hidden transition-all duration-300 ease-in-out"
-              [style.max-height]="openFaqIndex() === 6 ? '200px' : '0'"
+              [style.max-height]="openFaqIndex() === 6 ? '320px' : '0'"
               [style.opacity]="openFaqIndex() === 6 ? '1' : '0'">
               <p class="pb-6 text-[15px] sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed pr-12">
-                Yes. You can start on Free and upgrade to Pro when you need unlimited receipts and advanced tools.
+                Wave and Expensify are broader accounting and expense platforms built for business workflows.
+                ReceiptNest AI is built for individuals and small teams who want a private, lightweight receipt
+                organizer and monthly spending view without the overhead of full bookkeeping software.
               </p>
             </div>
           </div>
@@ -1934,8 +1988,8 @@
             <button type="button" (click)="toggleFaq(7)"
               class="flex w-full items-center justify-between gap-4 py-6 text-left transition-colors"
               [attr.aria-expanded]="openFaqIndex() === 7">
-              <span class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">Do you sell my
-                data?</span>
+              <span class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">Can I switch plans
+                later?</span>
               <span
                 class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 transition-colors"
                 [class.bg-slate-900]="openFaqIndex() === 7" [class.dark:bg-white]="openFaqIndex() === 7"
@@ -1951,6 +2005,34 @@
             <div class="faq-answer overflow-hidden transition-all duration-300 ease-in-out"
               [style.max-height]="openFaqIndex() === 7 ? '200px' : '0'"
               [style.opacity]="openFaqIndex() === 7 ? '1' : '0'">
+              <p class="pb-6 text-[15px] sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed pr-12">
+                Yes. You can start on Free and upgrade to Pro when you need unlimited receipts and advanced tools.
+              </p>
+            </div>
+          </div>
+
+          <!-- FAQ 8 -->
+          <div class="faq-item">
+            <button type="button" (click)="toggleFaq(8)"
+              class="flex w-full items-center justify-between gap-4 py-6 text-left transition-colors"
+              [attr.aria-expanded]="openFaqIndex() === 8">
+              <span class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white pr-4">Do you sell my
+                data?</span>
+              <span
+                class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 transition-colors"
+                [class.bg-slate-900]="openFaqIndex() === 8" [class.dark:bg-white]="openFaqIndex() === 8"
+                [class.border-transparent]="openFaqIndex() === 8">
+                <svg class="h-4 w-4 transition-transform duration-300" [class.rotate-45]="openFaqIndex() === 8"
+                  [class.text-slate-500]="openFaqIndex() !== 8" [class.dark:text-slate-400]="openFaqIndex() !== 8"
+                  [class.text-white]="openFaqIndex() === 8" [class.dark:text-slate-900]="openFaqIndex() === 8"
+                  fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+              </span>
+            </button>
+            <div class="faq-answer overflow-hidden transition-all duration-300 ease-in-out"
+              [style.max-height]="openFaqIndex() === 8 ? '200px' : '0'"
+              [style.opacity]="openFaqIndex() === 8 ? '1' : '0'">
               <p class="pb-6 text-[15px] sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed pr-12">
                 Never. Your receipts are encrypted, never shared with third parties, and never used to train AI
                 models. You can export or permanently delete all your data at any time.

@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Meta, Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../services/auth.service';
@@ -16,6 +17,8 @@ export class RegisterComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly title = inject(Title);
+  private readonly meta = inject(Meta);
 
   readonly form = this.formBuilder.group({
     firstName: ['', Validators.required],
@@ -26,6 +29,13 @@ export class RegisterComponent {
 
   isSubmitting = false;
   errorMessage = '';
+
+  constructor() {
+    this.title.setTitle('Create Account - ReceiptNest AI');
+    this.meta.updateTag({ name: 'description', content: 'Create your ReceiptNest AI account.' });
+    this.meta.updateTag({ name: 'robots', content: 'noindex, follow' });
+    this.meta.updateTag({ name: 'googlebot', content: 'noindex, follow' });
+  }
 
   async submit() {
     if (this.form.invalid) {
@@ -68,6 +78,4 @@ export class RegisterComponent {
     }
   }
 }
-
-
 

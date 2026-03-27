@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Meta, Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../services/auth.service';
@@ -14,11 +15,20 @@ import { AuthService } from '../../../services/auth.service';
 export class VerifyEmailComponent {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
+  private readonly title = inject(Title);
+  private readonly meta = inject(Meta);
 
   readonly email: string = this.router.getCurrentNavigation()?.extras.state?.['email'] ?? '';
   isSending = false;
   message = '';
   error = '';
+
+  constructor() {
+    this.title.setTitle('Verify Email - ReceiptNest AI');
+    this.meta.updateTag({ name: 'description', content: 'Verify your email to continue with ReceiptNest AI.' });
+    this.meta.updateTag({ name: 'robots', content: 'noindex, follow' });
+    this.meta.updateTag({ name: 'googlebot', content: 'noindex, follow' });
+  }
 
   async resend() {
     this.error = '';
@@ -34,6 +44,4 @@ export class VerifyEmailComponent {
     }
   }
 }
-
-
 

@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../services/auth.service';
@@ -18,6 +19,8 @@ export class LoginComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly title = inject(Title);
+  private readonly meta = inject(Meta);
 
   readonly form = this.formBuilder.group({
     email: ['', [Validators.required, Validators.email]],
@@ -29,6 +32,13 @@ export class LoginComponent {
   errorMessage = '';
   resetMessage = '';
   resetErrorMessage = '';
+
+  constructor() {
+    this.title.setTitle('Sign In - ReceiptNest AI');
+    this.meta.updateTag({ name: 'description', content: 'Sign in to your ReceiptNest AI account.' });
+    this.meta.updateTag({ name: 'robots', content: 'noindex, follow' });
+    this.meta.updateTag({ name: 'googlebot', content: 'noindex, follow' });
+  }
 
   async submit() {
     if (this.form.invalid) {

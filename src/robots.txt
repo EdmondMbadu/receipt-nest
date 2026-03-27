@@ -4,21 +4,10 @@
 User-agent: *
 Allow: /
 
-# Sitemap location
-Sitemap: https://receipt-nest.com/sitemap.xml
-
-# Crawl-delay (optional, be nice to servers)
-Crawl-delay: 1
-
 # Disallow private/authenticated areas
 Disallow: /app/
 Disallow: /home/
 Disallow: /app/receipt/
 
-# Allow important pages
-Allow: /
-Allow: /login
-Allow: /register
-Allow: /terms
-Allow: /support
-Allow: /share/
+# Sitemap location
+Sitemap: https://receipt-nest.com/sitemap.xml
