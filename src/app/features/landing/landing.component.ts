@@ -82,9 +82,9 @@ export class LandingComponent {
   }
 
   private applySeoTags() {
-    const pageTitle = 'ReceiptNest AI | AI Receipt Organizer & Expense Tracker';
+    const pageTitle = 'ReceiptNest AI | Receipt Organizer & Expense Tracker';
     const description =
-      'ReceiptNest AI is an AI receipt organizer and expense tracker for freelancers and small teams. Scan, upload, sort, search, and export tax-ready receipts.';
+      'ReceiptNest AI is a receipt organizer and expense tracker that turns scattered receipts into a clear picture of your spending: auto-organized, tax-ready, and private by default.';
     const keywords =
       'ReceiptNest AI, ReceiptNest, receipt organizer, AI receipt organizer, receipt scanner, receipt tracker, receipt management software, expense tracker, receipt inbox, tax-ready receipts';
     const canonicalUrl = 'https://receipt-nest.com/';

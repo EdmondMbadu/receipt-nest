@@ -14,13 +14,15 @@
         </a>
 
         <div class="hidden items-center gap-1 lg:flex">
-          <a href="#features"
-            class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Features</a>
-          <a href="#people"
-            class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">People</a>
-          <a href="#pricing"
+          <a href="/#receipt-organizer"
+            class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Receipt Organizer</a>
+          <a href="/#how-it-works"
+            class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">How It Works</a>
+          <a href="/#people"
+            class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Who It's For</a>
+          <a href="/#pricing"
             class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Pricing</a>
-          <a href="#faq"
+          <a href="/#faq"
             class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">FAQ</a>
         </div>
 
@@ -106,25 +108,34 @@
 
       <div class="flex-1 overflow-y-auto p-5">
         <div class="space-y-1">
-          <a href="#features" (click)="toggleMobileMenu()"
+          <a href="/#receipt-organizer" (click)="toggleMobileMenu()"
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
               viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
             </svg>
-            Features
+            Receipt Organizer
           </a>
-          <a href="#people" (click)="toggleMobileMenu()"
+          <a href="/#how-it-works" (click)="toggleMobileMenu()"
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
               viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
             </svg>
-            People
+            How It Works
           </a>
-          <a href="#pricing" (click)="toggleMobileMenu()"
+          <a href="/#people" (click)="toggleMobileMenu()"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.979 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.072M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.526-.645-6.401-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+            </svg>
+            Who It's For
+          </a>
+          <a href="/#pricing" (click)="toggleMobileMenu()"
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
               viewBox="0 0 24 24">
@@ -133,7 +144,7 @@
             </svg>
             Pricing
           </a>
-          <a href="#faq" (click)="toggleMobileMenu()"
+          <a href="/#faq" (click)="toggleMobileMenu()"
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5"
               viewBox="0 0 24 24">
@@ -170,13 +181,12 @@
         <div class="max-w-2xl lg:flex-1">
           <h1
             class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.05]">
-            ReceiptNest AI organizes receipts so you know where your money goes.
+            Finally know where your money goes.
           </h1>
 
-          <p class="mt-8 text-lg sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl">
-            ReceiptNest AI is an AI receipt organizer, receipt scanner, and expense tracker for freelancers,
-            self-employed people, and small teams. Forward email receipts, upload PDFs, snap photos, and export
-            tax-ready reports without spreadsheet cleanup.
+          <p class="mt-6 text-lg sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl">
+            Stop guessing. ReceiptNest AI turns your scattered receipts into a clear picture of your spending -
+            auto-organized, tax-ready, and private by default.
           </p>
 
           <!-- CTA Buttons -->
@@ -227,6 +237,30 @@
               </svg>
               <span>Free forever to start</span>
             </div>
+          </div>
+
+          <div class="mt-8 flex flex-wrap items-center gap-3">
+            <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Jump to:</span>
+            <a href="/#receipt-organizer"
+              class="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              Receipt Organizer
+            </a>
+            <a href="/#how-it-works"
+              class="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              How It Works
+            </a>
+            <a href="/#people"
+              class="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              Who It's For
+            </a>
+            <a href="/#pricing"
+              class="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              Pricing
+            </a>
+            <a href="/#faq"
+              class="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              FAQ
+            </a>
           </div>
         </div>
 
@@ -372,7 +406,7 @@
   </section>
 
   <!-- Search Intent / SEO Copy -->
-  <section class="py-16 sm:py-20 border-b border-slate-100 dark:border-slate-800/50">
+  <section id="receipt-organizer" class="py-16 sm:py-20 border-b border-slate-100 dark:border-slate-800/50">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-start">
         <div>
