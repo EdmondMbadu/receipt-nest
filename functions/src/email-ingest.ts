@@ -21,6 +21,7 @@ const MAX_EMAIL_TEXT_LENGTH = 12000;
 const MAX_EMAIL_HTML_LENGTH = 250000;
 const MAX_EMAIL_DOCUMENT_TEXT_LENGTH = 50000;
 const MAX_ALIAS_LOCAL_PART_LENGTH = 64;
+const RECEIPT_FORWARDING_ALIAS_COLLECTION = "receiptForwardingAliases";
 
 const ALLOWED_ATTACHMENT_TYPES = new Set([
   "image/jpeg",
@@ -521,7 +522,20 @@ async function findUsersByRecipientLocals(recipientLocals: string[]): Promise<Se
     }
   }
 
-  const aliasLookups = await Promise.all(Array.from(aliasCandidates).map(async (alias) => {
+  const aliasReservationLookups = await Promise.all(Array.from(aliasCandidates).map(async (alias) => {
+    const snapshot = await db.doc(`${RECEIPT_FORWARDING_ALIAS_COLLECTION}/${alias}`).get();
+    const reservedUserId = snapshot.get("userId");
+    return typeof reservedUserId === "string" && reservedUserId ? reservedUserId : null;
+  }));
+
+  for (const userId of aliasReservationLookups) {
+    if (userId) {
+      matchedUserIds.add(userId);
+    }
+  }
+
+  const unresolvedAliases = Array.from(aliasCandidates).filter((_, index) => !aliasReservationLookups[index]);
+  const aliasLookups = await Promise.all(unresolvedAliases.map(async (alias) => {
     const snapshot = await db
       .collection("users")
       .where("receiptEmailAlias", "==", alias)
@@ -2369,15 +2383,42 @@ async function resolvePrimaryAliasForUser(
 ): Promise<string> {
   const existingAlias = String(userData.receiptEmailAlias || "").toLowerCase();
   if (isValidAliasLocalPart(existingAlias) && !looksLikeLegacyTokenAlias(existingAlias)) {
-    return existingAlias;
+    const claimedExistingAlias = await tryClaimAlias(userId, existingAlias);
+    if (claimedExistingAlias) {
+      return claimedExistingAlias;
+    }
   }
 
   const baseAlias = buildAliasBase(userData, userId);
   return allocateUniqueAlias(userId, baseAlias);
 }
 
-async function allocateUniqueAlias(userId: string, baseAlias: string): Promise<string> {
+async function tryClaimAlias(userId: string, alias: string): Promise<string | null> {
+  const normalizedAlias = alias.toLowerCase();
+  if (!isValidAliasLocalPart(normalizedAlias)) {
+    return null;
+  }
+
   const db = admin.firestore();
+  const aliasRef = db.doc(`${RECEIPT_FORWARDING_ALIAS_COLLECTION}/${normalizedAlias}`);
+
+  return db.runTransaction(async (transaction) => {
+    const aliasSnap = await transaction.get(aliasRef);
+    if (aliasSnap.exists) {
+      return aliasSnap.get("userId") === userId ? normalizedAlias : null;
+    }
+
+    transaction.set(aliasRef, {
+      alias: normalizedAlias,
+      userId,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    return normalizedAlias;
+  });
+}
+
+async function allocateUniqueAlias(userId: string, baseAlias: string): Promise<string> {
   const normalizedBase = baseAlias
     .replace(/[^a-z0-9._-]/g, "")
     .replace(/^[._-]+|[._-]+$/g, "")
@@ -2395,14 +2436,9 @@ async function allocateUniqueAlias(userId: string, baseAlias: string): Promise<s
       continue;
     }
 
-    const snapshot = await db
-      .collection("users")
-      .where("receiptEmailAlias", "==", candidate)
-      .limit(1)
-      .get();
-
-    if (snapshot.empty || snapshot.docs[0].id === userId) {
-      return candidate;
+    const claimedAlias = await tryClaimAlias(userId, candidate);
+    if (claimedAlias) {
+      return claimedAlias;
     }
   }
 
