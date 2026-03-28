@@ -50,12 +50,10 @@ export const ALLOWED_FILE_TYPES = [
   'image/webp',
   'image/heic',
   'image/heif',
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  'application/pdf'
 ];
 
-const ALLOWED_FILE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'pdf', 'doc', 'docx'];
+const ALLOWED_FILE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'pdf'];
 
 /**
  * Maximum file size (10MB)
@@ -126,7 +124,7 @@ export class ReceiptService {
     if (!hasAllowedMime && !hasAllowedExtension) {
       return {
         valid: false,
-        error: 'Invalid file type. Allowed: JPEG, PNG, WebP, HEIC, HEIF, PDF, DOC, DOCX'
+        error: 'Invalid file type. Allowed: JPEG, PNG, WebP, HEIC, HEIF, PDF'
       };
     }
 

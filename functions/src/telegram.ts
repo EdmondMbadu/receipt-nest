@@ -22,6 +22,7 @@ import {
   formatCurrency,
 } from "./ai-insights";
 import { getFreePlanReceiptLimit } from "./app-config";
+import { assertAdmin } from "./authz";
 
 // ─── Secrets & Configuration ────────────────────────────────────────────────
 
@@ -1158,15 +1159,7 @@ export const setupTelegramWebhook = onCall(
       throw new HttpsError("unauthenticated", "Authentication required");
     }
 
-    // Verify admin role
-    const db = admin.firestore();
-    const userDoc = await db.doc(`users/${request.auth.uid}`).get();
-    if (!userDoc.exists || userDoc.data()?.role !== "admin") {
-      throw new HttpsError(
-        "permission-denied",
-        "Only admins can setup the webhook"
-      );
-    }
+    await assertAdmin(request.auth.uid, request.auth.token as Record<string, unknown>);
 
     const token = telegramBotToken.value();
     if (!token) {

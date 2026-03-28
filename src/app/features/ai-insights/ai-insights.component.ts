@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { doc, getFirestore, onSnapshot } from 'firebase/firestore';
 
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
@@ -11,7 +10,6 @@ import { ReceiptService } from '../../services/receipt.service';
 import { AiInsightsService } from '../../services/ai-insights.service';
 import { UploadComponent } from '../../components/upload/upload.component';
 import { Receipt } from '../../models/receipt.model';
-import { app } from '../../../../environments/environments';
 
 @Component({
   selector: 'app-ai-insights',
@@ -29,7 +27,6 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly receiptService = inject(ReceiptService);
   readonly aiService = inject(AiInsightsService);
-  private readonly db = getFirestore(app);
   private readonly sanitizer = inject(DomSanitizer);
 
   readonly user = this.auth.user;
@@ -39,9 +36,8 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
   readonly error = this.aiService.error;
 
   // Subscription state
-  readonly subscriptionPlan = signal<'free' | 'pro'>('free');
-  readonly subscriptionStatus = signal<string>('inactive');
-  private userSubscriptionCleanup: (() => void) | null = null;
+  readonly subscriptionPlan = computed<'free' | 'pro'>(() => this.user()?.subscriptionPlan ?? 'free');
+  readonly subscriptionStatus = computed(() => this.user()?.subscriptionStatus ?? 'inactive');
 
   // Input state
   readonly messageText = signal('');
@@ -72,33 +68,22 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
       setTimeout(() => this.scrollToBottom(), 100);
     }
   });
+  private accessEffect = effect(() => {
+    if (!this.hasAiAccess()) {
+      return;
+    }
+
+    void this.aiService.initializeChatState();
+  });
 
   ngOnInit(): void {
     // Subscribe to receipt updates
     this.receiptService.subscribeToReceipts();
 
-    // Subscribe to user subscription status
-    const user = this.user();
-    if (user) {
-      const userRef = doc(this.db, 'users', user.id);
-      this.userSubscriptionCleanup = onSnapshot(userRef, (snapshot) => {
-        if (snapshot.exists()) {
-          const data = snapshot.data();
-          this.subscriptionPlan.set((data['subscriptionPlan'] as 'free' | 'pro') || 'free');
-          this.subscriptionStatus.set(String(data['subscriptionStatus'] || 'inactive'));
-          this.initializeAiData();
-        }
-      });
-    }
-
     this.initializeAiData();
   }
 
-  ngOnDestroy(): void {
-    if (this.userSubscriptionCleanup) {
-      this.userSubscriptionCleanup();
-    }
-  }
+  ngOnDestroy(): void {}
 
   toggleTheme(): void {
     this.theme.toggleTheme();
@@ -306,6 +291,6 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
   private initializeAiData(): void {
     if (!this.hasAiAccess()) return;
 
-    this.aiService.initializeChatState();
+    void this.aiService.initializeChatState();
   }
 }

@@ -2,10 +2,12 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper function to check if user is authenticated
     function isAuthenticated() {
       return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
     }
 
     function isAdmin() {
@@ -16,72 +18,193 @@ service cloud.firestore {
           || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
         );
     }
-    
-    // Helper function to check if user owns the document
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+
+    function isAllowedReceiptMimeType(mimeType) {
+      return mimeType in [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/webp',
+        'image/heic',
+        'image/heif',
+        'application/pdf'
+      ];
     }
-    
-    // User profiles
+
+    function isUserReceiptStoragePath(userId, storagePath) {
+      return storagePath is string
+        && storagePath.matches('^users/' + userId + '/receipts/[^/]+$');
+    }
+
+    function isValidReceiptFile(userId, file) {
+      return file is map
+        && file.storagePath is string
+        && file.originalName is string
+        && file.mimeType is string
+        && file.sizeBytes is number
+        && file.sizeBytes > 0
+        && file.sizeBytes <= 10 * 1024 * 1024
+        && isAllowedReceiptMimeType(file.mimeType)
+        && isUserReceiptStoragePath(userId, file.storagePath);
+    }
+
+    function ownerCanCreateUserProfile(userId) {
+      return isOwner(userId)
+        && request.resource.data.keys().hasOnly([
+          'id',
+          'firstName',
+          'lastName',
+          'email',
+          'receiptCount',
+          'role',
+          'notificationSettings',
+          'lastLoginAt',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.id == userId
+        && request.resource.data.role == 'user'
+        && request.resource.data.email is string
+        && request.resource.data.firstName is string
+        && request.resource.data.lastName is string
+        && (
+          !request.resource.data.keys().hasAny(['receiptCount'])
+          || request.resource.data.receiptCount == 0
+        );
+    }
+
+    function ownerCanUpdateUserProfile(userId) {
+      let changedKeys = request.resource.data.diff(resource.data).changedKeys();
+
+      return isOwner(userId)
+        && changedKeys.hasOnly([
+          'firstName',
+          'lastName',
+          'email',
+          'notificationSettings',
+          'lastLoginAt',
+          'lastSeenAt',
+          'notificationTokens',
+          'notificationTimeZone',
+          'receiptForwardingEnabled',
+          'telegramChatId',
+          'telegramLinkedAt',
+          'updatedAt'
+        ])
+        && (
+          !changedKeys.hasAny(['telegramChatId', 'telegramLinkedAt'])
+          || (
+            request.resource.data.telegramChatId == null
+            && request.resource.data.telegramLinkedAt == null
+          )
+        );
+    }
+
+    function ownerCanCreateReceipt(userId) {
+      return isOwner(userId)
+        && request.resource.data.keys().hasOnly([
+          'userId',
+          'status',
+          'file',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.userId == userId
+        && request.resource.data.status == 'uploaded'
+        && isValidReceiptFile(userId, request.resource.data.file);
+    }
+
+    function ownerCanUpdateReceipt(userId, receiptId) {
+      let changedKeys = request.resource.data.diff(resource.data).changedKeys();
+
+      return isOwner(userId)
+        && changedKeys.hasOnly([
+          'id',
+          'status',
+          'totalAmount',
+          'currency',
+          'date',
+          'merchant',
+          'category',
+          'notes',
+          'tags',
+          'updatedAt'
+        ])
+        && (
+          !changedKeys.hasAny(['id'])
+          || (
+            request.resource.data.id == receiptId
+            && (resource.data.id == null || resource.data.id == receiptId)
+          )
+        );
+    }
+
+    function ownerCanWriteFolder(userId) {
+      return isOwner(userId)
+        && request.resource.data.userId == userId;
+    }
+
     match /users/{userId} {
-      allow read, write: if isOwner(userId) || isAdmin();
-      
-      // User's receipts subcollection
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if ownerCanCreateUserProfile(userId) || isAdmin();
+      allow update: if ownerCanUpdateUserProfile(userId) || isAdmin();
+      allow delete: if isAdmin();
+
       match /receipts/{receiptId} {
-        allow read, write: if isOwner(userId) || isAdmin();
+        allow get, list: if isOwner(userId) || isAdmin();
+        allow create: if ownerCanCreateReceipt(userId) || isAdmin();
+        allow update: if ownerCanUpdateReceipt(userId, receiptId) || isAdmin();
+        allow delete: if isOwner(userId) || isAdmin();
       }
-      
-      // User's merchants subcollection
+
       match /merchants/{merchantId} {
         allow read, write: if isOwner(userId) || isAdmin();
       }
-      
-      // User's monthly summaries subcollection
+
       match /monthlySummaries/{summaryId} {
         allow read, write: if isOwner(userId) || isAdmin();
       }
 
-      // User's folders subcollection
       match /folders/{folderId} {
-        allow read, write: if isOwner(userId) || isAdmin();
+        allow get, list: if isOwner(userId) || isAdmin();
+        allow create, update: if ownerCanWriteFolder(userId) || isAdmin();
+        allow delete: if isOwner(userId) || isAdmin();
       }
 
-      // User's AI chat sessions
       match /aiChats/{chatId} {
         allow read, write: if isOwner(userId) || isAdmin();
       }
     }
-    
-    // Telegram account linking tokens (short-lived)
+
     match /telegramLinks/{token} {
       allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
       allow read: if isAuthenticated() && request.auth.uid == resource.data.userId;
-      allow update, delete: if false; // Only Cloud Functions (Admin SDK) can update/delete
+      allow update, delete: if false;
     }
 
-    // Global categories (read-only for authenticated users)
     match /categories/{categoryId} {
       allow read: if isAuthenticated();
-      allow write: if false; // Admin only via console
+      allow write: if false;
     }
 
-    // Public app config
     match /publicConfig/{configId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Public graph share links
     match /graphShares/{shareId} {
       allow read: if true;
-      allow write: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
+      allow update: if false;
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.userId;
     }
 
-    // Public AI chat share links (view-only for anyone with link)
     match /chatShares/{shareId} {
       allow read: if true;
       allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
-      allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      allow update: if false;
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.userId;
     }
   }
 }

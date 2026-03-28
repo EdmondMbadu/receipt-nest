@@ -3,23 +3,10 @@ import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import sgMail from "@sendgrid/mail";
+import { assertAdmin } from "./authz";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
 const fromEmail = "info@receipt-nest.com";
-
-const assertAdmin = async (uid: string, token: Record<string, unknown>) => {
-  if (token?.admin === true || token?.role === "admin") {
-    return;
-  }
-
-  const userSnap = await admin.firestore().doc(`users/${uid}`).get();
-  const role = userSnap.get("role");
-  if (role === "admin") {
-    return;
-  }
-
-  throw new HttpsError("permission-denied", "Admin access required.");
-};
 
 const MAX_RECEIPT_COUNT_BACKFILL_USERS = 50;
 

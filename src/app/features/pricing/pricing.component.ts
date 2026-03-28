@@ -1,8 +1,8 @@
-import { Component, EffectRef, OnDestroy, computed, effect, inject, signal } from '@angular/core';
+import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
-import { doc, getFirestore, onSnapshot, Timestamp } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 import { httpsCallable, getFunctions } from 'firebase/functions';
 import { AppConfigService } from '../../services/app-config.service';
 import { ThemeService } from '../../services/theme.service';
@@ -23,7 +23,6 @@ export class PricingComponent implements OnDestroy {
   private readonly meta = inject(Meta);
   private readonly auth = inject(AuthService);
   private readonly appConfig = inject(AppConfigService);
-  private readonly db = getFirestore(app);
   private readonly functions = getFunctions(app);
   private readonly route = inject(ActivatedRoute);
   readonly isDarkMode = this.theme.isDarkMode;
@@ -34,14 +33,13 @@ export class PricingComponent implements OnDestroy {
   readonly portalError = signal<string | null>(null);
   readonly limitReachedNotice = signal(false);
   readonly freePlanReceiptLimit = this.appConfig.freePlanReceiptLimit;
+  readonly profile = this.auth.user;
 
-  readonly subscriptionPlan = signal<'free' | 'pro'>('free');
-  readonly subscriptionStatus = signal<string>('inactive');
-  readonly subscriptionInterval = signal<'monthly' | 'annual'>('monthly');
-  readonly subscriptionPeriodEnd = signal<Timestamp | null>(null);
-  readonly cancelAtPeriodEnd = signal<boolean>(false);
-  private userSubscriptionCleanup: (() => void) | null = null;
-  private userEffectRef: EffectRef | null = null;
+  readonly subscriptionPlan = computed<'free' | 'pro'>(() => this.profile()?.subscriptionPlan ?? 'free');
+  readonly subscriptionStatus = computed(() => this.profile()?.subscriptionStatus ?? 'inactive');
+  readonly subscriptionInterval = computed<'monthly' | 'annual'>(() => this.profile()?.subscriptionInterval ?? 'monthly');
+  readonly subscriptionPeriodEnd = computed<Timestamp | null>(() => (this.profile()?.subscriptionCurrentPeriodEnd as Timestamp | null) ?? null);
+  readonly cancelAtPeriodEnd = computed(() => Boolean(this.profile()?.subscriptionCancelAtPeriodEnd));
   private routeSubscription: Subscription | null = null;
 
   readonly isPro = computed(() => this.subscriptionPlan() === 'pro');
@@ -61,34 +59,6 @@ export class PricingComponent implements OnDestroy {
     this.routeSubscription = this.route.queryParamMap.subscribe((params) => {
       this.limitReachedNotice.set(params.get('limit') === 'free');
     });
-
-    this.userEffectRef = effect(
-      () => {
-        const user = this.auth.user();
-        if (!user) {
-          this.resetSubscriptionState();
-          this.detachUserSubscription();
-          return;
-        }
-
-        this.detachUserSubscription();
-        const userRef = doc(this.db, 'users', user.id);
-        this.userSubscriptionCleanup = onSnapshot(userRef, (snapshot) => {
-          if (!snapshot.exists()) {
-            this.resetSubscriptionState();
-            return;
-          }
-
-          const data = snapshot.data();
-          this.subscriptionPlan.set((data['subscriptionPlan'] as 'free' | 'pro') || 'free');
-          this.subscriptionStatus.set(String(data['subscriptionStatus'] || 'inactive'));
-          this.subscriptionInterval.set((data['subscriptionInterval'] as 'monthly' | 'annual') || 'monthly');
-          this.subscriptionPeriodEnd.set((data['subscriptionCurrentPeriodEnd'] as Timestamp) || null);
-          this.cancelAtPeriodEnd.set(Boolean(data['subscriptionCancelAtPeriodEnd']));
-        });
-      },
-      { allowSignalWrites: true }
-    );
   }
 
   toggleTheme() {
@@ -96,9 +66,6 @@ export class PricingComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.detachUserSubscription();
-    this.userEffectRef?.destroy();
-    this.userEffectRef = null;
     this.routeSubscription?.unsubscribe();
     this.routeSubscription = null;
   }
@@ -142,21 +109,6 @@ export class PricingComponent implements OnDestroy {
       this.portalError.set('Unable to open the billing portal right now.');
     } finally {
       this.isPortalProcessing.set(false);
-    }
-  }
-
-  private resetSubscriptionState() {
-    this.subscriptionPlan.set('free');
-    this.subscriptionStatus.set('inactive');
-    this.subscriptionInterval.set('monthly');
-    this.subscriptionPeriodEnd.set(null);
-    this.cancelAtPeriodEnd.set(false);
-  }
-
-  private detachUserSubscription() {
-    if (this.userSubscriptionCleanup) {
-      this.userSubscriptionCleanup();
-      this.userSubscriptionCleanup = null;
     }
   }
 }

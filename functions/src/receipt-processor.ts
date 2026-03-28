@@ -12,6 +12,7 @@ import * as admin from "firebase-admin";
 import { VertexAI } from "@google-cloud/vertexai";
 import sharp from "sharp";
 import heicDecode from "heic-decode";
+import { assertAdmin } from "./authz";
 
 // Types
 interface ExtractedField<T> {
@@ -91,6 +92,7 @@ const CATEGORIES = [
 ];
 
 const VALID_CATEGORY_NAMES = CATEGORIES.map((c) => c.name);
+const USER_RECEIPT_STORAGE_PREFIX = "users/";
 
 const updateUserReceiptCount = async (userId: string, delta: number) => {
   const userRef = admin.firestore().doc(`users/${userId}`);
@@ -102,6 +104,11 @@ const updateUserReceiptCount = async (userId: string, delta: number) => {
     { merge: true }
   );
 };
+
+const buildUserReceiptStoragePrefix = (userId: string) => `${USER_RECEIPT_STORAGE_PREFIX}${userId}/receipts/`;
+
+const isOwnedReceiptStoragePath = (userId: string, storagePath: unknown): storagePath is string =>
+  typeof storagePath === "string" && storagePath.startsWith(buildUserReceiptStoragePrefix(userId));
 
 export const onReceiptCreatedUpdateUserCount = onDocumentCreated(
   {
@@ -400,6 +407,12 @@ export const processReceipt = onDocumentCreated(
       const storagePath = receiptData.file?.storagePath;
       if (!storagePath) {
         throw new Error("No storage path found in receipt document");
+      }
+      if (receiptData.userId !== userId) {
+        throw new Error("Receipt userId does not match the document owner");
+      }
+      if (!isOwnedReceiptStoragePath(userId, storagePath)) {
+        throw new Error("Receipt storage path does not belong to the document owner");
       }
 
       const bucket = admin.storage().bucket();
@@ -951,14 +964,7 @@ export const backfillReceiptCategories = onCall(
       throw new HttpsError("unauthenticated", "User must be authenticated.");
     }
 
-    const token = request.auth.token as Record<string, unknown>;
-    if (token?.admin !== true && token?.role !== "admin") {
-      const userSnap = await admin.firestore().doc(`users/${request.auth.uid}`).get();
-      const role = userSnap.get("role");
-      if (role !== "admin") {
-        throw new HttpsError("permission-denied", "Admin access required.");
-      }
-    }
+    await assertAdmin(request.auth.uid, request.auth.token as Record<string, unknown>);
 
     const batchSize = (request.data?.batchSize as number) || 50;
     const targetUserId = request.data?.userId as string | undefined;
@@ -997,6 +1003,16 @@ export const backfillReceiptCategories = onCall(
         const storagePath = data.file?.storagePath;
         if (!storagePath) {
           logger.warn(`Backfill: No storagePath for receipt ${doc.id}`);
+          errors++;
+          continue;
+        }
+        if (data.userId !== userId || !isOwnedReceiptStoragePath(userId, storagePath)) {
+          logger.warn("Backfill: Rejected receipt with invalid storage ownership", {
+            userId,
+            receiptId: doc.id,
+            storagePath,
+            receiptUserId: data.userId,
+          });
           errors++;
           continue;
         }
