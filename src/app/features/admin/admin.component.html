@@ -196,8 +196,43 @@
             Loading automation schedule...
           </div>
 
-          <div *ngIf="!scheduleLoading()" class="grid gap-4 xl:grid-cols-2">
-            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 space-y-4">
+          <div *ngIf="!scheduleLoading()" class="space-y-4">
+            <div
+              class="rounded-2xl border px-4 py-3"
+              [class.border-emerald-200]="weeklyAutomationEnabled() && monthlyAutomationEnabled()"
+              [class.bg-emerald-50/80]="weeklyAutomationEnabled() && monthlyAutomationEnabled()"
+              [class.dark:border-emerald-900/60]="weeklyAutomationEnabled() && monthlyAutomationEnabled()"
+              [class.dark:bg-emerald-950/30]="weeklyAutomationEnabled() && monthlyAutomationEnabled()"
+              [class.border-amber-200]="!weeklyAutomationEnabled() || !monthlyAutomationEnabled()"
+              [class.bg-amber-50/80]="!weeklyAutomationEnabled() || !monthlyAutomationEnabled()"
+              [class.dark:border-amber-900/60]="!weeklyAutomationEnabled() || !monthlyAutomationEnabled()"
+              [class.dark:bg-amber-950/30]="!weeklyAutomationEnabled() || !monthlyAutomationEnabled()">
+              <p class="text-sm font-semibold"
+                [class.text-emerald-800]="weeklyAutomationEnabled() && monthlyAutomationEnabled()"
+                [class.dark:text-emerald-200]="weeklyAutomationEnabled() && monthlyAutomationEnabled()"
+                [class.text-amber-900]="!weeklyAutomationEnabled() || !monthlyAutomationEnabled()"
+                [class.dark:text-amber-100]="!weeklyAutomationEnabled() || !monthlyAutomationEnabled()">
+                {{ weeklyAutomationEnabled() && monthlyAutomationEnabled()
+                  ? 'Summary automations are live.'
+                  : 'One or more summary automations are paused.' }}
+              </p>
+              <p class="mt-1 text-sm"
+                [class.text-emerald-700]="weeklyAutomationEnabled() && monthlyAutomationEnabled()"
+                [class.dark:text-emerald-300]="weeklyAutomationEnabled() && monthlyAutomationEnabled()"
+                [class.text-amber-800]="!weeklyAutomationEnabled() || !monthlyAutomationEnabled()"
+                [class.dark:text-amber-200]="!weeklyAutomationEnabled() || !monthlyAutomationEnabled()">
+                {{ weeklyAutomationEnabled() && monthlyAutomationEnabled()
+                  ? 'Weekly and monthly summary emails are enabled. Future changes only go live after you save each schedule.'
+                  : 'Paused schedules do not send any summary emails. Toggle them on and save the schedule to make them live.' }}
+              </p>
+            </div>
+
+            <div class="grid gap-4 xl:grid-cols-2">
+            <div class="rounded-2xl border bg-white dark:bg-slate-900 p-4 space-y-4"
+              [class.border-emerald-300]="weeklyAutomationEnabled()"
+              [class.dark:border-emerald-800]="weeklyAutomationEnabled()"
+              [class.border-amber-300]="!weeklyAutomationEnabled()"
+              [class.dark:border-amber-800]="!weeklyAutomationEnabled()">
               <div class="flex items-start justify-between gap-3">
                 <div>
                   <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Weekly automation</p>
@@ -205,12 +240,62 @@
                     Sends the most recently completed week on the schedule below.
                   </p>
                 </div>
-                <label class="inline-flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
-                  <input type="checkbox" [ngModel]="weeklyAutomationEnabled()"
-                    (ngModelChange)="weeklyAutomationEnabled.set(!!$event)"
-                    class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                <button type="button" (click)="weeklyAutomationEnabled.set(!weeklyAutomationEnabled())"
+                  class="inline-flex items-center gap-3 rounded-full border px-3 py-2 text-sm font-semibold transition-colors"
+                  [attr.aria-pressed]="weeklyAutomationEnabled()"
+                  [class.border-emerald-300]="weeklyAutomationEnabled()"
+                  [class.bg-emerald-50]="weeklyAutomationEnabled()"
+                  [class.text-emerald-700]="weeklyAutomationEnabled()"
+                  [class.dark:border-emerald-800]="weeklyAutomationEnabled()"
+                  [class.dark:bg-emerald-950/40]="weeklyAutomationEnabled()"
+                  [class.dark:text-emerald-200]="weeklyAutomationEnabled()"
+                  [class.border-amber-300]="!weeklyAutomationEnabled()"
+                  [class.bg-amber-50]="!weeklyAutomationEnabled()"
+                  [class.text-amber-700]="!weeklyAutomationEnabled()"
+                  [class.dark:border-amber-800]="!weeklyAutomationEnabled()"
+                  [class.dark:bg-amber-950/40]="!weeklyAutomationEnabled()"
+                  [class.dark:text-amber-200]="!weeklyAutomationEnabled()">
                   <span>{{ weeklyAutomationEnabled() ? 'Enabled' : 'Paused' }}</span>
-                </label>
+                  <span class="relative h-7 w-12 rounded-full transition-colors"
+                    [class.bg-emerald-500]="weeklyAutomationEnabled()"
+                    [class.bg-amber-400]="!weeklyAutomationEnabled()">
+                    <span class="absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-transform"
+                      [class.left-6]="weeklyAutomationEnabled()"
+                      [class.left-1]="!weeklyAutomationEnabled()"></span>
+                  </span>
+                </button>
+              </div>
+
+              <div class="rounded-xl border px-3 py-3"
+                [class.border-emerald-200]="weeklyAutomationEnabled()"
+                [class.bg-emerald-50/70]="weeklyAutomationEnabled()"
+                [class.dark:border-emerald-900/60]="weeklyAutomationEnabled()"
+                [class.dark:bg-emerald-950/30]="weeklyAutomationEnabled()"
+                [class.border-amber-200]="!weeklyAutomationEnabled()"
+                [class.bg-amber-50/70]="!weeklyAutomationEnabled()"
+                [class.dark:border-amber-900/60]="!weeklyAutomationEnabled()"
+                [class.dark:bg-amber-950/30]="!weeklyAutomationEnabled()">
+                <p class="text-sm font-semibold"
+                  [class.text-emerald-800]="weeklyAutomationEnabled()"
+                  [class.dark:text-emerald-200]="weeklyAutomationEnabled()"
+                  [class.text-amber-900]="!weeklyAutomationEnabled()"
+                  [class.dark:text-amber-100]="!weeklyAutomationEnabled()">
+                  {{ weeklyAutomationEnabled()
+                    ? 'Weekly summary emails are enabled.'
+                    : 'Weekly summary emails are paused.' }}
+                </p>
+                <p class="mt-1 text-sm"
+                  [class.text-emerald-700]="weeklyAutomationEnabled()"
+                  [class.dark:text-emerald-300]="weeklyAutomationEnabled()"
+                  [class.text-amber-800]="!weeklyAutomationEnabled()"
+                  [class.dark:text-amber-200]="!weeklyAutomationEnabled()">
+                  {{ weeklyAutomationEnabled()
+                    ? 'Members with an email address can receive the completed weekly summary on the saved schedule below.'
+                    : 'No weekly summary emails will be sent until this is turned on and the weekly schedule is saved.' }}
+                </p>
+                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                  Changes to the toggle, day, or time are only applied after you click <span class="font-semibold text-slate-700 dark:text-slate-200">Save weekly schedule</span>.
+                </p>
               </div>
 
               <div class="grid gap-4 sm:grid-cols-2">
@@ -254,7 +339,11 @@
               </button>
             </div>
 
-            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 space-y-4">
+            <div class="rounded-2xl border bg-white dark:bg-slate-900 p-4 space-y-4"
+              [class.border-emerald-300]="monthlyAutomationEnabled()"
+              [class.dark:border-emerald-800]="monthlyAutomationEnabled()"
+              [class.border-amber-300]="!monthlyAutomationEnabled()"
+              [class.dark:border-amber-800]="!monthlyAutomationEnabled()">
               <div class="flex items-start justify-between gap-3">
                 <div>
                   <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Monthly automation</p>
@@ -262,12 +351,62 @@
                     Sends the most recently completed month on the chosen day and time.
                   </p>
                 </div>
-                <label class="inline-flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
-                  <input type="checkbox" [ngModel]="monthlyAutomationEnabled()"
-                    (ngModelChange)="monthlyAutomationEnabled.set(!!$event)"
-                    class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                <button type="button" (click)="monthlyAutomationEnabled.set(!monthlyAutomationEnabled())"
+                  class="inline-flex items-center gap-3 rounded-full border px-3 py-2 text-sm font-semibold transition-colors"
+                  [attr.aria-pressed]="monthlyAutomationEnabled()"
+                  [class.border-emerald-300]="monthlyAutomationEnabled()"
+                  [class.bg-emerald-50]="monthlyAutomationEnabled()"
+                  [class.text-emerald-700]="monthlyAutomationEnabled()"
+                  [class.dark:border-emerald-800]="monthlyAutomationEnabled()"
+                  [class.dark:bg-emerald-950/40]="monthlyAutomationEnabled()"
+                  [class.dark:text-emerald-200]="monthlyAutomationEnabled()"
+                  [class.border-amber-300]="!monthlyAutomationEnabled()"
+                  [class.bg-amber-50]="!monthlyAutomationEnabled()"
+                  [class.text-amber-700]="!monthlyAutomationEnabled()"
+                  [class.dark:border-amber-800]="!monthlyAutomationEnabled()"
+                  [class.dark:bg-amber-950/40]="!monthlyAutomationEnabled()"
+                  [class.dark:text-amber-200]="!monthlyAutomationEnabled()">
                   <span>{{ monthlyAutomationEnabled() ? 'Enabled' : 'Paused' }}</span>
-                </label>
+                  <span class="relative h-7 w-12 rounded-full transition-colors"
+                    [class.bg-emerald-500]="monthlyAutomationEnabled()"
+                    [class.bg-amber-400]="!monthlyAutomationEnabled()">
+                    <span class="absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-transform"
+                      [class.left-6]="monthlyAutomationEnabled()"
+                      [class.left-1]="!monthlyAutomationEnabled()"></span>
+                  </span>
+                </button>
+              </div>
+
+              <div class="rounded-xl border px-3 py-3"
+                [class.border-emerald-200]="monthlyAutomationEnabled()"
+                [class.bg-emerald-50/70]="monthlyAutomationEnabled()"
+                [class.dark:border-emerald-900/60]="monthlyAutomationEnabled()"
+                [class.dark:bg-emerald-950/30]="monthlyAutomationEnabled()"
+                [class.border-amber-200]="!monthlyAutomationEnabled()"
+                [class.bg-amber-50/70]="!monthlyAutomationEnabled()"
+                [class.dark:border-amber-900/60]="!monthlyAutomationEnabled()"
+                [class.dark:bg-amber-950/30]="!monthlyAutomationEnabled()">
+                <p class="text-sm font-semibold"
+                  [class.text-emerald-800]="monthlyAutomationEnabled()"
+                  [class.dark:text-emerald-200]="monthlyAutomationEnabled()"
+                  [class.text-amber-900]="!monthlyAutomationEnabled()"
+                  [class.dark:text-amber-100]="!monthlyAutomationEnabled()">
+                  {{ monthlyAutomationEnabled()
+                    ? 'Monthly summary emails are enabled.'
+                    : 'Monthly summary emails are paused.' }}
+                </p>
+                <p class="mt-1 text-sm"
+                  [class.text-emerald-700]="monthlyAutomationEnabled()"
+                  [class.dark:text-emerald-300]="monthlyAutomationEnabled()"
+                  [class.text-amber-800]="!monthlyAutomationEnabled()"
+                  [class.dark:text-amber-200]="!monthlyAutomationEnabled()">
+                  {{ monthlyAutomationEnabled()
+                    ? 'Members with an email address can receive the completed monthly summary on the saved schedule below.'
+                    : 'No monthly summary emails will be sent until this is turned on and the monthly schedule is saved.' }}
+                </p>
+                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                  Changes to the toggle, day, or time are only applied after you click <span class="font-semibold text-slate-700 dark:text-slate-200">Save monthly schedule</span>.
+                </p>
               </div>
 
               <div class="grid gap-4 sm:grid-cols-2">
@@ -313,6 +452,7 @@
                 <span>{{ scheduleSaving() === 'month' ? 'Saving monthly schedule...' : 'Save monthly schedule' }}</span>
               </button>
             </div>
+          </div>
           </div>
 
           <div class="flex flex-wrap items-center gap-3">
