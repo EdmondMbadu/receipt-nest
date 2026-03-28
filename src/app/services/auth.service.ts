@@ -84,6 +84,18 @@ export class AuthService {
     const auth = this.requireAuth();
     this.initPromise = new Promise((resolve) => {
       onAuthStateChanged(auth, async (firebaseUser) => {
+        let authStateSettled = false;
+        const settleAuthState = () => {
+          if (authStateSettled) {
+            return;
+          }
+
+          authStateSettled = true;
+          this.finishInit(resolve);
+          this.resolveAuthStateReady?.();
+          this.resolveAuthStateReady = null;
+        };
+
         try {
           if (!firebaseUser) {
             this.clearUserProfileSubscription();
@@ -99,20 +111,15 @@ export class AuthService {
 
           const lastLoginAt = this.parseLastLoginTimestamp(firebaseUser.metadata.lastSignInTime);
           const userProfile = await this.loadOrCreateUserProfile(firebaseUser.uid, firebaseUser.email ?? '', lastLoginAt);
-          await this.syncLastLoginAt(firebaseUser.uid, userProfile.lastLoginAt, lastLoginAt);
           this.user.set(userProfile);
           this.subscribeToUserProfile(firebaseUser.uid);
-          await this.syncLastSeenAt(firebaseUser.uid, true);
-          if (firebaseUser.emailVerified) {
-            await this.sendWelcomeEmailIfNeeded();
-          }
+          settleAuthState();
+          void this.runPostSignInSync(firebaseUser.uid, userProfile, lastLoginAt, firebaseUser.emailVerified);
         } catch (error) {
           console.error('Failed to load auth state', error);
           this.user.set(null);
         } finally {
-          this.finishInit(resolve);
-          this.resolveAuthStateReady?.();
-          this.resolveAuthStateReady = null;
+          settleAuthState();
         }
       });
     });
@@ -190,6 +197,29 @@ export class AuthService {
       },
       { merge: true }
     );
+  }
+
+  private async runPostSignInSync(
+    uid: string,
+    userProfile: UserProfile,
+    lastLoginAt: Timestamp | null,
+    emailVerified: boolean
+  ): Promise<void> {
+    const tasks: Array<Promise<unknown>> = [
+      this.syncLastLoginAt(uid, userProfile.lastLoginAt, lastLoginAt),
+      this.syncLastSeenAt(uid, true)
+    ];
+
+    if (emailVerified) {
+      tasks.push(this.sendWelcomeEmailIfNeeded());
+    }
+
+    const results = await Promise.allSettled(tasks);
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        console.error('Post sign-in sync failed', result.reason);
+      }
+    }
   }
 
   private parseLastLoginTimestamp(value: string | undefined): Timestamp | null {
