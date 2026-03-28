@@ -285,7 +285,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
 
-  async saveSpendSummarySchedule(period: 'week' | 'month'): Promise<void> {
+  async saveSpendSummarySchedule(period: 'week' | 'month'): Promise<boolean> {
     this.scheduleError.set(null);
     this.scheduleSuccess.set(null);
     this.scheduleSaving.set(period);
@@ -317,11 +317,29 @@ export class AdminComponent implements OnInit, OnDestroy {
           ? 'Weekly automation schedule saved.'
           : 'Monthly automation schedule saved.'
       );
+      return true;
     } catch (error) {
       console.error(`Failed to save ${period} summary automation schedule`, error);
       this.scheduleError.set('Unable to save the automation schedule right now.');
+      return false;
     } finally {
       this.scheduleSaving.set(null);
+    }
+  }
+
+  async toggleSpendSummarySchedule(period: 'week' | 'month'): Promise<void> {
+    if (this.scheduleSaving()) {
+      return;
+    }
+
+    const isWeekly = period === 'week';
+    const targetSignal = isWeekly ? this.weeklyAutomationEnabled : this.monthlyAutomationEnabled;
+    const previousValue = targetSignal();
+    targetSignal.set(!previousValue);
+
+    const saved = await this.saveSpendSummarySchedule(period);
+    if (!saved) {
+      targetSignal.set(previousValue);
     }
   }
 

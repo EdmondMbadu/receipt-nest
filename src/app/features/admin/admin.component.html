@@ -240,9 +240,10 @@
                     Sends the most recently completed week on the schedule below.
                   </p>
                 </div>
-                <button type="button" (click)="weeklyAutomationEnabled.set(!weeklyAutomationEnabled())"
+                <button type="button" (click)="toggleSpendSummarySchedule('week')"
                   class="inline-flex items-center gap-3 rounded-full border px-3 py-2 text-sm font-semibold transition-colors"
                   [attr.aria-pressed]="weeklyAutomationEnabled()"
+                  [disabled]="scheduleSaving() === 'week'"
                   [class.border-emerald-300]="weeklyAutomationEnabled()"
                   [class.bg-emerald-50]="weeklyAutomationEnabled()"
                   [class.text-emerald-700]="weeklyAutomationEnabled()"
@@ -255,7 +256,7 @@
                   [class.dark:border-amber-800]="!weeklyAutomationEnabled()"
                   [class.dark:bg-amber-950/40]="!weeklyAutomationEnabled()"
                   [class.dark:text-amber-200]="!weeklyAutomationEnabled()">
-                  <span>{{ weeklyAutomationEnabled() ? 'Enabled' : 'Paused' }}</span>
+                  <span>{{ scheduleSaving() === 'week' ? 'Saving...' : (weeklyAutomationEnabled() ? 'Enabled' : 'Paused') }}</span>
                   <span class="relative h-7 w-12 rounded-full transition-colors"
                     [class.bg-emerald-500]="weeklyAutomationEnabled()"
                     [class.bg-amber-400]="!weeklyAutomationEnabled()">
@@ -294,7 +295,7 @@
                     : 'No weekly summary emails will be sent until this is turned on and the weekly schedule is saved.' }}
                 </p>
                 <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                  Changes to the toggle, day, or time are only applied after you click <span class="font-semibold text-slate-700 dark:text-slate-200">Save weekly schedule</span>.
+                  The on/off toggle saves immediately. Day and time changes still require <span class="font-semibold text-slate-700 dark:text-slate-200">Save weekly schedule</span>.
                 </p>
               </div>
 
@@ -351,9 +352,10 @@
                     Sends the most recently completed month on the chosen day and time.
                   </p>
                 </div>
-                <button type="button" (click)="monthlyAutomationEnabled.set(!monthlyAutomationEnabled())"
+                <button type="button" (click)="toggleSpendSummarySchedule('month')"
                   class="inline-flex items-center gap-3 rounded-full border px-3 py-2 text-sm font-semibold transition-colors"
                   [attr.aria-pressed]="monthlyAutomationEnabled()"
+                  [disabled]="scheduleSaving() === 'month'"
                   [class.border-emerald-300]="monthlyAutomationEnabled()"
                   [class.bg-emerald-50]="monthlyAutomationEnabled()"
                   [class.text-emerald-700]="monthlyAutomationEnabled()"
@@ -366,7 +368,7 @@
                   [class.dark:border-amber-800]="!monthlyAutomationEnabled()"
                   [class.dark:bg-amber-950/40]="!monthlyAutomationEnabled()"
                   [class.dark:text-amber-200]="!monthlyAutomationEnabled()">
-                  <span>{{ monthlyAutomationEnabled() ? 'Enabled' : 'Paused' }}</span>
+                  <span>{{ scheduleSaving() === 'month' ? 'Saving...' : (monthlyAutomationEnabled() ? 'Enabled' : 'Paused') }}</span>
                   <span class="relative h-7 w-12 rounded-full transition-colors"
                     [class.bg-emerald-500]="monthlyAutomationEnabled()"
                     [class.bg-amber-400]="!monthlyAutomationEnabled()">
@@ -405,7 +407,7 @@
                     : 'No monthly summary emails will be sent until this is turned on and the monthly schedule is saved.' }}
                 </p>
                 <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                  Changes to the toggle, day, or time are only applied after you click <span class="font-semibold text-slate-700 dark:text-slate-200">Save monthly schedule</span>.
+                  The on/off toggle saves immediately. Day and time changes still require <span class="font-semibold text-slate-700 dark:text-slate-200">Save monthly schedule</span>.
                 </p>
               </div>
 
