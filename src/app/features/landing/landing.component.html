@@ -2191,7 +2191,7 @@
   <div *ngIf="isDemoOpen()" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
     <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" (click)="closeDemo()"></div>
     <div
-      class="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl">
+      class="relative w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl">
       <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-4 py-3">
         <div>
           <h3 class="text-sm font-semibold text-slate-900 dark:text-white">ReceiptNest AI in 60 seconds</h3>
@@ -2203,9 +2203,17 @@
           </svg>
         </button>
       </div>
-      <div class="bg-black max-h-[70vh]">
-        <video #demoVideo autoplay controls playsinline class="w-full h-full max-h-[70vh] object-contain"
-          src="https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/receipt-nest-ai.mp4?alt=media&token=489d67ce-917b-402f-bb4f-00dbaca171a6"></video>
+      <div class="bg-black">
+        <div class="relative mx-auto w-full max-w-[340px]" style="aspect-ratio: 9/16;">
+          <iframe
+            class="absolute inset-0 h-full w-full"
+            src="https://www.youtube.com/embed/l1RcQc1tvtk?autoplay=1&rel=0"
+            title="ReceiptNest AI demo"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+          </iframe>
+        </div>
       </div>
     </div>
   </div>
