@@ -1,0 +1,56 @@
+<footer class="border-t border-slate-200 bg-white/80 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-950/80">
+  <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div
+      class="flex flex-col gap-8 rounded-3xl border border-slate-200/80 bg-white/80 px-6 py-7 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.45)] dark:border-slate-800/80 dark:bg-slate-900/80 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
+      <div class="flex flex-col items-center gap-3 text-center lg:items-start lg:text-left">
+        <a routerLink="/" class="flex items-center gap-2">
+          <img src="assets/receipt-nest.png" alt="ReceiptNest AI" class="h-8 w-8 object-contain" />
+          <span class="font-semibold">
+            <span class="text-slate-900 dark:text-white">Receipt</span><span
+              class="text-emerald-700 dark:text-emerald-300">Nest</span><span
+              class="ml-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">AI</span>
+          </span>
+        </a>
+
+        <p class="max-w-md text-sm text-slate-500 dark:text-slate-400">
+          AI-powered receipt organization for clearer spending, cleaner records, and less manual work.
+        </p>
+      </div>
+
+      <div class="flex flex-col items-center gap-5 lg:items-end">
+        <nav class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 lg:justify-end">
+          <a routerLink="/terms"
+            class="text-sm font-medium text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">Terms</a>
+          <a routerLink="/support"
+            class="text-sm font-medium text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">Support</a>
+        </nav>
+
+        <div class="flex flex-col items-center gap-3 lg:items-end">
+          <span class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">Follow us</span>
+
+          <div class="flex flex-wrap items-center justify-center gap-3 lg:justify-end">
+            <a *ngFor="let social of socialLinks"
+              [href]="social.href"
+              target="_blank"
+              rel="noopener noreferrer"
+              [attr.aria-label]="'ReceiptNest AI on ' + social.label"
+              [attr.data-platform]="social.platform"
+              class="social-link">
+              <span class="social-link__icon" [ngSwitch]="social.platform" aria-hidden="true">
+                <svg *ngSwitchCase="'youtube'" viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M23.5 6.2a3 3 0 0 0-2.1-2.12C19.53 3.5 12 3.5 12 3.5s-7.53 0-9.4.58A3 3 0 0 0 .5 6.2 31.7 31.7 0 0 0 0 12a31.7 31.7 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.12c1.87.58 9.4.58 9.4.58s7.53 0 9.4-.58a3 3 0 0 0 2.1-2.12A31.7 31.7 0 0 0 24 12a31.7 31.7 0 0 0-.5-5.8ZM9.6 15.66V8.34L15.87 12 9.6 15.66Z" />
+                </svg>
+              </span>
+              <span class="text-sm font-semibold">{{ social.label }}</span>
+            </a>
+          </div>
+        </div>
+
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          © {{ currentYear }} ReceiptNest AI. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
