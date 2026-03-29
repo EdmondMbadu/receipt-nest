@@ -22,14 +22,13 @@
         [disabled]="isSending">
         {{ isSending ? 'Sending…' : 'Resend verification email' }}
       </button>
-      <a routerLink="/login"
-        class="block text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">
+      <button type="button" (click)="backToSignIn()"
+        class="block w-full text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">
         Back to sign in
-      </a>
+      </button>
     </div>
 
     <p *ngIf="message" class="text-sm text-emerald-600 dark:text-emerald-300">{{ message }}</p>
     <p *ngIf="error" class="text-sm text-rose-500">{{ error }}</p>
   </div>
 </div>
-

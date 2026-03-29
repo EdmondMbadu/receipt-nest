@@ -127,6 +127,16 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly forwardingAddressCopied = signal(false);
   readonly showDesktopFab = signal(false);
 
+  private shouldRefreshStoredForwardingAddress(address: string | null | undefined): boolean {
+    const normalized = (address ?? '').trim().toLowerCase();
+    if (!normalized) {
+      return true;
+    }
+
+    const [localPart] = normalized.split('@');
+    return /^user\.[a-z0-9]{8}$/.test(localPart) || /^(r-)?[a-f0-9]{20}$/.test(localPart);
+  }
+
   @ViewChild('addReceiptButton') addReceiptButton?: ElementRef<HTMLElement>;
   private addReceiptObserver?: IntersectionObserver;
 
@@ -1189,7 +1199,22 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async loadReceiptForwardingAddress(): Promise<void> {
-    if (!this.user()) {
+    const profile = this.user();
+    if (!profile) {
+      return;
+    }
+
+    const storedAddress = (profile.receiptForwardingAddress ?? '').trim();
+    const storedFallbacks = Array.isArray(profile.receiptForwardingFallbackAddresses)
+      ? profile.receiptForwardingFallbackAddresses.filter(
+          (value): value is string => typeof value === 'string' && value.trim().length > 0
+        )
+      : [];
+    if (!this.shouldRefreshStoredForwardingAddress(storedAddress)) {
+      this.forwardingAddress.set(storedAddress);
+      this.forwardingFallbackAddresses.set(storedFallbacks);
+      this.forwardingAddressError.set(null);
+      this.forwardingAddressLoading.set(false);
       return;
     }
 

@@ -1,14 +1,14 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Meta, Title } from '@angular/platform-browser';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 
 import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-verify-email',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './verify-email.component.html',
   styleUrl: './verify-email.component.css'
 })
@@ -43,5 +43,9 @@ export class VerifyEmailComponent {
       this.isSending = false;
     }
   }
-}
 
+  async backToSignIn() {
+    await this.auth.logout();
+    await this.router.navigateByUrl('/login');
+  }
+}

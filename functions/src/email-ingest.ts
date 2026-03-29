@@ -2364,6 +2364,17 @@ function buildAliasBase(
   return `user.${userId.slice(0, 8)}`.toLowerCase();
 }
 
+function hasReadableNameAliasPreference(userData: admin.firestore.DocumentData): boolean {
+  const first = sanitizeAliasSegment(String(userData.firstName || ""));
+  const last = sanitizeAliasSegment(String(userData.lastName || ""));
+  return Boolean(first && last);
+}
+
+function looksLikeGeneratedFallbackAlias(alias: string, userId: string): boolean {
+  const normalized = alias.toLowerCase();
+  return normalized === `user.${userId.slice(0, 8).toLowerCase()}`;
+}
+
 function extractTokenFromLocalPart(localPart: string): string | null {
   let candidate = localPart.toLowerCase();
   if (candidate.startsWith("r-")) {
@@ -2382,7 +2393,13 @@ async function resolvePrimaryAliasForUser(
   userData: admin.firestore.DocumentData
 ): Promise<string> {
   const existingAlias = String(userData.receiptEmailAlias || "").toLowerCase();
-  if (isValidAliasLocalPart(existingAlias) && !looksLikeLegacyTokenAlias(existingAlias)) {
+  const shouldUpgradeExistingAlias =
+    hasReadableNameAliasPreference(userData) && looksLikeGeneratedFallbackAlias(existingAlias, userId);
+  if (
+    isValidAliasLocalPart(existingAlias) &&
+    !looksLikeLegacyTokenAlias(existingAlias) &&
+    !shouldUpgradeExistingAlias
+  ) {
     const claimedExistingAlias = await tryClaimAlias(userId, existingAlias);
     if (claimedExistingAlias) {
       return claimedExistingAlias;

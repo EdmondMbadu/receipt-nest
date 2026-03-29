@@ -260,10 +260,6 @@ export class AuthService {
 
     await setDoc(doc(db, 'users', credential.user.uid), profile);
     await this.sendVerificationEmail();
-    await signOut(auth);
-    this.user.set(null);
-    this.resolveAuthStateReady?.();
-    this.resolveAuthStateReady = null;
 
     return credential;
   }
@@ -276,8 +272,6 @@ export class AuthService {
 
     if (!user.emailVerified) {
       await this.sendVerificationEmail();
-      await signOut(auth);
-      this.user.set(null);
       const error: any = new Error('Email not verified');
       error.code = 'auth/email-not-verified';
       throw error;
