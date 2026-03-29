@@ -4,11 +4,14 @@ import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import sgMail from "@sendgrid/mail";
 import { assertAdmin } from "./authz";
+import { getEffectiveSubscriptionPlan } from "./subscription";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
 const fromEmail = "info@receipt-nest.com";
 
 const MAX_RECEIPT_COUNT_BACKFILL_USERS = 50;
+
+type UserProAccessMode = "grant" | "revoke";
 
 export const sendTestEmail = onCall(
   { region: "us-central1", secrets: [sendgridApiKey] },
@@ -180,5 +183,73 @@ export const backfillUserReceiptCounts = onCall(
     });
 
     return { ok: true, updatedCount: updatedUsers.length };
+  }
+);
+
+export const setUserProAccess = onCall(
+  { region: "us-central1" },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "User must be authenticated.");
+    }
+
+    await assertAdmin(request.auth.uid, request.auth.token as Record<string, unknown>);
+
+    const userId = String(request.data?.userId || "").trim();
+    const mode = String(request.data?.mode || "").trim() as UserProAccessMode;
+
+    if (!userId) {
+      throw new HttpsError("invalid-argument", "A target userId is required.");
+    }
+
+    if (mode !== "grant" && mode !== "revoke") {
+      throw new HttpsError("invalid-argument", "Mode must be grant or revoke.");
+    }
+
+    const db = admin.firestore();
+    const userRef = db.doc(`users/${userId}`);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      throw new HttpsError("not-found", "User not found.");
+    }
+
+    const actingUserEmail =
+      typeof request.auth.token?.email === "string" ? request.auth.token.email : null;
+    const previousData = userSnap.data() || {};
+
+    await userRef.set(
+      {
+        adminSubscriptionPlanOverride: mode === "grant" ? "pro" : null,
+        adminSubscriptionOverrideUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        adminSubscriptionOverrideUpdatedBy: request.auth.uid,
+        adminSubscriptionOverrideUpdatedByEmail: actingUserEmail,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    const nextData = {
+      ...previousData,
+      adminSubscriptionPlanOverride: mode === "grant" ? "pro" : null,
+    };
+    const effectivePlan = getEffectiveSubscriptionPlan(nextData);
+    const manualOverrideActive = mode === "grant";
+
+    logger.info("Admin updated user Pro access", {
+      requestedBy: request.auth.uid,
+      requestedByEmail: actingUserEmail,
+      targetUserId: userId,
+      mode,
+      previousEffectivePlan: getEffectiveSubscriptionPlan(previousData),
+      effectivePlan,
+      manualOverrideActive,
+    });
+
+    return {
+      ok: true,
+      userId,
+      effectivePlan,
+      manualOverrideActive,
+    };
   }
 );

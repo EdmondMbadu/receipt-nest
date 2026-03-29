@@ -9,6 +9,11 @@ import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../services/auth.service';
 import { app } from '../../../../environments/environments';
 import { Subscription } from 'rxjs';
+import {
+  getEffectiveSubscriptionPlan,
+  getEffectiveSubscriptionStatus,
+  hasManualProOverride
+} from '../../utils/subscription.utils';
 
 @Component({
   selector: 'app-pricing',
@@ -35,11 +40,18 @@ export class PricingComponent implements OnDestroy {
   readonly freePlanReceiptLimit = this.appConfig.freePlanReceiptLimit;
   readonly profile = this.auth.user;
 
-  readonly subscriptionPlan = computed<'free' | 'pro'>(() => this.profile()?.subscriptionPlan ?? 'free');
-  readonly subscriptionStatus = computed(() => this.profile()?.subscriptionStatus ?? 'inactive');
+  readonly subscriptionPlan = computed<'free' | 'pro'>(() => getEffectiveSubscriptionPlan(this.profile()));
+  readonly subscriptionStatus = computed(() => getEffectiveSubscriptionStatus(this.profile()));
   readonly subscriptionInterval = computed<'monthly' | 'annual'>(() => this.profile()?.subscriptionInterval ?? 'monthly');
-  readonly subscriptionPeriodEnd = computed<Timestamp | null>(() => (this.profile()?.subscriptionCurrentPeriodEnd as Timestamp | null) ?? null);
-  readonly cancelAtPeriodEnd = computed(() => Boolean(this.profile()?.subscriptionCancelAtPeriodEnd));
+  readonly hasManualProAccess = computed(() => hasManualProOverride(this.profile()));
+  readonly subscriptionPeriodEnd = computed<Timestamp | null>(() => {
+    if (this.hasManualProAccess()) {
+      return null;
+    }
+
+    return (this.profile()?.subscriptionCurrentPeriodEnd as Timestamp | null) ?? null;
+  });
+  readonly cancelAtPeriodEnd = computed(() => !this.hasManualProAccess() && Boolean(this.profile()?.subscriptionCancelAtPeriodEnd));
   private routeSubscription: Subscription | null = null;
 
   readonly isPro = computed(() => this.subscriptionPlan() === 'pro');

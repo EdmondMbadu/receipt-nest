@@ -10,8 +10,6 @@ import {
   doc,
   getFirestore,
   onSnapshot,
-  orderBy,
-  query,
   serverTimestamp,
   setDoc,
   Unsubscribe
@@ -26,6 +24,12 @@ import {
 } from '../../config/subscription.constants';
 import { UserProfile } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
+import {
+  EffectiveSubscriptionSource,
+  getEffectiveSubscriptionPlan,
+  getEffectiveSubscriptionSource,
+  hasManualProOverride
+} from '../../utils/subscription.utils';
 
 type AdminUser = UserProfile;
 type SummaryEmailPeriod = 'week' | 'month';
@@ -69,6 +73,15 @@ interface ReceiptCountBackfillResponse {
   ok: boolean;
   updatedCount: number;
 }
+
+interface UserProAccessResponse {
+  ok: boolean;
+  userId: string;
+  effectivePlan: 'free' | 'pro';
+  manualOverrideActive: boolean;
+}
+
+type UserProAccessMode = 'grant' | 'revoke';
 
 const RECEIPT_COUNT_BACKFILL_BATCH_SIZE = 50;
 
@@ -138,12 +151,15 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly freePlanReceiptLimitSaving = signal(false);
   readonly freePlanReceiptLimitError = signal<string | null>(null);
   readonly freePlanReceiptLimitSuccess = signal<string | null>(null);
+  readonly userPlanActionPendingUserId = signal<string | null>(null);
+  readonly userPlanActionError = signal<string | null>(null);
+  readonly userPlanActionSuccess = signal<string | null>(null);
   readonly userSortColumn = signal<UserSortColumn>('created');
   readonly userSortDirection = signal<SortDirection>('desc');
 
   readonly totalUsers = computed(() => this.users().length);
   readonly adminCount = computed(() => this.users().filter((user) => user.role === 'admin').length);
-  readonly proCount = computed(() => this.users().filter((user) => user.subscriptionPlan === 'pro').length);
+  readonly proCount = computed(() => this.users().filter((user) => this.effectivePlan(user) === 'pro').length);
   readonly sortedUsers = computed(() => {
     const column = this.userSortColumn();
     const direction = this.userSortDirection();
@@ -152,7 +168,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     return [...this.users()].sort((a, b) => this.compareUsers(a, b, column) * multiplier);
   });
   readonly summaryUsers = computed(() =>
-    [...this.users()].sort((a, b) => this.displayName(a).localeCompare(this.displayName(b)))
+    [...this.users()].sort((a, b) => this.compareText(this.displayName(a), this.displayName(b)))
   );
   readonly selectedSummaryUser = computed(() =>
     this.summaryUsers().find((user) => user.id === this.summaryUserId()) ?? null
@@ -205,7 +221,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     void this.loadSpendSummarySchedule();
 
     const usersRef = collection(this.db, 'users');
-    const usersQuery = query(usersRef, orderBy('createdAt', 'desc'));
     const billingConfigRef = doc(this.db, PUBLIC_BILLING_CONFIG_COLLECTION, PUBLIC_BILLING_CONFIG_DOC_ID);
 
     this.billingConfigUnsubscribe = onSnapshot(
@@ -222,7 +237,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     );
 
     this.usersUnsubscribe = onSnapshot(
-      usersQuery,
+      usersRef,
       (snapshot) => {
         const users = snapshot.docs.map((doc) => {
           const data = doc.data() as Omit<UserProfile, 'id'>;
@@ -247,7 +262,76 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   displayName(user: AdminUser): string {
     const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
-    return fullName || user.email;
+    return fullName || user.email || user.id || 'Unknown user';
+  }
+
+  effectivePlan(user: AdminUser): 'free' | 'pro' {
+    return getEffectiveSubscriptionPlan(user);
+  }
+
+  planSource(user: AdminUser): EffectiveSubscriptionSource {
+    return getEffectiveSubscriptionSource(user);
+  }
+
+  hasManualProAccess(user: AdminUser): boolean {
+    return hasManualProOverride(user);
+  }
+
+  planSourceLabel(user: AdminUser): string {
+    switch (this.planSource(user)) {
+      case 'admin':
+        return 'Admin override';
+      case 'billing':
+        return 'Paid subscription';
+      default:
+        return 'No Pro access';
+    }
+  }
+
+  isUserPlanActionPending(userId: string): boolean {
+    return this.userPlanActionPendingUserId() === userId;
+  }
+
+  async updateUserProAccess(user: AdminUser, mode: UserProAccessMode): Promise<void> {
+    if (this.userPlanActionPendingUserId()) {
+      return;
+    }
+
+    this.userPlanActionError.set(null);
+    this.userPlanActionSuccess.set(null);
+
+    const targetLabel = `${this.displayName(user)} (${user.email})`;
+    const confirmationMessage = mode === 'grant'
+      ? `Grant Pro access to ${targetLabel}? This keeps Stripe billing data intact and adds an admin override.`
+      : `Remove the admin-granted Pro override for ${targetLabel}? Their account will return to its normal billing state.`;
+
+    if (typeof window !== 'undefined' && !window.confirm(confirmationMessage)) {
+      return;
+    }
+
+    this.userPlanActionPendingUserId.set(user.id);
+
+    try {
+      const callable = httpsCallable<{ userId: string; mode: UserProAccessMode }, UserProAccessResponse>(
+        this.functions,
+        'setUserProAccess'
+      );
+      await callable({ userId: user.id, mode });
+
+      this.userPlanActionSuccess.set(
+        mode === 'grant'
+          ? `Pro access granted to ${targetLabel}.`
+          : `Admin-granted Pro access removed for ${targetLabel}.`
+      );
+    } catch (error: any) {
+      console.error(`Failed to ${mode} Pro access`, error);
+      this.userPlanActionError.set(
+        error?.message ||
+          `Unable to ${mode === 'grant' ? 'grant' : 'remove'} Pro access right now.`
+      );
+    } finally {
+      this.userPlanActionPendingUserId.set(null);
+    }
   }
 
   setFreePlanReceiptLimitInput(value: string | number): void {
@@ -532,7 +616,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'role':
         return this.compareText(a.role || 'user', b.role || 'user');
       case 'plan':
-        return this.compareText(a.subscriptionPlan || 'free', b.subscriptionPlan || 'free');
+        return this.compareText(this.effectivePlan(a), this.effectivePlan(b));
       case 'receipts':
         return (a.receiptCount ?? -1) - (b.receiptCount ?? -1);
       case 'lastLogin':

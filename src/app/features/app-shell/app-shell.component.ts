@@ -9,6 +9,7 @@ import { ThemeService } from '../../services/theme.service';
 import { AiInsightsService } from '../../services/ai-insights.service';
 import { ShareService } from '../../services/share.service';
 import { NotificationSettings } from '../../models/user.model';
+import { getEffectiveSubscriptionPlan } from '../../utils/subscription.utils';
 
 @Component({
   selector: 'app-shell',
@@ -105,7 +106,7 @@ export class AppShellComponent {
 
   readonly isFreePlan = computed(() => {
     const profile = this.user();
-    return !profile?.subscriptionPlan || profile.subscriptionPlan === 'free';
+    return getEffectiveSubscriptionPlan(profile) === 'free';
   });
 
   readonly displayName = computed(() => {

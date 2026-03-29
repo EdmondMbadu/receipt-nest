@@ -8,6 +8,7 @@ import * as crypto from "crypto";
 import type { Request } from "express";
 import sharp from "sharp";
 import { getFreePlanReceiptLimit } from "./app-config";
+import { getEffectiveSubscriptionPlan } from "./subscription";
 
 const receiptInboundDomain = defineSecret("RECEIPT_INBOUND_DOMAIN");
 const emailIngestWebhookKey = defineSecret("EMAIL_INGEST_WEBHOOK_KEY");
@@ -2486,7 +2487,7 @@ async function generateUniqueReceiptToken(): Promise<string> {
 async function canUserAcceptNewReceipt(userId: string): Promise<boolean> {
   const db = admin.firestore();
   const userSnap = await db.doc(`users/${userId}`).get();
-  const plan = userSnap.get("subscriptionPlan");
+  const plan = getEffectiveSubscriptionPlan(userSnap.data());
   if (plan === "pro") {
     return true;
   }

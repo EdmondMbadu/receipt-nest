@@ -10,6 +10,7 @@ import { ReceiptService } from '../../services/receipt.service';
 import { AiInsightsService } from '../../services/ai-insights.service';
 import { UploadComponent } from '../../components/upload/upload.component';
 import { Receipt } from '../../models/receipt.model';
+import { getEffectiveSubscriptionPlan, getEffectiveSubscriptionStatus } from '../../utils/subscription.utils';
 
 @Component({
   selector: 'app-ai-insights',
@@ -36,8 +37,8 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
   readonly error = this.aiService.error;
 
   // Subscription state
-  readonly subscriptionPlan = computed<'free' | 'pro'>(() => this.user()?.subscriptionPlan ?? 'free');
-  readonly subscriptionStatus = computed(() => this.user()?.subscriptionStatus ?? 'inactive');
+  readonly subscriptionPlan = computed<'free' | 'pro'>(() => getEffectiveSubscriptionPlan(this.user()));
+  readonly subscriptionStatus = computed(() => getEffectiveSubscriptionStatus(this.user()));
 
   // Input state
   readonly messageText = signal('');

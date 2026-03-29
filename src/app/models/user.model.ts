@@ -23,6 +23,10 @@ export interface UserProfile {
   subscriptionPriceId?: string | null;
   subscriptionCurrentPeriodEnd?: Timestamp | null;
   subscriptionCancelAtPeriodEnd?: boolean;
+  adminSubscriptionPlanOverride?: 'pro' | null;
+  adminSubscriptionOverrideUpdatedAt?: Timestamp | ReturnType<typeof serverTimestamp> | null;
+  adminSubscriptionOverrideUpdatedBy?: string | null;
+  adminSubscriptionOverrideUpdatedByEmail?: string | null;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
   welcomeEmailSent?: boolean;

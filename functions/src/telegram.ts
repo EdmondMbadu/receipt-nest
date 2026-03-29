@@ -23,6 +23,7 @@ import {
 } from "./ai-insights";
 import { getFreePlanReceiptLimit } from "./app-config";
 import { assertAdmin } from "./authz";
+import { getEffectiveSubscriptionPlan } from "./subscription";
 
 // ─── Secrets & Configuration ────────────────────────────────────────────────
 
@@ -38,7 +39,7 @@ async function canUserAcceptNewReceipt(userId: string): Promise<{ allowed: boole
   const db = admin.firestore();
   const userSnap = await db.doc(`users/${userId}`).get();
   const limit = await getFreePlanReceiptLimit();
-  const plan = userSnap.get("subscriptionPlan");
+  const plan = getEffectiveSubscriptionPlan(userSnap.data());
   if (plan === "pro") {
     return { allowed: true, limit };
   }

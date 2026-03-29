@@ -13,6 +13,7 @@ import { UploadComponent } from '../../components/upload/upload.component';
 import { Receipt, ReceiptStatus } from '../../models/receipt.model';
 import { DEFAULT_CATEGORIES, getCategoryById, Category } from '../../models/category.model';
 import { app } from '../../../../environments/environments';
+import { getEffectiveSubscriptionPlan } from '../../utils/subscription.utils';
 
 // Interface for grouped receipts by month
 interface MonthGroup {
@@ -169,6 +170,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   });
 
   readonly isAdmin = computed(() => this.user()?.role === 'admin');
+  readonly isPro = computed(() => getEffectiveSubscriptionPlan(this.user()) === 'pro');
 
   readonly userInitials = computed(() => {
     const profile = this.user();

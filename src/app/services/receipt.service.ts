@@ -32,6 +32,7 @@ import {
 import { app } from '../../../environments/environments';
 import { AppConfigService } from './app-config.service';
 import { AuthService } from './auth.service';
+import { getEffectiveSubscriptionPlan } from '../utils/subscription.utils';
 import {
   Receipt,
   ReceiptStatus,
@@ -148,7 +149,7 @@ export class ReceiptService {
     const userId = this.auth.user()?.id;
     if (!userId) throw new Error('User not authenticated');
 
-    const plan = this.auth.user()?.subscriptionPlan ?? 'free';
+    const plan = getEffectiveSubscriptionPlan(this.auth.user());
     if (plan !== 'pro') {
       const receiptsRef = collection(this.db, this.getReceiptsPath());
       const countSnapshot = await getCountFromServer(receiptsRef);
