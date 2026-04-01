@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -18,6 +18,7 @@ export class ResetPasswordComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
 
@@ -64,6 +65,7 @@ export class ResetPasswordComponent implements OnInit {
 
     if (trimmedPassword !== trimmedConfirmPassword) {
       this.errorMessage = 'Passwords do not match yet. Please enter the same password in both fields.';
+      this.detectChanges();
       return;
     }
 
@@ -78,6 +80,7 @@ export class ResetPasswordComponent implements OnInit {
       this.errorMessage = this.getResetErrorMessage(error);
     } finally {
       this.isSubmitting = false;
+      this.detectChanges();
     }
   }
 
@@ -96,6 +99,7 @@ export class ResetPasswordComponent implements OnInit {
     if (!this.oobCode) {
       this.errorMessage = 'This reset link is missing required details. Request a new password reset email and try again.';
       this.isLoading = false;
+      this.detectChanges();
       return;
     }
 
@@ -106,7 +110,12 @@ export class ResetPasswordComponent implements OnInit {
       this.errorMessage = this.getResetErrorMessage(error);
     } finally {
       this.isLoading = false;
+      this.detectChanges();
     }
+  }
+
+  private detectChanges(): void {
+    this.cdr.detectChanges();
   }
 
   private getResetErrorMessage(error: any): string {
