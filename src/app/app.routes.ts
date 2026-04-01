@@ -88,6 +88,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/verify/verify-email.component').then((m) => m.VerifyEmailComponent)
   },
   {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/auth/reset-password/reset-password.component').then((m) => m.ResetPasswordComponent)
+  },
+  {
     path: 'share/:id',
     loadComponent: () => import('./features/share/share-view.component').then((m) => m.ShareViewComponent)
   },

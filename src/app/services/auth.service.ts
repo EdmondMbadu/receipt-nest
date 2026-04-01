@@ -5,15 +5,16 @@ import {
   EmailAuthProvider,
   GoogleAuthProvider,
   UserCredential,
+  confirmPasswordReset as firebaseConfirmPasswordReset,
   createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
   reauthenticateWithCredential,
-  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
-  updatePassword
+  updatePassword,
+  verifyPasswordResetCode as firebaseVerifyPasswordResetCode
 } from 'firebase/auth';
 import {
   Firestore,
@@ -307,8 +308,19 @@ export class AuthService {
       throw error;
     }
 
+    const functions = this.requireFunctions();
+    const callable = httpsCallable<{ email: string }, { ok: boolean }>(functions, 'sendPasswordResetEmail');
+    await callable({ email });
+  }
+
+  async verifyPasswordResetCode(oobCode: string): Promise<string> {
     const auth = this.requireAuth();
-    await sendPasswordResetEmail(auth, email);
+    return firebaseVerifyPasswordResetCode(auth, oobCode);
+  }
+
+  async confirmPasswordReset(oobCode: string, newPassword: string): Promise<void> {
+    const auth = this.requireAuth();
+    await firebaseConfirmPasswordReset(auth, oobCode, newPassword);
   }
 
   async logout() {

@@ -30,6 +30,7 @@ export class LoginComponent {
   isSubmitting = false;
   isSendingReset = false;
   errorMessage = '';
+  pageNotice = '';
   resetMessage = '';
   resetErrorMessage = '';
 
@@ -38,6 +39,17 @@ export class LoginComponent {
     this.meta.updateTag({ name: 'description', content: 'Sign in to your ReceiptNest AI account.' });
     this.meta.updateTag({ name: 'robots', content: 'noindex, follow' });
     this.meta.updateTag({ name: 'googlebot', content: 'noindex, follow' });
+
+    const email = (this.route.snapshot.queryParamMap.get('email') ?? '').trim();
+    if (email) {
+      this.form.patchValue({ email });
+    }
+
+    if (this.route.snapshot.queryParamMap.get('reset') === 'success') {
+      this.pageNotice = 'Your password was updated successfully. Sign in with your new password.';
+    } else if (this.route.snapshot.queryParamMap.get('verified') === '1') {
+      this.pageNotice = 'Your email is verified. Welcome to ReceiptNest AI.';
+    }
   }
 
   async submit() {
@@ -90,7 +102,7 @@ export class LoginComponent {
     try {
       await this.authService.sendPasswordReset(email);
       this.resetMessage =
-        `We sent a reset link to ${email}. Check your inbox to finish resetting your password, then sign in with the new one.`;
+        `If an account exists for ${email}, we sent a secure reset link. Check your inbox to finish updating your password.`;
       this.resetErrorMessage = '';
       this.detectChanges();
     } catch (error: any) {

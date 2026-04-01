@@ -15,6 +15,31 @@ const escapeHtml = (value: string) =>
     .replace(/>/g, "&gt;")
     .replace(/\n/g, "<br />");
 
+const normalizeBaseUrl = (value: string) => value.trim().replace(/\/+$/, "");
+
+const buildCustomActionLink = (
+  generatedLink: string,
+  baseUrl: string,
+  path: string,
+  extraParams: Record<string, string> = {}
+) => {
+  const parsedLink = new URL(generatedLink);
+  const oobCode = parsedLink.searchParams.get("oobCode");
+
+  if (!oobCode) {
+    throw new HttpsError("internal", "Generated auth link is missing an action code.");
+  }
+
+  const customLink = new URL(`${normalizeBaseUrl(baseUrl)}${path}`);
+  customLink.searchParams.set("oobCode", oobCode);
+
+  for (const [key, value] of Object.entries(extraParams)) {
+    customLink.searchParams.set(key, value);
+  }
+
+  return customLink.toString();
+};
+
 const buildEmailShell = (title: string, bodyHtml: string, preheader: string) => {
   const safeTitle = escapeHtml(title);
   return `<!DOCTYPE html>
@@ -140,6 +165,61 @@ export const sendVerificationEmail = onCall(
   }
 );
 
+export const sendPasswordResetEmail = onCall(
+  { region: "us-central1", secrets: [sendgridApiKey, appBaseUrl] },
+  async (request) => {
+    const email = typeof request.data?.email === "string" ? request.data.email.trim().toLowerCase() : "";
+    if (!email) {
+      throw new HttpsError("invalid-argument", "A valid email address is required.");
+    }
+
+    if (!appBaseUrl.value()) {
+      throw new HttpsError("failed-precondition", "App base URL is missing.");
+    }
+
+    try {
+      const generatedLink = await admin.auth().generatePasswordResetLink(email);
+      const resetLink = buildCustomActionLink(generatedLink, appBaseUrl.value(), "/reset-password");
+      const subject = "Reset your ReceiptNest AI password";
+      const text = [
+        "We received a request to reset your ReceiptNest AI password.",
+        "",
+        `Use this secure link to choose a new password: ${resetLink}`,
+        "",
+        "If you did not request this change, you can ignore this email."
+      ].join("\n");
+      const bodyHtml = `
+        <p style="margin:0 0 12px; font-size:15px; line-height:1.6;">Hello,</p>
+        <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">We received a request to reset the password for your ReceiptNest AI account associated with <strong style="color:#0f172a;">${escapeHtml(email)}</strong>.</p>
+        <p style="margin:0 0 18px; font-size:15px; line-height:1.6;">Use the button below to choose a new password and get back into your workspace.</p>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:18px 0;">
+          <tr>
+            <td align="center" bgcolor="#10b981" style="border-radius:999px;">
+              <a href="${resetLink}" style="display:inline-block; padding:12px 22px; font-size:14px; font-weight:600; color:#ffffff; text-decoration:none; font-family:Arial, sans-serif;">Reset password</a>
+            </td>
+          </tr>
+        </table>
+        <div style="margin-top:18px; padding:14px 16px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; font-size:13px; color:#475569;">
+          If you did not request a password reset, you can safely ignore this email. Your password will stay unchanged until you create a new one.
+        </div>
+      `;
+      const html = buildEmailShell(subject, bodyHtml, "Reset your ReceiptNest AI password securely.");
+
+      await sendEmail(email, subject, text, html);
+    } catch (error: any) {
+      if (error?.code === "auth/user-not-found") {
+        logger.info("Password reset requested for non-existent email", { email });
+        return { ok: true };
+      }
+
+      logger.error("Failed to send password reset email", error);
+      throw new HttpsError("internal", "Failed to send password reset email.");
+    }
+
+    return { ok: true };
+  }
+);
+
 export const sendWelcomeEmail = onCall(
   { region: "us-central1", secrets: [sendgridApiKey, appBaseUrl] },
   async (request) => {
@@ -164,11 +244,11 @@ export const sendWelcomeEmail = onCall(
     }
 
     const subject = "Welcome to ReceiptNest AI";
-    const text = `Welcome to ReceiptNest AI!\n\nCapture receipts, stay organized, and keep every expense in one place.\n\nGo to your dashboard: ${appBaseUrl.value()}/app`;
+    const text = `Welcome to ReceiptNest AI!\n\nYour account is ready. Capture receipts, keep expenses organized, and stay on top of your spending in one place.\n\nGo to your dashboard: ${appBaseUrl.value()}/app`;
     const bodyHtml = `
       <p style="margin:0 0 12px; font-size:15px; line-height:1.6;">Welcome to ReceiptNest AI,</p>
-      <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">Your receipts are about to get a lot calmer. Upload anything, keep it tidy, and track your spend without the chaos.</p>
-      <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">When you are ready, jump into your dashboard and start building your receipt library.</p>
+      <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">Your account is ready. From here, you can upload receipts, keep expenses organized, and build a cleaner record of every purchase.</p>
+      <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">When you are ready, head to your dashboard and add your first receipt.</p>
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:18px 0;">
         <tr>
           <td align="center" bgcolor="#10b981" style="border-radius:999px;">

@@ -38,7 +38,7 @@ export {
   dispatchScheduledSpendSummaryEmails,
   dispatchScheduledSpendSummaryNotifications,
 } from "./spend-summary-email";
-export { sendVerificationEmail, sendWelcomeEmail } from "./email";
+export { sendPasswordResetEmail, sendVerificationEmail, sendWelcomeEmail } from "./email";
 export { generateReceiptForwardingAddress, inboundEmailWebhook } from "./email-ingest";
 export { telegramWebhook, generateTelegramLinkToken, setupTelegramWebhook, onTelegramReceiptProcessed } from "./telegram";
 export { deleteUserAccount } from "./account";
