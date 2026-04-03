@@ -44,6 +44,7 @@ export class PricingComponent implements OnDestroy {
   readonly subscriptionStatus = computed(() => getEffectiveSubscriptionStatus(this.profile()));
   readonly subscriptionInterval = computed<'monthly' | 'annual'>(() => this.profile()?.subscriptionInterval ?? 'monthly');
   readonly hasManualProAccess = computed(() => hasManualProOverride(this.profile()));
+  readonly hasBillingPortalAccess = computed(() => Boolean(this.profile()?.stripeCustomerId));
   readonly subscriptionPeriodEnd = computed<Timestamp | null>(() => {
     if (this.hasManualProAccess()) {
       return null;
@@ -107,6 +108,11 @@ export class PricingComponent implements OnDestroy {
 
   async openBillingPortal() {
     this.portalError.set(null);
+    if (!this.hasBillingPortalAccess()) {
+      this.portalError.set('Billing portal becomes available after you start a subscription.');
+      return;
+    }
+
     this.isPortalProcessing.set(true);
     try {
       const portal = httpsCallable(this.functions, 'createPortalSession');

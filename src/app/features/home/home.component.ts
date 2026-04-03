@@ -171,6 +171,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   readonly isAdmin = computed(() => this.user()?.role === 'admin');
   readonly isPro = computed(() => getEffectiveSubscriptionPlan(this.user()) === 'pro');
+  readonly hasBillingPortalAccess = computed(() => Boolean(this.user()?.stripeCustomerId));
 
   readonly userInitials = computed(() => {
     const profile = this.user();
@@ -1183,6 +1184,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   async openBillingPortal() {
     this.billingPortalError.set(null);
+    if (!this.hasBillingPortalAccess()) {
+      this.billingPortalError.set('Billing portal becomes available after you start a subscription.');
+      return;
+    }
+
     this.billingPortalLoading.set(true);
     try {
       const portal = httpsCallable(this.functions, 'createPortalSession');
