@@ -1,4 +1,4 @@
-import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
@@ -31,8 +31,9 @@ export class PricingComponent implements OnDestroy {
   private readonly functions = getFunctions(app);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private lastSyncedBillingIntervalKey: string | null = null;
   readonly isDarkMode = this.theme.isDarkMode;
-  readonly billingInterval = signal<'monthly' | 'annual'>('monthly');
+  readonly billingInterval = signal<'monthly' | 'annual'>('annual');
   readonly isProcessing = signal(false);
   readonly isPortalProcessing = signal(false);
   readonly checkoutError = signal<string | null>(null);
@@ -92,6 +93,19 @@ export class PricingComponent implements OnDestroy {
       } else {
         this.checkoutReturnStatus.set(null);
       }
+    });
+
+    effect(() => {
+      const plan = this.subscriptionPlan();
+      const interval = this.subscriptionInterval();
+      const nextKey = plan === 'pro' ? `pro:${interval}` : 'free:annual';
+
+      if (this.lastSyncedBillingIntervalKey === nextKey) {
+        return;
+      }
+
+      this.lastSyncedBillingIntervalKey = nextKey;
+      this.billingInterval.set(plan === 'pro' ? interval : 'annual');
     });
   }
 
