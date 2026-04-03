@@ -1,6 +1,6 @@
 import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
 import { Timestamp } from 'firebase/firestore';
 import { httpsCallable, getFunctions } from 'firebase/functions';
@@ -30,6 +30,7 @@ export class PricingComponent implements OnDestroy {
   private readonly appConfig = inject(AppConfigService);
   private readonly functions = getFunctions(app);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   readonly isDarkMode = this.theme.isDarkMode;
   readonly billingInterval = signal<'monthly' | 'annual'>('monthly');
   readonly isProcessing = signal(false);
@@ -37,8 +38,17 @@ export class PricingComponent implements OnDestroy {
   readonly checkoutError = signal<string | null>(null);
   readonly portalError = signal<string | null>(null);
   readonly limitReachedNotice = signal(false);
+  readonly checkoutReturnStatus = signal<'success' | 'cancel' | null>(null);
+  readonly checkoutModalDismissed = signal(false);
   readonly freePlanReceiptLimit = this.appConfig.freePlanReceiptLimit;
   readonly profile = this.auth.user;
+  readonly successHighlights = [
+    'Unlimited receipts',
+    'Advanced search & filters',
+    'Export to CSV + PDF',
+    'Spending insights & trends',
+    'Priority support',
+  ] as const;
 
   readonly subscriptionPlan = computed<'free' | 'pro'>(() => getEffectiveSubscriptionPlan(this.profile()));
   readonly subscriptionStatus = computed(() => getEffectiveSubscriptionStatus(this.profile()));
@@ -64,6 +74,10 @@ export class PricingComponent implements OnDestroy {
     const date = periodEnd.toDate();
     return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
   });
+  readonly showCheckoutModal = computed(() => !this.checkoutModalDismissed() && this.checkoutReturnStatus() !== null);
+  readonly checkoutFinalizing = computed(() => this.checkoutReturnStatus() === 'success' && !this.isPro());
+  readonly checkoutSucceeded = computed(() => this.checkoutReturnStatus() === 'success' && this.isPro());
+  readonly checkoutEmailLabel = computed(() => this.profile()?.email?.trim() || 'your account email');
 
   constructor() {
     this.title.setTitle('Pricing - ReceiptNest AI');
@@ -71,6 +85,13 @@ export class PricingComponent implements OnDestroy {
 
     this.routeSubscription = this.route.queryParamMap.subscribe((params) => {
       this.limitReachedNotice.set(params.get('limit') === 'free');
+      const checkout = params.get('checkout');
+      if (checkout === 'success' || checkout === 'cancel') {
+        this.checkoutReturnStatus.set(checkout);
+        this.checkoutModalDismissed.set(false);
+      } else {
+        this.checkoutReturnStatus.set(null);
+      }
     });
   }
 
@@ -128,5 +149,15 @@ export class PricingComponent implements OnDestroy {
     } finally {
       this.isPortalProcessing.set(false);
     }
+  }
+
+  async dismissCheckoutModal(): Promise<void> {
+    this.checkoutModalDismissed.set(true);
+    await this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { checkout: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 }

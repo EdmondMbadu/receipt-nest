@@ -2,6 +2,7 @@ import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
+import sgMail from "@sendgrid/mail";
 import Stripe from "stripe";
 import { BillingMode, getEffectiveBillingModeForUserData } from "./app-config";
 import {
@@ -23,6 +24,8 @@ const stripeWebhookSecretTest = defineSecret("STRIPE_WEBHOOK_SECRET_TEST");
 const stripePriceIdMonthlyTest = defineSecret("STRIPE_PRICE_ID_MONTHLY_TEST");
 const stripePriceIdAnnualTest = defineSecret("STRIPE_PRICE_ID_ANNUAL_TEST");
 const appBaseUrl = defineSecret("APP_BASE_URL");
+const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
+const fromEmail = "info@receipt-nest.com";
 
 const getStripeSecretKeyForMode = (mode: BillingMode) =>
   mode === "test" ? stripeSecretKeyTest.value() : stripeSecretKey.value();
@@ -97,8 +100,39 @@ const resolveIntervalFromPrice = (mode: BillingMode, priceId: string | null | un
 };
 
 const activeStatusSet = new Set(["active", "trialing", "past_due", "unpaid"]);
+const PRO_FEATURE_HIGHLIGHTS = [
+  "Unlimited receipts",
+  "Advanced search and filters",
+  "Export to CSV and PDF",
+  "Spending insights and trends",
+  "Priority support",
+];
 
 const normalizeBaseUrl = (value: string) => value.replace(/\/+$/, "");
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+const formatDateLabel = (date: Date) =>
+  new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+
+const formatCurrency = (amountMinor: number, currency: string | null | undefined) => {
+  const normalizedCurrency = (currency || "usd").toUpperCase();
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: normalizedCurrency,
+    }).format(amountMinor / 100);
+  } catch {
+    return `${(amountMinor / 100).toFixed(2)} ${normalizedCurrency}`;
+  }
+};
 
 const buildBillingUrls = (platform: BillingPlatform) => {
   const baseUrl = normalizeBaseUrl(appBaseUrl.value());
@@ -135,6 +169,27 @@ const getCustomerEmail = (
   return storedEmail || authEmail || undefined;
 };
 
+const maybeUpdateCustomerEmail = async ({
+  stripe,
+  customerId,
+  existingEmail,
+  nextEmail,
+}: {
+  stripe: Stripe;
+  customerId: string;
+  existingEmail: string | null | undefined;
+  nextEmail: string | undefined;
+}) => {
+  const normalizedNextEmail = nextEmail?.trim();
+  const normalizedExistingEmail = existingEmail?.trim();
+
+  if (!normalizedNextEmail || normalizedExistingEmail === normalizedNextEmail) {
+    return;
+  }
+
+  await stripe.customers.update(customerId, { email: normalizedNextEmail });
+};
+
 const ensureCheckoutCustomerId = async ({
   stripe,
   userRef,
@@ -155,6 +210,12 @@ const ensureCheckoutCustomerId = async ({
     try {
       const customer = await stripe.customers.retrieve(normalizedCustomerId);
       if (!("deleted" in customer) || !customer.deleted) {
+        await maybeUpdateCustomerEmail({
+          stripe,
+          customerId: normalizedCustomerId,
+          existingEmail: customer.email,
+          nextEmail: email,
+        });
         return normalizedCustomerId;
       }
 
@@ -187,6 +248,214 @@ const ensureCheckoutCustomerId = async ({
     { merge: true }
   );
   return customer.id;
+};
+
+const findUserSnapshotByCustomerId = async (mode: BillingMode, customerId: string) => {
+  const db = admin.firestore();
+  let userSnapshot = await db
+    .collection("users")
+    .where(getModeBillingFieldName(mode, "stripeCustomerId"), "==", customerId)
+    .limit(1)
+    .get();
+
+  if (userSnapshot.empty && mode === "live") {
+    userSnapshot = await db
+      .collection("users")
+      .where("stripeCustomerId", "==", customerId)
+      .limit(1)
+      .get();
+  }
+
+  if (userSnapshot.empty) {
+    return null;
+  }
+
+  return userSnapshot.docs[0];
+};
+
+const markInvoiceEmailAsSent = async (mode: BillingMode, invoiceId: string) => {
+  const recordRef = admin.firestore().collection("stripeInvoiceEmailReceipts").doc(`${mode}_${invoiceId}`);
+
+  try {
+    await recordRef.create({
+      mode,
+      invoiceId,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    return true;
+  } catch (error: any) {
+    if (error?.code !== 6 && error?.code !== "already-exists") {
+      throw error;
+    }
+
+    logger.info("Skipping duplicate billing confirmation email.", {
+      mode,
+      invoiceId,
+    });
+    return false;
+  }
+};
+
+const sendSubscriptionReceiptEmail = async ({
+  invoice,
+  subscription,
+  mode,
+}: {
+  invoice: Stripe.Invoice;
+  subscription: Stripe.Subscription;
+  mode: BillingMode;
+}) => {
+  if (!sendgridApiKey.value()) {
+    logger.warn("Skipping billing confirmation email because SENDGRID_API_KEY is missing.", {
+      invoiceId: invoice.id,
+      mode,
+    });
+    return;
+  }
+
+  const customerId = typeof invoice.customer === "string" ? invoice.customer : null;
+  if (!customerId) {
+    return;
+  }
+
+  const userDoc = await findUserSnapshotByCustomerId(mode, customerId);
+  if (!userDoc) {
+    logger.warn("No user found for billing confirmation email.", {
+      invoiceId: invoice.id,
+      customerId,
+      mode,
+    });
+    return;
+  }
+
+  const userData = userDoc.data() || {};
+  const recipient = getCustomerEmail(userData, invoice.customer_email ?? undefined);
+  if (!recipient) {
+    logger.warn("Skipping billing confirmation email because no customer email was found.", {
+      invoiceId: invoice.id,
+      customerId,
+      mode,
+    });
+    return;
+  }
+
+  const shouldSend = await markInvoiceEmailAsSent(mode, invoice.id);
+  if (!shouldSend) {
+    return;
+  }
+
+  sgMail.setApiKey(sendgridApiKey.value());
+
+  const isInitialPurchase = invoice.billing_reason === "subscription_create";
+  const amountLabel = formatCurrency(invoice.amount_paid ?? 0, invoice.currency);
+  const renewalDate =
+    subscription.current_period_end != null
+      ? formatDateLabel(new Date(subscription.current_period_end * 1000))
+      : null;
+  const manageBillingUrl = `${normalizeBaseUrl(appBaseUrl.value())}/app/pricing`;
+  const featureListHtml = PRO_FEATURE_HIGHLIGHTS.map(
+    (feature) =>
+      `<li style="margin:0 0 10px; color:#0f172a; font-size:14px; line-height:1.6;">${escapeHtml(feature)}</li>`
+  ).join("");
+
+  const subject = isInitialPurchase
+    ? "Your ReceiptNest AI Pro receipt and activation details"
+    : "Your ReceiptNest AI Pro renewal receipt";
+  const text = [
+    isInitialPurchase
+      ? "Congratulations. Your ReceiptNest AI Pro plan is now active."
+      : "Your ReceiptNest AI Pro renewal was successful.",
+    "",
+    `Amount paid: ${amountLabel}`,
+    renewalDate ? `Next renewal: ${renewalDate}` : null,
+    "",
+    "Pro includes:",
+    ...PRO_FEATURE_HIGHLIGHTS.map((feature) => `- ${feature}`),
+    "",
+    `Manage billing: ${manageBillingUrl}`,
+    invoice.hosted_invoice_url ? `Invoice: ${invoice.hosted_invoice_url}` : null,
+    invoice.invoice_pdf ? `PDF receipt: ${invoice.invoice_pdf}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const bodyHtml = `
+    <p style="margin:0 0 12px; font-size:15px; line-height:1.6;">${isInitialPurchase ? "Congratulations," : "Hello,"}</p>
+    <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">
+      ${isInitialPurchase
+        ? "Your ReceiptNest AI Pro plan is now active and your payment was processed successfully."
+        : "Your ReceiptNest AI Pro subscription renewed successfully."}
+    </p>
+    <div style="margin:0 0 18px; padding:16px; background:#ecfdf5; border:1px solid #d1fae5; border-radius:14px;">
+      <p style="margin:0 0 8px; font-size:13px; font-weight:700; color:#065f46; text-transform:uppercase; letter-spacing:0.08em;">Payment summary</p>
+      <p style="margin:0; font-size:18px; font-weight:700; color:#0f172a;">${escapeHtml(amountLabel)}</p>
+      ${renewalDate ? `<p style="margin:8px 0 0; font-size:14px; color:#475569;">Next renewal: ${escapeHtml(renewalDate)}</p>` : ""}
+    </div>
+    <p style="margin:0 0 10px; font-size:15px; line-height:1.6;">Your Pro features include:</p>
+    <ul style="margin:0 0 18px 18px; padding:0;">
+      ${featureListHtml}
+    </ul>
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:18px 0;">
+      <tr>
+        <td align="center" bgcolor="#10b981" style="border-radius:999px;">
+          <a href="${manageBillingUrl}" style="display:inline-block; padding:12px 22px; font-size:14px; font-weight:600; color:#ffffff; text-decoration:none; font-family:Arial, sans-serif;">Manage billing</a>
+        </td>
+      </tr>
+    </table>
+    ${
+      invoice.hosted_invoice_url || invoice.invoice_pdf
+        ? `<div style="margin-top:18px; padding:14px 16px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; font-size:13px; color:#475569;">
+            ${invoice.hosted_invoice_url ? `<p style="margin:0 0 8px;">Invoice: <a href="${invoice.hosted_invoice_url}" style="color:#065f46; text-decoration:none;">View hosted invoice</a></p>` : ""}
+            ${invoice.invoice_pdf ? `<p style="margin:0;">PDF receipt: <a href="${invoice.invoice_pdf}" style="color:#065f46; text-decoration:none;">Download receipt PDF</a></p>` : ""}
+          </div>`
+        : ""
+    }
+  `;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${escapeHtml(subject)}</title>
+  </head>
+  <body style="margin:0; padding:0; background-color:#f8fafc;">
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color:#f8fafc;">
+      <tr>
+        <td align="center" style="padding:24px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:620px; background:#ffffff; border-radius:20px; border:1px solid #e2e8f0; overflow:hidden; box-shadow:0 20px 40px rgba(15, 23, 42, 0.08);">
+            <tr>
+              <td style="padding:28px 32px; background:linear-gradient(135deg,#0f172a 0%, #0b2f24 45%, #065f46 100%); color:#ffffff;">
+                <p style="margin:0; font-size:12px; letter-spacing:0.28em; text-transform:uppercase; font-weight:600; color:#a7f3d0;">ReceiptNest AI</p>
+                <h1 style="margin:10px 0 0; font-size:24px; font-weight:600; font-family:Arial, sans-serif;">${escapeHtml(subject)}</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:30px 32px; font-family:Arial, sans-serif; color:#0f172a;">
+                ${bodyHtml}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:22px 32px 30px; font-family:Arial, sans-serif; font-size:12px; color:#64748b;">
+                <p style="margin:0 0 6px;">ReceiptNest AI • ${escapeHtml(fromEmail)}</p>
+                <p style="margin:0;">You are receiving this email because a subscription payment succeeded on your ReceiptNest AI account.</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+
+  await sgMail.send({
+    to: recipient,
+    from: { email: fromEmail, name: "ReceiptNest AI" },
+    replyTo: { email: fromEmail, name: "ReceiptNest AI" },
+    subject,
+    text,
+    html,
+  });
 };
 
 const requirePortalCustomerId = async ({
@@ -403,6 +672,8 @@ export const stripeWebhook = onRequest(
       stripeWebhookSecretTest,
       stripePriceIdMonthlyTest,
       stripePriceIdAnnualTest,
+      appBaseUrl,
+      sendgridApiKey,
     ],
   },
   async (req, res) => {
@@ -483,6 +754,13 @@ export const stripeWebhook = onRequest(
           if (invoice.subscription) {
             const subscription = await stripe.subscriptions.retrieve(String(invoice.subscription));
             await syncSubscription(subscription, billingMode);
+            if (event.type === "invoice.paid") {
+              await sendSubscriptionReceiptEmail({
+                invoice,
+                subscription,
+                mode: billingMode,
+              });
+            }
           }
           break;
         }
