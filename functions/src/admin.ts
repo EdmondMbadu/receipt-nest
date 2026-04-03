@@ -4,14 +4,59 @@ import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import sgMail from "@sendgrid/mail";
 import { assertAdmin } from "./authz";
+import {
+  BillingMode,
+  DEFAULT_BILLING_MODE,
+  getEffectiveBillingModeForUserData,
+} from "./app-config";
+import {
+  buildGenericBillingOverlay,
+  buildModeBillingFields,
+  getGenericBillingSnapshot,
+  getModeBillingSnapshot,
+} from "./billing-state";
 import { getEffectiveSubscriptionPlan } from "./subscription";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
+const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
+const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
+const stripePriceIdMonthly = defineSecret("STRIPE_PRICE_ID_MONTHLY");
+const stripePriceIdAnnual = defineSecret("STRIPE_PRICE_ID_ANNUAL");
+const stripeSecretKeyTest = defineSecret("STRIPE_SECRET_KEY_TEST");
+const stripeWebhookSecretTest = defineSecret("STRIPE_WEBHOOK_SECRET_TEST");
+const stripePriceIdMonthlyTest = defineSecret("STRIPE_PRICE_ID_MONTHLY_TEST");
+const stripePriceIdAnnualTest = defineSecret("STRIPE_PRICE_ID_ANNUAL_TEST");
 const fromEmail = "info@receipt-nest.com";
 
 const MAX_RECEIPT_COUNT_BACKFILL_USERS = 50;
 
 type UserProAccessMode = "grant" | "revoke";
+
+const parseBillingMode = (value: unknown): BillingMode => {
+  if (value === "live" || value === "test") {
+    return value;
+  }
+
+  throw new HttpsError("invalid-argument", "Billing mode must be live or test.");
+};
+
+const hasBillingModeConfig = (mode: BillingMode) => {
+  if (mode === "test") {
+    return Boolean(
+      stripeSecretKeyTest.value() &&
+        stripeWebhookSecretTest.value() &&
+        stripePriceIdMonthlyTest.value() &&
+        stripePriceIdAnnualTest.value()
+    );
+  }
+
+  return Boolean(
+    stripeSecretKey.value() &&
+      stripeWebhookSecret.value() &&
+      stripePriceIdMonthly.value() &&
+      stripePriceIdAnnual.value()
+  );
+};
 
 export const sendTestEmail = onCall(
   { region: "us-central1", secrets: [sendgridApiKey] },
@@ -250,6 +295,119 @@ export const setUserProAccess = onCall(
       userId,
       effectivePlan,
       manualOverrideActive,
+    };
+  }
+);
+
+export const getBillingModeStatus = onCall(
+  {
+    region: "us-central1",
+    secrets: [
+      stripeSecretKey,
+      stripeWebhookSecret,
+      stripePriceIdMonthly,
+      stripePriceIdAnnual,
+      stripeSecretKeyTest,
+      stripeWebhookSecretTest,
+      stripePriceIdMonthlyTest,
+      stripePriceIdAnnualTest,
+    ],
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "User must be authenticated.");
+    }
+
+    await assertAdmin(request.auth.uid, request.auth.token as Record<string, unknown>);
+
+    return {
+      ok: true,
+      defaultBillingMode: DEFAULT_BILLING_MODE,
+      hasLiveConfig: hasBillingModeConfig("live"),
+      hasTestConfig: hasBillingModeConfig("test"),
+    };
+  }
+);
+
+export const setUserBillingMode = onCall(
+  {
+    region: "us-central1",
+    secrets: [
+      stripeSecretKey,
+      stripeWebhookSecret,
+      stripePriceIdMonthly,
+      stripePriceIdAnnual,
+      stripeSecretKeyTest,
+      stripeWebhookSecretTest,
+      stripePriceIdMonthlyTest,
+      stripePriceIdAnnualTest,
+    ],
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "User must be authenticated.");
+    }
+
+    await assertAdmin(request.auth.uid, request.auth.token as Record<string, unknown>);
+
+    const userId = String(request.data?.userId || "").trim();
+    const targetMode = parseBillingMode(request.data?.mode);
+
+    if (!userId) {
+      throw new HttpsError("invalid-argument", "A target userId is required.");
+    }
+
+    if (!hasBillingModeConfig(targetMode)) {
+      throw new HttpsError(
+        "failed-precondition",
+        `Stripe ${targetMode} configuration is incomplete. Add the required Stripe secrets and price IDs first.`
+      );
+    }
+
+    const db = admin.firestore();
+    const userRef = db.doc(`users/${userId}`);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) {
+      throw new HttpsError("not-found", "User not found.");
+    }
+
+    const userData = userSnap.data() || {};
+    const currentMode = getEffectiveBillingModeForUserData(userData);
+    if (currentMode === targetMode) {
+      return { ok: true, userId, billingMode: targetMode };
+    }
+
+    const currentSnapshot = getGenericBillingSnapshot(userData);
+    const targetSnapshot = getModeBillingSnapshot(userData, targetMode);
+
+    const actingUserEmail =
+      typeof request.auth.token?.email === "string" ? request.auth.token.email : null;
+
+    await userRef.set(
+      {
+        ...buildModeBillingFields(currentMode, currentSnapshot),
+        ...buildGenericBillingOverlay(targetSnapshot),
+        billingModeOverride: targetMode === "test" ? "test" : null,
+        billingModeOverrideUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        billingModeOverrideUpdatedBy: request.auth.uid,
+        billingModeOverrideUpdatedByEmail: actingUserEmail,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    logger.info("Admin updated user billing mode", {
+      requestedBy: request.auth.uid,
+      requestedByEmail: actingUserEmail,
+      targetUserId: userId,
+      previousBillingMode: currentMode,
+      billingMode: targetMode,
+    });
+
+    return {
+      ok: true,
+      userId,
+      billingMode: targetMode,
     };
   }
 );

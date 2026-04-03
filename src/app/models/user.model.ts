@@ -23,6 +23,10 @@ export interface UserProfile {
   subscriptionPriceId?: string | null;
   subscriptionCurrentPeriodEnd?: Timestamp | null;
   subscriptionCancelAtPeriodEnd?: boolean;
+  billingModeOverride?: 'test' | null;
+  billingModeOverrideUpdatedAt?: Timestamp | ReturnType<typeof serverTimestamp> | null;
+  billingModeOverrideUpdatedBy?: string | null;
+  billingModeOverrideUpdatedByEmail?: string | null;
   adminSubscriptionPlanOverride?: 'pro' | null;
   adminSubscriptionOverrideUpdatedAt?: Timestamp | ReturnType<typeof serverTimestamp> | null;
   adminSubscriptionOverrideUpdatedBy?: string | null;

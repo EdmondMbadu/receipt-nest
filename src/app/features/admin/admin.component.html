@@ -75,6 +75,77 @@
       </p>
     </div>
 
+    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm space-y-4">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Billing environment</p>
+          <h2 class="mt-1 text-lg font-semibold text-slate-900 dark:text-white">Stripe environment readiness</h2>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            The app defaults to live billing. Use the per-user controls in the user table below when you want to route one account through Stripe test mode for QA.
+          </p>
+        </div>
+        <span
+          class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
+          Default: {{ billingModeLabel(defaultBillingMode()) }}
+        </span>
+      </div>
+
+      <div *ngIf="billingModeLoading()" class="text-sm text-slate-500 dark:text-slate-400">
+        Loading Stripe environment readiness...
+      </div>
+
+      <div *ngIf="!billingModeLoading()" class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 p-4 space-y-3">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="text-sm font-semibold text-slate-900 dark:text-white">Live Stripe</p>
+              <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Real customer charges and production subscriptions.</p>
+            </div>
+            <span
+              class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
+              [class.bg-emerald-100]="hasLiveBillingConfig()"
+              [class.text-emerald-800]="hasLiveBillingConfig()"
+              [class.dark:bg-emerald-950/40]="hasLiveBillingConfig()"
+              [class.dark:text-emerald-200]="hasLiveBillingConfig()"
+              [class.bg-rose-100]="!hasLiveBillingConfig()"
+              [class.text-rose-800]="!hasLiveBillingConfig()"
+              [class.dark:bg-rose-950/40]="!hasLiveBillingConfig()"
+              [class.dark:text-rose-200]="!hasLiveBillingConfig()">
+              {{ hasLiveBillingConfig() ? 'Configured' : 'Incomplete' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 p-4 space-y-3">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="text-sm font-semibold text-slate-900 dark:text-white">Test Stripe</p>
+              <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Sandbox checkout, portal, and subscription sync for QA without real charges.</p>
+            </div>
+            <span
+              class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
+              [class.bg-emerald-100]="hasTestBillingConfig()"
+              [class.text-emerald-800]="hasTestBillingConfig()"
+              [class.dark:bg-emerald-950/40]="hasTestBillingConfig()"
+              [class.dark:text-emerald-200]="hasTestBillingConfig()"
+              [class.bg-rose-100]="!hasTestBillingConfig()"
+              [class.text-rose-800]="!hasTestBillingConfig()"
+              [class.dark:bg-rose-950/40]="!hasTestBillingConfig()"
+              [class.dark:text-rose-200]="!hasTestBillingConfig()">
+              {{ hasTestBillingConfig() ? 'Configured' : 'Incomplete' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        Web and mobile both follow the selected user’s billing override automatically. There is no separate mobile toggle.
+      </p>
+      <p *ngIf="billingModeError()" class="text-sm text-rose-600 dark:text-rose-400">
+        {{ billingModeError() }}
+      </p>
+    </div>
+
     <details class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
       <summary
         class="flex cursor-pointer items-center justify-between gap-4 px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white list-none">
@@ -655,6 +726,16 @@
         </span>
       </div>
 
+      <div *ngIf="userBillingModeActionSuccess() || userBillingModeActionError()"
+        class="border-b border-slate-100 dark:border-slate-800 px-4 py-3 text-sm">
+        <span *ngIf="userBillingModeActionSuccess()" class="text-emerald-600 dark:text-emerald-400">
+          {{ userBillingModeActionSuccess() }}
+        </span>
+        <span *ngIf="userBillingModeActionError()" class="text-rose-600 dark:text-rose-400">
+          {{ userBillingModeActionError() }}
+        </span>
+      </div>
+
       <div *ngIf="!isLoading() && !error() && users().length === 0"
         class="px-4 py-6 text-sm text-slate-500 dark:text-slate-400">
         No users found yet.
@@ -787,27 +868,63 @@
                 {{ formatDate(user.createdAt) }}
               </td>
               <td class="px-4 py-3 text-sm">
-                <div class="flex flex-wrap items-center gap-2">
-                  <button *ngIf="effectivePlan(user) !== 'pro'"
+                <div class="flex flex-col items-start gap-2">
+                  <div class="flex flex-col gap-1">
+                    <span
+                      class="inline-flex w-fit items-center rounded-full px-2.5 py-1 text-xs font-semibold"
+                      [class.bg-amber-100]="effectiveBillingMode(user) === 'test'"
+                      [class.text-amber-900]="effectiveBillingMode(user) === 'test'"
+                      [class.dark:bg-amber-950/40]="effectiveBillingMode(user) === 'test'"
+                      [class.dark:text-amber-200]="effectiveBillingMode(user) === 'test'"
+                      [class.bg-emerald-100]="effectiveBillingMode(user) === 'live'"
+                      [class.text-emerald-800]="effectiveBillingMode(user) === 'live'"
+                      [class.dark:bg-emerald-950/40]="effectiveBillingMode(user) === 'live'"
+                      [class.dark:text-emerald-200]="effectiveBillingMode(user) === 'live'">
+                      {{ billingModeLabel(effectiveBillingMode(user)) }} billing
+                    </span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400">
+                      {{ billingModeSourceLabel(user) }}
+                    </span>
+                  </div>
+
+                  <div class="flex flex-wrap items-center gap-2">
+                    <button *ngIf="effectiveBillingMode(user) !== 'test'"
+                      type="button"
+                      (click)="updateUserBillingMode(user, 'test')"
+                      [disabled]="isUserBillingModeActionPending(user.id) || !hasTestBillingConfig()"
+                      class="inline-flex items-center justify-center rounded-lg bg-amber-500 px-3 py-2 text-xs font-semibold text-slate-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60">
+                      {{ isUserBillingModeActionPending(user.id) ? 'Saving...' : 'Use test billing' }}
+                    </button>
+
+                    <button *ngIf="effectiveBillingMode(user) !== 'live'"
+                      type="button"
+                      (click)="updateUserBillingMode(user, 'live')"
+                      [disabled]="isUserBillingModeActionPending(user.id) || !hasLiveBillingConfig()"
+                      class="inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
+                      {{ isUserBillingModeActionPending(user.id) ? 'Saving...' : 'Return to live billing' }}
+                    </button>
+
+                    <button *ngIf="effectivePlan(user) !== 'pro'"
                     type="button"
                     (click)="updateUserProAccess(user, 'grant')"
                     [disabled]="isUserPlanActionPending(user.id)"
                     class="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60">
                     {{ isUserPlanActionPending(user.id) ? 'Saving...' : 'Make Pro' }}
-                  </button>
+                    </button>
 
-                  <button *ngIf="hasManualProAccess(user)"
-                    type="button"
-                    (click)="updateUserProAccess(user, 'revoke')"
-                    [disabled]="isUserPlanActionPending(user.id)"
-                    class="inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
-                    {{ isUserPlanActionPending(user.id) ? 'Saving...' : 'Return to default' }}
-                  </button>
+                    <button *ngIf="hasManualProAccess(user)"
+                      type="button"
+                      (click)="updateUserProAccess(user, 'revoke')"
+                      [disabled]="isUserPlanActionPending(user.id)"
+                      class="inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
+                      {{ isUserPlanActionPending(user.id) ? 'Saving...' : 'Return to default' }}
+                    </button>
 
-                  <span *ngIf="effectivePlan(user) === 'pro' && !hasManualProAccess(user)"
-                    class="text-xs font-medium text-slate-500 dark:text-slate-400">
-                    Paid Pro
-                  </span>
+                    <span *ngIf="effectivePlan(user) === 'pro' && !hasManualProAccess(user)"
+                      class="text-xs font-medium text-slate-500 dark:text-slate-400">
+                      Paid Pro
+                    </span>
+                  </div>
                 </div>
               </td>
             </tr>

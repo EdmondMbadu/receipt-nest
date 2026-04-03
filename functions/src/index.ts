@@ -29,7 +29,13 @@ export {
 } from "./receipt-processor";
 export { createCheckoutSession, createPortalSession, stripeWebhook } from "./billing";
 export { generateAiInsights } from "./ai-insights";
-export { sendTestEmail, backfillUserReceiptCounts, setUserProAccess } from "./admin";
+export {
+  sendTestEmail,
+  backfillUserReceiptCounts,
+  setUserProAccess,
+  getBillingModeStatus,
+  setUserBillingMode,
+} from "./admin";
 export {
   sendSpendSummaryEmail,
   sendSpendSummaryNotification,

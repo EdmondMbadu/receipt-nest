@@ -3,18 +3,63 @@ import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import Stripe from "stripe";
+import { BillingMode, getEffectiveBillingModeForUserData } from "./app-config";
+import {
+  BillingSnapshot,
+  buildGenericBillingOverlay,
+  buildModeBillingFields,
+  emptyBillingSnapshot,
+  getModeBillingFieldName,
+  getStoredCustomerIdForMode,
+} from "./billing-state";
 
 const STRIPE_API_VERSION = "2024-06-20";
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
 const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
 const stripePriceIdMonthly = defineSecret("STRIPE_PRICE_ID_MONTHLY");
 const stripePriceIdAnnual = defineSecret("STRIPE_PRICE_ID_ANNUAL");
+const stripeSecretKeyTest = defineSecret("STRIPE_SECRET_KEY_TEST");
+const stripeWebhookSecretTest = defineSecret("STRIPE_WEBHOOK_SECRET_TEST");
+const stripePriceIdMonthlyTest = defineSecret("STRIPE_PRICE_ID_MONTHLY_TEST");
+const stripePriceIdAnnualTest = defineSecret("STRIPE_PRICE_ID_ANNUAL_TEST");
 const appBaseUrl = defineSecret("APP_BASE_URL");
 
-const getStripe = () => {
-  const secret = stripeSecretKey.value();
+const getStripeSecretKeyForMode = (mode: BillingMode) =>
+  mode === "test" ? stripeSecretKeyTest.value() : stripeSecretKey.value();
+
+const getStripeWebhookSecretForMode = (mode: BillingMode) =>
+  mode === "test" ? stripeWebhookSecretTest.value() : stripeWebhookSecret.value();
+
+const getStripePriceIdForModeAndInterval = (mode: BillingMode, interval: string) => {
+  if (mode === "test") {
+    return interval === "annual" ? stripePriceIdAnnualTest.value() : stripePriceIdMonthlyTest.value();
+  }
+
+  return interval === "annual" ? stripePriceIdAnnual.value() : stripePriceIdMonthly.value();
+};
+
+const hasCheckoutConfigForMode = (mode: BillingMode) => {
+  const secretKey = getStripeSecretKeyForMode(mode);
+  const monthlyPriceId = getStripePriceIdForModeAndInterval(mode, "monthly");
+  const annualPriceId = getStripePriceIdForModeAndInterval(mode, "annual");
+  return Boolean(secretKey && monthlyPriceId && annualPriceId && appBaseUrl.value());
+};
+
+const hasPortalConfigForMode = (mode: BillingMode) =>
+  Boolean(getStripeSecretKeyForMode(mode) && appBaseUrl.value());
+
+const hasWebhookConfigForMode = (mode: BillingMode) =>
+  Boolean(
+    getStripeSecretKeyForMode(mode) &&
+      getStripeWebhookSecretForMode(mode) &&
+      getStripePriceIdForModeAndInterval(mode, "monthly") &&
+      getStripePriceIdForModeAndInterval(mode, "annual")
+  );
+
+const getStripe = (mode: BillingMode) => {
+  const secret = getStripeSecretKeyForMode(mode);
   if (!secret) {
-    throw new Error("Missing STRIPE_SECRET_KEY.");
+    throw new Error(`Missing Stripe secret key for ${mode} mode.`);
   }
   return new Stripe(secret, {
     apiVersion: STRIPE_API_VERSION,
@@ -22,29 +67,30 @@ const getStripe = () => {
 };
 
 const VALID_INTERVALS = new Set(["monthly", "annual"]);
-const VALID_PLATFORMS = new Set(["web", "mobile"]);
+type BillingPlatform = "web" | "mobile";
+const VALID_PLATFORMS = new Set<BillingPlatform>(["web", "mobile"]);
 const portalRedirectStatusSet = new Set(["active", "trialing", "past_due", "unpaid", "paused"]);
 const pendingCheckoutStatusSet = new Set(["incomplete"]);
 
-const getPriceIdForInterval = (interval: string) => {
-  if (interval === "annual") {
-    return stripePriceIdAnnual.value();
-  }
-  return stripePriceIdMonthly.value();
+const getPriceIdForInterval = (mode: BillingMode, interval: string) => {
+  return getStripePriceIdForModeAndInterval(mode, interval);
 };
 
-const resolvePlanFromPrice = (priceId: string | null | undefined) => {
-  if (priceId === stripePriceIdMonthly.value() || priceId === stripePriceIdAnnual.value()) {
+const resolvePlanFromPrice = (mode: BillingMode, priceId: string | null | undefined) => {
+  if (
+    priceId === getStripePriceIdForModeAndInterval(mode, "monthly") ||
+    priceId === getStripePriceIdForModeAndInterval(mode, "annual")
+  ) {
     return "pro";
   }
   return "free";
 };
 
-const resolveIntervalFromPrice = (priceId: string | null | undefined) => {
-  if (priceId === stripePriceIdAnnual.value()) {
+const resolveIntervalFromPrice = (mode: BillingMode, priceId: string | null | undefined) => {
+  if (priceId === getStripePriceIdForModeAndInterval(mode, "annual")) {
     return "annual";
   }
-  if (priceId === stripePriceIdMonthly.value()) {
+  if (priceId === getStripePriceIdForModeAndInterval(mode, "monthly")) {
     return "monthly";
   }
   return "monthly";
@@ -54,7 +100,7 @@ const activeStatusSet = new Set(["active", "trialing", "past_due", "unpaid"]);
 
 const normalizeBaseUrl = (value: string) => value.replace(/\/+$/, "");
 
-const buildBillingUrls = (platform: string) => {
+const buildBillingUrls = (platform: BillingPlatform) => {
   const baseUrl = normalizeBaseUrl(appBaseUrl.value());
   if (platform === "mobile") {
     return {
@@ -93,12 +139,14 @@ const ensureCheckoutCustomerId = async ({
   stripe,
   userRef,
   uid,
+  mode,
   storedCustomerId,
   email,
 }: {
   stripe: Stripe;
   userRef: admin.firestore.DocumentReference;
   uid: string;
+  mode: BillingMode;
   storedCustomerId: string | undefined;
   email: string | undefined;
 }) => {
@@ -131,7 +179,13 @@ const ensureCheckoutCustomerId = async ({
     metadata: { firebaseUID: uid },
   });
 
-  await userRef.set({ stripeCustomerId: customer.id }, { merge: true });
+  await userRef.set(
+    {
+      [getModeBillingFieldName(mode, "stripeCustomerId")]: customer.id,
+      stripeCustomerId: customer.id,
+    },
+    { merge: true }
+  );
   return customer.id;
 };
 
@@ -205,8 +259,11 @@ export const createCheckoutSession = onCall(
     region: "us-central1",
     secrets: [
       stripeSecretKey,
+      stripeSecretKeyTest,
       stripePriceIdMonthly,
       stripePriceIdAnnual,
+      stripePriceIdMonthlyTest,
+      stripePriceIdAnnualTest,
       appBaseUrl,
     ],
   },
@@ -215,42 +272,40 @@ export const createCheckoutSession = onCall(
       throw new HttpsError("unauthenticated", "User must be authenticated to start checkout.");
     }
 
-    if (
-      !stripeSecretKey.value() ||
-      !stripePriceIdMonthly.value() ||
-      !stripePriceIdAnnual.value() ||
-      !appBaseUrl.value()
-    ) {
-      throw new HttpsError("failed-precondition", "Stripe configuration is incomplete.");
-    }
-
     const interval = String(request.data?.interval || "monthly");
     if (!VALID_INTERVALS.has(interval)) {
       throw new HttpsError("invalid-argument", "Interval must be monthly or annual.");
     }
 
-    const platform = String(request.data?.platform || "web");
+    const platform = String(request.data?.platform || "web") as BillingPlatform;
     if (!VALID_PLATFORMS.has(platform)) {
       throw new HttpsError("invalid-argument", "Platform must be web or mobile.");
     }
 
-    const priceId = getPriceIdForInterval(interval);
+    const uid = request.auth.uid;
+    const userRef = admin.firestore().doc(`users/${uid}`);
+    const userSnap = await userRef.get();
+    const userData = userSnap.data() || {};
+    const billingMode = getEffectiveBillingModeForUserData(userData);
+
+    if (!hasCheckoutConfigForMode(billingMode)) {
+      throw new HttpsError("failed-precondition", `Stripe ${billingMode} configuration is incomplete.`);
+    }
+
+    const priceId = getPriceIdForInterval(billingMode, interval);
     if (!priceId) {
       throw new HttpsError("failed-precondition", "Stripe price ID missing for selected interval.");
     }
 
     const billingUrls = buildBillingUrls(platform);
-    const stripe = getStripe();
-    const uid = request.auth.uid;
-    const userRef = admin.firestore().doc(`users/${uid}`);
-    const userSnap = await userRef.get();
-    const userData = userSnap.data() || {};
+    const stripe = getStripe(billingMode);
 
     const customerId = await ensureCheckoutCustomerId({
       stripe,
       userRef,
       uid,
-      storedCustomerId: userData.stripeCustomerId as string | undefined,
+      mode: billingMode,
+      storedCustomerId: getStoredCustomerIdForMode(userData, billingMode) ?? undefined,
       email: getCustomerEmail(userData, request.auth.token.email),
     });
 
@@ -283,12 +338,14 @@ export const createCheckoutSession = onCall(
         firebaseUID: uid,
         planInterval: interval,
         platform,
+        billingMode,
       },
       subscription_data: {
         metadata: {
           firebaseUID: uid,
           planInterval: interval,
           platform,
+          billingMode,
         },
       },
     });
@@ -298,17 +355,13 @@ export const createCheckoutSession = onCall(
 );
 
 export const createPortalSession = onCall(
-  { region: "us-central1", secrets: [stripeSecretKey, appBaseUrl] },
+  { region: "us-central1", secrets: [stripeSecretKey, stripeSecretKeyTest, appBaseUrl] },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "User must be authenticated to access the billing portal.");
     }
 
-    if (!stripeSecretKey.value() || !appBaseUrl.value()) {
-      throw new HttpsError("failed-precondition", "Stripe configuration is incomplete.");
-    }
-
-    const platform = String(request.data?.platform || "web");
+    const platform = String(request.data?.platform || "web") as BillingPlatform;
     if (!VALID_PLATFORMS.has(platform)) {
       throw new HttpsError("invalid-argument", "Platform must be web or mobile.");
     }
@@ -316,13 +369,18 @@ export const createPortalSession = onCall(
     const uid = request.auth.uid;
     const userSnap = await admin.firestore().doc(`users/${uid}`).get();
     const userData = userSnap.data() || {};
+    const billingMode = getEffectiveBillingModeForUserData(userData);
+
+    if (!hasPortalConfigForMode(billingMode)) {
+      throw new HttpsError("failed-precondition", `Stripe ${billingMode} configuration is incomplete.`);
+    }
 
     const billingUrls = buildBillingUrls(platform);
-    const stripe = getStripe();
+    const stripe = getStripe(billingMode);
     const customerId = await requirePortalCustomerId({
       stripe,
       uid,
-      storedCustomerId: userData.stripeCustomerId as string | undefined,
+      storedCustomerId: getStoredCustomerIdForMode(userData, billingMode) ?? undefined,
     });
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
@@ -334,14 +392,26 @@ export const createPortalSession = onCall(
 );
 
 export const stripeWebhook = onRequest(
-  { region: "us-central1", secrets: [stripeSecretKey, stripeWebhookSecret, stripePriceIdMonthly, stripePriceIdAnnual] },
+  {
+    region: "us-central1",
+    secrets: [
+      stripeSecretKey,
+      stripeWebhookSecret,
+      stripePriceIdMonthly,
+      stripePriceIdAnnual,
+      stripeSecretKeyTest,
+      stripeWebhookSecretTest,
+      stripePriceIdMonthlyTest,
+      stripePriceIdAnnualTest,
+    ],
+  },
   async (req, res) => {
     if (req.method !== "POST") {
       res.status(405).send("Method Not Allowed");
       return;
     }
 
-    if (!stripeSecretKey.value() || !stripeWebhookSecret.value()) {
+    if (!hasWebhookConfigForMode("live") && !hasWebhookConfigForMode("test")) {
       logger.error("Stripe webhook configuration missing.");
       res.status(500).send("Webhook configuration missing.");
       return;
@@ -353,15 +423,41 @@ export const stripeWebhook = onRequest(
       return;
     }
 
-    let event: Stripe.Event;
+    let event: Stripe.Event | null = null;
+    let billingMode: BillingMode | null = null;
     try {
-      const stripe = getStripe();
-      event = stripe.webhooks.constructEvent(req.rawBody, signature, stripeWebhookSecret.value());
+      const candidateModes: BillingMode[] = ["live", "test"];
+      let lastError: unknown = null;
+
+      for (const candidateMode of candidateModes) {
+        if (!hasWebhookConfigForMode(candidateMode)) {
+          continue;
+        }
+
+        try {
+          const stripe = getStripe(candidateMode);
+          event = stripe.webhooks.constructEvent(
+            req.rawBody,
+            signature,
+            getStripeWebhookSecretForMode(candidateMode)
+          );
+          billingMode = candidateMode;
+          break;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      if (!event || !billingMode) {
+        throw lastError ?? new Error("No matching Stripe webhook secret was configured.");
+      }
     } catch (error) {
       logger.error("Stripe webhook signature verification failed.", error);
       res.status(400).send("Webhook signature verification failed.");
       return;
     }
+
+    const stripe = getStripe(billingMode);
 
     try {
       switch (event.type) {
@@ -369,15 +465,14 @@ export const stripeWebhook = onRequest(
         case "customer.subscription.updated":
         case "customer.subscription.deleted": {
           const subscription = event.data.object as Stripe.Subscription;
-          await syncSubscription(subscription);
+          await syncSubscription(subscription, billingMode);
           break;
         }
         case "checkout.session.completed": {
           const session = event.data.object as Stripe.Checkout.Session;
           if (session.subscription) {
-            const stripe = getStripe();
             const subscription = await stripe.subscriptions.retrieve(String(session.subscription));
-            await syncSubscription(subscription);
+            await syncSubscription(subscription, billingMode);
           }
           break;
         }
@@ -386,9 +481,8 @@ export const stripeWebhook = onRequest(
         case "invoice.payment_failed": {
           const invoice = event.data.object as Stripe.Invoice;
           if (invoice.subscription) {
-            const stripe = getStripe();
             const subscription = await stripe.subscriptions.retrieve(String(invoice.subscription));
-            await syncSubscription(subscription);
+            await syncSubscription(subscription, billingMode);
           }
           break;
         }
@@ -404,7 +498,7 @@ export const stripeWebhook = onRequest(
   }
 );
 
-const syncSubscription = async (subscription: Stripe.Subscription) => {
+const syncSubscription = async (subscription: Stripe.Subscription, mode: BillingMode) => {
   const customerId = subscription.customer as string | null;
   if (!customerId) {
     logger.warn("Subscription missing customer id.");
@@ -412,37 +506,56 @@ const syncSubscription = async (subscription: Stripe.Subscription) => {
   }
 
   const db = admin.firestore();
-  const userSnapshot = await db
+  let userSnapshot = await db
     .collection("users")
-    .where("stripeCustomerId", "==", customerId)
+    .where(getModeBillingFieldName(mode, "stripeCustomerId"), "==", customerId)
     .limit(1)
     .get();
 
+  if (userSnapshot.empty && mode === "live") {
+    userSnapshot = await db
+      .collection("users")
+      .where("stripeCustomerId", "==", customerId)
+      .limit(1)
+      .get();
+  }
+
   if (userSnapshot.empty) {
-    logger.warn(`No user found for Stripe customer ${customerId}`);
+    logger.warn(`No user found for Stripe customer ${customerId}`, { billingMode: mode });
     return;
   }
 
   const userRef = userSnapshot.docs[0].ref;
+  const userData = userSnapshot.docs[0].data() || {};
   const priceId = subscription.items.data[0]?.price?.id;
-  const plan = resolvePlanFromPrice(priceId);
-  const interval = resolveIntervalFromPrice(priceId);
+  const plan = resolvePlanFromPrice(mode, priceId);
+  const interval = resolveIntervalFromPrice(mode, priceId);
   const isActive = activeStatusSet.has(subscription.status);
+  const snapshot: BillingSnapshot = {
+    ...emptyBillingSnapshot(),
+    subscriptionPlan: isActive && plan === "pro" ? "pro" : "free",
+    subscriptionStatus: subscription.status,
+    subscriptionInterval: interval,
+    subscriptionPriceId: priceId || null,
+    stripeCustomerId: customerId,
+    stripeSubscriptionId: subscription.id,
+    subscriptionCancelAtPeriodEnd: subscription.cancel_at_period_end || false,
+    subscriptionCurrentPeriodEnd: subscription.current_period_end
+      ? admin.firestore.Timestamp.fromMillis(subscription.current_period_end * 1000)
+      : null,
+    subscriptionUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  const nextFields: Record<string, unknown> = {
+    ...buildModeBillingFields(mode, snapshot),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  if (getEffectiveBillingModeForUserData(userData) === mode) {
+    Object.assign(nextFields, buildGenericBillingOverlay(snapshot));
+  }
 
   await userRef.set(
-    {
-      subscriptionPlan: isActive && plan === "pro" ? "pro" : "free",
-      subscriptionStatus: subscription.status,
-      subscriptionInterval: interval,
-      subscriptionPriceId: priceId || null,
-      stripeCustomerId: customerId,
-      stripeSubscriptionId: subscription.id,
-      subscriptionCancelAtPeriodEnd: subscription.cancel_at_period_end || false,
-      subscriptionCurrentPeriodEnd: subscription.current_period_end
-        ? admin.firestore.Timestamp.fromMillis(subscription.current_period_end * 1000)
-        : null,
-      subscriptionUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    },
+    nextFields,
     { merge: true }
   );
 };

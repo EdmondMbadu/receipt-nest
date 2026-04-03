@@ -17,9 +17,11 @@ import {
 
 import { app } from '../../../../environments/environments';
 import {
+  BillingMode,
   DEFAULT_FREE_PLAN_RECEIPT_LIMIT,
   PUBLIC_BILLING_CONFIG_COLLECTION,
   PUBLIC_BILLING_CONFIG_DOC_ID,
+  normalizeBillingMode,
   normalizeFreePlanReceiptLimit
 } from '../../config/subscription.constants';
 import { UserProfile } from '../../models/user.model';
@@ -79,6 +81,19 @@ interface UserProAccessResponse {
   userId: string;
   effectivePlan: 'free' | 'pro';
   manualOverrideActive: boolean;
+}
+
+interface BillingModeStatusResponse {
+  ok: boolean;
+  defaultBillingMode: BillingMode;
+  hasLiveConfig: boolean;
+  hasTestConfig: boolean;
+}
+
+interface UserBillingModeResponse {
+  ok: boolean;
+  userId: string;
+  billingMode: BillingMode;
 }
 
 type UserProAccessMode = 'grant' | 'revoke';
@@ -151,6 +166,14 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly freePlanReceiptLimitSaving = signal(false);
   readonly freePlanReceiptLimitError = signal<string | null>(null);
   readonly freePlanReceiptLimitSuccess = signal<string | null>(null);
+  readonly defaultBillingMode = signal<BillingMode>('live');
+  readonly billingModeLoading = signal(true);
+  readonly billingModeError = signal<string | null>(null);
+  readonly hasLiveBillingConfig = signal(false);
+  readonly hasTestBillingConfig = signal(false);
+  readonly userBillingModeActionPendingUserId = signal<string | null>(null);
+  readonly userBillingModeActionError = signal<string | null>(null);
+  readonly userBillingModeActionSuccess = signal<string | null>(null);
   readonly userPlanActionPendingUserId = signal<string | null>(null);
   readonly userPlanActionError = signal<string | null>(null);
   readonly userPlanActionSuccess = signal<string | null>(null);
@@ -219,6 +242,7 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     void this.loadSpendSummarySchedule();
+    void this.loadBillingModeStatus();
 
     const usersRef = collection(this.db, 'users');
     const billingConfigRef = doc(this.db, PUBLIC_BILLING_CONFIG_COLLECTION, PUBLIC_BILLING_CONFIG_DOC_ID);
@@ -226,7 +250,8 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.billingConfigUnsubscribe = onSnapshot(
       billingConfigRef,
       (snapshot) => {
-        const limit = normalizeFreePlanReceiptLimit(snapshot.data()?.['freePlanReceiptLimit']);
+        const data = snapshot.data();
+        const limit = normalizeFreePlanReceiptLimit(data?.['freePlanReceiptLimit']);
         this.freePlanReceiptLimit.set(limit);
         this.freePlanReceiptLimitInput.set(limit);
       },
@@ -337,6 +362,67 @@ export class AdminComponent implements OnInit, OnDestroy {
   setFreePlanReceiptLimitInput(value: string | number): void {
     const parsed = typeof value === 'string' ? Number.parseInt(value, 10) : Number(value);
     this.freePlanReceiptLimitInput.set(Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0);
+  }
+
+  billingModeLabel(mode: BillingMode): string {
+    return mode === 'test' ? 'Test' : 'Live';
+  }
+
+  effectiveBillingMode(user: AdminUser): BillingMode {
+    return normalizeBillingMode(user.billingModeOverride);
+  }
+
+  billingModeSourceLabel(user: AdminUser): string {
+    return this.effectiveBillingMode(user) === 'test'
+      ? 'Per-user test override'
+      : `Default ${this.billingModeLabel(this.defaultBillingMode()).toLowerCase()} billing`;
+  }
+
+  isUserBillingModeActionPending(userId: string): boolean {
+    return this.userBillingModeActionPendingUserId() === userId;
+  }
+
+  async updateUserBillingMode(user: AdminUser, mode: BillingMode): Promise<void> {
+    if (this.userBillingModeActionPendingUserId() || this.effectiveBillingMode(user) === mode) {
+      return;
+    }
+
+    if ((mode === 'test' && !this.hasTestBillingConfig()) || (mode === 'live' && !this.hasLiveBillingConfig())) {
+      this.billingModeError.set(`Stripe ${this.billingModeLabel(mode).toLowerCase()} configuration is incomplete.`);
+      return;
+    }
+
+    this.billingModeError.set(null);
+    this.userBillingModeActionError.set(null);
+    this.userBillingModeActionSuccess.set(null);
+
+    const targetLabel = `${this.displayName(user)} (${user.email})`;
+    const confirmationMessage = mode === 'test'
+      ? `Switch ${targetLabel} to Stripe test billing only? Their live billing state will be preserved and restored when you switch them back.`
+      : `Return ${targetLabel} to live Stripe billing? Their stored test billing state will be kept for future QA.`;
+
+    if (typeof window !== 'undefined' && !window.confirm(confirmationMessage)) {
+      return;
+    }
+
+    this.userBillingModeActionPendingUserId.set(user.id);
+
+    try {
+      const callable = httpsCallable<{ userId: string; mode: BillingMode }, UserBillingModeResponse>(
+        this.functions,
+        'setUserBillingMode'
+      );
+      const response = await callable({ userId: user.id, mode });
+      this.userBillingModeActionSuccess.set(
+        `${targetLabel} now uses ${this.billingModeLabel(response.data.billingMode).toLowerCase()} billing.`
+      );
+      await this.loadBillingModeStatus();
+    } catch (error: any) {
+      console.error('Failed to update user billing mode', error);
+      this.userBillingModeActionError.set(error?.message || 'Unable to switch billing for this user right now.');
+    } finally {
+      this.userBillingModeActionPendingUserId.set(null);
+    }
   }
 
   async saveFreePlanReceiptLimit(): Promise<void> {
@@ -654,6 +740,23 @@ export class AdminComponent implements OnInit, OnDestroy {
       this.scheduleError.set('Unable to load the automation schedule right now.');
     } finally {
       this.scheduleLoading.set(false);
+    }
+  }
+
+  private async loadBillingModeStatus(): Promise<void> {
+    this.billingModeLoading.set(true);
+
+    try {
+      const callable = httpsCallable<void, BillingModeStatusResponse>(this.functions, 'getBillingModeStatus');
+      const response = await callable();
+      this.defaultBillingMode.set(response.data.defaultBillingMode);
+      this.hasLiveBillingConfig.set(response.data.hasLiveConfig);
+      this.hasTestBillingConfig.set(response.data.hasTestConfig);
+    } catch (error) {
+      console.error('Failed to load billing mode status', error);
+      this.billingModeError.set('Unable to load Stripe environment readiness right now.');
+    } finally {
+      this.billingModeLoading.set(false);
     }
   }
 
