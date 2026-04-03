@@ -112,6 +112,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/share/share-view.component').then((m) => m.ShareViewComponent)
   },
   {
+    path: 'mobile-return/:flow',
+    title: 'Open ReceiptNest AI',
+    loadComponent: () =>
+      import('./features/mobile-return/mobile-return.component').then((m) => m.MobileReturnComponent)
+  },
+  {
     path: 'support',
     title: 'Support',
     loadComponent: () => import('./features/support/support.component').then((m) => m.SupportComponent)

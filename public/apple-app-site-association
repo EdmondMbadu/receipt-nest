@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "NK3H883YB2.com.receiptnest.mobile",
+        "paths": [
+          "/mobile-return/*"
+        ]
+      }
+    ]
+  }
+}

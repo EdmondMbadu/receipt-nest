@@ -22,6 +22,7 @@ const getStripe = () => {
 };
 
 const VALID_INTERVALS = new Set(["monthly", "annual"]);
+const VALID_PLATFORMS = new Set(["web", "mobile"]);
 const portalRedirectStatusSet = new Set(["active", "trialing", "past_due", "unpaid", "paused"]);
 const pendingCheckoutStatusSet = new Set(["incomplete"]);
 
@@ -50,6 +51,25 @@ const resolveIntervalFromPrice = (priceId: string | null | undefined) => {
 };
 
 const activeStatusSet = new Set(["active", "trialing", "past_due", "unpaid"]);
+
+const normalizeBaseUrl = (value: string) => value.replace(/\/+$/, "");
+
+const buildBillingUrls = (platform: string) => {
+  const baseUrl = normalizeBaseUrl(appBaseUrl.value());
+  if (platform === "mobile") {
+    return {
+      checkoutSuccessUrl: `${baseUrl}/mobile-return/checkout?status=success`,
+      checkoutCancelUrl: `${baseUrl}/mobile-return/checkout?status=cancel`,
+      portalReturnUrl: `${baseUrl}/mobile-return/portal`,
+    };
+  }
+
+  return {
+    checkoutSuccessUrl: `${baseUrl}/app/pricing?checkout=success`,
+    checkoutCancelUrl: `${baseUrl}/app/pricing?checkout=cancel`,
+    portalReturnUrl: `${baseUrl}/app/pricing`,
+  };
+};
 
 const isStripeResourceMissingError = (error: unknown) => {
   if (!error || typeof error !== "object") {
@@ -209,11 +229,17 @@ export const createCheckoutSession = onCall(
       throw new HttpsError("invalid-argument", "Interval must be monthly or annual.");
     }
 
+    const platform = String(request.data?.platform || "web");
+    if (!VALID_PLATFORMS.has(platform)) {
+      throw new HttpsError("invalid-argument", "Platform must be web or mobile.");
+    }
+
     const priceId = getPriceIdForInterval(interval);
     if (!priceId) {
       throw new HttpsError("failed-precondition", "Stripe price ID missing for selected interval.");
     }
 
+    const billingUrls = buildBillingUrls(platform);
     const stripe = getStripe();
     const uid = request.auth.uid;
     const userRef = admin.firestore().doc(`users/${uid}`);
@@ -233,7 +259,7 @@ export const createCheckoutSession = onCall(
       if (portalRedirectStatusSet.has(blockingSubscription.status)) {
         const portalSession = await stripe.billingPortal.sessions.create({
           customer: customerId,
-          return_url: `${appBaseUrl.value()}/app/pricing`,
+          return_url: billingUrls.portalReturnUrl,
         });
 
         return { url: portalSession.url };
@@ -251,16 +277,18 @@ export const createCheckoutSession = onCall(
       client_reference_id: uid,
       line_items: [{ price: priceId, quantity: 1 }],
       allow_promotion_codes: true,
-      success_url: `${appBaseUrl.value()}/app/pricing?checkout=success`,
-      cancel_url: `${appBaseUrl.value()}/app/pricing?checkout=cancel`,
+      success_url: billingUrls.checkoutSuccessUrl,
+      cancel_url: billingUrls.checkoutCancelUrl,
       metadata: {
         firebaseUID: uid,
         planInterval: interval,
+        platform,
       },
       subscription_data: {
         metadata: {
           firebaseUID: uid,
           planInterval: interval,
+          platform,
         },
       },
     });
@@ -280,10 +308,16 @@ export const createPortalSession = onCall(
       throw new HttpsError("failed-precondition", "Stripe configuration is incomplete.");
     }
 
+    const platform = String(request.data?.platform || "web");
+    if (!VALID_PLATFORMS.has(platform)) {
+      throw new HttpsError("invalid-argument", "Platform must be web or mobile.");
+    }
+
     const uid = request.auth.uid;
     const userSnap = await admin.firestore().doc(`users/${uid}`).get();
     const userData = userSnap.data() || {};
 
+    const billingUrls = buildBillingUrls(platform);
     const stripe = getStripe();
     const customerId = await requirePortalCustomerId({
       stripe,
@@ -292,7 +326,7 @@ export const createPortalSession = onCall(
     });
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${appBaseUrl.value()}/app/pricing`,
+      return_url: billingUrls.portalReturnUrl,
     });
 
     return { url: portalSession.url };

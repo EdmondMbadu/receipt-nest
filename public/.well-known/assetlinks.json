@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.receiptnest.mobile",
+      "sha256_cert_fingerprints": [
+        "7E:29:3F:88:A0:25:21:4B:92:FB:AD:C6:B0:F0:A7:6B:2A:61:21:65:C6:84:D2:A5:20:D1:FD:B7:5C:D7:0C:88"
+      ]
+    }
+  }
+]
