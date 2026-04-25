@@ -190,7 +190,41 @@
           </p>
 
           <!-- CTA Buttons -->
-          <div class="mt-10 flex flex-col sm:flex-row gap-4">
+          <div class="mt-10 flex flex-col sm:flex-row flex-wrap gap-4">
+            <a href="https://play.google.com/store/apps/details?id=com.receiptnest.mobile"
+              target="_blank" rel="noopener noreferrer"
+              aria-label="Get ReceiptNest AI on Google Play"
+              class="group inline-flex items-center gap-3 rounded-xl border border-slate-800 bg-black px-5 py-3 text-white shadow-xl shadow-black/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-900 hover:shadow-2xl">
+              <svg class="h-7 w-7" viewBox="0 0 512 512" aria-hidden="true">
+                <defs>
+                  <linearGradient id="gp-blue" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#00A0FF"/>
+                    <stop offset="100%" stop-color="#00E2FF"/>
+                  </linearGradient>
+                  <linearGradient id="gp-yellow" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#FFBD00"/>
+                    <stop offset="100%" stop-color="#FFE000"/>
+                  </linearGradient>
+                  <linearGradient id="gp-red" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#FF3A44"/>
+                    <stop offset="100%" stop-color="#C31162"/>
+                  </linearGradient>
+                  <linearGradient id="gp-green" x1="0" y1="1" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#00A070"/>
+                    <stop offset="100%" stop-color="#00F076"/>
+                  </linearGradient>
+                </defs>
+                <path fill="url(#gp-blue)" d="M64 32 L320 256 L64 480 C56 472 52 462 52 450 V62 C52 50 56 40 64 32 Z"/>
+                <path fill="url(#gp-yellow)" d="M400 208 L320 256 L400 304 L450 274 C470 262 470 250 450 238 Z"/>
+                <path fill="url(#gp-red)" d="M64 480 L320 256 L400 304 L96 478 C84 484 74 484 64 480 Z"/>
+                <path fill="url(#gp-green)" d="M64 32 C74 28 84 28 96 34 L400 208 L320 256 Z"/>
+              </svg>
+              <span class="flex flex-col leading-tight text-left">
+                <span class="text-[10px] uppercase tracking-wider text-slate-300">Get it on</span>
+                <span class="text-lg font-semibold -mt-0.5">Google Play</span>
+              </span>
+            </a>
+
             <a routerLink="/register"
               class="group inline-flex items-center justify-center gap-3 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 px-8 py-4 text-base font-semibold text-white dark:text-slate-900 shadow-xl shadow-slate-900/10 dark:shadow-white/5 transition-all duration-200 hover:scale-[1.02]">
               Start for free
@@ -2139,6 +2173,40 @@
             It takes 60 seconds to sign up. Upload your first receipt, and watch ReceiptNest AI do the rest.
           </p>
           <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="https://play.google.com/store/apps/details?id=com.receiptnest.mobile"
+              target="_blank" rel="noopener noreferrer"
+              aria-label="Get ReceiptNest AI on Google Play"
+              class="group inline-flex items-center gap-3 rounded-xl border border-slate-700 bg-black px-5 py-3 text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-900">
+              <svg class="h-7 w-7" viewBox="0 0 512 512" aria-hidden="true">
+                <defs>
+                  <linearGradient id="gp-blue-cta" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#00A0FF"/>
+                    <stop offset="100%" stop-color="#00E2FF"/>
+                  </linearGradient>
+                  <linearGradient id="gp-yellow-cta" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#FFBD00"/>
+                    <stop offset="100%" stop-color="#FFE000"/>
+                  </linearGradient>
+                  <linearGradient id="gp-red-cta" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#FF3A44"/>
+                    <stop offset="100%" stop-color="#C31162"/>
+                  </linearGradient>
+                  <linearGradient id="gp-green-cta" x1="0" y1="1" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#00A070"/>
+                    <stop offset="100%" stop-color="#00F076"/>
+                  </linearGradient>
+                </defs>
+                <path fill="url(#gp-blue-cta)" d="M64 32 L320 256 L64 480 C56 472 52 462 52 450 V62 C52 50 56 40 64 32 Z"/>
+                <path fill="url(#gp-yellow-cta)" d="M400 208 L320 256 L400 304 L450 274 C470 262 470 250 450 238 Z"/>
+                <path fill="url(#gp-red-cta)" d="M64 480 L320 256 L400 304 L96 478 C84 484 74 484 64 480 Z"/>
+                <path fill="url(#gp-green-cta)" d="M64 32 C74 28 84 28 96 34 L400 208 L320 256 Z"/>
+              </svg>
+              <span class="flex flex-col leading-tight text-left">
+                <span class="text-[10px] uppercase tracking-wider text-slate-300">Get it on</span>
+                <span class="text-lg font-semibold -mt-0.5">Google Play</span>
+              </span>
+            </a>
+
             <a routerLink="/register"
               class="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-slate-100 px-8 py-4 text-base font-semibold text-slate-900 shadow-xl transition-all duration-200 hover:scale-[1.02]">
               Start free - no credit card needed
@@ -2206,6 +2274,44 @@
             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069Zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073Zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324ZM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881Z"/>
             </svg>
+          </a>
+
+          <!-- Divider -->
+          <span class="mx-1 hidden h-6 w-px bg-slate-200 dark:bg-slate-700 sm:block"></span>
+
+          <!-- Google Play badge -->
+          <a href="https://play.google.com/store/apps/details?id=com.receiptnest.mobile"
+            target="_blank" rel="noopener noreferrer"
+            aria-label="Get ReceiptNest AI on Google Play"
+            class="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-black px-3 py-1.5 text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-900 hover:shadow-md">
+            <svg class="h-5 w-5" viewBox="0 0 512 512" aria-hidden="true">
+              <defs>
+                <linearGradient id="gp-blue-f" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#00A0FF"/>
+                  <stop offset="100%" stop-color="#00E2FF"/>
+                </linearGradient>
+                <linearGradient id="gp-yellow-f" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#FFBD00"/>
+                  <stop offset="100%" stop-color="#FFE000"/>
+                </linearGradient>
+                <linearGradient id="gp-red-f" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#FF3A44"/>
+                  <stop offset="100%" stop-color="#C31162"/>
+                </linearGradient>
+                <linearGradient id="gp-green-f" x1="0" y1="1" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#00A070"/>
+                  <stop offset="100%" stop-color="#00F076"/>
+                </linearGradient>
+              </defs>
+              <path fill="url(#gp-blue-f)" d="M64 32 L320 256 L64 480 C56 472 52 462 52 450 V62 C52 50 56 40 64 32 Z"/>
+              <path fill="url(#gp-yellow-f)" d="M400 208 L320 256 L400 304 L450 274 C470 262 470 250 450 238 Z"/>
+              <path fill="url(#gp-red-f)" d="M64 480 L320 256 L400 304 L96 478 C84 484 74 484 64 480 Z"/>
+              <path fill="url(#gp-green-f)" d="M64 32 C74 28 84 28 96 34 L400 208 L320 256 Z"/>
+            </svg>
+            <span class="flex flex-col leading-tight text-left">
+              <span class="text-[8px] uppercase tracking-wider text-slate-300">Get it on</span>
+              <span class="text-xs font-semibold -mt-0.5">Google Play</span>
+            </span>
           </a>
         </div>
       </div>
