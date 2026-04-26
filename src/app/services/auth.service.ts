@@ -5,16 +5,15 @@ import {
   EmailAuthProvider,
   GoogleAuthProvider,
   OAuthProvider,
+  User,
   UserCredential,
   confirmPasswordReset as firebaseConfirmPasswordReset,
   createUserWithEmailAndPassword,
-  getRedirectResult,
   getAuth,
   onAuthStateChanged,
   reauthenticateWithCredential,
   signInWithEmailAndPassword,
   signInWithPopup,
-  signInWithRedirect,
   signOut,
   updatePassword,
   verifyPasswordResetCode as firebaseVerifyPasswordResetCode
@@ -50,7 +49,6 @@ export class AuthService {
 
   private initialized = false;
   private readonly initPromise: Promise<void>;
-  private readonly redirectResultPromise: Promise<void>;
   private authStateReady: Promise<void> = Promise.resolve();
   private resolveAuthStateReady: (() => void) | null = null;
   private userProfileUnsubscribe: Unsubscribe | null = null;
@@ -68,7 +66,6 @@ export class AuthService {
 
   readonly user = signal<UserProfile | null>(null);
   readonly isLoading = signal<boolean>(true);
-  readonly redirectErrorMessage = signal<string>('');
   readonly isAuthenticated = computed<boolean>(() => !!this.user());
 
   constructor() {
@@ -79,14 +76,12 @@ export class AuthService {
       this.isLoading.set(false);
       this.initialized = true;
       this.initPromise = Promise.resolve();
-      this.redirectResultPromise = Promise.resolve();
       return;
     }
 
     this.auth = getAuth(app);
     this.db = getFirestore(app);
     this.functions = getFunctions(app);
-    this.redirectResultPromise = this.captureRedirectResult();
     this.registerLastSeenTracking();
 
     const auth = this.requireAuth();
@@ -111,16 +106,12 @@ export class AuthService {
             return;
           }
 
-          if (!firebaseUser.emailVerified) {
-            this.clearUserProfileSubscription();
-            this.user.set(null);
+          const userProfile = await this.loadSignedInUserProfile(firebaseUser);
+          if (!userProfile) {
             return;
           }
 
           const lastLoginAt = this.parseLastLoginTimestamp(firebaseUser.metadata.lastSignInTime);
-          const userProfile = await this.loadOrCreateUserProfile(firebaseUser.uid, firebaseUser.email ?? '', lastLoginAt);
-          this.user.set(userProfile);
-          this.subscribeToUserProfile(firebaseUser.uid);
           settleAuthState();
           void this.runPostSignInSync(firebaseUser.uid, userProfile, lastLoginAt, firebaseUser.emailVerified);
         } catch (error) {
@@ -137,6 +128,11 @@ export class AuthService {
     this.authStateReady = new Promise((resolve) => {
       this.resolveAuthStateReady = resolve;
     });
+  }
+
+  private resolvePendingAuthState() {
+    this.resolveAuthStateReady?.();
+    this.resolveAuthStateReady = null;
   }
 
   private finishInit(resolve: () => void) {
@@ -180,6 +176,20 @@ export class AuthService {
 
     await setDoc(userRef, profile);
     return profile;
+  }
+
+  private async loadSignedInUserProfile(firebaseUser: User): Promise<UserProfile | null> {
+    if (!firebaseUser.emailVerified) {
+      this.clearUserProfileSubscription();
+      this.user.set(null);
+      return null;
+    }
+
+    const lastLoginAt = this.parseLastLoginTimestamp(firebaseUser.metadata.lastSignInTime);
+    const userProfile = await this.loadOrCreateUserProfile(firebaseUser.uid, firebaseUser.email ?? '', lastLoginAt);
+    this.user.set(userProfile);
+    this.subscribeToUserProfile(firebaseUser.uid);
+    return userProfile;
   }
 
   private async syncLastLoginAt(
@@ -291,18 +301,42 @@ export class AuthService {
     this.resetAuthStateReady();
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    await signInWithPopup(auth, provider);
+    const credential = await signInWithPopup(auth, provider);
+    await this.finishProviderSignIn(credential);
   }
 
   async loginWithApple() {
     const auth = this.requireAuth();
     this.resetAuthStateReady();
-    this.redirectErrorMessage.set('');
     const provider = new OAuthProvider('apple.com');
     provider.addScope('email');
     provider.addScope('name');
     provider.setCustomParameters({ locale: 'en' });
-    await signInWithRedirect(auth, provider);
+    try {
+      const credential = await this.withPopupTimeout(signInWithPopup(auth, provider), 'Apple');
+      await this.finishProviderSignIn(credential);
+    } catch (error: any) {
+      if (error?.code === 'auth/operation-not-allowed') {
+        throw new Error('Apple sign-in is not enabled in Firebase Authentication.');
+      }
+      if (error?.code === 'auth/unauthorized-domain') {
+        throw new Error('This domain is not authorized for Firebase Authentication.');
+      }
+      throw error;
+    }
+  }
+
+  private async finishProviderSignIn(credential: UserCredential): Promise<void> {
+    const userProfile = await this.withAuthOperationTimeout(
+      this.loadSignedInUserProfile(credential.user),
+      'Loading your account after sign-in'
+    );
+    if (!userProfile) {
+      const error: any = new Error('Please verify your email to sign in.');
+      error.code = 'auth/email-not-verified';
+      throw error;
+    }
+    this.resolvePendingAuthState();
   }
 
   async sendVerificationEmail(): Promise<void> {
@@ -476,23 +510,7 @@ export class AuthService {
   }
 
   async waitForAuthState(): Promise<void> {
-    return this.authStateReady;
-  }
-
-  async waitForRedirectResult(): Promise<void> {
-    return this.redirectResultPromise;
-  }
-
-  private async captureRedirectResult(): Promise<void> {
-    try {
-      const auth = this.requireAuth();
-      await getRedirectResult(auth);
-    } catch (error: any) {
-      console.error('Apple redirect sign-in failed', error);
-      this.redirectErrorMessage.set(
-        error?.message ?? 'Unable to complete Apple sign-in. Please try again.'
-      );
-    }
+    return this.withAuthOperationTimeout(this.authStateReady, 'Waiting for sign-in to complete');
   }
 
   private subscribeToUserProfile(uid: string): void {
@@ -633,5 +651,43 @@ export class AuthService {
       throw error;
     }
     return currentUser;
+  }
+
+  private async withPopupTimeout<T>(promise: Promise<T>, providerName: string): Promise<T> {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(
+          new Error(
+            `${providerName} sign-in did not complete. Confirm the provider is configured in Firebase Authentication and try again.`
+          )
+        );
+      }, 20000);
+    });
+
+    try {
+      return await Promise.race([promise, timeout]);
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    }
+  }
+
+  private async withAuthOperationTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error(`${label} took too long. Please refresh and try again.`));
+      }, 20000);
+    });
+
+    try {
+      return await Promise.race([promise, timeout]);
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    }
   }
 }

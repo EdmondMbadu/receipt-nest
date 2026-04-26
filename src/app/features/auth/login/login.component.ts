@@ -50,8 +50,6 @@ export class LoginComponent {
     } else if (this.route.snapshot.queryParamMap.get('verified') === '1') {
       this.pageNotice = 'Your email is verified. Welcome to ReceiptNest AI.';
     }
-
-    void this.redirectIfAuthenticated();
   }
 
   async submit() {
@@ -154,27 +152,12 @@ export class LoginComponent {
 
     try {
       await this.authService.loginWithApple();
+      await this.authService.waitForAuthState();
+      await this.router.navigateByUrl(this.getRedirectUrl());
     } catch (error: any) {
       this.errorMessage = error?.message ?? 'Unable to sign you in with Apple right now.';
+    } finally {
       this.isSubmitting = false;
-      return;
-    }
-  }
-
-  private async redirectIfAuthenticated() {
-    try {
-      await this.authService.waitForRedirectResult();
-      await this.authService.waitForAuthState();
-      const redirectError = this.authService.redirectErrorMessage();
-      if (redirectError) {
-        this.errorMessage = redirectError;
-        return;
-      }
-      if (this.authService.isAuthenticated()) {
-        await this.router.navigateByUrl(this.getRedirectUrl());
-      }
-    } catch {
-      // The explicit sign-in handlers surface actionable auth errors.
     }
   }
 
