@@ -35,6 +35,8 @@ export class RegisterComponent {
     this.meta.updateTag({ name: 'description', content: 'Create your ReceiptNest AI account.' });
     this.meta.updateTag({ name: 'robots', content: 'noindex, follow' });
     this.meta.updateTag({ name: 'googlebot', content: 'noindex, follow' });
+
+    void this.redirectIfAuthenticated();
   }
 
   async submit() {
@@ -77,5 +79,36 @@ export class RegisterComponent {
       this.isSubmitting = false;
     }
   }
-}
 
+  async signInWithApple() {
+    this.errorMessage = '';
+    this.isSubmitting = true;
+
+    try {
+      await this.authService.loginWithApple();
+    } catch (error: any) {
+      this.errorMessage = error?.message ?? 'Unable to continue with Apple right now.';
+      this.isSubmitting = false;
+      return;
+    }
+  }
+
+  private async redirectIfAuthenticated() {
+    try {
+      await this.authService.waitForRedirectResult();
+      await this.authService.waitForAuthState();
+      const redirectError = this.authService.redirectErrorMessage();
+      if (redirectError) {
+        this.errorMessage = redirectError;
+        return;
+      }
+      if (this.authService.isAuthenticated()) {
+        await this.router.navigateByUrl('/app');
+      }
+    } catch {
+      // The explicit sign-in handlers surface actionable auth errors.
+    } finally {
+      this.isSubmitting = false;
+    }
+  }
+}

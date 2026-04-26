@@ -26,6 +26,15 @@
     "public": "dist/receipt-nest/browser",
     "headers": [
       {
+        "source": "**",
+        "headers": [
+          {
+            "key": "Cross-Origin-Opener-Policy",
+            "value": "same-origin-allow-popups"
+          }
+        ]
+      },
+      {
         "source": "/apple-app-site-association",
         "headers": [
           {

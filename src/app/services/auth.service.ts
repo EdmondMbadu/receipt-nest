@@ -4,14 +4,17 @@ import {
   Auth,
   EmailAuthProvider,
   GoogleAuthProvider,
+  OAuthProvider,
   UserCredential,
   confirmPasswordReset as firebaseConfirmPasswordReset,
   createUserWithEmailAndPassword,
+  getRedirectResult,
   getAuth,
   onAuthStateChanged,
   reauthenticateWithCredential,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   updatePassword,
   verifyPasswordResetCode as firebaseVerifyPasswordResetCode
@@ -47,6 +50,7 @@ export class AuthService {
 
   private initialized = false;
   private readonly initPromise: Promise<void>;
+  private readonly redirectResultPromise: Promise<void>;
   private authStateReady: Promise<void> = Promise.resolve();
   private resolveAuthStateReady: (() => void) | null = null;
   private userProfileUnsubscribe: Unsubscribe | null = null;
@@ -64,6 +68,7 @@ export class AuthService {
 
   readonly user = signal<UserProfile | null>(null);
   readonly isLoading = signal<boolean>(true);
+  readonly redirectErrorMessage = signal<string>('');
   readonly isAuthenticated = computed<boolean>(() => !!this.user());
 
   constructor() {
@@ -74,12 +79,14 @@ export class AuthService {
       this.isLoading.set(false);
       this.initialized = true;
       this.initPromise = Promise.resolve();
+      this.redirectResultPromise = Promise.resolve();
       return;
     }
 
     this.auth = getAuth(app);
     this.db = getFirestore(app);
     this.functions = getFunctions(app);
+    this.redirectResultPromise = this.captureRedirectResult();
     this.registerLastSeenTracking();
 
     const auth = this.requireAuth();
@@ -287,6 +294,17 @@ export class AuthService {
     await signInWithPopup(auth, provider);
   }
 
+  async loginWithApple() {
+    const auth = this.requireAuth();
+    this.resetAuthStateReady();
+    this.redirectErrorMessage.set('');
+    const provider = new OAuthProvider('apple.com');
+    provider.addScope('email');
+    provider.addScope('name');
+    provider.setCustomParameters({ locale: 'en' });
+    await signInWithRedirect(auth, provider);
+  }
+
   async sendVerificationEmail(): Promise<void> {
     const auth = this.requireAuth();
     const functions = this.requireFunctions();
@@ -459,6 +477,22 @@ export class AuthService {
 
   async waitForAuthState(): Promise<void> {
     return this.authStateReady;
+  }
+
+  async waitForRedirectResult(): Promise<void> {
+    return this.redirectResultPromise;
+  }
+
+  private async captureRedirectResult(): Promise<void> {
+    try {
+      const auth = this.requireAuth();
+      await getRedirectResult(auth);
+    } catch (error: any) {
+      console.error('Apple redirect sign-in failed', error);
+      this.redirectErrorMessage.set(
+        error?.message ?? 'Unable to complete Apple sign-in. Please try again.'
+      );
+    }
   }
 
   private subscribeToUserProfile(uid: string): void {
