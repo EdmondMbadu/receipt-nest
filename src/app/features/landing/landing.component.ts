@@ -29,6 +29,7 @@ export class LandingComponent {
   readonly isMobileMenuOpen = signal(false);
   readonly isDemoOpen = signal(false);
   readonly openFaqIndex = signal<number | null>(null);
+  readonly billingInterval = signal<'monthly' | 'annual'>('monthly');
   readonly demoVideo = viewChild<ElementRef<HTMLVideoElement>>('demoVideo');
   readonly freePlanReceiptLimit = this.appConfig.freePlanReceiptLimit;
 
@@ -79,6 +80,10 @@ export class LandingComponent {
 
   toggleFaq(index: number) {
     this.openFaqIndex.update(current => current === index ? null : index);
+  }
+
+  setBillingInterval(interval: 'monthly' | 'annual') {
+    this.billingInterval.set(interval);
   }
 
   private applySeoTags() {
