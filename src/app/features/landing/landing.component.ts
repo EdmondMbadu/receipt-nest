@@ -7,7 +7,7 @@ import { AppConfigService } from '../../services/app-config.service';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 
-type DemoMonth = 'Oct' | 'Nov' | 'Dec';
+type DemoMonth = string;
 
 interface DemoMerchantTemplate {
   name: string;
@@ -56,13 +56,11 @@ export class LandingComponent {
   readonly freePlanReceiptLimit = this.appConfig.freePlanReceiptLimit;
 
   // ---- Live simulation (in-hero interactive dashboard) ----
-  readonly demoMonths: DemoMonth[] = ['Oct', 'Nov', 'Dec'];
-  readonly selectedDemoMonth = signal<DemoMonth>('Nov');
-  readonly demoReceiptsByMonth = signal<Record<DemoMonth, DemoReceipt[]>>({
-    Oct: [],
-    Nov: [],
-    Dec: []
-  });
+  readonly demoMonths: DemoMonth[] = this.computeRecentDemoMonths();
+  readonly selectedDemoMonth = signal<DemoMonth>(this.demoMonths[this.demoMonths.length - 1]);
+  readonly demoReceiptsByMonth = signal<Record<DemoMonth, DemoReceipt[]>>(
+    this.demoMonths.reduce((acc, m) => ({ ...acc, [m]: [] }), {} as Record<DemoMonth, DemoReceipt[]>)
+  );
   readonly displayedDemoTotal = signal(0);
   readonly justAddedDemoReceiptId = signal<number | null>(null);
   private demoReceiptIdCounter = 0;
@@ -195,7 +193,7 @@ export class LandingComponent {
     const pool = this.demoMerchantCatalog.filter(m => m.name !== lastTemplateName);
     const template = pool[Math.floor(Math.random() * pool.length)];
 
-    const day = Math.max(1, 28 - existing.length);
+    const day = Math.max(1, this.demoMonthAnchorDay(month) - existing.length);
     const dayLabel = `${month} ${day}`;
     const id = ++this.demoReceiptIdCounter;
     const receipt: DemoReceipt = {
@@ -240,6 +238,28 @@ export class LandingComponent {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
+  }
+
+  private computeRecentDemoMonths(): DemoMonth[] {
+    const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const now = new Date();
+    const months: DemoMonth[] = [];
+    for (let offset = 2; offset >= 0; offset--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+      months.push(labels[d.getMonth()]);
+    }
+    return months;
+  }
+
+  private demoMonthAnchorDay(month: DemoMonth): number {
+    const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const now = new Date();
+    const monthIdx = labels.indexOf(month);
+    if (monthIdx === -1) return 28;
+    if (monthIdx === now.getMonth()) {
+      return now.getDate();
+    }
+    return new Date(now.getFullYear(), monthIdx + 1, 0).getDate();
   }
 
   private animateDemoTotalTo(target: number) {
