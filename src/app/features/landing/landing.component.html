@@ -191,7 +191,21 @@
 
           <!-- CTA Buttons -->
           <div class="mt-10 flex flex-col sm:flex-row flex-wrap gap-4">
-            <a href="https://play.google.com/store/apps/details?id=com.receiptnest.mobile"
+            <a [href]="appStoreUrl"
+              target="_blank" rel="noopener noreferrer"
+              aria-label="Download ReceiptNest AI on the App Store"
+              class="group inline-flex items-center gap-3 rounded-xl border border-slate-800 bg-black px-5 py-3 text-white shadow-xl shadow-black/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-900 hover:shadow-2xl">
+              <svg class="h-7 w-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path
+                  d="M16.365 1.43c0 1.14-.468 2.231-1.213 3.02-.796.832-2.095 1.475-3.23 1.38-.144-1.097.364-2.267 1.11-3.055.82-.88 2.197-1.506 3.333-1.345Zm4.24 16.235c-.57 1.29-.836 1.867-1.57 2.997-1.025 1.57-2.474 3.527-4.272 3.542-1.603.016-2.017-1.045-4.193-1.032-2.178.012-2.632 1.051-4.234 1.035-1.8-.015-3.172-1.777-4.198-3.347C-.732 16.474-.873 11.11 1.52 7.42c1.697-2.62 4.381-4.153 6.902-4.153 1.653 0 3.03 1.14 4.574 1.14 1.497 0 2.408-1.142 4.557-1.142.9 0 3.71.247 5.468 2.815-4.807 2.635-4.024 9.497-2.416 11.585Z" />
+              </svg>
+              <span class="flex flex-col leading-tight text-left">
+                <span class="text-[10px] uppercase tracking-wider text-slate-300">Download on the</span>
+                <span class="text-lg font-semibold -mt-0.5">App Store</span>
+              </span>
+            </a>
+
+            <a [href]="googlePlayUrl"
               target="_blank" rel="noopener noreferrer"
               aria-label="Get ReceiptNest AI on Google Play"
               class="group inline-flex items-center gap-3 rounded-xl border border-slate-800 bg-black px-5 py-3 text-white shadow-xl shadow-black/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-900 hover:shadow-2xl">
@@ -223,15 +237,6 @@
                 <span class="text-[10px] uppercase tracking-wider text-slate-300">Get it on</span>
                 <span class="text-lg font-semibold -mt-0.5">Google Play</span>
               </span>
-            </a>
-
-            <a routerLink="/register"
-              class="group inline-flex items-center justify-center gap-3 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 px-8 py-4 text-base font-semibold text-white dark:text-slate-900 shadow-xl shadow-slate-900/10 dark:shadow-white/5 transition-all duration-200 hover:scale-[1.02]">
-              Start for free
-              <svg class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor"
-                stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
             </a>
           </div>
 
@@ -2202,7 +2207,21 @@
             It takes 60 seconds to sign up. Upload your first receipt, and watch ReceiptNest AI do the rest.
           </p>
           <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="https://play.google.com/store/apps/details?id=com.receiptnest.mobile"
+            <a [href]="appStoreUrl"
+              target="_blank" rel="noopener noreferrer"
+              aria-label="Download ReceiptNest AI on the App Store"
+              class="group inline-flex items-center gap-3 rounded-xl border border-slate-700 bg-black px-5 py-3 text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-900">
+              <svg class="h-7 w-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path
+                  d="M16.365 1.43c0 1.14-.468 2.231-1.213 3.02-.796.832-2.095 1.475-3.23 1.38-.144-1.097.364-2.267 1.11-3.055.82-.88 2.197-1.506 3.333-1.345Zm4.24 16.235c-.57 1.29-.836 1.867-1.57 2.997-1.025 1.57-2.474 3.527-4.272 3.542-1.603.016-2.017-1.045-4.193-1.032-2.178.012-2.632 1.051-4.234 1.035-1.8-.015-3.172-1.777-4.198-3.347C-.732 16.474-.873 11.11 1.52 7.42c1.697-2.62 4.381-4.153 6.902-4.153 1.653 0 3.03 1.14 4.574 1.14 1.497 0 2.408-1.142 4.557-1.142.9 0 3.71.247 5.468 2.815-4.807 2.635-4.024 9.497-2.416 11.585Z" />
+              </svg>
+              <span class="flex flex-col leading-tight text-left">
+                <span class="text-[10px] uppercase tracking-wider text-slate-300">Download on the</span>
+                <span class="text-lg font-semibold -mt-0.5">App Store</span>
+              </span>
+            </a>
+
+            <a [href]="googlePlayUrl"
               target="_blank" rel="noopener noreferrer"
               aria-label="Get ReceiptNest AI on Google Play"
               class="group inline-flex items-center gap-3 rounded-xl border border-slate-700 bg-black px-5 py-3 text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-900">
@@ -2234,14 +2253,6 @@
                 <span class="text-[10px] uppercase tracking-wider text-slate-300">Get it on</span>
                 <span class="text-lg font-semibold -mt-0.5">Google Play</span>
               </span>
-            </a>
-
-            <a routerLink="/register"
-              class="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-slate-100 px-8 py-4 text-base font-semibold text-slate-900 shadow-xl transition-all duration-200 hover:scale-[1.02]">
-              Start free - no credit card needed
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
             </a>
           </div>
         </div>
@@ -2308,8 +2319,23 @@
           <!-- Divider -->
           <span class="mx-1 hidden h-6 w-px bg-slate-200 dark:bg-slate-700 sm:block"></span>
 
+          <!-- App Store badge -->
+          <a [href]="appStoreUrl"
+            target="_blank" rel="noopener noreferrer"
+            aria-label="Download ReceiptNest AI on the App Store"
+            class="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-black px-3 py-1.5 text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-900 hover:shadow-md">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path
+                d="M16.365 1.43c0 1.14-.468 2.231-1.213 3.02-.796.832-2.095 1.475-3.23 1.38-.144-1.097.364-2.267 1.11-3.055.82-.88 2.197-1.506 3.333-1.345Zm4.24 16.235c-.57 1.29-.836 1.867-1.57 2.997-1.025 1.57-2.474 3.527-4.272 3.542-1.603.016-2.017-1.045-4.193-1.032-2.178.012-2.632 1.051-4.234 1.035-1.8-.015-3.172-1.777-4.198-3.347C-.732 16.474-.873 11.11 1.52 7.42c1.697-2.62 4.381-4.153 6.902-4.153 1.653 0 3.03 1.14 4.574 1.14 1.497 0 2.408-1.142 4.557-1.142.9 0 3.71.247 5.468 2.815-4.807 2.635-4.024 9.497-2.416 11.585Z" />
+            </svg>
+            <span class="flex flex-col leading-tight text-left">
+              <span class="text-[8px] uppercase tracking-wider text-slate-300">Download on the</span>
+              <span class="text-xs font-semibold -mt-0.5">App Store</span>
+            </span>
+          </a>
+
           <!-- Google Play badge -->
-          <a href="https://play.google.com/store/apps/details?id=com.receiptnest.mobile"
+          <a [href]="googlePlayUrl"
             target="_blank" rel="noopener noreferrer"
             aria-label="Get ReceiptNest AI on Google Play"
             class="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-black px-3 py-1.5 text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-900 hover:shadow-md">

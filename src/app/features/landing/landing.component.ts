@@ -30,6 +30,8 @@ export class LandingComponent {
   readonly isDemoOpen = signal(false);
   readonly openFaqIndex = signal<number | null>(null);
   readonly billingInterval = signal<'monthly' | 'annual'>('monthly');
+  readonly googlePlayUrl = 'https://play.google.com/store/apps/details?id=com.receiptnest.mobile';
+  readonly appStoreUrl = 'https://apps.apple.com/us/app/receiptnest-ai/id6762539388';
   readonly demoVideo = viewChild<ElementRef<HTMLVideoElement>>('demoVideo');
   readonly freePlanReceiptLimit = this.appConfig.freePlanReceiptLimit;
 
