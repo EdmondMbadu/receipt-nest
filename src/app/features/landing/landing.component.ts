@@ -7,6 +7,26 @@ import { AppConfigService } from '../../services/app-config.service';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 
+type DemoMonth = 'Oct' | 'Nov' | 'Dec';
+
+interface DemoMerchantTemplate {
+  name: string;
+  initials: string;
+  category: string;
+  amount: number;
+  toneClass: string;
+}
+
+interface DemoReceipt {
+  id: number;
+  name: string;
+  initials: string;
+  category: string;
+  amount: number;
+  toneClass: string;
+  dayLabel: string;
+}
+
 @Component({
   selector: 'app-landing',
   standalone: true,
@@ -34,6 +54,79 @@ export class LandingComponent {
   readonly appStoreUrl = 'https://apps.apple.com/us/app/receiptnest-ai/id6762539388';
   readonly demoVideo = viewChild<ElementRef<HTMLVideoElement>>('demoVideo');
   readonly freePlanReceiptLimit = this.appConfig.freePlanReceiptLimit;
+
+  // ---- Live simulation (in-hero interactive dashboard) ----
+  readonly demoMonths: DemoMonth[] = ['Oct', 'Nov', 'Dec'];
+  readonly selectedDemoMonth = signal<DemoMonth>('Nov');
+  readonly demoReceiptsByMonth = signal<Record<DemoMonth, DemoReceipt[]>>({
+    Oct: [],
+    Nov: [],
+    Dec: []
+  });
+  readonly displayedDemoTotal = signal(0);
+  readonly justAddedDemoReceiptId = signal<number | null>(null);
+  private demoReceiptIdCounter = 0;
+  private demoTotalAnimationFrame: number | null = null;
+
+  private readonly demoMerchantCatalog: DemoMerchantTemplate[] = [
+    { name: 'Whole Foods Market', initials: 'WF', category: 'Groceries', amount: 86.41, toneClass: 'tone-emerald' },
+    { name: 'Spotify', initials: 'SP', category: 'Subscription', amount: 9.99, toneClass: 'tone-green' },
+    { name: 'Uber Eats', initials: 'UE', category: 'Food', amount: 34.20, toneClass: 'tone-orange' },
+    { name: 'Starbucks', initials: 'SB', category: 'Coffee', amount: 6.75, toneClass: 'tone-amber' },
+    { name: 'Target', initials: 'TG', category: 'Household', amount: 52.18, toneClass: 'tone-rose' },
+    { name: 'Shell', initials: 'SH', category: 'Fuel', amount: 48.90, toneClass: 'tone-yellow' },
+    { name: 'Apple', initials: 'AP', category: 'Electronics', amount: 129.00, toneClass: 'tone-slate' },
+    { name: 'Trader Joe\'s', initials: 'TJ', category: 'Groceries', amount: 41.27, toneClass: 'tone-emerald' },
+    { name: 'Netflix', initials: 'NF', category: 'Subscription', amount: 15.49, toneClass: 'tone-rose' },
+    { name: 'CVS Pharmacy', initials: 'CV', category: 'Health', amount: 23.65, toneClass: 'tone-blue' },
+    { name: 'Amazon', initials: 'AZ', category: 'Shopping', amount: 67.32, toneClass: 'tone-amber' },
+    { name: 'Chipotle', initials: 'CH', category: 'Food', amount: 13.85, toneClass: 'tone-orange' }
+  ];
+
+  readonly currentDemoReceipts = computed(() => this.demoReceiptsByMonth()[this.selectedDemoMonth()]);
+  readonly demoTotalSpend = computed(() =>
+    this.currentDemoReceipts().reduce((sum, r) => sum + r.amount, 0)
+  );
+  readonly demoReceiptCount = computed(() => this.currentDemoReceipts().length);
+
+  readonly demoChartPath = computed(() => {
+    const receipts = this.currentDemoReceipts();
+    if (receipts.length === 0) {
+      return { line: '', area: '', dotX: 0, dotY: 40 };
+    }
+
+    let running = 0;
+    const points = receipts.map((r, i) => {
+      running += r.amount;
+      const x = receipts.length === 1 ? 100 : (i / (receipts.length - 1)) * 200;
+      return { x, value: running };
+    });
+
+    const max = Math.max(...points.map(p => p.value), 1);
+    const mapped = points.map(p => ({ x: p.x, y: 70 - (p.value / max) * 56 }));
+
+    if (mapped.length === 1) {
+      const p = mapped[0];
+      return {
+        line: `M 0,70 L ${p.x},${p.y}`,
+        area: `M 0,70 L ${p.x},${p.y} L ${p.x},80 L 0,80 Z`,
+        dotX: p.x,
+        dotY: p.y
+      };
+    }
+
+    const linePath = mapped.reduce((acc, p, i) => {
+      if (i === 0) return `M ${p.x},${p.y}`;
+      const prev = mapped[i - 1];
+      const cx = (prev.x + p.x) / 2;
+      return `${acc} C ${cx},${prev.y} ${cx},${p.y} ${p.x},${p.y}`;
+    }, '');
+
+    const last = mapped[mapped.length - 1];
+    const areaPath = `${linePath} L ${last.x},80 L 0,80 Z`;
+
+    return { line: linePath, area: areaPath, dotX: last.x, dotY: last.y };
+  });
 
   readonly displayName = computed(() => {
     const profile = this.user();
@@ -86,6 +179,93 @@ export class LandingComponent {
 
   setBillingInterval(interval: 'monthly' | 'annual') {
     this.billingInterval.set(interval);
+  }
+
+  // ---- Live simulation actions ----
+  selectDemoMonth(month: DemoMonth) {
+    if (this.selectedDemoMonth() === month) return;
+    this.selectedDemoMonth.set(month);
+    this.animateDemoTotalTo(this.demoTotalSpend());
+  }
+
+  addDemoReceipt() {
+    const month = this.selectedDemoMonth();
+    const existing = this.demoReceiptsByMonth()[month];
+    const lastTemplateName = existing[0]?.name;
+    const pool = this.demoMerchantCatalog.filter(m => m.name !== lastTemplateName);
+    const template = pool[Math.floor(Math.random() * pool.length)];
+
+    const day = Math.max(1, 28 - existing.length);
+    const dayLabel = `${month} ${day}`;
+    const id = ++this.demoReceiptIdCounter;
+    const receipt: DemoReceipt = {
+      id,
+      name: template.name,
+      initials: template.initials,
+      category: template.category,
+      amount: template.amount,
+      toneClass: template.toneClass,
+      dayLabel
+    };
+
+    this.demoReceiptsByMonth.update(state => ({
+      ...state,
+      [month]: [receipt, ...state[month]]
+    }));
+
+    this.justAddedDemoReceiptId.set(id);
+    setTimeout(() => {
+      if (this.justAddedDemoReceiptId() === id) {
+        this.justAddedDemoReceiptId.set(null);
+      }
+    }, 800);
+
+    this.animateDemoTotalTo(this.demoTotalSpend());
+  }
+
+  resetDemoReceipts() {
+    const month = this.selectedDemoMonth();
+    this.demoReceiptsByMonth.update(state => ({ ...state, [month]: [] }));
+    this.animateDemoTotalTo(0);
+  }
+
+  trackDemoReceipt(_: number, r: DemoReceipt) {
+    return r.id;
+  }
+
+  formatDemoCurrency(value: number): string {
+    return value.toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  private animateDemoTotalTo(target: number) {
+    if (this.demoTotalAnimationFrame !== null) {
+      cancelAnimationFrame(this.demoTotalAnimationFrame);
+    }
+    const start = this.displayedDemoTotal();
+    const delta = target - start;
+    if (Math.abs(delta) < 0.005) {
+      this.displayedDemoTotal.set(target);
+      return;
+    }
+    const duration = 480;
+    const startTime = performance.now();
+
+    const step = (now: number) => {
+      const t = Math.min(1, (now - startTime) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      this.displayedDemoTotal.set(start + delta * eased);
+      if (t < 1) {
+        this.demoTotalAnimationFrame = requestAnimationFrame(step);
+      } else {
+        this.demoTotalAnimationFrame = null;
+      }
+    };
+    this.demoTotalAnimationFrame = requestAnimationFrame(step);
   }
 
   private applySeoTags() {

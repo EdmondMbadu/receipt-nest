@@ -316,127 +316,146 @@
             <div
               class="relative rounded-[2rem] border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-slate-900 p-8 shadow-inner">
               <!-- Top bar -->
-              <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
                 <div class="flex items-center gap-2 min-w-0">
                   <img src="assets/receipt-nest.png" alt="ReceiptNest AI" class="h-7 w-7 shrink-0 object-contain" />
-                  <span class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">This month's snapshot</span>
+                  <span class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">Live demo · interactive</span>
                 </div>
-                <div class="flex shrink-0 items-center gap-1 text-xs">
-                  <button
-                    class="rounded-lg border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-3 py-1.5 text-emerald-900 dark:text-emerald-200 font-semibold">Oct</button>
-                  <button
-                    class="rounded-lg px-3 py-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Nov</button>
+                <div class="flex shrink-0 items-center gap-1 rounded-xl bg-slate-100 dark:bg-slate-800/60 p-1 text-xs">
+                  <button *ngFor="let m of demoMonths" type="button" (click)="selectDemoMonth(m)"
+                    [class]="selectedDemoMonth() === m
+                      ? 'rounded-lg bg-white dark:bg-slate-700 px-3 py-1.5 text-slate-900 dark:text-white font-semibold shadow-sm transition-all'
+                      : 'rounded-lg px-3 py-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors'">
+                    {{ m }}
+                  </button>
                 </div>
               </div>
 
               <!-- Total spend card -->
               <div
-                class="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-5 mb-4">
-                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total spend</p>
-                <div class="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-2">
-                  <p class="text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">$2,437.19</p>
-                  <span
-                    class="inline-flex shrink-0 items-center gap-1 rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-2 py-1 text-xs font-semibold text-emerald-900 dark:text-emerald-200">
-                    <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
-                    </svg>
-                    18% down
+                class="relative overflow-hidden rounded-xl border border-slate-100 dark:border-slate-800 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/60 dark:to-slate-900/40 p-5 mb-4">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total spend</p>
+                  <span class="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                    <span class="relative flex h-2 w-2">
+                      <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span>
+                      <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                    </span>
+                    Live
                   </span>
                 </div>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">vs last month</p>
+                <div class="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-2">
+                  <p class="text-3xl font-bold tabular-nums text-slate-900 dark:text-white sm:text-4xl">
+                    {{ formatDemoCurrency(displayedDemoTotal()) }}
+                  </p>
+                  <span
+                    class="inline-flex shrink-0 items-center gap-1 rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-2 py-1 text-xs font-semibold text-emerald-900 dark:text-emerald-200">
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    {{ demoReceiptCount() }} {{ demoReceiptCount() === 1 ? 'receipt' : 'receipts' }}
+                  </span>
+                </div>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ selectedDemoMonth() }} · auto-organized</p>
 
-                <!-- Mini Chart -->
+                <!-- Mini Chart (live) -->
                 <div class="mt-4 h-24 w-full">
                   <svg class="w-full h-full" viewBox="0 0 200 80" preserveAspectRatio="none">
-                    <path
-                      d="M 0,65 C 20,63 40,58 60,52 C 80,46 100,40 120,35 C 140,30 160,26 180,22 C 190,20 195,18 200,16 L 200,80 L 0,80 Z"
-                      fill="rgb(16 185 129 / 0.1)" />
-                    <path
-                      d="M 0,65 C 20,63 40,58 60,52 C 80,46 100,40 120,35 C 140,30 160,26 180,22 C 190,20 195,18 200,16"
-                      stroke="rgb(16, 185, 129)" stroke-width="2.5" fill="none" stroke-linecap="round" />
-                    <circle cx="200" cy="16" r="4" fill="rgb(16, 185, 129)" />
-                    <circle cx="200" cy="16" r="2" fill="white" />
+                    <defs>
+                      <linearGradient id="demo-chart-fill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="rgb(16, 185, 129)" stop-opacity="0.25" />
+                        <stop offset="100%" stop-color="rgb(16, 185, 129)" stop-opacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <ng-container *ngIf="demoReceiptCount() > 0; else emptyChart">
+                      <path [attr.d]="demoChartPath().area" fill="url(#demo-chart-fill)" class="demo-chart-path" />
+                      <path [attr.d]="demoChartPath().line" stroke="rgb(16, 185, 129)" stroke-width="2.5" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round" class="demo-chart-path" />
+                      <circle [attr.cx]="demoChartPath().dotX" [attr.cy]="demoChartPath().dotY" r="4"
+                        fill="rgb(16, 185, 129)" class="demo-chart-dot" />
+                      <circle [attr.cx]="demoChartPath().dotX" [attr.cy]="demoChartPath().dotY" r="2" fill="white"
+                        class="demo-chart-dot" />
+                    </ng-container>
+                    <ng-template #emptyChart>
+                      <line x1="0" y1="60" x2="200" y2="60" stroke="rgb(148, 163, 184)" stroke-width="1"
+                        stroke-dasharray="3 4" opacity="0.5" />
+                    </ng-template>
                   </svg>
                 </div>
               </div>
 
-              <div
-                class="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-3 py-1.5 text-xs font-semibold text-emerald-900 dark:text-emerald-200">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-1.5 0h12a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014.5 18v-6a1.5 1.5 0 011.5-1.5z" />
-                </svg>
-                <span>Private - only you can see this</span>
-              </div>
-
-              <button type="button" (click)="openDemo()" aria-label="Play the ReceiptNest AI demo"
-                class="group mb-4 flex w-full items-center gap-4 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-950 px-4 py-3 text-left text-white shadow-lg shadow-slate-950/15 transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-400/60 hover:shadow-xl hover:shadow-emerald-950/20 dark:bg-slate-950">
-                <span
-                  class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/10 transition-colors group-hover:bg-emerald-500 group-hover:text-slate-950">
-                  <svg class="ml-0.5 h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
+              <!-- Add receipt CTA -->
+              <button type="button" (click)="addDemoReceipt()"
+                aria-label="Add a receipt to the live demo"
+                class="group relative mb-4 flex w-full items-center justify-between gap-4 overflow-hidden rounded-2xl bg-slate-950 px-4 py-3.5 text-left text-white shadow-lg shadow-slate-950/20 ring-1 ring-white/10 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-emerald-500/20 dark:bg-slate-950">
+                <span class="pointer-events-none absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/10 to-emerald-500/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
+                <span class="relative flex items-center gap-3 min-w-0">
+                  <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-md shadow-emerald-500/30 ring-1 ring-emerald-400/40 transition-transform duration-200 group-hover:scale-105 group-active:scale-95">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                  </span>
+                  <span class="min-w-0">
+                    <span class="block text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-300/90">Try it now</span>
+                    <span class="mt-0.5 block text-sm font-semibold text-white">Add a receipt</span>
+                  </span>
                 </span>
-                <span class="min-w-0 flex-1">
-                  <span class="block text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-300/80">Demo mode</span>
-                  <span class="mt-1 block text-sm font-semibold text-white">Play the 60-sec walkthrough</span>
-                </span>
-                <span
-                  class="shrink-0 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200 transition-colors group-hover:border-emerald-400/40 group-hover:bg-emerald-400/15 group-hover:text-emerald-100">
-                  0:60
+                <span class="relative shrink-0 rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200 transition-colors group-hover:border-emerald-400/40 group-hover:bg-emerald-400/15 group-hover:text-emerald-100">
+                  Tap to simulate
                 </span>
               </button>
 
-              <!-- Recent receipts -->
-              <div class="space-y-2">
-                <div class="flex items-center justify-between text-sm">
+              <!-- Recent receipts (scrollable) -->
+              <div>
+                <div class="flex items-center justify-between text-sm mb-2">
                   <span class="font-medium text-slate-700 dark:text-slate-200">Recent receipts</span>
-                  <button
-                    class="text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 dark:hover:text-emerald-200 font-semibold transition-colors">View
-                    all</button>
+                  <button *ngIf="demoReceiptCount() > 0" type="button" (click)="resetDemoReceipts()"
+                    class="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
+                    Reset
+                  </button>
                 </div>
 
-                <div class="space-y-2">
-                  <div
-                    class="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 px-4 py-3 transition-colors hover:bg-slate-100/50 dark:hover:bg-slate-800/50">
-                    <div class="flex items-center gap-3">
-                      <span
-                        class="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200 text-sm font-bold">WF</span>
-                      <div>
-                        <p class="text-sm font-medium text-slate-900 dark:text-white">Whole Foods Market</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Groceries • Nov 14</p>
-                      </div>
-                    </div>
-                    <p class="text-sm font-semibold text-slate-900 dark:text-white">$86.41</p>
+                <div class="demo-receipts-scroll relative h-64 overflow-y-auto rounded-xl">
+                  <!-- Empty state -->
+                  <div *ngIf="demoReceiptCount() === 0"
+                    class="flex h-full flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50/40 dark:bg-slate-800/20 px-6 py-8 text-center">
+                    <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 ring-1 ring-emerald-200/60 dark:ring-emerald-800/60">
+                      <svg class="h-6 w-6 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-3-3v6m-9 .75h.008v.008H3v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </span>
+                    <p class="mt-3 text-sm font-medium text-slate-700 dark:text-slate-200">Start with a clean slate</p>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400 max-w-xs">Tap <span class="font-semibold text-emerald-700 dark:text-emerald-300">Add a receipt</span> to watch the total update in real time.</p>
                   </div>
 
-                  <div
-                    class="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 px-4 py-3 transition-colors hover:bg-slate-100/50 dark:hover:bg-slate-800/50">
-                    <div class="flex items-center gap-3">
-                      <span
-                        class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 text-sm font-bold">SP</span>
-                      <div>
-                        <p class="text-sm font-medium text-slate-900 dark:text-white">Spotify</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Subscription • Nov 13</p>
+                  <!-- Receipts list -->
+                  <div *ngIf="demoReceiptCount() > 0" class="space-y-2 pr-1">
+                    <div *ngFor="let receipt of currentDemoReceipts(); trackBy: trackDemoReceipt"
+                      class="demo-receipt-item flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/40 px-4 py-3 shadow-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/70"
+                      [class.demo-receipt-item-new]="justAddedDemoReceiptId() === receipt.id">
+                      <div class="flex items-center gap-3 min-w-0">
+                        <span class="demo-tone flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-bold"
+                          [ngClass]="receipt.toneClass">
+                          {{ receipt.initials }}
+                        </span>
+                        <div class="min-w-0">
+                          <p class="text-sm font-medium text-slate-900 dark:text-white truncate">{{ receipt.name }}</p>
+                          <p class="text-xs text-slate-500 dark:text-slate-400">{{ receipt.category }} · {{ receipt.dayLabel }}</p>
+                        </div>
                       </div>
+                      <p class="text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
+                        {{ formatDemoCurrency(receipt.amount) }}
+                      </p>
                     </div>
-                    <p class="text-sm font-semibold text-slate-900 dark:text-white">$9.99</p>
-                  </div>
-
-                  <div
-                    class="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 px-4 py-3 transition-colors hover:bg-slate-100/50 dark:hover:bg-slate-800/50">
-                    <div class="flex items-center gap-3">
-                      <span
-                        class="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 text-sm font-bold">UE</span>
-                      <div>
-                        <p class="text-sm font-medium text-slate-900 dark:text-white">Uber Eats</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Food • Nov 12</p>
-                      </div>
-                    </div>
-                    <p class="text-sm font-semibold text-slate-900 dark:text-white">$34.20</p>
                   </div>
                 </div>
+
+                <p class="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                  <svg class="h-3.5 w-3.5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-1.5 0h12a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014.5 18v-6a1.5 1.5 0 011.5-1.5z" />
+                  </svg>
+                  Private by default — your real receipts never leave your account.
+                </p>
               </div>
             </div>
           </div>

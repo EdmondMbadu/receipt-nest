@@ -147,6 +147,173 @@ svg {
   --showcase-border: rgb(4 120 87);
 }
 
+/* ---------- Live demo simulation ---------- */
+
+/* Receipt slide-in animation */
+@keyframes demoReceiptSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes demoReceiptHighlight {
+  0%, 30% {
+    box-shadow: 0 0 0 2px rgb(16 185 129 / 0.45), 0 8px 24px -10px rgb(16 185 129 / 0.4);
+  }
+  100% {
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+}
+
+.demo-receipt-item {
+  animation: demoReceiptSlideIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.demo-receipt-item-new {
+  animation:
+    demoReceiptSlideIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) both,
+    demoReceiptHighlight 1.1s ease-out both;
+}
+
+/* Chart smooth path transitions */
+.demo-chart-path {
+  transition: d 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.demo-chart-dot {
+  transition:
+    cx 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    cy 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Scrollable receipts container — restrained, premium scrollbar */
+.demo-receipts-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(203 213 225 / 0.6) transparent;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black 12px,
+    black calc(100% - 12px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black 12px,
+    black calc(100% - 12px),
+    transparent 100%
+  );
+}
+
+.demo-receipts-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.demo-receipts-scroll::-webkit-scrollbar-thumb {
+  background: rgb(203 213 225 / 0.55);
+  border-radius: 3px;
+}
+
+.dark .demo-receipts-scroll {
+  scrollbar-color: rgb(71 85 105 / 0.6) transparent;
+}
+
+.dark .demo-receipts-scroll::-webkit-scrollbar-thumb {
+  background: rgb(71 85 105 / 0.55);
+}
+
+/* Merchant tone palette — matches app's category-icon language */
+.demo-tone.tone-emerald {
+  background: rgb(209 250 229);
+  color: rgb(6 95 70);
+  box-shadow: inset 0 0 0 1px rgb(110 231 183 / 0.5);
+}
+.demo-tone.tone-green {
+  background: rgb(220 252 231);
+  color: rgb(22 101 52);
+  box-shadow: inset 0 0 0 1px rgb(134 239 172 / 0.5);
+}
+.demo-tone.tone-orange {
+  background: rgb(255 237 213);
+  color: rgb(154 52 18);
+  box-shadow: inset 0 0 0 1px rgb(253 186 116 / 0.5);
+}
+.demo-tone.tone-amber {
+  background: rgb(254 243 199);
+  color: rgb(146 64 14);
+  box-shadow: inset 0 0 0 1px rgb(252 211 77 / 0.5);
+}
+.demo-tone.tone-rose {
+  background: rgb(255 228 230);
+  color: rgb(159 18 57);
+  box-shadow: inset 0 0 0 1px rgb(253 164 175 / 0.5);
+}
+.demo-tone.tone-yellow {
+  background: rgb(254 249 195);
+  color: rgb(133 77 14);
+  box-shadow: inset 0 0 0 1px rgb(253 224 71 / 0.5);
+}
+.demo-tone.tone-slate {
+  background: rgb(241 245 249);
+  color: rgb(30 41 59);
+  box-shadow: inset 0 0 0 1px rgb(203 213 225 / 0.6);
+}
+.demo-tone.tone-blue {
+  background: rgb(219 234 254);
+  color: rgb(30 64 175);
+  box-shadow: inset 0 0 0 1px rgb(147 197 253 / 0.5);
+}
+
+.dark .demo-tone.tone-emerald {
+  background: rgb(6 78 59 / 0.5);
+  color: rgb(167 243 208);
+  box-shadow: inset 0 0 0 1px rgb(6 95 70 / 0.7);
+}
+.dark .demo-tone.tone-green {
+  background: rgb(20 83 45 / 0.5);
+  color: rgb(187 247 208);
+  box-shadow: inset 0 0 0 1px rgb(22 101 52 / 0.7);
+}
+.dark .demo-tone.tone-orange {
+  background: rgb(124 45 18 / 0.5);
+  color: rgb(254 215 170);
+  box-shadow: inset 0 0 0 1px rgb(154 52 18 / 0.7);
+}
+.dark .demo-tone.tone-amber {
+  background: rgb(120 53 15 / 0.5);
+  color: rgb(253 230 138);
+  box-shadow: inset 0 0 0 1px rgb(146 64 14 / 0.7);
+}
+.dark .demo-tone.tone-rose {
+  background: rgb(136 19 55 / 0.45);
+  color: rgb(254 205 211);
+  box-shadow: inset 0 0 0 1px rgb(159 18 57 / 0.7);
+}
+.dark .demo-tone.tone-yellow {
+  background: rgb(113 63 18 / 0.5);
+  color: rgb(254 240 138);
+  box-shadow: inset 0 0 0 1px rgb(133 77 14 / 0.7);
+}
+.dark .demo-tone.tone-slate {
+  background: rgb(51 65 85 / 0.6);
+  color: rgb(226 232 240);
+  box-shadow: inset 0 0 0 1px rgb(71 85 105 / 0.7);
+}
+.dark .demo-tone.tone-blue {
+  background: rgb(30 58 138 / 0.5);
+  color: rgb(191 219 254);
+  box-shadow: inset 0 0 0 1px rgb(30 64 175 / 0.7);
+}
+
 :host-context(.dark) .showcase-card-2 {
   --showcase-border: rgb(109 40 217);
 }
