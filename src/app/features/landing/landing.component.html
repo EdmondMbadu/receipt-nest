@@ -241,17 +241,26 @@
           </div>
 
           <!-- Watch demo -->
-          <div class="mt-5">
+          <div class="mt-6">
             <button type="button" (click)="openDemo()"
               aria-label="Watch the 60-second ReceiptNest AI demo"
-              class="group inline-flex items-center gap-3 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 py-2 pl-2 pr-5 text-slate-700 dark:text-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 dark:hover:border-emerald-700 hover:bg-emerald-50/60 dark:hover:bg-emerald-950/40 hover:shadow-md">
-              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm shadow-emerald-500/30 transition-transform duration-200 group-hover:scale-105">
-                <svg class="ml-0.5 h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              class="watch-demo-btn group relative inline-flex items-center gap-3.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 py-2 pl-2 pr-2 text-slate-800 dark:text-slate-100 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow-md">
+              <span class="watch-demo-disc relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm shadow-emerald-500/30 ring-1 ring-emerald-400/40 transition-transform duration-200 group-hover:scale-[1.06] group-active:scale-95">
+                <span aria-hidden="true" class="watch-demo-disc-pulse absolute inset-0 rounded-full ring-2 ring-emerald-400/60"></span>
+                <svg class="ml-0.5 h-4 w-4 drop-shadow-sm" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M8 5v14l11-7z" />
                 </svg>
               </span>
-              <span class="text-sm font-semibold tracking-tight">Watch the 60-sec demo</span>
-              <span class="hidden sm:inline-flex items-center text-[11px] font-medium text-slate-400 dark:text-slate-500 border-l border-slate-200 dark:border-slate-700 pl-3">No sign-up</span>
+              <span class="flex flex-col leading-tight text-left">
+                <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">Watch demo</span>
+                <span class="text-[15px] font-semibold tracking-tight text-slate-900 dark:text-white">See it in action — 60 sec</span>
+              </span>
+              <span class="ml-1 inline-flex items-center gap-1 rounded-full border border-emerald-200/80 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                No sign-up
+              </span>
             </button>
           </div>
 

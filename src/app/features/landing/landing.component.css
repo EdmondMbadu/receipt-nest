@@ -147,6 +147,38 @@ svg {
   --showcase-border: rgb(4 120 87);
 }
 
+/* ---------- Watch demo button ---------- */
+
+@keyframes watchDemoDiscPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  70% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+
+.watch-demo-disc-pulse {
+  animation: watchDemoDiscPulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.watch-demo-btn:hover .watch-demo-disc-pulse {
+  animation-duration: 1.4s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .watch-demo-disc-pulse {
+    animation: none;
+    opacity: 0;
+  }
+}
+
 /* ---------- Live demo simulation ---------- */
 
 /* Receipt slide-in animation */
