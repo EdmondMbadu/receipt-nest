@@ -42,6 +42,47 @@
             </svg>
           </button>
 
+          <!-- App Store / Play Store icon buttons (always visible from sm up) -->
+          <div class="hidden sm:flex items-center gap-1.5 pl-2 ml-1 border-l border-slate-200 dark:border-slate-800">
+            <a [href]="appStoreUrl" target="_blank" rel="noopener noreferrer"
+              title="Download on the App Store"
+              aria-label="Download ReceiptNest AI on the App Store"
+              class="group inline-flex items-center justify-center h-9 w-9 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+              <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M16.365 1.43c0 1.14-.468 2.231-1.213 3.02-.796.832-2.095 1.475-3.23 1.38-.144-1.097.364-2.267 1.11-3.055.82-.88 2.197-1.506 3.333-1.345Zm4.24 16.235c-.57 1.29-.836 1.867-1.57 2.997-1.025 1.57-2.474 3.527-4.272 3.542-1.603.016-2.017-1.045-4.193-1.032-2.178.012-2.632 1.051-4.234 1.035-1.8-.015-3.172-1.777-4.198-3.347C-.732 16.474-.873 11.11 1.52 7.42c1.697-2.62 4.381-4.153 6.902-4.153 1.653 0 3.03 1.14 4.574 1.14 1.497 0 2.408-1.142 4.557-1.142.9 0 3.71.247 5.468 2.815-4.807 2.635-4.024 9.497-2.416 11.585Z" />
+              </svg>
+            </a>
+            <a [href]="googlePlayUrl" target="_blank" rel="noopener noreferrer"
+              title="Get it on Google Play"
+              aria-label="Get ReceiptNest AI on Google Play"
+              class="group inline-flex items-center justify-center h-9 w-9 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+              <svg class="h-[18px] w-[18px]" viewBox="0 0 512 512" aria-hidden="true">
+                <defs>
+                  <linearGradient id="nav-gp-blue" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#00A0FF"/>
+                    <stop offset="100%" stop-color="#00E2FF"/>
+                  </linearGradient>
+                  <linearGradient id="nav-gp-yellow" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#FFBD00"/>
+                    <stop offset="100%" stop-color="#FFE000"/>
+                  </linearGradient>
+                  <linearGradient id="nav-gp-red" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#FF3A44"/>
+                    <stop offset="100%" stop-color="#C31162"/>
+                  </linearGradient>
+                  <linearGradient id="nav-gp-green" x1="0" y1="1" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#00A070"/>
+                    <stop offset="100%" stop-color="#00F076"/>
+                  </linearGradient>
+                </defs>
+                <path fill="url(#nav-gp-blue)" d="M64 32 L320 256 L64 480 C56 472 52 462 52 450 V62 C52 50 56 40 64 32 Z"/>
+                <path fill="url(#nav-gp-yellow)" d="M400 208 L320 256 L400 304 L450 274 C470 262 470 250 450 238 Z"/>
+                <path fill="url(#nav-gp-red)" d="M64 480 L320 256 L400 304 L96 478 C84 484 74 484 64 480 Z"/>
+                <path fill="url(#nav-gp-green)" d="M64 32 C74 28 84 28 96 34 L400 208 L320 256 Z"/>
+              </svg>
+            </a>
+          </div>
+
           <ng-container *ngIf="auth.isAuthenticated(); else guestLinks">
             <a routerLink="/app"
               class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-400 px-5 py-2.5 text-sm font-medium text-white dark:text-slate-950 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all duration-200">
