@@ -1165,9 +1165,15 @@ const renderFooter = (links: SummaryLinks) => {
     `
     : "";
   const secondaryLinks = [
-    links.supportUrl ? `<a href="${escapeHtml(links.supportUrl)}" style="display:inline-block; margin:6px 5px 0; padding:10px 14px; border-radius:999px; background:#eef4ff; border:1px solid #d4e4fa; color:#243244; text-decoration:none; font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.2; font-weight:800; letter-spacing:0.08em; text-transform:uppercase;">Support</a>` : "",
-    links.termsUrl ? `<a href="${escapeHtml(links.termsUrl)}" style="display:inline-block; margin:6px 5px 0; padding:10px 14px; border-radius:999px; background:#eef4ff; border:1px solid #d4e4fa; color:#243244; text-decoration:none; font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.2; font-weight:800; letter-spacing:0.08em; text-transform:uppercase;">Terms</a>` : "",
-    links.unsubscribeUrl ? `<a href="${escapeHtml(links.unsubscribeUrl)}" style="display:inline-block; margin:6px 5px 0; padding:10px 14px; border-radius:999px; background:#fff4f3; border:1px solid #fecaca; color:#9f1239; text-decoration:none; font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.2; font-weight:800; letter-spacing:0.08em; text-transform:uppercase;">Unsubscribe</a>` : "",
+    links.supportUrl
+      ? `<td style="padding:6px 5px 0 0;"><a href="${escapeHtml(links.supportUrl)}" style="display:inline-block; padding:10px 14px; border-radius:999px; background:#eef4ff; border:1px solid #d4e4fa; color:#243244; text-decoration:none; font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.2; font-weight:800; letter-spacing:0.08em; text-transform:uppercase;">Support</a></td>`
+      : "",
+    links.termsUrl
+      ? `<td style="padding:6px 5px 0 0;"><a href="${escapeHtml(links.termsUrl)}" style="display:inline-block; padding:10px 14px; border-radius:999px; background:#eef4ff; border:1px solid #d4e4fa; color:#243244; text-decoration:none; font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.2; font-weight:800; letter-spacing:0.08em; text-transform:uppercase;">Terms</a></td>`
+      : "",
+    links.unsubscribeUrl
+      ? `<td style="padding:6px 0 0;"><a href="${escapeHtml(links.unsubscribeUrl)}" style="display:inline-block; padding:10px 14px; border-radius:999px; background:#fff4f3; border:1px solid #fecaca; color:#9f1239; text-decoration:none; font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.2; font-weight:800; letter-spacing:0.08em; text-transform:uppercase;">Unsubscribe</a></td>`
+      : "",
   ].filter(Boolean).join("");
 
   return `
@@ -1177,7 +1183,7 @@ const renderFooter = (links: SummaryLinks) => {
           <p style="margin:0; font-size:18px; line-height:1.2; color:#064e3b; font-weight:900;">ReceiptNest AI</p>
           ${dashboardCta}
           ${renderAppDownloadHtmlCard()}
-          ${secondaryLinks ? `<div style="margin-top:14px; font-size:0; line-height:0;">${secondaryLinks}</div>` : ""}
+          ${secondaryLinks ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:14px;"><tr>${secondaryLinks}</tr></table>` : ""}
           <p style="margin:16px 0 0; font-size:11px; line-height:1.6; color:#64748b;">
             © ${new Date().getFullYear()} ReceiptNest AI. All rights reserved.
           </p>
