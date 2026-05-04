@@ -15,6 +15,7 @@ import {
   getGenericBillingSnapshot,
   getModeBillingSnapshot,
 } from "./billing-state";
+import { appendAppDownloadText, renderAppDownloadHtmlCard } from "./email-app-links";
 import { getEffectiveSubscriptionPlan } from "./subscription";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
@@ -83,7 +84,7 @@ export const sendTestEmail = onCall(
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
-      .replace(/\\n/g, "<br />");
+      .replace(/\n/g, "<br />");
     const preheader = "ReceiptNest AI test email confirmation.";
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -137,6 +138,7 @@ export const sendTestEmail = onCall(
             </tr>
             <tr>
               <td style="padding:22px 32px 30px; font-family:Arial, sans-serif; font-size:12px; color:#64748b;">
+                ${renderAppDownloadHtmlCard()}
                 <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                   <tr>
                     <td>
@@ -166,7 +168,7 @@ export const sendTestEmail = onCall(
         from: { email: fromEmail, name: "ReceiptNest AI" },
         replyTo: { email: fromEmail, name: "ReceiptNest AI" },
         subject,
-        text: message,
+        text: appendAppDownloadText(message),
         html
       });
     } catch (error) {

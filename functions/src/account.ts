@@ -4,6 +4,7 @@ import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import Stripe from "stripe";
 import sgMail from "@sendgrid/mail";
+import { appendAppDownloadText, renderAppDownloadHtmlCard } from "./email-app-links";
 
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
@@ -168,11 +169,12 @@ const sendAccountDeletionEmail = async (email: string): Promise<void> => {
   }
 
   const subject = "Your ReceiptNest AI account has been fully deleted";
-  const text =
+  const text = appendAppDownloadText(
     "Hi,\n\n" +
     "This confirms that your ReceiptNest AI account and all associated data were fully deleted.\n\n" +
     "Thank you for using us. We hope you come back.\n\n" +
-    "If you did not request this, please contact support immediately at info@receipt-nest.com.";
+    "If you did not request this, please contact support immediately at info@receipt-nest.com."
+  );
   const html = `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -197,6 +199,7 @@ const sendAccountDeletionEmail = async (email: string): Promise<void> => {
                 <p style="margin:0 0 14px;font-size:15px;line-height:1.6;">This confirms that your ReceiptNest AI account and all associated data were fully deleted.</p>
                 <p style="margin:0 0 18px;font-size:15px;line-height:1.6;">Thank you for using us once upon a time. We hope you come back.</p>
                 <p style="margin:0;font-size:13px;line-height:1.6;color:#475569;">If you did not request this, contact us immediately at <a href="mailto:info@receipt-nest.com" style="color:#065f46;text-decoration:none;">info@receipt-nest.com</a>.</p>
+                ${renderAppDownloadHtmlCard()}
               </td>
             </tr>
           </table>

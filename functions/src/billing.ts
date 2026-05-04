@@ -13,6 +13,7 @@ import {
   getModeBillingFieldName,
   getStoredCustomerIdForMode,
 } from "./billing-state";
+import { appendAppDownloadText, renderAppDownloadHtmlCard } from "./email-app-links";
 
 const STRIPE_API_VERSION = "2024-06-20";
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
@@ -361,7 +362,7 @@ const sendSubscriptionReceiptEmail = async ({
   const subject = isInitialPurchase
     ? "Your ReceiptNest AI Pro receipt and activation details"
     : "Your ReceiptNest AI Pro renewal receipt";
-  const text = [
+  const text = appendAppDownloadText([
     isInitialPurchase
       ? "Congratulations. Your ReceiptNest AI Pro plan is now active."
       : "Your ReceiptNest AI Pro renewal was successful.",
@@ -377,7 +378,7 @@ const sendSubscriptionReceiptEmail = async ({
     invoice.invoice_pdf ? `PDF receipt: ${invoice.invoice_pdf}` : null,
   ]
     .filter(Boolean)
-    .join("\n");
+    .join("\n"));
 
   const bodyHtml = `
     <p style="margin:0 0 12px; font-size:15px; line-height:1.6;">${isInitialPurchase ? "Congratulations," : "Hello,"}</p>
@@ -437,6 +438,7 @@ const sendSubscriptionReceiptEmail = async ({
             </tr>
             <tr>
               <td style="padding:22px 32px 30px; font-family:Arial, sans-serif; font-size:12px; color:#64748b;">
+                ${renderAppDownloadHtmlCard()}
                 <p style="margin:0 0 6px;">ReceiptNest AI • ${escapeHtml(fromEmail)}</p>
                 <p style="margin:0;">You are receiving this email because a subscription payment succeeded on your ReceiptNest AI account.</p>
               </td>

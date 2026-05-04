@@ -3,6 +3,7 @@ import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import sgMail from "@sendgrid/mail";
+import { appendAppDownloadText, renderAppDownloadHtmlCard } from "./email-app-links";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
 const appBaseUrl = defineSecret("APP_BASE_URL");
@@ -81,6 +82,7 @@ const buildEmailShell = (title: string, bodyHtml: string, preheader: string) => 
             </tr>
             <tr>
               <td style="padding:22px 32px 30px; font-family:Arial, sans-serif; font-size:12px; color:#64748b;">
+                ${renderAppDownloadHtmlCard()}
                 <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                   <tr>
                     <td>
@@ -140,7 +142,7 @@ export const sendVerificationEmail = onCall(
     });
 
     const subject = "Verify your ReceiptNest AI email";
-    const text = `Welcome to ReceiptNest AI!\n\nPlease verify your email to finish setting up your account: ${link}\n\nOnce verified, you can head to your dashboard and start organizing receipts.`;
+    const text = appendAppDownloadText(`Welcome to ReceiptNest AI!\n\nPlease verify your email to finish setting up your account: ${link}\n\nOnce verified, you can head to your dashboard and start organizing receipts.`);
     const bodyHtml = `
       <p style="margin:0 0 12px; font-size:15px; line-height:1.6;">Hello,</p>
       <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">Thanks for signing up for ReceiptNest AI. Please verify your email to finish setting up your account.</p>
@@ -181,13 +183,13 @@ export const sendPasswordResetEmail = onCall(
       const generatedLink = await admin.auth().generatePasswordResetLink(email);
       const resetLink = buildCustomActionLink(generatedLink, appBaseUrl.value(), "/reset-password");
       const subject = "Reset your ReceiptNest AI password";
-      const text = [
+      const text = appendAppDownloadText([
         "We received a request to reset your ReceiptNest AI password.",
         "",
         `Use this secure link to choose a new password: ${resetLink}`,
         "",
         "If you did not request this change, you can ignore this email."
-      ].join("\n");
+      ].join("\n"));
       const bodyHtml = `
         <p style="margin:0 0 12px; font-size:15px; line-height:1.6;">Hello,</p>
         <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">We received a request to reset the password for your ReceiptNest AI account associated with <strong style="color:#0f172a;">${escapeHtml(email)}</strong>.</p>
@@ -244,7 +246,7 @@ export const sendWelcomeEmail = onCall(
     }
 
     const subject = "Welcome to ReceiptNest AI";
-    const text = `Welcome to ReceiptNest AI!\n\nYour account is ready. Capture receipts, keep expenses organized, and stay on top of your spending in one place.\n\nGo to your dashboard: ${appBaseUrl.value()}/app`;
+    const text = appendAppDownloadText(`Welcome to ReceiptNest AI!\n\nYour account is ready. Capture receipts, keep expenses organized, and stay on top of your spending in one place.\n\nGo to your dashboard: ${appBaseUrl.value()}/app`);
     const bodyHtml = `
       <p style="margin:0 0 12px; font-size:15px; line-height:1.6;">Welcome to ReceiptNest AI,</p>
       <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">Your account is ready. From here, you can upload receipts, keep expenses organized, and build a cleaner record of every purchase.</p>
