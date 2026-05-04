@@ -3,7 +3,7 @@ import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import sgMail from "@sendgrid/mail";
-import { appendAppDownloadText, renderAppDownloadHtmlCard } from "./email-app-links";
+import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
 const appBaseUrl = defineSecret("APP_BASE_URL");
@@ -116,7 +116,8 @@ const sendEmail = async (to: string, subject: string, text: string, html: string
     replyTo: { email: fromEmail, name: "ReceiptNest AI" },
     subject,
     text,
-    html
+    html,
+    attachments: getEmailAppIconAttachments(),
   });
 };
 

@@ -5,7 +5,7 @@ import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import sgMail from "@sendgrid/mail";
 import { assertAdmin } from "./authz";
-import { appendAppDownloadText, renderAppDownloadHtmlCard } from "./email-app-links";
+import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
 const appBaseUrl = defineSecret("APP_BASE_URL");
@@ -1606,6 +1606,7 @@ const sendSummaryEmailMessage = async (to: string, summary: SpendSummaryData, li
     subject: buildSummarySubject(summary),
     text: buildEmailText(summary),
     html: buildEmailHtml(summary, links),
+    attachments: getEmailAppIconAttachments(),
   });
 };
 

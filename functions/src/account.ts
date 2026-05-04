@@ -4,7 +4,7 @@ import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import Stripe from "stripe";
 import sgMail from "@sendgrid/mail";
-import { appendAppDownloadText, renderAppDownloadHtmlCard } from "./email-app-links";
+import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
 
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
@@ -217,7 +217,8 @@ const sendAccountDeletionEmail = async (email: string): Promise<void> => {
       replyTo: { email: fromEmail, name: "ReceiptNest AI" },
       subject,
       text,
-      html
+      html,
+      attachments: getEmailAppIconAttachments(),
     });
   } catch (error) {
     logger.error("Failed sending account deletion confirmation email", { recipient, error });

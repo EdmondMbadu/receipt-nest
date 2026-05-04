@@ -13,7 +13,7 @@ import {
   getModeBillingFieldName,
   getStoredCustomerIdForMode,
 } from "./billing-state";
-import { appendAppDownloadText, renderAppDownloadHtmlCard } from "./email-app-links";
+import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
 
 const STRIPE_API_VERSION = "2024-06-20";
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
@@ -457,6 +457,7 @@ const sendSubscriptionReceiptEmail = async ({
     subject,
     text,
     html,
+    attachments: getEmailAppIconAttachments(),
   });
 };
 

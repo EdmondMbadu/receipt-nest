@@ -15,7 +15,7 @@ import {
   getGenericBillingSnapshot,
   getModeBillingSnapshot,
 } from "./billing-state";
-import { appendAppDownloadText, renderAppDownloadHtmlCard } from "./email-app-links";
+import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
 import { getEffectiveSubscriptionPlan } from "./subscription";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
@@ -169,7 +169,8 @@ export const sendTestEmail = onCall(
         replyTo: { email: fromEmail, name: "ReceiptNest AI" },
         subject,
         text: appendAppDownloadText(message),
-        html
+        html,
+        attachments: getEmailAppIconAttachments(),
       });
     } catch (error) {
       logger.error("SendGrid test email failed", error);
