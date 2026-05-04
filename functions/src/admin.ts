@@ -2,7 +2,6 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
-import sgMail from "@sendgrid/mail";
 import { assertAdmin } from "./authz";
 import {
   BillingMode,
@@ -16,6 +15,7 @@ import {
   getModeBillingSnapshot,
 } from "./billing-state";
 import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
+import { sendSendgridMail } from "./sendgrid";
 import { getEffectiveSubscriptionPlan } from "./subscription";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
@@ -160,10 +160,8 @@ export const sendTestEmail = onCall(
   </body>
 </html>`;
 
-    sgMail.setApiKey(sendgridApiKey.value());
-
     try {
-      await sgMail.send({
+      await sendSendgridMail(sendgridApiKey.value(), {
         to,
         from: { email: fromEmail, name: "ReceiptNest AI" },
         replyTo: { email: fromEmail, name: "ReceiptNest AI" },

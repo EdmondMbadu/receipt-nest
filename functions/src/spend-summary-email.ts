@@ -3,9 +3,9 @@ import { onSchedule } from "firebase-functions/v2/scheduler";
 import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
-import sgMail from "@sendgrid/mail";
 import { assertAdmin } from "./authz";
 import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
+import { sendSendgridMail } from "./sendgrid";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
 const appBaseUrl = defineSecret("APP_BASE_URL");
@@ -1597,9 +1597,7 @@ const buildEmailText = (data: SpendSummaryData) => {
 };
 
 const sendSummaryEmailMessage = async (to: string, summary: SpendSummaryData, links: SummaryLinks) => {
-  sgMail.setApiKey(sendgridApiKey.value());
-
-  await sgMail.send({
+  await sendSendgridMail(sendgridApiKey.value(), {
     to,
     from: { email: fromEmail, name: "ReceiptNest AI" },
     replyTo: { email: fromEmail, name: "ReceiptNest AI" },

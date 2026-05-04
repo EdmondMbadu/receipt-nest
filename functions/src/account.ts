@@ -3,8 +3,8 @@ import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import Stripe from "stripe";
-import sgMail from "@sendgrid/mail";
 import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
+import { sendSendgridMail } from "./sendgrid";
 
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
@@ -210,8 +210,7 @@ const sendAccountDeletionEmail = async (email: string): Promise<void> => {
 </html>`;
 
   try {
-    sgMail.setApiKey(apiKey);
-    await sgMail.send({
+    await sendSendgridMail(apiKey, {
       to: recipient,
       from: { email: fromEmail, name: "ReceiptNest AI" },
       replyTo: { email: fromEmail, name: "ReceiptNest AI" },

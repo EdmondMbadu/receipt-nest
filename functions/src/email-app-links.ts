@@ -12,21 +12,30 @@ const readAssetBase64 = (filename: string) =>
 const appleIconBase64 = readAssetBase64("apple-store-icon.png");
 const googlePlayIconBase64 = readAssetBase64("google-play-icon.png");
 
+const buildInlineImageAttachment = (
+  content: string,
+  filename: string,
+  contentId: string,
+) => ({
+  content,
+  filename,
+  type: "image/png",
+  disposition: "inline" as const,
+  contentId,
+  toJSON() {
+    return {
+      content,
+      filename,
+      type: "image/png",
+      disposition: "inline",
+      content_id: contentId,
+    };
+  },
+});
+
 export const getEmailAppIconAttachments = () => [
-  {
-    content: appleIconBase64,
-    filename: "apple-store-icon.png",
-    type: "image/png",
-    disposition: "inline" as const,
-    contentId: APPLE_ICON_CID,
-  },
-  {
-    content: googlePlayIconBase64,
-    filename: "google-play-icon.png",
-    type: "image/png",
-    disposition: "inline" as const,
-    contentId: GOOGLE_PLAY_ICON_CID,
-  },
+  buildInlineImageAttachment(appleIconBase64, "apple-store-icon.png", APPLE_ICON_CID),
+  buildInlineImageAttachment(googlePlayIconBase64, "google-play-icon.png", GOOGLE_PLAY_ICON_CID),
 ];
 
 export const renderAppDownloadHtmlCard = () => `

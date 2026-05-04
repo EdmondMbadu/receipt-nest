@@ -2,7 +2,6 @@ import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
-import sgMail from "@sendgrid/mail";
 import Stripe from "stripe";
 import { BillingMode, getEffectiveBillingModeForUserData } from "./app-config";
 import {
@@ -14,6 +13,7 @@ import {
   getStoredCustomerIdForMode,
 } from "./billing-state";
 import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
+import { sendSendgridMail } from "./sendgrid";
 
 const STRIPE_API_VERSION = "2024-06-20";
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
@@ -345,8 +345,6 @@ const sendSubscriptionReceiptEmail = async ({
     return;
   }
 
-  sgMail.setApiKey(sendgridApiKey.value());
-
   const isInitialPurchase = invoice.billing_reason === "subscription_create";
   const amountLabel = formatCurrency(invoice.amount_paid ?? 0, invoice.currency);
   const renewalDate =
@@ -450,7 +448,7 @@ const sendSubscriptionReceiptEmail = async ({
   </body>
 </html>`;
 
-  await sgMail.send({
+  await sendSendgridMail(sendgridApiKey.value(), {
     to: recipient,
     from: { email: fromEmail, name: "ReceiptNest AI" },
     replyTo: { email: fromEmail, name: "ReceiptNest AI" },
