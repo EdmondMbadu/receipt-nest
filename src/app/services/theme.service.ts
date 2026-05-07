@@ -1,18 +1,26 @@
-import { Injectable, effect, signal } from '@angular/core';
+import { Injectable, OnDestroy, effect, signal } from '@angular/core';
+
+type ThemePreference = 'dark' | 'light';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ThemeService {
-  readonly isDarkMode = signal<boolean>(true);
+export class ThemeService implements OnDestroy {
+  private readonly storageKey = 'theme';
+  private readonly darkModeMediaQuery = '(prefers-color-scheme: dark)';
+  private systemPreferenceQuery: MediaQueryList | null = null;
+  private readonly systemPreferenceChangeHandler = (event: MediaQueryListEvent) => {
+    if (this.getSavedTheme()) {
+      return;
+    }
+    this.isDarkMode.set(event.matches);
+  };
+
+  readonly isDarkMode = signal<boolean>(this.getInitialDarkModePreference());
 
   constructor() {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const savedTheme = localStorage.getItem('theme');
-      const prefersDark = savedTheme ? savedTheme === 'dark' : true;
-      this.isDarkMode.set(prefersDark);
-      this.applyTheme(prefersDark);
-    }
+    this.watchSystemPreference();
+    this.applyTheme(this.isDarkMode());
 
     effect(() => {
       const isDark = this.isDarkMode();
@@ -20,13 +28,69 @@ export class ThemeService {
     });
   }
 
+  ngOnDestroy(): void {
+    if (!this.systemPreferenceQuery) {
+      return;
+    }
+
+    this.systemPreferenceQuery.removeEventListener('change', this.systemPreferenceChangeHandler);
+  }
+
   toggleTheme() {
     const next = !this.isDarkMode();
     this.isDarkMode.set(next);
-    if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.setItem('theme', next ? 'dark' : 'light');
+    this.saveTheme(next ? 'dark' : 'light');
+  }
+
+  private getInitialDarkModePreference(): boolean {
+    const savedTheme = this.getSavedTheme();
+    if (savedTheme) {
+      return savedTheme === 'dark';
     }
-    this.applyTheme(next);
+
+    return this.systemPrefersDarkMode();
+  }
+
+  private getSavedTheme(): ThemePreference | null {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+
+    try {
+      const savedTheme = window.localStorage?.getItem(this.storageKey);
+      return savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private saveTheme(theme: ThemePreference): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    try {
+      window.localStorage?.setItem(this.storageKey, theme);
+    } catch {
+      // The in-memory signal still reflects the user's choice when storage is unavailable.
+    }
+  }
+
+  private systemPrefersDarkMode(): boolean {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return false;
+    }
+
+    return window.matchMedia(this.darkModeMediaQuery).matches;
+  }
+
+  private watchSystemPreference(): void {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return;
+    }
+
+    this.systemPreferenceQuery = window.matchMedia(this.darkModeMediaQuery);
+    this.systemPreferenceQuery.addEventListener('change', this.systemPreferenceChangeHandler);
   }
 
   private applyTheme(isDark: boolean) {
@@ -43,6 +107,4 @@ export class ThemeService {
     }
   }
 }
-
-
 
