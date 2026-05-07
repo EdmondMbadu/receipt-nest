@@ -1,4 +1,4 @@
-import { Component, computed, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, OnDestroy, signal, viewChild } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
@@ -34,7 +34,7 @@ interface DemoReceipt {
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.css'
 })
-export class LandingComponent {
+export class LandingComponent implements OnDestroy {
   readonly auth = inject(AuthService);
   private readonly theme = inject(ThemeService);
   private readonly router = inject(Router);
@@ -65,6 +65,20 @@ export class LandingComponent {
   readonly justAddedDemoReceiptId = signal<number | null>(null);
   private demoReceiptIdCounter = 0;
   private demoTotalAnimationFrame: number | null = null;
+
+  // ---- Auto-play simulation state machine ----
+  // Stages: idle → capture (camera/shutter) → scan (AI extraction) → add (slide into list) → loop
+  readonly simStage = signal<'idle' | 'capture' | 'scan' | 'add' | 'complete'>('idle');
+  readonly simMerchant = signal<DemoMerchantTemplate | null>(null);
+  readonly simExtractedFields = signal<{ merchant: boolean; category: boolean; amount: boolean }>({
+    merchant: false,
+    category: false,
+    amount: false
+  });
+  readonly simAutoPlay = signal(true);
+  private simTimers: ReturnType<typeof setTimeout>[] = [];
+  private simSequenceIndex = 0;
+  private readonly simReceiptsPerCycle = 6;
 
   private readonly demoMerchantCatalog: DemoMerchantTemplate[] = [
     { name: 'Whole Foods Market', initials: 'WF', category: 'Groceries', amount: 86.41, toneClass: 'tone-emerald' },
@@ -145,6 +159,18 @@ export class LandingComponent {
         this.router.navigate(['/app']);
       }
     });
+
+    // Kick off the cinematic auto-loop after the page settles
+    if (this.canAutoPlayDemo()) {
+      this.scheduleSim(900, () => this.runSimCycle());
+    }
+  }
+
+  ngOnDestroy() {
+    this.clearSimTimers();
+    if (this.demoTotalAnimationFrame !== null) {
+      cancelAnimationFrame(this.demoTotalAnimationFrame);
+    }
   }
 
   toggleTheme() {
@@ -186,23 +212,26 @@ export class LandingComponent {
     this.animateDemoTotalTo(this.demoTotalSpend());
   }
 
-  addDemoReceipt() {
+  addDemoReceipt(template?: DemoMerchantTemplate) {
     const month = this.selectedDemoMonth();
     const existing = this.demoReceiptsByMonth()[month];
-    const lastTemplateName = existing[0]?.name;
-    const pool = this.demoMerchantCatalog.filter(m => m.name !== lastTemplateName);
-    const template = pool[Math.floor(Math.random() * pool.length)];
+    let chosen = template;
+    if (!chosen) {
+      const lastTemplateName = existing[0]?.name;
+      const pool = this.demoMerchantCatalog.filter(m => m.name !== lastTemplateName);
+      chosen = pool[Math.floor(Math.random() * pool.length)];
+    }
 
     const day = Math.max(1, this.demoMonthAnchorDay(month) - existing.length);
     const dayLabel = `${month} ${day}`;
     const id = ++this.demoReceiptIdCounter;
     const receipt: DemoReceipt = {
       id,
-      name: template.name,
-      initials: template.initials,
-      category: template.category,
-      amount: template.amount,
-      toneClass: template.toneClass,
+      name: chosen.name,
+      initials: chosen.initials,
+      category: chosen.category,
+      amount: chosen.amount,
+      toneClass: chosen.toneClass,
       dayLabel
     };
 
@@ -225,6 +254,100 @@ export class LandingComponent {
     const month = this.selectedDemoMonth();
     this.demoReceiptsByMonth.update(state => ({ ...state, [month]: [] }));
     this.animateDemoTotalTo(0);
+    this.simStage.set('idle');
+    this.simMerchant.set(null);
+    this.simExtractedFields.set({ merchant: false, category: false, amount: false });
+  }
+
+  // ---- Auto-play cinematic loop ----
+  private canAutoPlayDemo(): boolean {
+    if (typeof window === 'undefined') return false;
+    try {
+      return !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch {
+      return true;
+    }
+  }
+
+  private scheduleSim(delayMs: number, fn: () => void) {
+    const handle = setTimeout(() => {
+      this.simTimers = this.simTimers.filter(t => t !== handle);
+      fn();
+    }, delayMs);
+    this.simTimers.push(handle);
+  }
+
+  private clearSimTimers() {
+    for (const t of this.simTimers) {
+      clearTimeout(t);
+    }
+    this.simTimers = [];
+  }
+
+  private pickNextSimMerchant(): DemoMerchantTemplate {
+    const month = this.selectedDemoMonth();
+    const existing = this.demoReceiptsByMonth()[month];
+    const recentNames = new Set(existing.slice(0, 3).map(r => r.name));
+    const pool = this.demoMerchantCatalog.filter(m => !recentNames.has(m.name));
+    const source = pool.length > 0 ? pool : this.demoMerchantCatalog;
+    return source[(this.simSequenceIndex++) % source.length];
+  }
+
+  // One full cycle: capture → scan → add → next (or reset & loop)
+  private runSimCycle() {
+    if (!this.simAutoPlay()) return;
+
+    const month = this.selectedDemoMonth();
+    const count = this.demoReceiptsByMonth()[month].length;
+
+    // After N receipts, briefly celebrate and reset
+    if (count >= this.simReceiptsPerCycle) {
+      this.simStage.set('complete');
+      this.scheduleSim(1600, () => {
+        this.resetDemoReceipts();
+        this.scheduleSim(700, () => this.runSimCycle());
+      });
+      return;
+    }
+
+    const merchant = this.pickNextSimMerchant();
+    this.simMerchant.set(merchant);
+    this.simExtractedFields.set({ merchant: false, category: false, amount: false });
+
+    // Stage 1: capture (camera frames the receipt, shutter flash)
+    this.simStage.set('capture');
+    this.scheduleSim(1100, () => {
+      // Stage 2: scan + AI extraction
+      this.simStage.set('scan');
+      this.scheduleSim(420, () => {
+        this.simExtractedFields.update(f => ({ ...f, merchant: true }));
+      });
+      this.scheduleSim(820, () => {
+        this.simExtractedFields.update(f => ({ ...f, category: true }));
+      });
+      this.scheduleSim(1180, () => {
+        this.simExtractedFields.update(f => ({ ...f, amount: true }));
+      });
+      this.scheduleSim(1700, () => {
+        // Stage 3: commit the receipt to the list with full animation
+        this.simStage.set('add');
+        this.addDemoReceipt(merchant);
+        this.scheduleSim(900, () => {
+          this.simStage.set('idle');
+          this.simMerchant.set(null);
+          // Stage 4: brief breath, then loop
+          this.scheduleSim(700, () => this.runSimCycle());
+        });
+      });
+    });
+  }
+
+  // Pause auto-play if the user manually interacts
+  pauseSimForManualInteraction() {
+    this.simAutoPlay.set(false);
+    this.clearSimTimers();
+    this.simStage.set('idle');
+    this.simMerchant.set(null);
   }
 
   trackDemoReceipt(_: number, r: DemoReceipt) {

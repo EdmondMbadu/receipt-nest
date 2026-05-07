@@ -346,6 +346,161 @@ svg {
   box-shadow: inset 0 0 0 1px rgb(30 64 175 / 0.7);
 }
 
+/* ---------- Cinematic auto-demo stage ---------- */
+
+.demo-stage {
+  /* Subtle scanline texture for "screen capture" feel */
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 3px,
+      rgb(15 23 42 / 0.015) 3px,
+      rgb(15 23 42 / 0.015) 4px
+    );
+}
+
+.dark .demo-stage {
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 3px,
+      rgb(255 255 255 / 0.02) 3px,
+      rgb(255 255 255 / 0.02) 4px
+    );
+}
+
+/* Capture: paper slides up + tilts in, then shutter flashes */
+@keyframes demoPaperIn {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) rotate(-3deg) scale(0.92);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+}
+
+.demo-paper {
+  animation: demoPaperIn 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes demoShutter {
+  0% { opacity: 0; }
+  18% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+.demo-shutter {
+  animation: demoShutter 0.85s ease-out 0.45s both;
+}
+
+/* Scan: emerald scanline sweeps top to bottom on a loop */
+@keyframes demoScanline {
+  0% { top: -10%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 102%; opacity: 0; }
+}
+
+.demo-scanline {
+  top: -10%;
+  animation: demoScanline 1.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  box-shadow: 0 0 12px 2px rgb(16 185 129 / 0.55);
+}
+
+/* Field chips populate one-by-one as AI extracts them */
+.demo-field {
+  opacity: 0.55;
+  filter: grayscale(0.4);
+  transition: opacity 0.35s ease, filter 0.35s ease, transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.demo-field-on {
+  opacity: 1;
+  filter: none;
+  transform: translateX(2px);
+  box-shadow: 0 0 0 1px rgb(16 185 129 / 0.45), 0 6px 16px -8px rgb(16 185 129 / 0.45);
+  animation: demoFieldPop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes demoFieldPop {
+  0% {
+    transform: translateX(8px) scale(0.96);
+    opacity: 0.55;
+  }
+  60% {
+    transform: translateX(-1px) scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(2px) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Add: success burst pops then fades, signaling commit to the list */
+@keyframes demoAddBurst {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  60% {
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1) translateY(-18px);
+  }
+}
+
+.demo-add-burst {
+  animation: demoAddBurst 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Complete: check pulse */
+@keyframes demoCompleteCheck {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.demo-complete-check {
+  animation: demoCompleteCheck 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-paper,
+  .demo-shutter,
+  .demo-scanline,
+  .demo-field-on,
+  .demo-add-burst,
+  .demo-complete-check {
+    animation: none !important;
+  }
+  .demo-shutter {
+    opacity: 0;
+  }
+}
+
 :host-context(.dark) .showcase-card-2 {
   --showcase-border: rgb(109 40 217);
 }
