@@ -1,5 +1,16 @@
-import { Component, computed, effect, ElementRef, inject, OnDestroy, signal, viewChild } from '@angular/core';
-import { CommonModule, DOCUMENT } from '@angular/common';
+import {
+  Component,
+  afterNextRender,
+  computed,
+  effect,
+  ElementRef,
+  inject,
+  OnDestroy,
+  PLATFORM_ID,
+  signal,
+  viewChild
+} from '@angular/core';
+import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
 
@@ -8,6 +19,7 @@ import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 
 type DemoMonth = string;
+type MobileStorePlatform = 'ios' | 'android' | 'unknown';
 
 interface DemoMerchantTemplate {
   name: string;
@@ -42,6 +54,8 @@ export class LandingComponent implements OnDestroy {
   private readonly meta = inject(Meta);
   private readonly document = inject(DOCUMENT);
   private readonly appConfig = inject(AppConfigService);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
 
   readonly user = this.auth.user;
   readonly isDarkMode = this.theme.isDarkMode;
@@ -52,6 +66,9 @@ export class LandingComponent implements OnDestroy {
   readonly billingInterval = signal<'monthly' | 'annual'>('monthly');
   readonly googlePlayUrl = 'https://play.google.com/store/apps/details?id=com.receiptnest.mobile';
   readonly appStoreUrl = 'https://apps.apple.com/us/app/receiptnest-ai/id6762539388';
+  readonly mobileStorePlatform = signal<MobileStorePlatform>('unknown');
+  readonly showAppStoreButton = computed(() => this.mobileStorePlatform() !== 'android');
+  readonly showGooglePlayButton = computed(() => this.mobileStorePlatform() !== 'ios');
   readonly demoVideo = viewChild<ElementRef<HTMLVideoElement>>('demoVideo');
   readonly freePlanReceiptLimit = this.appConfig.freePlanReceiptLimit;
 
@@ -152,6 +169,10 @@ export class LandingComponent implements OnDestroy {
 
   constructor() {
     this.applySeoTags();
+
+    afterNextRender(() => {
+      this.mobileStorePlatform.set(this.detectMobileStorePlatform());
+    });
 
     // Redirect to home if user is already authenticated
     effect(() => {
@@ -261,12 +282,34 @@ export class LandingComponent implements OnDestroy {
 
   // ---- Auto-play cinematic loop ----
   private canAutoPlayDemo(): boolean {
-    if (typeof window === 'undefined') return false;
+    if (!this.isBrowser) return false;
     try {
       return !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     } catch {
       return true;
     }
+  }
+
+  private detectMobileStorePlatform(): MobileStorePlatform {
+    if (!this.isBrowser || typeof navigator === 'undefined') {
+      return 'unknown';
+    }
+
+    const userAgent = navigator.userAgent || '';
+    const platform = navigator.platform || '';
+    const maxTouchPoints = navigator.maxTouchPoints || 0;
+    const isIpadOsDesktopMode =
+      /Macintosh/i.test(userAgent) && /Mac/i.test(platform) && maxTouchPoints > 1;
+
+    if (/iPhone|iPad|iPod/i.test(userAgent) || isIpadOsDesktopMode) {
+      return 'ios';
+    }
+
+    if (/Android/i.test(userAgent)) {
+      return 'android';
+    }
+
+    return 'unknown';
   }
 
   private scheduleSim(delayMs: number, fn: () => void) {

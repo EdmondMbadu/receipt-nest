@@ -44,7 +44,7 @@
 
           <!-- App Store / Play Store icon buttons (always visible from sm up) -->
           <div class="hidden sm:flex items-center gap-1.5 pl-2 ml-1 border-l border-slate-200 dark:border-slate-800">
-            <a [href]="appStoreUrl" target="_blank" rel="noopener noreferrer"
+            <a *ngIf="showAppStoreButton()" [href]="appStoreUrl" target="_blank" rel="noopener noreferrer"
               title="Download on the App Store"
               aria-label="Download ReceiptNest AI on the App Store"
               class="group inline-flex items-center justify-center h-9 w-9 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
@@ -52,7 +52,7 @@
                 <path d="M16.365 1.43c0 1.14-.468 2.231-1.213 3.02-.796.832-2.095 1.475-3.23 1.38-.144-1.097.364-2.267 1.11-3.055.82-.88 2.197-1.506 3.333-1.345Zm4.24 16.235c-.57 1.29-.836 1.867-1.57 2.997-1.025 1.57-2.474 3.527-4.272 3.542-1.603.016-2.017-1.045-4.193-1.032-2.178.012-2.632 1.051-4.234 1.035-1.8-.015-3.172-1.777-4.198-3.347C-.732 16.474-.873 11.11 1.52 7.42c1.697-2.62 4.381-4.153 6.902-4.153 1.653 0 3.03 1.14 4.574 1.14 1.497 0 2.408-1.142 4.557-1.142.9 0 3.71.247 5.468 2.815-4.807 2.635-4.024 9.497-2.416 11.585Z" />
               </svg>
             </a>
-            <a [href]="googlePlayUrl" target="_blank" rel="noopener noreferrer"
+            <a *ngIf="showGooglePlayButton()" [href]="googlePlayUrl" target="_blank" rel="noopener noreferrer"
               title="Get it on Google Play"
               aria-label="Get ReceiptNest AI on Google Play"
               class="group inline-flex items-center justify-center h-9 w-9 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
@@ -232,7 +232,7 @@
 
           <!-- CTA Buttons -->
           <div class="mt-10 flex flex-col sm:flex-row flex-wrap gap-4">
-            <a [href]="appStoreUrl"
+            <a *ngIf="showAppStoreButton()" [href]="appStoreUrl"
               target="_blank" rel="noopener noreferrer"
               aria-label="Download ReceiptNest AI on the App Store"
               class="group inline-flex w-full items-center gap-4 rounded-2xl border border-white/15 bg-black px-6 py-4 text-white shadow-2xl shadow-black/35 ring-1 ring-slate-700/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/30 hover:bg-slate-950 hover:shadow-black/45 sm:w-auto sm:min-w-52">
@@ -246,7 +246,7 @@
               </span>
             </a>
 
-            <a [href]="googlePlayUrl"
+            <a *ngIf="showGooglePlayButton()" [href]="googlePlayUrl"
               target="_blank" rel="noopener noreferrer"
               aria-label="Get ReceiptNest AI on Google Play"
               class="group inline-flex w-full items-center gap-4 rounded-2xl border border-white/15 bg-black px-6 py-4 text-white shadow-2xl shadow-black/35 ring-1 ring-slate-700/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/30 hover:bg-slate-950 hover:shadow-black/45 sm:w-auto sm:min-w-52">
@@ -2336,7 +2336,7 @@
             It takes 60 seconds to sign up. Upload your first receipt, and watch ReceiptNest AI do the rest.
           </p>
           <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a [href]="appStoreUrl"
+            <a *ngIf="showAppStoreButton()" [href]="appStoreUrl"
               target="_blank" rel="noopener noreferrer"
               aria-label="Download ReceiptNest AI on the App Store"
               class="group inline-flex items-center gap-3 rounded-xl border border-slate-700 bg-black px-5 py-3 text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-900">
@@ -2350,7 +2350,7 @@
               </span>
             </a>
 
-            <a [href]="googlePlayUrl"
+            <a *ngIf="showGooglePlayButton()" [href]="googlePlayUrl"
               target="_blank" rel="noopener noreferrer"
               aria-label="Get ReceiptNest AI on Google Play"
               class="group inline-flex items-center gap-3 rounded-xl border border-slate-700 bg-black px-5 py-3 text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-900">
@@ -2449,7 +2449,7 @@
           <span class="mx-1 hidden h-6 w-px bg-slate-200 dark:bg-slate-700 sm:block"></span>
 
           <!-- App Store badge -->
-          <a [href]="appStoreUrl"
+          <a *ngIf="showAppStoreButton()" [href]="appStoreUrl"
             target="_blank" rel="noopener noreferrer"
             aria-label="Download ReceiptNest AI on the App Store"
             class="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-black px-3 py-1.5 text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-900 hover:shadow-md">
@@ -2464,7 +2464,7 @@
           </a>
 
           <!-- Google Play badge -->
-          <a [href]="googlePlayUrl"
+          <a *ngIf="showGooglePlayButton()" [href]="googlePlayUrl"
             target="_blank" rel="noopener noreferrer"
             aria-label="Get ReceiptNest AI on Google Play"
             class="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-black px-3 py-1.5 text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-900 hover:shadow-md">
