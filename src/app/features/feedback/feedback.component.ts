@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { Meta, Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { addDoc, collection, Firestore, getFirestore, serverTimestamp } from 'firebase/firestore';
@@ -12,7 +11,7 @@ import { ThemeService } from '../../services/theme.service';
 @Component({
   selector: 'app-feedback',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, RouterLink],
   templateUrl: './feedback.component.html',
   styleUrl: './feedback.component.css'
 })
@@ -70,7 +69,9 @@ export class FeedbackComponent {
     this.clearFeedbackStatus();
   }
 
-  async sendFeedback() {
+  async sendFeedback(event?: SubmitEvent) {
+    event?.preventDefault();
+
     if (this.feedbackSending()) {
       return;
     }
