@@ -205,6 +205,13 @@ export class AppShellComponent {
     this.router.navigate(['/app/pricing']);
   }
 
+  navigateToFeedback(): void {
+    this.settingsDropUpOpen.set(false);
+    this.closeSettingsModal();
+    this.closeSidebar();
+    void this.router.navigate(['/feedback']);
+  }
+
   toggleTheme(): void {
     this.theme.toggleTheme();
   }
