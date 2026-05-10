@@ -144,6 +144,33 @@ service cloud.firestore {
         && request.resource.data.userId == userId;
     }
 
+    function canCreateFeedback() {
+      return (
+          (isAuthenticated() && request.resource.data.userId == request.auth.uid)
+          || (!isAuthenticated() && request.resource.data.userId == null)
+        )
+        && request.resource.data.keys().hasOnly([
+          'userId',
+          'email',
+          'displayName',
+          'message',
+          'status',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.email is string
+        && request.resource.data.displayName is string
+        && request.resource.data.message is string
+        && request.resource.data.email.size() <= 160
+        && request.resource.data.displayName.size() <= 80
+        && request.resource.data.message.size() >= 3
+        && request.resource.data.message.size() <= 1200
+        && request.resource.data.status == 'open'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+    }
+
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
@@ -181,6 +208,11 @@ service cloud.firestore {
       allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
       allow read: if isAuthenticated() && request.auth.uid == resource.data.userId;
       allow update, delete: if false;
+    }
+
+    match /feedback/{feedbackId} {
+      allow create: if canCreateFeedback();
+      allow read, update, delete: if isAdmin();
     }
 
     match /categories/{categoryId} {

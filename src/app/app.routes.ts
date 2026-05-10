@@ -123,6 +123,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/support/support.component').then((m) => m.SupportComponent)
   },
   {
+    path: 'feedback',
+    title: 'Feedback',
+    loadComponent: () => import('./features/feedback/feedback.component').then((m) => m.FeedbackComponent)
+  },
+  {
     path: 'terms',
     title: 'Terms and Conditions',
     loadComponent: () => import('./features/terms/terms.component').then((m) => m.TermsComponent)

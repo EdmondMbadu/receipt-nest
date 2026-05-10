@@ -2,7 +2,6 @@ import {
   Component,
   afterNextRender,
   computed,
-  effect,
   ElementRef,
   inject,
   OnDestroy,
@@ -11,7 +10,7 @@ import {
   viewChild
 } from '@angular/core';
 import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
 
 import { AppConfigService } from '../../services/app-config.service';
@@ -49,7 +48,6 @@ interface DemoReceipt {
 export class LandingComponent implements OnDestroy {
   readonly auth = inject(AuthService);
   private readonly theme = inject(ThemeService);
-  private readonly router = inject(Router);
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
   private readonly document = inject(DOCUMENT);
@@ -172,13 +170,6 @@ export class LandingComponent implements OnDestroy {
 
     afterNextRender(() => {
       this.mobileStorePlatform.set(this.detectMobileStorePlatform());
-    });
-
-    // Redirect to home if user is already authenticated
-    effect(() => {
-      if (this.auth.isAuthenticated()) {
-        this.router.navigate(['/app']);
-      }
     });
 
     // Kick off the cinematic auto-loop after the page settles

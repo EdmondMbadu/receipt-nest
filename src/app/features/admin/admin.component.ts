@@ -7,11 +7,15 @@ import {
   Firestore,
   Timestamp,
   collection,
+  deleteDoc,
   doc,
   getFirestore,
   onSnapshot,
+  orderBy,
+  query,
   serverTimestamp,
   setDoc,
+  updateDoc,
   Unsubscribe
 } from 'firebase/firestore';
 
@@ -24,6 +28,7 @@ import {
   normalizeBillingMode,
   normalizeFreePlanReceiptLimit
 } from '../../config/subscription.constants';
+import { FeedbackMessage } from '../../models/feedback.model';
 import { UserProfile } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
 import {
@@ -34,6 +39,7 @@ import {
 } from '../../utils/subscription.utils';
 
 type AdminUser = UserProfile;
+type AdminFeedback = FeedbackMessage;
 type SummaryEmailPeriod = 'week' | 'month';
 type SummaryNotificationPeriod = 'week' | 'month';
 type WeeklyScheduleDay = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
@@ -112,12 +118,18 @@ export class AdminComponent implements OnInit, OnDestroy {
   private readonly db: Firestore = getFirestore(app);
   private readonly functions = getFunctions(app);
   private usersUnsubscribe: Unsubscribe | null = null;
+  private feedbackUnsubscribe: Unsubscribe | null = null;
   private billingConfigUnsubscribe: Unsubscribe | null = null;
   private readonly backfilledReceiptCountUserIds = new Set<string>();
 
   readonly users = signal<AdminUser[]>([]);
+  readonly feedback = signal<AdminFeedback[]>([]);
   readonly isLoading = signal(true);
+  readonly feedbackLoading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly feedbackError = signal<string | null>(null);
+  readonly feedbackSuccess = signal<string | null>(null);
+  readonly feedbackActionPendingId = signal<string | null>(null);
   readonly receiptCountSyncing = signal(false);
   readonly receiptCountSyncError = signal<string | null>(null);
   readonly testEmailTo = signal('');
@@ -183,6 +195,8 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly totalUsers = computed(() => this.users().length);
   readonly adminCount = computed(() => this.users().filter((user) => user.role === 'admin').length);
   readonly proCount = computed(() => this.users().filter((user) => this.effectivePlan(user) === 'pro').length);
+  readonly openFeedbackCount = computed(() => this.feedback().filter((item) => item.status !== 'archived').length);
+  readonly archivedFeedbackCount = computed(() => this.feedback().filter((item) => item.status === 'archived').length);
   readonly sortedUsers = computed(() => {
     const column = this.userSortColumn();
     const direction = this.userSortDirection();
@@ -245,6 +259,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     void this.loadBillingModeStatus();
 
     const usersRef = collection(this.db, 'users');
+    const feedbackQuery = query(collection(this.db, 'feedback'), orderBy('createdAt', 'desc'));
     const billingConfigRef = doc(this.db, PUBLIC_BILLING_CONFIG_COLLECTION, PUBLIC_BILLING_CONFIG_DOC_ID);
 
     this.billingConfigUnsubscribe = onSnapshot(
@@ -278,10 +293,28 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.isLoading.set(false);
       }
     );
+
+    this.feedbackUnsubscribe = onSnapshot(
+      feedbackQuery,
+      (snapshot) => {
+        const feedback = snapshot.docs.map((doc) => {
+          const data = doc.data() as Omit<FeedbackMessage, 'id'>;
+          return { id: doc.id, ...data };
+        });
+        this.feedback.set(feedback);
+        this.feedbackLoading.set(false);
+      },
+      (error) => {
+        console.error('Failed to load feedback', error);
+        this.feedbackError.set('Unable to load feedback right now.');
+        this.feedbackLoading.set(false);
+      }
+    );
   }
 
   ngOnDestroy(): void {
     this.usersUnsubscribe?.();
+    this.feedbackUnsubscribe?.();
     this.billingConfigUnsubscribe?.();
   }
 
@@ -315,6 +348,63 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   isUserPlanActionPending(userId: string): boolean {
     return this.userPlanActionPendingUserId() === userId;
+  }
+
+  isFeedbackActionPending(feedbackId: string): boolean {
+    return this.feedbackActionPendingId() === feedbackId;
+  }
+
+  async archiveFeedback(item: AdminFeedback): Promise<void> {
+    if (this.feedbackActionPendingId() || item.status === 'archived') {
+      return;
+    }
+
+    this.feedbackError.set(null);
+    this.feedbackSuccess.set(null);
+    this.feedbackActionPendingId.set(item.id);
+
+    try {
+      await updateDoc(doc(this.db, 'feedback', item.id), {
+        status: 'archived',
+        archivedAt: serverTimestamp(),
+        archivedBy: this.auth.user()?.id ?? null,
+        updatedAt: serverTimestamp()
+      });
+      this.feedbackSuccess.set('Feedback archived.');
+    } catch (error) {
+      console.error('Failed to archive feedback', error);
+      this.feedbackError.set('Unable to archive feedback right now.');
+    } finally {
+      this.feedbackActionPendingId.set(null);
+    }
+  }
+
+  async deleteFeedback(item: AdminFeedback): Promise<void> {
+    if (this.feedbackActionPendingId()) {
+      return;
+    }
+
+    const targetLabel = item.email || item.displayName || 'this user';
+    if (
+      typeof window !== 'undefined' &&
+      !window.confirm(`Delete this feedback from ${targetLabel}? This cannot be undone.`)
+    ) {
+      return;
+    }
+
+    this.feedbackError.set(null);
+    this.feedbackSuccess.set(null);
+    this.feedbackActionPendingId.set(item.id);
+
+    try {
+      await deleteDoc(doc(this.db, 'feedback', item.id));
+      this.feedbackSuccess.set('Feedback deleted.');
+    } catch (error) {
+      console.error('Failed to delete feedback', error);
+      this.feedbackError.set('Unable to delete feedback right now.');
+    } finally {
+      this.feedbackActionPendingId.set(null);
+    }
   }
 
   async updateUserProAccess(user: AdminUser, mode: UserProAccessMode): Promise<void> {
@@ -630,6 +720,24 @@ export class AdminComponent implements OnInit, OnDestroy {
       });
     } catch {
       return 'Never';
+    }
+  }
+
+  formatFeedbackDate(value?: FeedbackMessage['createdAt'] | null): string {
+    if (!value || !(value instanceof Timestamp)) {
+      return 'Pending timestamp';
+    }
+
+    try {
+      return value.toDate().toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+    } catch {
+      return 'Pending timestamp';
     }
   }
 

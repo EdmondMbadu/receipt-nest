@@ -1,0 +1,119 @@
+<div class="min-h-screen bg-slate-50 dark:bg-slate-950">
+  <header class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+      <a routerLink="/" class="flex w-fit items-center gap-2">
+        <img src="assets/receipt-nest.png" alt="ReceiptNest AI" class="h-8 w-8 object-contain" />
+        <span class="font-semibold">
+          <span class="text-slate-900 dark:text-white">Receipt</span><span
+            class="text-emerald-600 dark:text-emerald-400">Nest</span><span
+            class="ml-1 rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 dark:border-emerald-700/60 dark:bg-emerald-900/40 dark:text-emerald-300">AI</span>
+        </span>
+      </a>
+      <button type="button" (click)="toggleTheme()"
+        class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+        aria-label="Toggle theme">
+        <svg *ngIf="isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+        </svg>
+        <svg *ngIf="!isDarkMode()" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1fr)] lg:px-8 lg:py-16">
+    <section>
+      <p class="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Feedback</p>
+      <h1 class="mt-4 text-4xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+        Tell us what you think
+      </h1>
+      <p class="mt-5 text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+        Send product ideas, bugs, rough edges, or anything you want ReceiptNest AI to handle better.
+      </p>
+
+      <div class="mt-8 rounded-2xl border border-slate-200 bg-white p-5 text-sm leading-relaxed text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+        <p class="font-semibold text-slate-900 dark:text-white">Contact details are optional.</p>
+        <p class="mt-2">
+          If you are signed in, we will attach your account details automatically. If you are not signed in, only add
+          your name or email if you want us to follow up.
+        </p>
+      </div>
+    </section>
+
+    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+      <form class="space-y-5" (ngSubmit)="sendFeedback()">
+        <div *ngIf="!user()" class="grid gap-4 sm:grid-cols-2">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+            Name
+            <input type="text" maxlength="80" autocomplete="name" [ngModel]="feedbackName()"
+              (ngModelChange)="setFeedbackName($event)" name="feedbackName" placeholder="Optional"
+              class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-800 dark:bg-slate-950 dark:text-white" />
+          </label>
+
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+            Email
+            <input type="email" maxlength="160" autocomplete="email" [ngModel]="feedbackEmail()"
+              (ngModelChange)="setFeedbackEmail($event)" name="feedbackEmail" placeholder="Optional"
+              class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-800 dark:bg-slate-950 dark:text-white" />
+          </label>
+        </div>
+
+        <div *ngIf="user()"
+          class="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">
+          Sending as <span class="font-semibold">{{ displayName() || user()?.email }}</span>.
+        </div>
+
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+          Feedback
+          <textarea rows="9" maxlength="1200" [ngModel]="feedbackMessage()"
+            (ngModelChange)="setFeedbackMessage($event)" name="feedbackMessage"
+            placeholder="What should we improve, add, fix, or rethink?"
+            class="mt-2 w-full resize-y rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-relaxed text-slate-900 shadow-sm placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-800 dark:bg-slate-950 dark:text-white"></textarea>
+        </label>
+
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <span class="text-xs text-slate-400 dark:text-slate-500">{{ feedbackMessage().trim().length }}/1200</span>
+          <button type="submit" [disabled]="feedbackSending()"
+            class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60">
+            <svg *ngIf="!feedbackSending()" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M6 12 3.269 3.125A59.77 59.77 0 0 1 21.485 12 59.77 59.77 0 0 1 3.27 20.875L6 12Zm0 0h7.5" />
+            </svg>
+            <svg *ngIf="feedbackSending()" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-6.219-8.56" />
+            </svg>
+            <span>{{ feedbackSending() ? 'Sending...' : 'Send feedback' }}</span>
+          </button>
+        </div>
+
+        <p *ngIf="feedbackSuccess()" class="text-sm text-emerald-600 dark:text-emerald-400">
+          {{ feedbackSuccess() }}
+        </p>
+        <p *ngIf="feedbackError()" class="text-sm text-rose-600 dark:text-rose-400">
+          {{ feedbackError() }}
+        </p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="border-t border-slate-200 dark:border-slate-800">
+    <div class="mx-auto flex max-w-7xl flex-col items-center gap-4 px-4 py-8 sm:flex-row sm:justify-between sm:px-6 lg:px-8">
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        © {{ currentYear }} ReceiptNest AI. All rights reserved.
+      </p>
+      <div class="flex items-center gap-6">
+        <a routerLink="/terms"
+          class="text-sm text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">Terms</a>
+        <a routerLink="/support"
+          class="text-sm text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">Support</a>
+      </div>
+    </div>
+  </footer>
+</div>
