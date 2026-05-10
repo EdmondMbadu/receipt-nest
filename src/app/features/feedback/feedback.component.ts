@@ -31,6 +31,8 @@ export class FeedbackComponent {
   readonly feedbackSending = signal(false);
   readonly feedbackError = signal<string | null>(null);
   readonly feedbackSuccess = signal<string | null>(null);
+  readonly backLink = computed(() => (this.user() ? '/app' : '/'));
+  readonly backLabel = computed(() => (this.user() ? 'Back to app' : 'Back to home'));
 
   readonly displayName = computed(() => {
     const profile = this.user();
