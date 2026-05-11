@@ -49,6 +49,7 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
   readonly isScannedFile = signal(false);
   readonly autoCaptureStatus = signal<'searching' | 'detected' | 'capturing' | 'unavailable'>('searching');
   readonly autoCaptureProgress = signal(0);
+  readonly detectedDocumentOutline = signal<string | null>(null);
   private videoStream: MediaStream | null = null;
   private autoScannerTriggered = false;
   private autoCaptureTimer: ReturnType<typeof setInterval> | null = null;
@@ -91,7 +92,11 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     if (status === 'capturing') return 'Document locked. Capturing...';
     if (status === 'detected') return 'Document detected. Hold steady for auto-capture.';
     if (status === 'unavailable') return 'Could not auto-detect. Use manual capture below.';
-    return 'Point camera at receipt/check. Auto-capture will trigger when stable.';
+    return 'Point camera at the receipt. Auto-capture will trigger when the border is stable.';
+  });
+  readonly detectedDocumentOutlineClosed = computed(() => {
+    const outline = this.detectedDocumentOutline();
+    return outline ? `${outline} ${outline.split(' ')[0]}` : null;
   });
 
   readonly maxSizeDisplay = `${MAX_FILE_SIZE / 1024 / 1024}MB`;
@@ -296,12 +301,14 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: 'environment', // Use back camera on mobile devices
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
+          width: { ideal: 2560 },
+          height: { ideal: 1440 },
+          frameRate: { ideal: 30, max: 30 }
         }
       });
 
       this.videoStream = stream;
+      await this.optimizeCameraTrack(stream.getVideoTracks()[0]);
       const video = this.videoElement.nativeElement;
       video.srcObject = stream;
       await video.play().catch(() => undefined);
@@ -311,6 +318,39 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
       this.errorMessage.set('Failed to access camera. Please check permissions.');
       this.showCamera.set(false);
     }
+  }
+
+  private async optimizeCameraTrack(track: MediaStreamTrack | undefined): Promise<void> {
+    if (!track?.applyConstraints || !track.getCapabilities) {
+      return;
+    }
+
+    const capabilities = track.getCapabilities() as MediaTrackCapabilities & {
+      focusMode?: string[];
+      exposureMode?: string[];
+      whiteBalanceMode?: string[];
+    };
+    const advanced: Array<MediaTrackConstraintSet & {
+      focusMode?: string;
+      exposureMode?: string;
+      whiteBalanceMode?: string;
+    }> = [];
+
+    if (capabilities.focusMode?.includes('continuous')) {
+      advanced.push({ focusMode: 'continuous' });
+    }
+    if (capabilities.exposureMode?.includes('continuous')) {
+      advanced.push({ exposureMode: 'continuous' });
+    }
+    if (capabilities.whiteBalanceMode?.includes('continuous')) {
+      advanced.push({ whiteBalanceMode: 'continuous' });
+    }
+
+    if (!advanced.length) {
+      return;
+    }
+
+    await track.applyConstraints({ advanced }).catch(() => undefined);
   }
 
   // Stop camera stream
@@ -394,6 +434,7 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     }
     this.frameProbeCanvas = null;
     this.frameProbeCtx = null;
+    this.detectedDocumentOutline.set(null);
   }
 
   private processAutoCaptureFrame(): void {
@@ -423,7 +464,8 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     }
 
     this.frameProbeCtx.drawImage(video, 0, 0, frameW, frameH);
-    const corners = this.detectDocumentCorners(this.frameProbeCtx, frameW, frameH, 420);
+    const detection = this.detectDocument(this.frameProbeCtx, frameW, frameH, 420);
+    const corners = detection?.corners ?? null;
 
     if (!corners) {
       this.noDetectionTicks += 1;
@@ -431,9 +473,11 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
       this.autoCaptureProgress.set(Math.max(0, this.stableDetections * 25));
       this.autoCaptureStatus.set(this.noDetectionTicks > 25 ? 'unavailable' : 'searching');
       this.lastDetection = null;
+      this.detectedDocumentOutline.set(null);
       return;
     }
 
+    this.detectedDocumentOutline.set(this.toOverlayPoints(corners, frameW, frameH));
     this.noDetectionTicks = 0;
     const centerX = (corners.tl.x + corners.tr.x + corners.br.x + corners.bl.x) / 4;
     const centerY = (corners.tl.y + corners.tr.y + corners.br.y + corners.bl.y) / 4;
@@ -488,7 +532,7 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     originalCtx.drawImage(image, 0, 0);
 
     let outputCanvas = originalCanvas;
-    const corners = this.detectDocumentCorners(originalCtx, image.width, image.height);
+    const corners = this.detectDocument(originalCtx, image.width, image.height)?.corners ?? null;
 
     if (corners) {
       const warped = this.perspectiveWarpFromCorners(originalCtx, corners);
@@ -542,12 +586,12 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private detectDocumentCorners(
+  private detectDocument(
     sourceCtx: CanvasRenderingContext2D,
     sourceWidth: number,
     sourceHeight: number,
     maxDetectSize = 1000
-  ): { tl: Point; tr: Point; br: Point; bl: Point } | null {
+  ): ScanDetection | null {
     const scale = Math.min(1, maxDetectSize / Math.max(sourceWidth, sourceHeight));
     const detectW = Math.max(1, Math.round(sourceWidth * scale));
     const detectH = Math.max(1, Math.round(sourceHeight * scale));
@@ -578,40 +622,185 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
       variance += d * d;
     }
     const std = Math.sqrt(variance / gray.length);
-    const threshold = Math.max(130, Math.min(245, Math.round(mean + std * 0.25 + 12)));
 
-    const mask = new Uint8Array(detectW * detectH);
-    for (let i = 0; i < gray.length; i++) {
-      mask[i] = gray[i] >= threshold ? 1 : 0;
+    const smoothed = this.boxBlurGray(gray, detectW, detectH, 2);
+    const thresholds = Array.from(new Set([
+      Math.round(mean + std * 0.08 + 6),
+      Math.round(mean + std * 0.22 + 10),
+      Math.round(mean + std * 0.38 + 14),
+      160,
+      180,
+      205
+    ].map((value) => this.clamp(Math.round(value), 85, 245))));
+
+    let best: ScanDetection | null = null;
+
+    for (const threshold of thresholds) {
+      const mask = new Uint8Array(detectW * detectH);
+      for (let i = 0; i < smoothed.length; i++) {
+        mask[i] = smoothed[i] >= threshold ? 1 : 0;
+      }
+
+      this.closeMask(mask, detectW, detectH);
+      const candidates = this.findComponentCandidates(mask, detectW, detectH, 5);
+      for (const candidate of candidates) {
+        const detection = this.detectionFromComponent(candidate, detectW, detectH, sourceWidth, sourceHeight, scale);
+        if (detection && (!best || detection.score > best.score)) {
+          best = detection;
+        }
+      }
     }
 
-    const largest = this.findLargestComponent(mask, detectW, detectH);
-    if (!largest) return null;
+    return best;
+  }
 
-    const areaRatio = largest.area / (detectW * detectH);
-    if (areaRatio < 0.12) {
+  private detectionFromComponent(
+    candidate: ComponentCandidate,
+    detectW: number,
+    detectH: number,
+    sourceWidth: number,
+    sourceHeight: number,
+    scale: number
+  ): ScanDetection | null {
+    const areaRatio = candidate.area / (detectW * detectH);
+    if (areaRatio < 0.06 || areaRatio > 0.96 || candidate.boundary.length < 16) {
       return null;
     }
 
-    const hull = this.convexHull(largest.boundary);
+    const hull = this.convexHull(candidate.boundary);
     if (hull.length < 4) return null;
 
     const quad = this.extractQuadFromHull(hull);
     if (!quad) return null;
 
-    const scaled = {
+    const scaled = this.orderCorners({
       tl: { x: quad.tl.x / scale, y: quad.tl.y / scale },
       tr: { x: quad.tr.x / scale, y: quad.tr.y / scale },
       br: { x: quad.br.x / scale, y: quad.br.y / scale },
       bl: { x: quad.bl.x / scale, y: quad.bl.y / scale }
-    };
+    });
 
-    const polygonArea = this.quadArea(scaled);
-    if (polygonArea < sourceWidth * sourceHeight * 0.08) {
+    const score = this.scoreDocumentQuad(scaled, sourceWidth, sourceHeight, areaRatio);
+    if (score === null) {
       return null;
     }
 
-    return scaled;
+    return { corners: scaled, score };
+  }
+
+  private scoreDocumentQuad(
+    corners: DocumentCorners,
+    sourceWidth: number,
+    sourceHeight: number,
+    componentAreaRatio: number
+  ): number | null {
+    const polygonArea = this.quadArea(corners);
+    const frameArea = sourceWidth * sourceHeight;
+    const areaRatio = polygonArea / Math.max(1, frameArea);
+    if (areaRatio < 0.08 || areaRatio > 0.98) {
+      return null;
+    }
+
+    const topWidth = this.distance(corners.tl, corners.tr);
+    const bottomWidth = this.distance(corners.bl, corners.br);
+    const leftHeight = this.distance(corners.tl, corners.bl);
+    const rightHeight = this.distance(corners.tr, corners.br);
+    const avgWidth = (topWidth + bottomWidth) / 2;
+    const avgHeight = (leftHeight + rightHeight) / 2;
+    if (avgWidth < sourceWidth * 0.12 || avgHeight < sourceHeight * 0.12) {
+      return null;
+    }
+
+    const aspect = avgWidth / Math.max(1, avgHeight);
+    if (aspect < 0.16 || aspect > 4.4) {
+      return null;
+    }
+
+    const widthBalance = Math.min(topWidth, bottomWidth) / Math.max(topWidth, bottomWidth);
+    const heightBalance = Math.min(leftHeight, rightHeight) / Math.max(leftHeight, rightHeight);
+    const boundingBoxArea = this.boundingBoxArea(corners);
+    const rectangularity = polygonArea / Math.max(1, boundingBoxArea);
+    const edgeBalance = Math.min(widthBalance, heightBalance);
+    if (rectangularity < 0.38 || edgeBalance < 0.3) {
+      return null;
+    }
+
+    const centerX = (corners.tl.x + corners.tr.x + corners.br.x + corners.bl.x) / 4;
+    const centerY = (corners.tl.y + corners.tr.y + corners.br.y + corners.bl.y) / 4;
+    const frameCenterX = sourceWidth / 2;
+    const frameCenterY = sourceHeight / 2;
+    const centerDrift =
+      Math.hypot(centerX - frameCenterX, centerY - frameCenterY) /
+      Math.max(1, Math.hypot(frameCenterX, frameCenterY));
+    const centerScore = 1 - Math.min(1, centerDrift);
+
+    return areaRatio * 5 + componentAreaRatio * 2 + rectangularity + edgeBalance + centerScore;
+  }
+
+  private boundingBoxArea(corners: DocumentCorners): number {
+    const xs = [corners.tl.x, corners.tr.x, corners.br.x, corners.bl.x];
+    const ys = [corners.tl.y, corners.tr.y, corners.br.y, corners.bl.y];
+    return (Math.max(...xs) - Math.min(...xs)) * (Math.max(...ys) - Math.min(...ys));
+  }
+
+  private toOverlayPoints(corners: DocumentCorners, width: number, height: number): string {
+    const points = [corners.tl, corners.tr, corners.br, corners.bl];
+    return points
+      .map((point) => {
+        const x = this.clamp((point.x / width) * 100, 0, 100).toFixed(2);
+        const y = this.clamp((point.y / height) * 100, 0, 100).toFixed(2);
+        return `${x},${y}`;
+      })
+      .join(' ');
+  }
+
+  private closeMask(mask: Uint8Array, width: number, height: number): void {
+    const dilated = this.dilateMask(mask, width, height);
+    const closed = this.erodeMask(dilated, width, height);
+    mask.set(closed);
+  }
+
+  private dilateMask(mask: Uint8Array, width: number, height: number): Uint8Array {
+    const out = new Uint8Array(mask.length);
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        let value = 0;
+        for (let oy = -1; oy <= 1 && !value; oy++) {
+          for (let ox = -1; ox <= 1; ox++) {
+            const nx = x + ox;
+            const ny = y + oy;
+            if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+            if (mask[ny * width + nx]) {
+              value = 1;
+              break;
+            }
+          }
+        }
+        out[y * width + x] = value;
+      }
+    }
+    return out;
+  }
+
+  private erodeMask(mask: Uint8Array, width: number, height: number): Uint8Array {
+    const out = new Uint8Array(mask.length);
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        let value = 1;
+        for (let oy = -1; oy <= 1 && value; oy++) {
+          for (let ox = -1; ox <= 1; ox++) {
+            const nx = x + ox;
+            const ny = y + oy;
+            if (nx < 0 || ny < 0 || nx >= width || ny >= height || !mask[ny * width + nx]) {
+              value = 0;
+              break;
+            }
+          }
+        }
+        out[y * width + x] = value;
+      }
+    }
+    return out;
   }
 
   private perspectiveWarpFromCorners(
@@ -632,11 +821,12 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
       return null;
     }
 
-    const maxOut = 2200;
+    const maxOut = 2800;
     const outScale = Math.min(1, maxOut / Math.max(targetW, targetH));
     const outW = Math.max(1, Math.round(targetW * outScale));
     const outH = Math.max(1, Math.round(targetH * outScale));
 
+    const transform = this.projectUnitSquareToQuad(padded);
     const sourceData = sourceCtx.getImageData(0, 0, sourceCtx.canvas.width, sourceCtx.canvas.height);
     const outCanvas = document.createElement('canvas');
     outCanvas.width = outW;
@@ -652,12 +842,10 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
 
     for (let y = 0; y < outH; y++) {
       const v = outH <= 1 ? 0 : y / (outH - 1);
-      const left = this.lerpPoint(padded.tl, padded.bl, v);
-      const right = this.lerpPoint(padded.tr, padded.br, v);
 
       for (let x = 0; x < outW; x++) {
         const u = outW <= 1 ? 0 : x / (outW - 1);
-        const src = this.lerpPoint(left, right, u);
+        const src = this.applyProjectiveTransform(transform, u, v);
         const sample = this.sampleBilinear(srcPixels, srcW, srcH, src.x, src.y);
         const i = (y * outW + x) * 4;
         outPixels[i] = sample.r;
@@ -721,46 +909,126 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     return out;
   }
 
+  private boxBlurGray(gray: Uint8ClampedArray, width: number, height: number, radius: number): Uint8ClampedArray {
+    if (radius <= 0) {
+      return new Uint8ClampedArray(gray);
+    }
+
+    const integral = new Uint32Array((width + 1) * (height + 1));
+    for (let y = 1; y <= height; y++) {
+      let rowSum = 0;
+      for (let x = 1; x <= width; x++) {
+        rowSum += gray[(y - 1) * width + (x - 1)];
+        integral[y * (width + 1) + x] = integral[(y - 1) * (width + 1) + x] + rowSum;
+      }
+    }
+
+    const out = new Uint8ClampedArray(gray.length);
+    for (let y = 0; y < height; y++) {
+      const y0 = Math.max(0, y - radius);
+      const y1 = Math.min(height - 1, y + radius);
+      for (let x = 0; x < width; x++) {
+        const x0 = Math.max(0, x - radius);
+        const x1 = Math.min(width - 1, x + radius);
+        const integralX0 = x0;
+        const integralY0 = y0;
+        const integralX1 = x1 + 1;
+        const integralY1 = y1 + 1;
+        const sum =
+          integral[integralY1 * (width + 1) + integralX1] -
+          integral[integralY0 * (width + 1) + integralX1] -
+          integral[integralY1 * (width + 1) + integralX0] +
+          integral[integralY0 * (width + 1) + integralX0];
+        out[y * width + x] = Math.round(sum / ((x1 - x0 + 1) * (y1 - y0 + 1)));
+      }
+    }
+
+    return out;
+  }
+
   private enhanceDocumentCanvas(canvas: HTMLCanvasElement): void {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
+    const pixelCount = canvas.width * canvas.height;
+    const gray = new Uint8ClampedArray(pixelCount);
 
-    let minLum = 255;
-    let maxLum = 0;
-    for (let i = 0; i < data.length; i += 4) {
+    for (let i = 0, p = 0; i < data.length; i += 4, p++) {
       const lum = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
-      if (lum < minLum) minLum = lum;
-      if (lum > maxLum) maxLum = lum;
+      gray[p] = lum;
     }
 
-    const range = Math.max(1, maxLum - minLum);
-    for (let i = 0; i < data.length; i += 4) {
-      const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-      const normalized = (lum - minLum) / range;
-      const boosted = Math.pow(Math.max(0, Math.min(1, normalized)), 0.74);
+    const backgroundRadius = Math.max(16, Math.round(Math.min(canvas.width, canvas.height) / 22));
+    const background = this.boxBlurGray(gray, canvas.width, canvas.height, backgroundRadius);
+    const adjusted = new Uint8ClampedArray(pixelCount);
+    const histogram = new Uint32Array(256);
 
-      let tone = Math.round(boosted * 255);
-      if (tone > 236) tone = 255;
-      if (tone < 18) tone = 0;
+    for (let p = 0; p < pixelCount; p++) {
+      const flattened = this.clamp(gray[p] + 238 - background[p], 0, 255);
+      adjusted[p] = flattened;
+      histogram[flattened]++;
+    }
 
+    const low = this.histogramPercentile(histogram, pixelCount, 0.015);
+    const high = Math.max(low + 24, this.histogramPercentile(histogram, pixelCount, 0.985));
+    const tones = new Uint8ClampedArray(pixelCount);
+
+    for (let p = 0; p < pixelCount; p++) {
+      const normalized = this.clamp((adjusted[p] - low) / (high - low), 0, 1);
+      let tone = Math.round(Math.pow(normalized, 0.72) * 255);
+      if (tone > 246) tone = 255;
+      if (tone < 10) tone = 0;
+      tones[p] = tone;
+    }
+
+    const sharpened = new Uint8ClampedArray(pixelCount);
+    for (let y = 0; y < canvas.height; y++) {
+      for (let x = 0; x < canvas.width; x++) {
+        const p = y * canvas.width + x;
+        if (x === 0 || y === 0 || x === canvas.width - 1 || y === canvas.height - 1) {
+          sharpened[p] = tones[p];
+          continue;
+        }
+
+        const neighborAverage =
+          (tones[p - 1] + tones[p + 1] + tones[p - canvas.width] + tones[p + canvas.width]) / 4;
+        sharpened[p] = this.clamp(Math.round(tones[p] * 1.48 - neighborAverage * 0.48), 0, 255);
+      }
+    }
+
+    for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+      const tone = sharpened[p];
       data[i] = tone;
       data[i + 1] = tone;
       data[i + 2] = tone;
+      data[i + 3] = 255;
     }
 
     ctx.putImageData(imageData, 0, 0);
   }
 
-  private findLargestComponent(
+  private histogramPercentile(histogram: Uint32Array, total: number, percentile: number): number {
+    const target = total * percentile;
+    let running = 0;
+    for (let i = 0; i < histogram.length; i++) {
+      running += histogram[i];
+      if (running >= target) {
+        return i;
+      }
+    }
+    return histogram.length - 1;
+  }
+
+  private findComponentCandidates(
     mask: Uint8Array,
     width: number,
-    height: number
-  ): { area: number; boundary: Point[] } | null {
+    height: number,
+    limit: number
+  ): ComponentCandidate[] {
     const visited = new Uint8Array(mask.length);
-    let bestArea = 0;
-    let bestPixels: number[] = [];
+    const candidates: ComponentCandidate[] = [];
+    const minArea = Math.max(80, Math.round(width * height * 0.015));
 
     for (let i = 0; i < mask.length; i++) {
       if (!mask[i] || visited[i]) continue;
@@ -769,6 +1037,10 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
       visited[i] = 1;
       const pixels: number[] = [];
       let head = 0;
+      let minX = width;
+      let minY = height;
+      let maxX = 0;
+      let maxY = 0;
 
       while (head < queue.length) {
         const idx = queue[head++];
@@ -776,6 +1048,10 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
 
         const x = idx % width;
         const y = (idx / width) | 0;
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
 
         for (let oy = -1; oy <= 1; oy++) {
           for (let ox = -1; ox <= 1; ox++) {
@@ -791,42 +1067,45 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
         }
       }
 
-      if (pixels.length > bestArea) {
-        bestArea = pixels.length;
-        bestPixels = pixels;
+      if (pixels.length < minArea) {
+        continue;
       }
-    }
 
-    if (!bestArea) return null;
+      const boxW = maxX - minX + 1;
+      const boxH = maxY - minY + 1;
+      if (boxW < width * 0.12 || boxH < height * 0.12) {
+        continue;
+      }
 
-    const pixelSet = new Uint8Array(mask.length);
-    for (const p of bestPixels) pixelSet[p] = 1;
+      const pixelSet = new Uint8Array(mask.length);
+      for (const p of pixels) pixelSet[p] = 1;
 
-    const boundary: Point[] = [];
-    for (const p of bestPixels) {
-      const x = p % width;
-      const y = (p / width) | 0;
-      let isBoundary = false;
-      for (let oy = -1; oy <= 1 && !isBoundary; oy++) {
-        for (let ox = -1; ox <= 1; ox++) {
-          const nx = x + ox;
-          const ny = y + oy;
-          if (nx < 0 || ny < 0 || nx >= width || ny >= height) {
-            isBoundary = true;
-            break;
-          }
-          if (!pixelSet[ny * width + nx]) {
-            isBoundary = true;
-            break;
+      const boundary: Point[] = [];
+      const stride = Math.max(1, Math.floor(pixels.length / 5000));
+      for (let pi = 0; pi < pixels.length; pi += stride) {
+        const p = pixels[pi];
+        const x = p % width;
+        const y = (p / width) | 0;
+        let isBoundary = false;
+        for (let oy = -1; oy <= 1 && !isBoundary; oy++) {
+          for (let ox = -1; ox <= 1; ox++) {
+            const nx = x + ox;
+            const ny = y + oy;
+            if (nx < 0 || ny < 0 || nx >= width || ny >= height || !pixelSet[ny * width + nx]) {
+              isBoundary = true;
+              break;
+            }
           }
         }
+        if (isBoundary) {
+          boundary.push({ x, y });
+        }
       }
-      if (isBoundary) {
-        boundary.push({ x, y });
-      }
+
+      candidates.push({ area: pixels.length, boundary });
     }
 
-    return { area: bestArea, boundary };
+    return candidates.sort((a, b) => b.area - a.area).slice(0, limit);
   }
 
   private convexHull(points: Point[]): Point[] {
@@ -912,10 +1191,61 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  private lerpPoint(a: Point, b: Point, t: number): Point {
+  private projectUnitSquareToQuad(quad: DocumentCorners): ProjectiveTransform {
+    const dx1 = quad.tr.x - quad.br.x;
+    const dy1 = quad.tr.y - quad.br.y;
+    const dx2 = quad.bl.x - quad.br.x;
+    const dy2 = quad.bl.y - quad.br.y;
+    const dx3 = quad.tl.x - quad.tr.x + quad.br.x - quad.bl.x;
+    const dy3 = quad.tl.y - quad.tr.y + quad.br.y - quad.bl.y;
+
+    if (Math.abs(dx3) < 0.0001 && Math.abs(dy3) < 0.0001) {
+      return {
+        a: quad.tr.x - quad.tl.x,
+        b: quad.bl.x - quad.tl.x,
+        c: quad.tl.x,
+        d: quad.tr.y - quad.tl.y,
+        e: quad.bl.y - quad.tl.y,
+        f: quad.tl.y,
+        g: 0,
+        h: 0
+      };
+    }
+
+    const det = dx1 * dy2 - dx2 * dy1;
+    if (Math.abs(det) < 0.0001) {
+      return {
+        a: quad.tr.x - quad.tl.x,
+        b: quad.bl.x - quad.tl.x,
+        c: quad.tl.x,
+        d: quad.tr.y - quad.tl.y,
+        e: quad.bl.y - quad.tl.y,
+        f: quad.tl.y,
+        g: 0,
+        h: 0
+      };
+    }
+
+    const g = (dx3 * dy2 - dx2 * dy3) / det;
+    const h = (dx1 * dy3 - dx3 * dy1) / det;
+
     return {
-      x: a.x + (b.x - a.x) * t,
-      y: a.y + (b.y - a.y) * t
+      a: quad.tr.x - quad.tl.x + g * quad.tr.x,
+      b: quad.bl.x - quad.tl.x + h * quad.bl.x,
+      c: quad.tl.x,
+      d: quad.tr.y - quad.tl.y + g * quad.tr.y,
+      e: quad.bl.y - quad.tl.y + h * quad.bl.y,
+      f: quad.tl.y,
+      g,
+      h
+    };
+  }
+
+  private applyProjectiveTransform(transform: ProjectiveTransform, u: number, v: number): Point {
+    const denominator = transform.g * u + transform.h * v + 1;
+    return {
+      x: (transform.a * u + transform.b * v + transform.c) / denominator,
+      y: (transform.d * u + transform.e * v + transform.f) / denominator
     };
   }
 
@@ -993,4 +1323,32 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
 type Point = {
   x: number;
   y: number;
+};
+
+type DocumentCorners = {
+  tl: Point;
+  tr: Point;
+  br: Point;
+  bl: Point;
+};
+
+type ScanDetection = {
+  corners: DocumentCorners;
+  score: number;
+};
+
+type ComponentCandidate = {
+  area: number;
+  boundary: Point[];
+};
+
+type ProjectiveTransform = {
+  a: number;
+  b: number;
+  c: number;
+  d: number;
+  e: number;
+  f: number;
+  g: number;
+  h: number;
 };

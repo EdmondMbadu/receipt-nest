@@ -79,9 +79,18 @@
     <!-- Camera View -->
     <div *ngIf="showCamera()" class="space-y-3">
       <!-- Video Preview -->
-      <div class="relative rounded-xl overflow-hidden bg-black" style="min-height: 400px;">
-        <video #videoElement autoplay playsinline class="w-full h-full object-cover">
+      <div class="relative min-h-[400px] rounded-xl overflow-hidden bg-black">
+        <video #videoElement autoplay playsinline class="absolute inset-0 h-full w-full object-contain">
         </video>
+
+        <svg *ngIf="detectedDocumentOutline()" class="pointer-events-none absolute inset-0 h-full w-full"
+          viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <polygon [attr.points]="detectedDocumentOutline()" fill="rgba(16, 185, 129, 0.14)"
+            stroke="rgba(52, 211, 153, 0.95)" stroke-width="0.9" vector-effect="non-scaling-stroke" />
+          <polyline [attr.points]="detectedDocumentOutlineClosed()" fill="none"
+            stroke="rgba(255, 255, 255, 0.75)" stroke-width="0.22"
+            vector-effect="non-scaling-stroke" />
+        </svg>
 
         <div class="absolute top-3 left-3 right-3">
           <div class="rounded-xl bg-black/55 backdrop-blur-sm border border-white/20 px-3 py-2.5 text-white">
