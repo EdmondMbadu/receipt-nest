@@ -18,6 +18,11 @@ import { AppConfigService } from '../../services/app-config.service';
 import { ReceiptService, UploadProgress, MAX_FILE_SIZE } from '../../services/receipt.service';
 import { Receipt } from '../../models/receipt.model';
 
+const AUTO_CAPTURE_INTERVAL_MS = 350;
+const AUTO_CAPTURE_STABLE_FRAMES = 9;
+const AUTO_CAPTURE_MIN_SHARPNESS = 18;
+const AUTO_CAPTURE_FOCUS_DELAY_MS = 1200;
+
 @Component({
   selector: 'app-upload',
   standalone: true,
@@ -47,7 +52,7 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
   readonly scanMode = signal(true);
   readonly isProcessingScan = signal(false);
   readonly isScannedFile = signal(false);
-  readonly autoCaptureStatus = signal<'searching' | 'detected' | 'capturing' | 'unavailable'>('searching');
+  readonly autoCaptureStatus = signal<'searching' | 'focusing' | 'detected' | 'capturing' | 'unavailable'>('searching');
   readonly autoCaptureProgress = signal(0);
   readonly detectedDocumentOutline = signal<string | null>(null);
   private videoStream: MediaStream | null = null;
@@ -59,6 +64,8 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
   private noDetectionTicks = 0;
   private frameProbeCanvas: HTMLCanvasElement | null = null;
   private frameProbeCtx: CanvasRenderingContext2D | null = null;
+  private autoCaptureStartedAt = 0;
+  private captureInFlight = false;
 
   constructor() {
     // Watch for camera state changes and initialize camera
@@ -90,9 +97,10 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
   readonly autoCaptureMessage = computed(() => {
     const status = this.autoCaptureStatus();
     if (status === 'capturing') return 'Document locked. Capturing...';
-    if (status === 'detected') return 'Document detected. Hold steady for auto-capture.';
+    if (status === 'detected') return 'Receipt border detected. Keep holding still.';
+    if (status === 'focusing') return 'Hold still. Waiting for the camera to focus.';
     if (status === 'unavailable') return 'Could not auto-detect. Use manual capture below.';
-    return 'Point camera at the receipt. Auto-capture will trigger when the border is stable.';
+    return 'Fit the receipt inside the frame with a small margin around each edge.';
   });
   readonly detectedDocumentOutlineClosed = computed(() => {
     const outline = this.detectedDocumentOutline();
@@ -356,6 +364,7 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
   // Stop camera stream
   stopCamera(): void {
     this.stopAutoCaptureDetection();
+    this.captureInFlight = false;
     if (this.videoStream) {
       this.videoStream.getTracks().forEach(track => track.stop());
       this.videoStream = null;
@@ -366,14 +375,21 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
   }
 
   // Capture photo from camera
-  capturePhoto(videoElement: HTMLVideoElement): void {
-    if (this.isUploading() || this.isProcessingScan()) {
+  async capturePhoto(videoElement: HTMLVideoElement): Promise<void> {
+    if (this.isUploading() || this.isProcessingScan() || this.captureInFlight) {
       return;
     }
 
     if (!videoElement.videoWidth || !videoElement.videoHeight) {
       this.errorMessage.set('Camera not ready. Please wait a moment.');
       return;
+    }
+
+    this.captureInFlight = true;
+    if (!this.autoCaptureTriggered) {
+      this.autoCaptureStatus.set('focusing');
+      this.autoCaptureProgress.set(Math.max(this.autoCaptureProgress(), 65));
+      await this.delay(700);
     }
 
     const canvas = document.createElement('canvas');
@@ -383,6 +399,7 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     const ctx = canvas.getContext('2d');
     if (!ctx) {
       this.errorMessage.set('Failed to capture photo');
+      this.captureInFlight = false;
       return;
     }
 
@@ -391,6 +408,7 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     canvas.toBlob((blob) => {
       if (!blob) {
         this.errorMessage.set('Failed to create image from capture');
+        this.captureInFlight = false;
         return;
       }
 
@@ -404,6 +422,7 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
       this.stopCamera();
       this.showCamera.set(false);
       this.handleFile(file, 'camera');
+      this.captureInFlight = false;
     }, 'image/jpeg', 0.95);
   }
 
@@ -419,12 +438,13 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     this.stableDetections = 0;
     this.lastDetection = null;
     this.noDetectionTicks = 0;
+    this.autoCaptureStartedAt = Date.now();
     this.autoCaptureStatus.set('searching');
     this.autoCaptureProgress.set(0);
 
     this.autoCaptureTimer = setInterval(() => {
       this.processAutoCaptureFrame();
-    }, 300);
+    }, AUTO_CAPTURE_INTERVAL_MS);
   }
 
   private stopAutoCaptureDetection(): void {
@@ -464,13 +484,15 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     }
 
     this.frameProbeCtx.drawImage(video, 0, 0, frameW, frameH);
+    const frameData = this.frameProbeCtx.getImageData(0, 0, frameW, frameH);
+    const sharpness = this.measureSharpness(frameData, frameW, frameH);
     const detection = this.detectDocument(this.frameProbeCtx, frameW, frameH, 420);
     const corners = detection?.corners ?? null;
 
     if (!corners) {
       this.noDetectionTicks += 1;
       this.stableDetections = Math.max(0, this.stableDetections - 1);
-      this.autoCaptureProgress.set(Math.max(0, this.stableDetections * 25));
+      this.autoCaptureProgress.set(Math.max(0, Math.round((this.stableDetections / AUTO_CAPTURE_STABLE_FRAMES) * 100)));
       this.autoCaptureStatus.set(this.noDetectionTicks > 25 ? 'unavailable' : 'searching');
       this.lastDetection = null;
       this.detectedDocumentOutline.set(null);
@@ -479,6 +501,14 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
 
     this.detectedDocumentOutline.set(this.toOverlayPoints(corners, frameW, frameH));
     this.noDetectionTicks = 0;
+    if (Date.now() - this.autoCaptureStartedAt < AUTO_CAPTURE_FOCUS_DELAY_MS || sharpness < AUTO_CAPTURE_MIN_SHARPNESS) {
+      this.stableDetections = Math.max(0, this.stableDetections - 1);
+      this.lastDetection = null;
+      this.autoCaptureStatus.set('focusing');
+      this.autoCaptureProgress.set(Math.min(90, Math.round((sharpness / AUTO_CAPTURE_MIN_SHARPNESS) * 60)));
+      return;
+    }
+
     const centerX = (corners.tl.x + corners.tr.x + corners.br.x + corners.bl.x) / 4;
     const centerY = (corners.tl.y + corners.tr.y + corners.br.y + corners.bl.y) / 4;
     const area = this.quadArea(corners);
@@ -498,10 +528,10 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     this.lastDetection = { centerX, centerY, area };
     this.stableDetections = isStable ? this.stableDetections + 1 : 1;
     this.autoCaptureStatus.set('detected');
-    const progress = Math.min(100, this.stableDetections * 25);
+    const progress = Math.min(100, Math.round((this.stableDetections / AUTO_CAPTURE_STABLE_FRAMES) * 100));
     this.autoCaptureProgress.set(progress);
 
-    if (this.stableDetections >= 4) {
+    if (this.stableDetections >= AUTO_CAPTURE_STABLE_FRAMES) {
       this.autoCaptureTriggered = true;
       this.autoCaptureStatus.set('capturing');
       this.autoCaptureProgress.set(100);
@@ -518,6 +548,42 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     const hasTouch = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
     const coarsePointer = window.matchMedia?.('(pointer: coarse)').matches ?? false;
     return hasTouch || coarsePointer;
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private measureSharpness(imageData: ImageData, width: number, height: number): number {
+    const gray = new Uint8ClampedArray(width * height);
+    for (let i = 0, p = 0; i < imageData.data.length; i += 4, p++) {
+      gray[p] = Math.round(
+        0.299 * imageData.data[i] + 0.587 * imageData.data[i + 1] + 0.114 * imageData.data[i + 2]
+      );
+    }
+
+    let sum = 0;
+    let sumSquares = 0;
+    let count = 0;
+    const step = 2;
+    for (let y = step; y < height - step; y += step) {
+      for (let x = step; x < width - step; x += step) {
+        const p = y * width + x;
+        const laplacian = Math.abs(
+          gray[p - width] + gray[p + width] + gray[p - 1] + gray[p + 1] - gray[p] * 4
+        );
+        sum += laplacian;
+        sumSquares += laplacian * laplacian;
+        count++;
+      }
+    }
+
+    if (!count) {
+      return 0;
+    }
+
+    const mean = sum / count;
+    return Math.sqrt(Math.max(0, sumSquares / count - mean * mean));
   }
 
   private async createScannedFile(file: File): Promise<File> {
@@ -663,7 +729,7 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     scale: number
   ): ScanDetection | null {
     const areaRatio = candidate.area / (detectW * detectH);
-    if (areaRatio < 0.06 || areaRatio > 0.96 || candidate.boundary.length < 16) {
+    if (areaRatio < 0.06 || areaRatio > 0.82 || candidate.boundary.length < 16) {
       return null;
     }
 
@@ -697,7 +763,11 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     const polygonArea = this.quadArea(corners);
     const frameArea = sourceWidth * sourceHeight;
     const areaRatio = polygonArea / Math.max(1, frameArea);
-    if (areaRatio < 0.08 || areaRatio > 0.98) {
+    if (areaRatio < 0.08 || areaRatio > 0.84) {
+      return null;
+    }
+
+    if (this.touchesTooMuchFrame(corners, sourceWidth, sourceHeight)) {
       return null;
     }
 
@@ -735,6 +805,25 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
     const centerScore = 1 - Math.min(1, centerDrift);
 
     return areaRatio * 5 + componentAreaRatio * 2 + rectangularity + edgeBalance + centerScore;
+  }
+
+  private touchesTooMuchFrame(corners: DocumentCorners, sourceWidth: number, sourceHeight: number): boolean {
+    const xs = [corners.tl.x, corners.tr.x, corners.br.x, corners.bl.x];
+    const ys = [corners.tl.y, corners.tr.y, corners.br.y, corners.bl.y];
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const marginX = sourceWidth * 0.025;
+    const marginY = sourceHeight * 0.025;
+    const touchedEdges = [
+      minX <= marginX,
+      maxX >= sourceWidth - marginX,
+      minY <= marginY,
+      maxY >= sourceHeight - marginY
+    ].filter(Boolean).length;
+
+    return touchedEdges >= 3;
   }
 
   private boundingBoxArea(corners: DocumentCorners): number {
@@ -1288,9 +1377,9 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
   ): { tl: Point; tr: Point; br: Point; bl: Point } {
     const centerX = (quad.tl.x + quad.tr.x + quad.br.x + quad.bl.x) / 4;
     const centerY = (quad.tl.y + quad.tr.y + quad.br.y + quad.bl.y) / 4;
-    const uniformScale = 1.03;
-    const topLift = maxH * 0.035;
-    const bottomDrop = maxH * 0.01;
+    const uniformScale = 1.012;
+    const topLift = maxH * 0.012;
+    const bottomDrop = maxH * 0.004;
 
     const scaleFromCenter = (p: Point): Point => ({
       x: centerX + (p.x - centerX) * uniformScale,
