@@ -10,7 +10,7 @@ import {
   viewChild
 } from '@angular/core';
 import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
 
 import { AppConfigService } from '../../services/app-config.service';
@@ -52,6 +52,7 @@ export class LandingComponent implements OnDestroy {
   private readonly meta = inject(Meta);
   private readonly document = inject(DOCUMENT);
   private readonly appConfig = inject(AppConfigService);
+  private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
@@ -166,6 +167,7 @@ export class LandingComponent implements OnDestroy {
   });
 
   constructor() {
+    void this.redirectSignedInUserToApp();
     this.applySeoTags();
 
     afterNextRender(() => {
@@ -479,6 +481,19 @@ export class LandingComponent implements OnDestroy {
     this.meta.updateTag({ name: 'twitter:image', content: previewImage });
     this.meta.updateTag({ name: 'twitter:image:alt', content: previewAlt });
     this.updateCanonical(canonicalUrl);
+  }
+
+  private async redirectSignedInUserToApp(): Promise<void> {
+    if (!this.isBrowser) {
+      return;
+    }
+
+    await this.auth.waitForAuthState();
+    await this.auth.waitForInitialization();
+
+    if (this.auth.isAuthenticated()) {
+      await this.router.navigateByUrl('/app', { replaceUrl: true });
+    }
   }
 
   private updateCanonical(url: string) {
