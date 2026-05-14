@@ -33,7 +33,7 @@ export class PricingComponent implements OnDestroy {
   private readonly router = inject(Router);
   private lastSyncedBillingIntervalKey: string | null = null;
   readonly isDarkMode = this.theme.isDarkMode;
-  readonly billingInterval = signal<'monthly' | 'annual'>('annual');
+  readonly billingInterval = signal<'monthly' | 'annual'>('monthly');
   readonly isProcessing = signal(false);
   readonly isPortalProcessing = signal(false);
   readonly checkoutError = signal<string | null>(null);
@@ -98,14 +98,14 @@ export class PricingComponent implements OnDestroy {
     effect(() => {
       const plan = this.subscriptionPlan();
       const interval = this.subscriptionInterval();
-      const nextKey = plan === 'pro' ? `pro:${interval}` : 'free:annual';
+      const nextKey = plan === 'pro' ? `pro:${interval}` : 'free:monthly';
 
       if (this.lastSyncedBillingIntervalKey === nextKey) {
         return;
       }
 
       this.lastSyncedBillingIntervalKey = nextKey;
-      this.billingInterval.set(plan === 'pro' ? interval : 'annual');
+      this.billingInterval.set(plan === 'pro' ? interval : 'monthly');
     });
   }
 
