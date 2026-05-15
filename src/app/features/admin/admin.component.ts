@@ -637,12 +637,14 @@ export class AdminComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const previewWindow = window.open('', '_blank', 'noopener,noreferrer');
+    this.customEmailError.set(null);
+    const previewWindow = window.open('', '_blank');
     if (!previewWindow) {
       this.customEmailError.set('Pop-up blocked. Allow pop-ups to open the preview page.');
       return;
     }
 
+    previewWindow.opener = null;
     previewWindow.document.open();
     previewWindow.document.write(this.customEmailRenderedPreview());
     previewWindow.document.close();
