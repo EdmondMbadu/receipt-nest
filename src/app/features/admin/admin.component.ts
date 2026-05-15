@@ -632,6 +632,22 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
 
+  openCustomEmailPreviewPage(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const previewWindow = window.open('', '_blank', 'noopener,noreferrer');
+    if (!previewWindow) {
+      this.customEmailError.set('Pop-up blocked. Allow pop-ups to open the preview page.');
+      return;
+    }
+
+    previewWindow.document.open();
+    previewWindow.document.write(this.customEmailRenderedPreview());
+    previewWindow.document.close();
+  }
+
   effectivePlan(user: AdminUser): 'free' | 'pro' {
     return getEffectiveSubscriptionPlan(user);
   }

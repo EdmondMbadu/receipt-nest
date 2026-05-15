@@ -969,8 +969,15 @@
             </div>
 
             <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
-              <div class="border-b border-slate-200 dark:border-slate-800 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Rendered preview
+              <div
+                class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 px-3 py-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Rendered preview
+                </span>
+                <button type="button" (click)="openCustomEmailPreviewPage()"
+                  class="inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
+                  Preview page
+                </button>
               </div>
               <iframe title="Custom email preview" [srcdoc]="customEmailRenderedPreview()"
                 class="h-96 w-full bg-white"></iframe>
