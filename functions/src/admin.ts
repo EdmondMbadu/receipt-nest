@@ -30,8 +30,162 @@ const stripePriceIdAnnualTest = defineSecret("STRIPE_PRICE_ID_ANNUAL_TEST");
 const fromEmail = "info@receipt-nest.com";
 
 const MAX_RECEIPT_COUNT_BACKFILL_USERS = 50;
+const MAX_CUSTOM_EMAIL_RECIPIENTS = 200;
+const MAX_CUSTOM_EMAIL_TEMPLATE_CHARS = 120_000;
 
 type UserProAccessMode = "grant" | "revoke";
+type CustomEmailRecipient = {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  fullName?: string;
+  userId?: string;
+  role?: string;
+  plan?: "free" | "pro";
+  planSource?: string;
+  billingMode?: BillingMode;
+  receiptCount?: number;
+};
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const stripHtmlToText = (value: string) =>
+  value
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const splitFullName = (value: string) => {
+  const parts = value.trim().split(/\s+/).filter(Boolean);
+  return {
+    firstName: parts[0] || "",
+    lastName: parts.slice(1).join(" "),
+  };
+};
+
+const getPlanSource = (userData: admin.firestore.DocumentData) => {
+  if (userData.adminSubscriptionPlanOverride === "pro") {
+    return "admin";
+  }
+
+  return userData.subscriptionPlan === "pro" ? "billing" : "free";
+};
+
+const normalizeCustomEmailRecipient = async (
+  db: admin.firestore.Firestore,
+  recipient: unknown
+): Promise<CustomEmailRecipient | null> => {
+  if (!recipient || typeof recipient !== "object") {
+    return null;
+  }
+
+  const value = recipient as Record<string, unknown>;
+  const userId = typeof value.userId === "string" ? value.userId.trim() : "";
+
+  if (userId) {
+    const userSnap = await db.doc(`users/${userId}`).get();
+    if (userSnap.exists) {
+      const userData = userSnap.data() || {};
+      const email = String(userData.email || "").trim().toLowerCase();
+      if (!emailPattern.test(email)) {
+        return null;
+      }
+
+      const firstName = String(userData.firstName || "").trim();
+      const lastName = String(userData.lastName || "").trim();
+      const fullName = `${firstName} ${lastName}`.trim() || email;
+
+      return {
+        email,
+        firstName,
+        lastName,
+        fullName,
+        userId,
+        role: String(userData.role || "user"),
+        plan: getEffectiveSubscriptionPlan(userData),
+        planSource: getPlanSource(userData),
+        billingMode: getEffectiveBillingModeForUserData(userData),
+        receiptCount: Number.isFinite(userData.receiptCount) ? Number(userData.receiptCount) : 0,
+      };
+    }
+  }
+
+  const email = String(value.email || "").trim().toLowerCase();
+  if (!emailPattern.test(email)) {
+    return null;
+  }
+
+  const fullName = String(value.fullName || "").trim();
+  const splitName = splitFullName(fullName);
+  const firstName = String(value.firstName || splitName.firstName || "").trim();
+  const lastName = String(value.lastName || splitName.lastName || "").trim();
+
+  return {
+    email,
+    firstName,
+    lastName,
+    fullName: `${firstName} ${lastName}`.trim() || fullName || email,
+    role: typeof value.role === "string" ? value.role : "csv",
+    plan: value.plan === "pro" ? "pro" : "free",
+    planSource: typeof value.planSource === "string" ? value.planSource : "csv",
+    billingMode: value.billingMode === "test" ? "test" : "live",
+    receiptCount: Number.isFinite(value.receiptCount) ? Number(value.receiptCount) : 0,
+  };
+};
+
+const buildTemplateValues = (recipient: CustomEmailRecipient, preheader: string) => {
+  const firstName = recipient.firstName || splitFullName(recipient.fullName || "").firstName || "there";
+  const lastName = recipient.lastName || "";
+  const fullName = recipient.fullName || `${firstName} ${lastName}`.trim() || recipient.email;
+  const values: Record<string, string> = {
+    firstname: firstName,
+    first_name: firstName,
+    first: firstName,
+    lastname: lastName,
+    last_name: lastName,
+    last: lastName,
+    fullname: fullName,
+    full_name: fullName,
+    name: fullName,
+    email: recipient.email,
+    userid: recipient.userId || "",
+    user_id: recipient.userId || "",
+    plan: recipient.plan || "",
+    role: recipient.role || "",
+    plansource: recipient.planSource || "",
+    plan_source: recipient.planSource || "",
+    billingmode: recipient.billingMode || "",
+    billing_mode: recipient.billingMode || "",
+    receiptcount: String(recipient.receiptCount ?? 0),
+    receipt_count: String(recipient.receiptCount ?? 0),
+    preheader,
+  };
+
+  return values;
+};
+
+const renderTemplate = (
+  template: string,
+  values: Record<string, string>,
+  escapeValue: (value: string) => string
+) =>
+  template.replace(/{{\s*([a-zA-Z0-9_.-]+)\s*}}/g, (_match, key: string) => {
+    const value = values[key.toLowerCase()] ?? "";
+    return escapeValue(value);
+  });
+
+const hasUnsafeEmailHtml = (html: string) =>
+  /<\s*script\b/i.test(html) || /javascript\s*:/i.test(html) || /\son[a-z]+\s*=/i.test(html);
 
 const parseBillingMode = (value: unknown): BillingMode => {
   if (value === "live" || value === "test") {
@@ -176,6 +330,131 @@ export const sendTestEmail = onCall(
     }
 
     return { ok: true };
+  }
+);
+
+export const sendCustomAdminEmail = onCall(
+  { region: "us-central1", secrets: [sendgridApiKey], timeoutSeconds: 300 },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "User must be authenticated.");
+    }
+
+    if (!sendgridApiKey.value()) {
+      throw new HttpsError("failed-precondition", "SendGrid configuration is missing.");
+    }
+
+    await assertAdmin(request.auth.uid, request.auth.token as Record<string, unknown>);
+
+    const subject = String(request.data?.subject || "").trim();
+    const preheader = String(request.data?.preheader || "").trim();
+    const htmlTemplate = String(request.data?.html || "").trim();
+    const textTemplate = String(request.data?.text || "").trim();
+    const rawRecipients: unknown[] = Array.isArray(request.data?.recipients) ? request.data.recipients : [];
+
+    if (!subject) {
+      throw new HttpsError("invalid-argument", "Email subject is required.");
+    }
+
+    if (!htmlTemplate) {
+      throw new HttpsError("invalid-argument", "HTML template is required.");
+    }
+
+    if (htmlTemplate.length > MAX_CUSTOM_EMAIL_TEMPLATE_CHARS || textTemplate.length > MAX_CUSTOM_EMAIL_TEMPLATE_CHARS) {
+      throw new HttpsError("invalid-argument", "Email template is too large.");
+    }
+
+    if (hasUnsafeEmailHtml(htmlTemplate)) {
+      throw new HttpsError(
+        "invalid-argument",
+        "HTML template cannot include script tags, javascript: URLs, or inline event handlers."
+      );
+    }
+
+    if (rawRecipients.length === 0) {
+      throw new HttpsError("invalid-argument", "At least one recipient is required.");
+    }
+
+    if (rawRecipients.length > MAX_CUSTOM_EMAIL_RECIPIENTS) {
+      throw new HttpsError(
+        "invalid-argument",
+        `Send at most ${MAX_CUSTOM_EMAIL_RECIPIENTS} recipients at a time.`
+      );
+    }
+
+    const db = admin.firestore();
+    const normalizedRecipients = await Promise.all(
+      rawRecipients.map((recipient) => normalizeCustomEmailRecipient(db, recipient))
+    );
+    const recipientsByEmail = new Map<string, CustomEmailRecipient>();
+    normalizedRecipients.forEach((recipient) => {
+      if (recipient) {
+        recipientsByEmail.set(recipient.email.toLowerCase(), recipient);
+      }
+    });
+    const recipients = [...recipientsByEmail.values()];
+
+    if (recipients.length === 0) {
+      throw new HttpsError("invalid-argument", "No valid recipient email addresses were provided.");
+    }
+
+    const actingUserEmail =
+      typeof request.auth.token?.email === "string" ? request.auth.token.email : null;
+    const failedRecipients: Array<{ email: string; reason: string }> = [];
+    let sentCount = 0;
+
+    for (const recipient of recipients) {
+      const values = buildTemplateValues(recipient, preheader);
+      const renderedSubject = renderTemplate(subject, values, (value) =>
+        value.replace(/[\r\n]+/g, " ").trim()
+      );
+      const renderedHtml = renderTemplate(htmlTemplate, values, escapeHtml);
+      const renderedText = renderTemplate(textTemplate || stripHtmlToText(htmlTemplate), values, (value) => value);
+
+      try {
+        await sendSendgridMail(sendgridApiKey.value(), {
+          to: recipient.email,
+          from: { email: fromEmail, name: "ReceiptNest AI" },
+          replyTo: { email: fromEmail, name: "ReceiptNest AI" },
+          subject: renderedSubject,
+          text: renderedText,
+          html: renderedHtml,
+        });
+        sentCount += 1;
+      } catch (error) {
+        logger.error("Custom admin email recipient failed", {
+          requestedBy: request.auth.uid,
+          requestedByEmail: actingUserEmail,
+          recipientEmail: recipient.email,
+          error,
+        });
+        failedRecipients.push({
+          email: recipient.email,
+          reason: "SendGrid rejected the message for this recipient.",
+        });
+      }
+    }
+
+    logger.info("Admin sent custom email", {
+      requestedBy: request.auth.uid,
+      requestedByEmail: actingUserEmail,
+      subject,
+      requestedRecipientCount: rawRecipients.length,
+      dedupedRecipientCount: recipients.length,
+      sentCount,
+      failedCount: failedRecipients.length,
+    });
+
+    if (sentCount === 0) {
+      throw new HttpsError("internal", "No emails were sent. Check the template and recipient list.");
+    }
+
+    return {
+      ok: true,
+      sentCount,
+      failedCount: failedRecipients.length,
+      failedRecipients: failedRecipients.slice(0, 10),
+    };
   }
 );
 

@@ -31,6 +31,7 @@ export { createCheckoutSession, createPortalSession, stripeWebhook } from "./bil
 export { generateAiInsights } from "./ai-insights";
 export {
   sendTestEmail,
+  sendCustomAdminEmail,
   backfillUserReceiptCounts,
   setUserProAccess,
   getBillingModeStatus,

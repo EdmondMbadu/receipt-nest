@@ -45,6 +45,33 @@ type SummaryNotificationPeriod = 'week' | 'month';
 type WeeklyScheduleDay = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
 type UserSortColumn = 'name' | 'email' | 'role' | 'plan' | 'receipts' | 'lastLogin' | 'lastSeen' | 'created';
 type SortDirection = 'asc' | 'desc';
+type CustomEmailPlanFilter = 'all' | 'free' | 'pro';
+type CustomEmailRoleFilter = 'all' | 'admin' | 'user';
+type CustomEmailProSourceFilter = 'all' | 'paid' | 'admin' | 'none';
+type CustomEmailBillingFilter = 'all' | 'live' | 'test';
+type CustomEmailReceiptFilter = 'all' | 'hasReceipts' | 'noReceipts';
+
+interface CustomEmailRecipient {
+  key: string;
+  source: 'system' | 'csv';
+  email: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  userId?: string;
+  role?: string;
+  plan?: 'free' | 'pro';
+  planSource?: EffectiveSubscriptionSource;
+  billingMode?: BillingMode;
+  receiptCount?: number;
+}
+
+interface CustomEmailSendResponse {
+  ok: boolean;
+  sentCount: number;
+  failedCount: number;
+  failedRecipients?: Array<{ email: string; reason: string }>;
+}
 
 interface SpendSummaryScheduleResponse {
   timeZone: string;
@@ -191,6 +218,25 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly userPlanActionSuccess = signal<string | null>(null);
   readonly userSortColumn = signal<UserSortColumn>('created');
   readonly userSortDirection = signal<SortDirection>('desc');
+  readonly customEmailSubject = signal('Unlock Pro in ReceiptNest AI');
+  readonly customEmailPreheader = signal('A quick note from ReceiptNest AI about your account.');
+  readonly customEmailHtml = signal(this.getDefaultCustomEmailHtml());
+  readonly customEmailText = signal(
+    'Dear {{firstName}},\n\nYou signed up for ReceiptNest AI, and Pro is ready when you want unlimited receipt capture and deeper spending insights.\n\nOpen your account: https://receipt-nest.com/app/pricing\n\nReceiptNest AI'
+  );
+  readonly customEmailSearch = signal('');
+  readonly customEmailPlanFilter = signal<CustomEmailPlanFilter>('free');
+  readonly customEmailRoleFilter = signal<CustomEmailRoleFilter>('all');
+  readonly customEmailProSourceFilter = signal<CustomEmailProSourceFilter>('all');
+  readonly customEmailBillingFilter = signal<CustomEmailBillingFilter>('all');
+  readonly customEmailReceiptFilter = signal<CustomEmailReceiptFilter>('all');
+  readonly customEmailCsvRecipients = signal<CustomEmailRecipient[]>([]);
+  readonly customEmailSelectedKeys = signal<Set<string>>(new Set());
+  readonly customEmailSending = signal(false);
+  readonly customEmailError = signal<string | null>(null);
+  readonly customEmailSuccess = signal<string | null>(null);
+  readonly customEmailCsvError = signal<string | null>(null);
+  readonly customEmailPreviewKey = signal<string | null>(null);
 
   readonly totalUsers = computed(() => this.users().length);
   readonly adminCount = computed(() => this.users().filter((user) => user.role === 'admin').length);
@@ -207,6 +253,119 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly summaryUsers = computed(() =>
     [...this.users()].sort((a, b) => this.compareText(this.displayName(a), this.displayName(b)))
   );
+  readonly customEmailSystemRecipients = computed(() => {
+    const search = this.customEmailSearch().trim().toLowerCase();
+    const planFilter = this.customEmailPlanFilter();
+    const roleFilter = this.customEmailRoleFilter();
+    const proSourceFilter = this.customEmailProSourceFilter();
+    const billingFilter = this.customEmailBillingFilter();
+    const receiptFilter = this.customEmailReceiptFilter();
+
+    return this.summaryUsers()
+      .filter((user) => Boolean(user.email))
+      .filter((user) => {
+        const plan = this.effectivePlan(user);
+        const role = user.role || 'user';
+        const planSource = this.planSource(user);
+        const billingMode = this.effectiveBillingMode(user);
+        const receiptCount = user.receiptCount ?? 0;
+
+        if (planFilter !== 'all' && plan !== planFilter) {
+          return false;
+        }
+
+        if (roleFilter !== 'all' && role !== roleFilter) {
+          return false;
+        }
+
+        if (proSourceFilter === 'paid' && planSource !== 'billing') {
+          return false;
+        }
+
+        if (proSourceFilter === 'admin' && planSource !== 'admin') {
+          return false;
+        }
+
+        if (proSourceFilter === 'none' && planSource !== 'free') {
+          return false;
+        }
+
+        if (billingFilter !== 'all' && billingMode !== billingFilter) {
+          return false;
+        }
+
+        if (receiptFilter === 'hasReceipts' && receiptCount < 1) {
+          return false;
+        }
+
+        if (receiptFilter === 'noReceipts' && receiptCount > 0) {
+          return false;
+        }
+
+        if (!search) {
+          return true;
+        }
+
+        const haystack = [
+          user.firstName,
+          user.lastName,
+          this.displayName(user),
+          user.email,
+          user.id
+        ].join(' ').toLowerCase();
+        return haystack.includes(search);
+      })
+      .map((user) => this.toCustomEmailRecipient(user));
+  });
+  readonly allCustomEmailRecipients = computed(() => {
+    const seenEmails = new Set<string>();
+    const recipients = [...this.customEmailSystemRecipients(), ...this.customEmailCsvRecipients()];
+
+    return recipients.filter((recipient) => {
+      const emailKey = recipient.email.toLowerCase();
+      if (seenEmails.has(emailKey)) {
+        return false;
+      }
+
+      seenEmails.add(emailKey);
+      return true;
+    });
+  });
+  readonly selectedCustomEmailRecipients = computed(() => {
+    const selectedKeys = this.customEmailSelectedKeys();
+    const systemRecipients = this.users()
+      .filter((user) => selectedKeys.has(this.customEmailUserKey(user.id)) && Boolean(user.email))
+      .map((user) => this.toCustomEmailRecipient(user));
+    const csvRecipients = this.customEmailCsvRecipients().filter((recipient) => selectedKeys.has(recipient.key));
+    const seenEmails = new Set<string>();
+
+    return [...systemRecipients, ...csvRecipients].filter((recipient) => {
+      const emailKey = recipient.email.toLowerCase();
+      if (seenEmails.has(emailKey)) {
+        return false;
+      }
+
+      seenEmails.add(emailKey);
+      return true;
+    });
+  });
+  readonly customEmailPreviewRecipient = computed(() => {
+    const selectedPreviewKey = this.customEmailPreviewKey();
+    const recipients = this.selectedCustomEmailRecipients();
+    if (selectedPreviewKey) {
+      const selected = recipients.find((recipient) => recipient.key === selectedPreviewKey);
+      if (selected) {
+        return selected;
+      }
+    }
+
+    return recipients[0] ?? this.allCustomEmailRecipients()[0] ?? null;
+  });
+  readonly customEmailRenderedPreview = computed(() => {
+    const recipient = this.customEmailPreviewRecipient();
+    return this.renderCustomEmailTemplate(this.customEmailHtml(), recipient);
+  });
+  readonly customEmailPreviewSelection = computed(() => this.customEmailPreviewRecipient()?.key ?? '');
   readonly selectedSummaryUser = computed(() =>
     this.summaryUsers().find((user) => user.id === this.summaryUserId()) ?? null
   );
@@ -321,6 +480,156 @@ export class AdminComponent implements OnInit, OnDestroy {
   displayName(user: AdminUser): string {
     const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
     return fullName || user.email || user.id || 'Unknown user';
+  }
+
+  customEmailUserKey(userId: string): string {
+    return `user:${userId}`;
+  }
+
+  isCustomEmailRecipientSelected(key: string): boolean {
+    return this.customEmailSelectedKeys().has(key);
+  }
+
+  toggleCustomEmailRecipient(key: string, selected: boolean): void {
+    const nextKeys = new Set(this.customEmailSelectedKeys());
+    if (selected) {
+      nextKeys.add(key);
+    } else {
+      nextKeys.delete(key);
+    }
+    this.customEmailSelectedKeys.set(nextKeys);
+  }
+
+  selectVisibleCustomEmailRecipients(): void {
+    const nextKeys = new Set(this.customEmailSelectedKeys());
+    this.allCustomEmailRecipients().forEach((recipient) => nextKeys.add(recipient.key));
+    this.customEmailSelectedKeys.set(nextKeys);
+    this.customEmailError.set(null);
+    this.customEmailSuccess.set(`${this.allCustomEmailRecipients().length} visible recipient(s) selected.`);
+  }
+
+  clearCustomEmailRecipients(): void {
+    this.customEmailSelectedKeys.set(new Set());
+    this.customEmailSuccess.set(null);
+    this.customEmailError.set(null);
+  }
+
+  removeCustomEmailCsvRecipient(key: string): void {
+    this.customEmailCsvRecipients.set(this.customEmailCsvRecipients().filter((recipient) => recipient.key !== key));
+    this.toggleCustomEmailRecipient(key, false);
+  }
+
+  async importCustomEmailCsv(event: Event): Promise<void> {
+    this.customEmailCsvError.set(null);
+    this.customEmailSuccess.set(null);
+
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      const importedRecipients = this.parseCustomEmailCsv(text);
+      if (importedRecipients.length === 0) {
+        this.customEmailCsvError.set('No valid email addresses were found in that CSV.');
+        return;
+      }
+
+      const existingByEmail = new Map(
+        this.customEmailCsvRecipients().map((recipient) => [recipient.email.toLowerCase(), recipient])
+      );
+      importedRecipients.forEach((recipient) => existingByEmail.set(recipient.email.toLowerCase(), recipient));
+      this.customEmailCsvRecipients.set([...existingByEmail.values()].sort((a, b) => this.compareText(a.email, b.email)));
+
+      const nextKeys = new Set(this.customEmailSelectedKeys());
+      importedRecipients.forEach((recipient) => nextKeys.add(recipient.key));
+      this.customEmailSelectedKeys.set(nextKeys);
+      this.customEmailSuccess.set(`${importedRecipients.length} CSV recipient(s) imported and selected.`);
+    } catch (error) {
+      console.error('Failed to import custom email CSV', error);
+      this.customEmailCsvError.set('Unable to read that CSV file.');
+    } finally {
+      if (input) {
+        input.value = '';
+      }
+    }
+  }
+
+  async sendCustomEmail(): Promise<void> {
+    this.customEmailError.set(null);
+    this.customEmailSuccess.set(null);
+
+    const subject = this.customEmailSubject().trim();
+    const preheader = this.customEmailPreheader().trim();
+    const html = this.customEmailHtml().trim();
+    const text = this.customEmailText().trim();
+    const recipients = this.selectedCustomEmailRecipients();
+
+    if (!subject) {
+      this.customEmailError.set('Enter an email subject.');
+      return;
+    }
+
+    if (!html) {
+      this.customEmailError.set('Add an HTML template before sending.');
+      return;
+    }
+
+    if (recipients.length === 0) {
+      this.customEmailError.set('Select at least one recipient or import a CSV.');
+      return;
+    }
+
+    if (
+      typeof window !== 'undefined' &&
+      !window.confirm(`Send "${subject}" to ${recipients.length} recipient(s)?`)
+    ) {
+      return;
+    }
+
+    this.customEmailSending.set(true);
+    try {
+      const callable = httpsCallable<
+        {
+          subject: string;
+          preheader: string;
+          html: string;
+          text: string;
+          recipients: CustomEmailRecipient[];
+        },
+        CustomEmailSendResponse
+      >(this.functions, 'sendCustomAdminEmail');
+
+      const response = await callable({
+        subject,
+        preheader,
+        html,
+        text,
+        recipients
+      });
+
+      const failedCount = response.data.failedCount ?? 0;
+      this.customEmailSuccess.set(
+        failedCount > 0
+          ? `Sent ${response.data.sentCount} email(s). ${failedCount} recipient(s) failed.`
+          : `Sent ${response.data.sentCount} custom email(s).`
+      );
+      if (failedCount > 0) {
+        this.customEmailError.set(
+          (response.data.failedRecipients || [])
+            .slice(0, 3)
+            .map((failure) => `${failure.email}: ${failure.reason}`)
+            .join(' | ') || 'Some recipients failed.'
+        );
+      }
+    } catch (error: any) {
+      console.error('Failed to send custom admin email', error);
+      this.customEmailError.set(error?.message || 'Unable to send the custom email right now.');
+    } finally {
+      this.customEmailSending.set(false);
+    }
   }
 
   effectivePlan(user: AdminUser): 'free' | 'pro' {
@@ -761,6 +1070,243 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     return this.userSortDirection() === 'asc' ? '↑' : '↓';
+  }
+
+  private toCustomEmailRecipient(user: AdminUser): CustomEmailRecipient {
+    return {
+      key: this.customEmailUserKey(user.id),
+      source: 'system',
+      email: user.email,
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      fullName: this.displayName(user),
+      userId: user.id,
+      role: user.role || 'user',
+      plan: this.effectivePlan(user),
+      planSource: this.planSource(user),
+      billingMode: this.effectiveBillingMode(user),
+      receiptCount: user.receiptCount ?? 0
+    };
+  }
+
+  private parseCustomEmailCsv(text: string): CustomEmailRecipient[] {
+    const rows = this.parseCsvRows(text).filter((row) => row.some((cell) => cell.trim().length > 0));
+    if (rows.length === 0) {
+      return [];
+    }
+
+    const firstRow = rows[0].map((cell) => this.normalizeCsvHeader(cell));
+    const hasHeader = firstRow.some((cell) =>
+      ['email', 'emailaddress', 'firstname', 'first', 'lastname', 'last', 'name', 'fullname'].includes(cell)
+    );
+    const headers = hasHeader ? firstRow : [];
+    const dataRows = hasHeader ? rows.slice(1) : rows;
+    const emailIndex = hasHeader
+      ? headers.findIndex((header) => header === 'email' || header === 'emailaddress')
+      : 0;
+    const firstNameIndex = hasHeader
+      ? headers.findIndex((header) => header === 'firstname' || header === 'first')
+      : 1;
+    const lastNameIndex = hasHeader
+      ? headers.findIndex((header) => header === 'lastname' || header === 'last')
+      : 2;
+    const fullNameIndex = hasHeader
+      ? headers.findIndex((header) => header === 'name' || header === 'fullname')
+      : -1;
+    const recipients = new Map<string, CustomEmailRecipient>();
+
+    dataRows.forEach((row) => {
+      const email = (row[emailIndex] || '').trim().toLowerCase();
+      if (!this.isLikelyEmail(email)) {
+        return;
+      }
+
+      let firstName = firstNameIndex >= 0 ? (row[firstNameIndex] || '').trim() : '';
+      let lastName = lastNameIndex >= 0 ? (row[lastNameIndex] || '').trim() : '';
+      const fullName = fullNameIndex >= 0 ? (row[fullNameIndex] || '').trim() : '';
+
+      if ((!firstName || !lastName) && fullName) {
+        const splitName = this.splitFullName(fullName);
+        firstName = firstName || splitName.firstName;
+        lastName = lastName || splitName.lastName;
+      }
+
+      const displayName = `${firstName} ${lastName}`.trim() || fullName || email;
+      recipients.set(email, {
+        key: `csv:${email}`,
+        source: 'csv',
+        email,
+        firstName,
+        lastName,
+        fullName: displayName,
+        plan: 'free',
+        role: 'csv',
+        receiptCount: 0
+      });
+    });
+
+    return [...recipients.values()];
+  }
+
+  private parseCsvRows(text: string): string[][] {
+    const rows: string[][] = [];
+    let row: string[] = [];
+    let cell = '';
+    let inQuotes = false;
+
+    for (let index = 0; index < text.length; index += 1) {
+      const char = text[index];
+      const nextChar = text[index + 1];
+
+      if (char === '"' && inQuotes && nextChar === '"') {
+        cell += '"';
+        index += 1;
+        continue;
+      }
+
+      if (char === '"') {
+        inQuotes = !inQuotes;
+        continue;
+      }
+
+      if (char === ',' && !inQuotes) {
+        row.push(cell);
+        cell = '';
+        continue;
+      }
+
+      if ((char === '\n' || char === '\r') && !inQuotes) {
+        if (char === '\r' && nextChar === '\n') {
+          index += 1;
+        }
+        row.push(cell);
+        rows.push(row);
+        row = [];
+        cell = '';
+        continue;
+      }
+
+      cell += char;
+    }
+
+    row.push(cell);
+    rows.push(row);
+    return rows;
+  }
+
+  private normalizeCsvHeader(value: string): string {
+    return value.trim().toLowerCase().replace(/[\s_-]+/g, '');
+  }
+
+  private isLikelyEmail(value: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  private splitFullName(value: string): { firstName: string; lastName: string } {
+    const parts = value.trim().split(/\s+/).filter(Boolean);
+    return {
+      firstName: parts[0] || '',
+      lastName: parts.slice(1).join(' ')
+    };
+  }
+
+  private renderCustomEmailTemplate(template: string, recipient: CustomEmailRecipient | null): string {
+    if (!recipient) {
+      return template;
+    }
+
+    const values = this.customEmailTemplateValues(recipient);
+    return template.replace(/{{\s*([a-zA-Z0-9_.-]+)\s*}}/g, (_match, key: string) => {
+      const normalizedKey = key.toLowerCase();
+      return this.escapeHtml(values[normalizedKey] ?? '');
+    });
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  private customEmailTemplateValues(recipient: CustomEmailRecipient): Record<string, string> {
+    const firstName = recipient.firstName || this.splitFullName(recipient.fullName).firstName || 'there';
+    const lastName = recipient.lastName || '';
+    const fullName = recipient.fullName || `${firstName} ${lastName}`.trim() || recipient.email;
+
+    return {
+      firstname: firstName,
+      first_name: firstName,
+      first: firstName,
+      lastname: lastName,
+      last_name: lastName,
+      last: lastName,
+      fullname: fullName,
+      full_name: fullName,
+      name: fullName,
+      email: recipient.email,
+      plan: recipient.plan || '',
+      role: recipient.role || '',
+      plansource: recipient.planSource || '',
+      plan_source: recipient.planSource || '',
+      billingmode: recipient.billingMode || '',
+      billing_mode: recipient.billingMode || '',
+      receiptcount: String(recipient.receiptCount ?? 0),
+      receipt_count: String(recipient.receiptCount ?? 0),
+      preheader: this.customEmailPreheader()
+    };
+  }
+
+  private getDefaultCustomEmailHtml(): string {
+    return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Unlock Pro in ReceiptNest AI</title>
+  </head>
+  <body style="margin:0; padding:0; background:#f8fafc; font-family:Arial, sans-serif; color:#0f172a;">
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;">{{preheader}}</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f8fafc;">
+      <tr>
+        <td align="center" style="padding:28px 16px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px; background:#ffffff; border:1px solid #e2e8f0; border-radius:18px; overflow:hidden;">
+            <tr>
+              <td style="padding:30px 34px; background:#064e3b; color:#ffffff;">
+                <p style="margin:0; font-size:12px; letter-spacing:0.22em; text-transform:uppercase; color:#a7f3d0;">ReceiptNest AI</p>
+                <h1 style="margin:12px 0 0; font-size:28px; line-height:1.2;">Your Pro workspace is ready</h1>
+                <p style="margin:10px 0 0; font-size:15px; line-height:1.6; color:#d1fae5;">Unlimited receipt capture, cleaner reports, and deeper spending insight.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:32px 34px;">
+                <p style="margin:0 0 16px; font-size:16px; line-height:1.65;">Dear {{firstName}},</p>
+                <p style="margin:0 0 16px; font-size:16px; line-height:1.65;">You signed up for ReceiptNest AI, and your account is ready for Pro. Pro removes free-plan limits and gives you a stronger workspace for receipts, categories, summaries, and tax-time organization.</p>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:24px 0;">
+                  <tr>
+                    <td style="padding:18px; border:1px solid #d1fae5; border-radius:14px; background:#ecfdf5;">
+                      <p style="margin:0; font-size:14px; line-height:1.6; color:#065f46;"><strong>Current plan:</strong> {{plan}}<br /><strong>Receipts saved:</strong> {{receiptCount}}</p>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0 0 22px; font-size:16px; line-height:1.65;">Open your account and choose Pro when you are ready.</p>
+                <a href="https://receipt-nest.com/app/pricing" style="display:inline-block; padding:13px 20px; border-radius:12px; background:#059669; color:#ffffff; font-size:15px; font-weight:700; text-decoration:none;">Upgrade to Pro</a>
+                <p style="margin:24px 0 0; font-size:14px; line-height:1.6; color:#64748b;">Questions? Reply to this email and we will help.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:22px 34px; border-top:1px solid #e2e8f0; color:#64748b; font-size:12px; line-height:1.6;">
+                ReceiptNest AI · info@receipt-nest.com
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
   }
 
   private async backfillMissingReceiptCounts(users: AdminUser[]): Promise<void> {
