@@ -51,6 +51,24 @@ type CustomEmailProSourceFilter = 'all' | 'paid' | 'admin' | 'none';
 type CustomEmailBillingFilter = 'all' | 'live' | 'test';
 type CustomEmailReceiptFilter = 'all' | 'hasReceipts' | 'noReceipts';
 
+interface UserGrowthMonth {
+  index: number;
+  shortLabel: string;
+  longLabel: string;
+  count: number;
+  cumulative: number;
+  isFuture: boolean;
+}
+
+interface UserGrowthSummary {
+  months: UserGrowthMonth[];
+  total: number;
+  maxCount: number;
+  activeMonthCount: number;
+  averagePerMonth: number;
+  peakMonth: UserGrowthMonth | null;
+}
+
 interface CustomEmailRecipient {
   key: string;
   source: 'system' | 'csv';
@@ -132,6 +150,20 @@ interface UserBillingModeResponse {
 type UserProAccessMode = 'grant' | 'revoke';
 
 const RECEIPT_COUNT_BACKFILL_BATCH_SIZE = 50;
+const MONTH_LABELS = [
+  { short: 'Jan', long: 'January' },
+  { short: 'Feb', long: 'February' },
+  { short: 'Mar', long: 'March' },
+  { short: 'Apr', long: 'April' },
+  { short: 'May', long: 'May' },
+  { short: 'Jun', long: 'June' },
+  { short: 'Jul', long: 'July' },
+  { short: 'Aug', long: 'August' },
+  { short: 'Sep', long: 'September' },
+  { short: 'Oct', long: 'October' },
+  { short: 'Nov', long: 'November' },
+  { short: 'Dec', long: 'December' }
+] as const;
 
 @Component({
   selector: 'app-admin',
@@ -218,6 +250,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly userPlanActionSuccess = signal<string | null>(null);
   readonly userSortColumn = signal<UserSortColumn>('created');
   readonly userSortDirection = signal<SortDirection>('desc');
+  readonly selectedGrowthYear = signal(new Date().getFullYear());
   readonly customEmailSubject = signal('Unlock Pro in ReceiptNest AI');
   readonly customEmailPreheader = signal('A quick note from ReceiptNest AI about your account.');
   readonly customEmailHtml = signal(this.getDefaultCustomEmailHtml());
@@ -243,6 +276,70 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly proCount = computed(() => this.users().filter((user) => this.effectivePlan(user) === 'pro').length);
   readonly openFeedbackCount = computed(() => this.feedback().filter((item) => item.status !== 'archived').length);
   readonly archivedFeedbackCount = computed(() => this.feedback().filter((item) => item.status === 'archived').length);
+  readonly availableGrowthYears = computed(() => {
+    const years = new Set<number>([new Date().getFullYear()]);
+    this.users().forEach((user) => {
+      const createdAt = this.userCreatedDate(user);
+      if (createdAt) {
+        years.add(createdAt.getFullYear());
+      }
+    });
+
+    return [...years].sort((a, b) => b - a);
+  });
+  readonly userGrowthSummary = computed<UserGrowthSummary>(() => {
+    const selectedYear = this.selectedGrowthYear();
+    const today = new Date();
+    const activeMonthCount = selectedYear === today.getFullYear() ? today.getMonth() + 1 : 12;
+    const counts = Array.from({ length: 12 }, () => 0);
+
+    this.users().forEach((user) => {
+      const createdAt = this.userCreatedDate(user);
+      if (!createdAt || createdAt.getFullYear() !== selectedYear) {
+        return;
+      }
+
+      counts[createdAt.getMonth()] += 1;
+    });
+
+    let cumulative = 0;
+    const months = counts.map((count, index) => {
+      cumulative += count;
+      return {
+        index,
+        shortLabel: MONTH_LABELS[index].short,
+        longLabel: MONTH_LABELS[index].long,
+        count,
+        cumulative,
+        isFuture: selectedYear === today.getFullYear() && index > today.getMonth()
+      };
+    });
+    const total = counts.reduce((sum, count) => sum + count, 0);
+    const maxCount = Math.max(...counts, 0);
+    const peakMonth = maxCount > 0
+      ? months.reduce((peak, month) => (month.count > peak.count ? month : peak), months[0])
+      : null;
+
+    return {
+      months,
+      total,
+      maxCount,
+      activeMonthCount,
+      averagePerMonth: total / activeMonthCount,
+      peakMonth
+    };
+  });
+  readonly userGrowthRangeLabel = computed(() => {
+    const selectedYear = this.selectedGrowthYear();
+    const today = new Date();
+    const endMonthIndex = selectedYear === today.getFullYear() ? today.getMonth() : 11;
+    return `Jan - ${MONTH_LABELS[endMonthIndex].short} ${selectedYear}`;
+  });
+  readonly userGrowthPeakLabel = computed(() => {
+    const peakMonth = this.userGrowthSummary().peakMonth;
+    return peakMonth ? `${peakMonth.longLabel} (${peakMonth.count})` : 'No signups yet';
+  });
+  readonly isSelectedGrowthYearCurrent = computed(() => this.selectedGrowthYear() === new Date().getFullYear());
   readonly sortedUsers = computed(() => {
     const column = this.userSortColumn();
     const direction = this.userSortDirection();
@@ -1068,6 +1165,22 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
 
+  setSelectedGrowthYear(value: string | number): void {
+    const parsedYear = typeof value === 'string' ? Number.parseInt(value, 10) : Number(value);
+    if (Number.isFinite(parsedYear)) {
+      this.selectedGrowthYear.set(parsedYear);
+    }
+  }
+
+  growthBarHeight(count: number): number {
+    const maxCount = this.userGrowthSummary().maxCount;
+    if (maxCount < 1) {
+      return 2;
+    }
+
+    return Math.max(7, Math.round((count / maxCount) * 100));
+  }
+
   toggleUserSort(column: UserSortColumn): void {
     if (this.userSortColumn() === column) {
       this.userSortDirection.set(this.userSortDirection() === 'asc' ? 'desc' : 'asc');
@@ -1363,6 +1476,10 @@ export class AdminComponent implements OnInit, OnDestroy {
   private getCurrentMonthValue(): string {
     const today = new Date();
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  private userCreatedDate(user: AdminUser): Date | null {
+    return user.createdAt instanceof Timestamp ? user.createdAt.toDate() : null;
   }
 
   private compareUsers(a: AdminUser, b: AdminUser, column: UserSortColumn): number {
