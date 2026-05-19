@@ -50,6 +50,7 @@ type CustomEmailRoleFilter = 'all' | 'admin' | 'user';
 type CustomEmailProSourceFilter = 'all' | 'paid' | 'admin' | 'none';
 type CustomEmailBillingFilter = 'all' | 'live' | 'test';
 type CustomEmailReceiptFilter = 'all' | 'hasReceipts' | 'noReceipts';
+type UserGrowthView = 'year' | 'month';
 
 interface UserGrowthMonth {
   index: number;
@@ -68,6 +69,23 @@ interface UserGrowthSummary {
   activeMonthCount: number;
   averagePerMonth: number;
   peakMonth: UserGrowthMonth | null;
+}
+
+interface UserGrowthDay {
+  day: number;
+  count: number;
+  cumulative: number;
+  isCurrentDay: boolean;
+  isFuture: boolean;
+}
+
+interface UserGrowthDaySummary {
+  days: UserGrowthDay[];
+  total: number;
+  maxCount: number;
+  activeDayCount: number;
+  averagePerDay: number;
+  peakDay: UserGrowthDay | null;
 }
 
 interface CustomEmailRecipient {
@@ -251,7 +269,9 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly userPlanActionSuccess = signal<string | null>(null);
   readonly userSortColumn = signal<UserSortColumn>('created');
   readonly userSortDirection = signal<SortDirection>('desc');
+  readonly selectedGrowthView = signal<UserGrowthView>('year');
   readonly selectedGrowthYear = signal(new Date().getFullYear());
+  readonly selectedGrowthMonth = signal(new Date().getMonth());
   readonly customEmailSubject = signal('Unlock Pro in ReceiptNest AI');
   readonly customEmailPreheader = signal('A quick note from ReceiptNest AI about your account.');
   readonly customEmailHtml = signal(this.getDefaultCustomEmailHtml());
@@ -342,6 +362,67 @@ export class AdminComponent implements OnInit, OnDestroy {
     return peakMonth ? `${peakMonth.longLabel} (${peakMonth.count})` : 'No signups yet';
   });
   readonly isSelectedGrowthYearCurrent = computed(() => this.selectedGrowthYear() === new Date().getFullYear());
+  readonly growthMonthOptions = MONTH_LABELS.map((month, index) => ({ ...month, index }));
+  readonly selectedGrowthMonthLabel = computed(() =>
+    `${MONTH_LABELS[this.selectedGrowthMonth()].long} ${this.selectedGrowthYear()}`
+  );
+  readonly userGrowthDaySummary = computed<UserGrowthDaySummary>(() => {
+    const selectedYear = this.selectedGrowthYear();
+    const selectedMonth = this.selectedGrowthMonth();
+    const today = new Date();
+    const isCurrentMonth = selectedYear === today.getFullYear() && selectedMonth === today.getMonth();
+    const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+    const activeDayCount = isCurrentMonth ? today.getDate() : daysInMonth;
+    const counts = Array.from({ length: daysInMonth }, () => 0);
+
+    this.users().forEach((user) => {
+      const createdAt = this.userCreatedDate(user);
+      if (
+        !createdAt ||
+        createdAt.getFullYear() !== selectedYear ||
+        createdAt.getMonth() !== selectedMonth
+      ) {
+        return;
+      }
+
+      counts[createdAt.getDate() - 1] += 1;
+    });
+
+    let cumulative = 0;
+    const days = counts.map((count, index) => {
+      const day = index + 1;
+      cumulative += count;
+      return {
+        day,
+        count,
+        cumulative,
+        isCurrentDay: isCurrentMonth && day === today.getDate(),
+        isFuture: isCurrentMonth && day > today.getDate()
+      };
+    });
+    const total = counts.reduce((sum, count) => sum + count, 0);
+    const maxCount = Math.max(...counts, 0);
+    const peakDay = maxCount > 0
+      ? days.reduce((peak, day) => (day.count > peak.count ? day : peak), days[0])
+      : null;
+
+    return {
+      days,
+      total,
+      maxCount,
+      activeDayCount,
+      averagePerDay: total / activeDayCount,
+      peakDay
+    };
+  });
+  readonly userGrowthDayPeakLabel = computed(() => {
+    const peakDay = this.userGrowthDaySummary().peakDay;
+    return peakDay ? `Day ${peakDay.day} (${peakDay.count})` : 'No signups yet';
+  });
+  readonly isSelectedGrowthMonthCurrent = computed(() => {
+    const today = new Date();
+    return this.selectedGrowthYear() === today.getFullYear() && this.selectedGrowthMonth() === today.getMonth();
+  });
   readonly sortedUsers = computed(() => {
     const column = this.userSortColumn();
     const direction = this.userSortDirection();
@@ -1174,6 +1255,17 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
 
+  setSelectedGrowthView(view: UserGrowthView): void {
+    this.selectedGrowthView.set(view);
+  }
+
+  setSelectedGrowthMonth(value: string | number): void {
+    const parsedMonth = typeof value === 'string' ? Number.parseInt(value, 10) : Number(value);
+    if (Number.isFinite(parsedMonth) && parsedMonth >= 0 && parsedMonth <= 11) {
+      this.selectedGrowthMonth.set(parsedMonth);
+    }
+  }
+
   growthBarHeight(count: number): number {
     const maxCount = this.userGrowthSummary().maxCount;
     if (maxCount < 1) {
@@ -1181,6 +1273,19 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     return Math.max(7, Math.round((count / maxCount) * 100));
+  }
+
+  dailyGrowthBarHeight(count: number): number {
+    const maxCount = this.userGrowthDaySummary().maxCount;
+    if (maxCount < 1) {
+      return 2;
+    }
+
+    return Math.max(8, Math.round((count / maxCount) * 100));
+  }
+
+  dailyGrowthGridTemplate(): string {
+    return `repeat(${this.userGrowthDaySummary().days.length}, minmax(18px, 1fr))`;
   }
 
   toggleUserSort(column: UserSortColumn): void {
