@@ -57,6 +57,7 @@ interface UserGrowthMonth {
   longLabel: string;
   count: number;
   cumulative: number;
+  isCurrentMonth: boolean;
   isFuture: boolean;
 }
 
@@ -311,6 +312,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         longLabel: MONTH_LABELS[index].long,
         count,
         cumulative,
+        isCurrentMonth: selectedYear === today.getFullYear() && index === today.getMonth(),
         isFuture: selectedYear === today.getFullYear() && index > today.getMonth()
       };
     });
