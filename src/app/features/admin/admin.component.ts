@@ -302,6 +302,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly selectedReceiptProcessingYear = signal(new Date().getFullYear());
   readonly selectedReceiptProcessingMonth = signal(new Date().getMonth());
   readonly receiptProcessingStats = signal<ReceiptProcessingStatsResponse | null>(null);
+  readonly receiptProcessingOverviewStats = signal<ReceiptProcessingStatsResponse | null>(null);
   readonly receiptProcessingLoading = signal(true);
   readonly receiptProcessingError = signal<string | null>(null);
   readonly customEmailSubject = signal('Unlock Pro in ReceiptNest AI');
@@ -459,7 +460,21 @@ export class AdminComponent implements OnInit, OnDestroy {
     `${MONTH_LABELS[this.selectedReceiptProcessingMonth()].long} ${this.selectedReceiptProcessingYear()}`
   );
   readonly receiptProcessingAllTimeTotal = computed(() =>
-    this.receiptProcessingStats()?.allTimeTotal ?? this.users().reduce((sum, user) => sum + (user.receiptCount ?? 0), 0)
+    this.receiptProcessingOverviewStats()?.allTimeTotal ??
+    this.receiptProcessingStats()?.allTimeTotal ??
+    this.users().reduce((sum, user) => sum + (user.receiptCount ?? 0), 0)
+  );
+  readonly receiptProcessingTodayTotal = computed(() => {
+    const today = new Date();
+    const stats = this.receiptProcessingOverviewStats();
+    if (!stats || stats.year !== today.getFullYear() || stats.month !== today.getMonth() + 1) {
+      return 0;
+    }
+
+    return stats.days.find((entry) => entry.day === today.getDate())?.count ?? 0;
+  });
+  readonly receiptProcessingOverviewLoading = computed(
+    () => this.receiptProcessingLoading() && this.receiptProcessingOverviewStats() === null
   );
   readonly receiptProcessingSummary = computed<ReceiptProcessingSummary>(() => {
     const selectedYear = this.selectedReceiptProcessingYear();
@@ -1315,6 +1330,10 @@ export class AdminComponent implements OnInit, OnDestroy {
 
       if (requestId === this.receiptProcessingStatsRequestId) {
         this.receiptProcessingStats.set(response.data);
+        const today = new Date();
+        if (year === today.getFullYear() && month === today.getMonth()) {
+          this.receiptProcessingOverviewStats.set(response.data);
+        }
       }
     } catch (error) {
       console.error('Failed to load receipt processing stats', error);
