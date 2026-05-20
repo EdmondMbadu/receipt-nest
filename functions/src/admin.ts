@@ -32,6 +32,7 @@ const fromEmail = "info@receipt-nest.com";
 const MAX_RECEIPT_COUNT_BACKFILL_USERS = 50;
 const MAX_CUSTOM_EMAIL_RECIPIENTS = 200;
 const MAX_CUSTOM_EMAIL_TEMPLATE_CHARS = 120_000;
+const RECEIPT_PROCESSING_STATS_USER_BATCH_SIZE = 20;
 const PROCESSED_RECEIPT_STATUSES = ["final", "needs_review", "extracted"];
 
 type UserProAccessMode = "grant" | "revoke";
@@ -559,25 +560,6 @@ export const getReceiptProcessingStats = onCall(
       throw new HttpsError("invalid-argument", "A valid month range is required.");
     }
 
-    const db = admin.firestore();
-    const start = admin.firestore.Timestamp.fromMillis(startAtMillis);
-    const end = admin.firestore.Timestamp.fromMillis(endAtMillis);
-    const receiptsQuery = db
-      .collectionGroup("receipts")
-      .where("status", "in", PROCESSED_RECEIPT_STATUSES);
-
-    const [totalSnap, processedAtSnap, legacyUpdatedAtSnap] = await Promise.all([
-      receiptsQuery.count().get(),
-      receiptsQuery
-        .where("processedAt", ">=", start)
-        .where("processedAt", "<", end)
-        .get(),
-      receiptsQuery
-        .where("updatedAt", ">=", start)
-        .where("updatedAt", "<", end)
-        .get(),
-    ]);
-
     let dayFormatter: Intl.DateTimeFormat;
     try {
       dayFormatter = new Intl.DateTimeFormat("en-US", {
@@ -587,7 +569,18 @@ export const getReceiptProcessingStats = onCall(
     } catch {
       throw new HttpsError("invalid-argument", "A valid IANA time zone is required.");
     }
+
+    const db = admin.firestore();
+    const start = admin.firestore.Timestamp.fromMillis(startAtMillis);
+    const end = admin.firestore.Timestamp.fromMillis(endAtMillis);
+    const usersSnap = await db.collection("users").get();
+    const allTimeTotal = usersSnap.docs.reduce((sum, doc) => {
+      const receiptCount = Number(doc.get("receiptCount") ?? 0);
+      return sum + (Number.isFinite(receiptCount) ? receiptCount : 0);
+    }, 0);
+    const processedStatuses = new Set(PROCESSED_RECEIPT_STATUSES);
     const counts = new Map<number, number>();
+    const countedReceiptPaths = new Set<string>();
 
     const addDay = (timestamp: admin.firestore.Timestamp) => {
       const day = Number(dayFormatter.format(timestamp.toDate()));
@@ -598,23 +591,87 @@ export const getReceiptProcessingStats = onCall(
       counts.set(day, (counts.get(day) || 0) + 1);
     };
 
-    processedAtSnap.docs.forEach((doc) => {
-      const timestamp = doc.get("processedAt");
-      if (timestamp instanceof admin.firestore.Timestamp) {
-        addDay(timestamp);
-      }
-    });
-
-    legacyUpdatedAtSnap.docs.forEach((doc) => {
-      const processedAt = doc.get("processedAt");
-      if (processedAt instanceof admin.firestore.Timestamp) {
+    const addReceipt = (
+      doc: admin.firestore.QueryDocumentSnapshot,
+      timestamp: admin.firestore.Timestamp
+    ) => {
+      if (countedReceiptPaths.has(doc.ref.path)) {
         return;
       }
 
-      const updatedAt = doc.get("updatedAt");
-      if (updatedAt instanceof admin.firestore.Timestamp) {
-        addDay(updatedAt);
+      if (!processedStatuses.has(String(doc.get("status") || ""))) {
+        return;
       }
+
+      countedReceiptPaths.add(doc.ref.path);
+      addDay(timestamp);
+    };
+
+    const loadUserReceiptStats = async (userId: string) => {
+      const receiptsRef = db.collection(`users/${userId}/receipts`);
+      const [processedAtSnap, extractionProcessedAtSnap, updatedAtSnap] = await Promise.all([
+        receiptsRef
+          .where("processedAt", ">=", start)
+          .where("processedAt", "<", end)
+          .get(),
+        receiptsRef
+          .where("extraction.processedAt", ">=", start)
+          .where("extraction.processedAt", "<", end)
+          .get(),
+        receiptsRef
+          .where("updatedAt", ">=", start)
+          .where("updatedAt", "<", end)
+          .get(),
+      ]);
+
+      processedAtSnap.docs.forEach((doc) => {
+        const timestamp = doc.get("processedAt");
+        if (timestamp instanceof admin.firestore.Timestamp) {
+          addReceipt(doc, timestamp);
+        }
+      });
+
+      extractionProcessedAtSnap.docs.forEach((doc) => {
+        const processedAt = doc.get("processedAt");
+        if (processedAt instanceof admin.firestore.Timestamp) {
+          return;
+        }
+
+        const timestamp = doc.get("extraction.processedAt");
+        if (timestamp instanceof admin.firestore.Timestamp) {
+          addReceipt(doc, timestamp);
+        }
+      });
+
+      updatedAtSnap.docs.forEach((doc) => {
+        const processedAt = doc.get("processedAt");
+        const extractionProcessedAt = doc.get("extraction.processedAt");
+        if (
+          processedAt instanceof admin.firestore.Timestamp ||
+          extractionProcessedAt instanceof admin.firestore.Timestamp
+        ) {
+          return;
+        }
+
+        const timestamp = doc.get("updatedAt");
+        if (timestamp instanceof admin.firestore.Timestamp) {
+          addReceipt(doc, timestamp);
+        }
+      });
+    };
+
+    for (let index = 0; index < usersSnap.docs.length; index += RECEIPT_PROCESSING_STATS_USER_BATCH_SIZE) {
+      const userBatch = usersSnap.docs.slice(index, index + RECEIPT_PROCESSING_STATS_USER_BATCH_SIZE);
+      await Promise.all(userBatch.map((doc) => loadUserReceiptStats(doc.id)));
+    }
+
+    logger.info("Loaded receipt processing stats", {
+      requestedBy: request.auth.uid,
+      year,
+      month,
+      userCount: usersSnap.size,
+      allTimeTotal,
+      monthlyTotal: countedReceiptPaths.size,
     });
 
     const days: ReceiptProcessingDayCount[] = [...counts.entries()]
@@ -623,7 +680,7 @@ export const getReceiptProcessingStats = onCall(
 
     return {
       ok: true,
-      allTimeTotal: totalSnap.data().count,
+      allTimeTotal,
       year,
       month,
       days,
