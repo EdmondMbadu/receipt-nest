@@ -32,6 +32,7 @@ const fromEmail = "info@receipt-nest.com";
 const MAX_RECEIPT_COUNT_BACKFILL_USERS = 50;
 const MAX_CUSTOM_EMAIL_RECIPIENTS = 200;
 const MAX_CUSTOM_EMAIL_TEMPLATE_CHARS = 120_000;
+const PROCESSED_RECEIPT_STATUSES = ["final", "needs_review", "extracted"];
 
 type UserProAccessMode = "grant" | "revoke";
 type CustomEmailRecipient = {
@@ -46,6 +47,19 @@ type CustomEmailRecipient = {
   billingMode?: BillingMode;
   receiptCount?: number;
 };
+
+interface ReceiptProcessingStatsRequest {
+  year?: unknown;
+  month?: unknown;
+  startAtMillis?: unknown;
+  endAtMillis?: unknown;
+  timeZone?: unknown;
+}
+
+interface ReceiptProcessingDayCount {
+  day: number;
+  count: number;
+}
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -508,6 +522,113 @@ export const backfillUserReceiptCounts = onCall(
     });
 
     return { ok: true, updatedCount: updatedUsers.length };
+  }
+);
+
+export const getReceiptProcessingStats = onCall(
+  { region: "us-central1" },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "User must be authenticated.");
+    }
+
+    await assertAdmin(request.auth.uid, request.auth.token as Record<string, unknown>);
+
+    const data = (request.data || {}) as ReceiptProcessingStatsRequest;
+    const now = new Date();
+    const year = Number(data.year ?? now.getUTCFullYear());
+    const month = Number(data.month ?? now.getUTCMonth() + 1);
+    const startAtMillis = Number(data.startAtMillis);
+    const endAtMillis = Number(data.endAtMillis);
+    const timeZone = typeof data.timeZone === "string" && data.timeZone.trim()
+      ? data.timeZone.trim()
+      : "UTC";
+
+    if (
+      !Number.isInteger(year) ||
+      year < 2020 ||
+      year > now.getUTCFullYear() + 1 ||
+      !Number.isInteger(month) ||
+      month < 1 ||
+      month > 12 ||
+      !Number.isFinite(startAtMillis) ||
+      !Number.isFinite(endAtMillis) ||
+      endAtMillis <= startAtMillis ||
+      endAtMillis - startAtMillis > 32 * 24 * 60 * 60 * 1000
+    ) {
+      throw new HttpsError("invalid-argument", "A valid month range is required.");
+    }
+
+    const db = admin.firestore();
+    const start = admin.firestore.Timestamp.fromMillis(startAtMillis);
+    const end = admin.firestore.Timestamp.fromMillis(endAtMillis);
+    const receiptsQuery = db
+      .collectionGroup("receipts")
+      .where("status", "in", PROCESSED_RECEIPT_STATUSES);
+
+    const [totalSnap, processedAtSnap, legacyUpdatedAtSnap] = await Promise.all([
+      receiptsQuery.count().get(),
+      receiptsQuery
+        .where("processedAt", ">=", start)
+        .where("processedAt", "<", end)
+        .get(),
+      receiptsQuery
+        .where("updatedAt", ">=", start)
+        .where("updatedAt", "<", end)
+        .get(),
+    ]);
+
+    let dayFormatter: Intl.DateTimeFormat;
+    try {
+      dayFormatter = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        day: "numeric",
+      });
+    } catch {
+      throw new HttpsError("invalid-argument", "A valid IANA time zone is required.");
+    }
+    const counts = new Map<number, number>();
+
+    const addDay = (timestamp: admin.firestore.Timestamp) => {
+      const day = Number(dayFormatter.format(timestamp.toDate()));
+      if (!Number.isInteger(day) || day < 1 || day > 31) {
+        return;
+      }
+
+      counts.set(day, (counts.get(day) || 0) + 1);
+    };
+
+    processedAtSnap.docs.forEach((doc) => {
+      const timestamp = doc.get("processedAt");
+      if (timestamp instanceof admin.firestore.Timestamp) {
+        addDay(timestamp);
+      }
+    });
+
+    legacyUpdatedAtSnap.docs.forEach((doc) => {
+      const processedAt = doc.get("processedAt");
+      if (processedAt instanceof admin.firestore.Timestamp) {
+        return;
+      }
+
+      const updatedAt = doc.get("updatedAt");
+      if (updatedAt instanceof admin.firestore.Timestamp) {
+        addDay(updatedAt);
+      }
+    });
+
+    const days: ReceiptProcessingDayCount[] = [...counts.entries()]
+      .map(([day, count]) => ({ day, count }))
+      .sort((a, b) => a.day - b.day);
+
+    return {
+      ok: true,
+      allTimeTotal: totalSnap.data().count,
+      year,
+      month,
+      days,
+      generatedAt: new Date().toISOString(),
+    };
   }
 );
 

@@ -137,6 +137,7 @@ export interface Receipt {
   email?: ReceiptEmailMetadata;
 
   // Timestamps
+  processedAt?: Timestamp | ReturnType<typeof serverTimestamp>;
   createdAt: Timestamp | ReturnType<typeof serverTimestamp>;
   updatedAt: Timestamp | ReturnType<typeof serverTimestamp>;
 }
@@ -158,4 +159,3 @@ export function createReceiptDocument(
     updatedAt: serverTimestamp()
   };
 }
-

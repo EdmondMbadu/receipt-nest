@@ -728,6 +728,7 @@ async function saveTextOnlyReceipt(
   const updateData: Record<string, unknown> = {
     userId,
     status,
+    processedAt: admin.firestore.FieldValue.serverTimestamp(),
     skipProcessing: true,
     source: "email",
     file: {

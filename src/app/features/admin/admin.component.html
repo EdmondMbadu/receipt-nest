@@ -1230,6 +1230,137 @@
       </div>
     </section>
 
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div class="border-b border-slate-100 bg-slate-50/80 px-5 py-4 dark:border-slate-800 dark:bg-slate-900/70">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+              Receipt processing
+            </p>
+            <h2 class="mt-1 text-lg font-semibold text-slate-950 dark:text-white">
+              Daily processed receipts
+            </h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Receipts completed during {{ selectedReceiptProcessingMonthLabel() }}.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-end gap-3">
+            <label class="min-w-32 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Year
+              <select [ngModel]="selectedReceiptProcessingYear()" (ngModelChange)="setSelectedReceiptProcessingYear($event)"
+                class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-900 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+                <option *ngFor="let year of availableGrowthYears()" [ngValue]="year">{{ year }}</option>
+              </select>
+            </label>
+
+            <label class="min-w-40 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Month
+              <select [ngModel]="selectedReceiptProcessingMonth()" (ngModelChange)="setSelectedReceiptProcessingMonth($event)"
+                class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-900 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+                <option *ngFor="let month of growthMonthOptions" [ngValue]="month.index">{{ month.long }}</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="mt-5 grid gap-3 sm:grid-cols-4">
+          <div class="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950/60">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">All-time processed</p>
+            <p class="mt-2 text-2xl font-semibold text-slate-950 dark:text-white">
+              {{ receiptProcessingAllTimeTotal() | number }}
+            </p>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950/60">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Month total</p>
+            <p class="mt-2 text-2xl font-semibold text-slate-950 dark:text-white">
+              {{ receiptProcessingSummary().total | number }}
+            </p>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950/60">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Avg / day</p>
+            <p class="mt-2 text-2xl font-semibold text-slate-950 dark:text-white">
+              {{ receiptProcessingSummary().averagePerDay | number:'1.0-1' }}
+            </p>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950/60">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Peak day</p>
+            <p class="mt-2 text-2xl font-semibold text-slate-950 dark:text-white">
+              {{ receiptProcessingPeakLabel() }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-5 py-5">
+        <div *ngIf="receiptProcessingLoading()" class="mb-4 text-sm text-slate-500 dark:text-slate-400">
+          Loading receipt processing stats...
+        </div>
+        <div *ngIf="receiptProcessingError()" class="mb-4 text-sm text-rose-600 dark:text-rose-400">
+          {{ receiptProcessingError() }}
+        </div>
+
+        <div class="overflow-x-auto">
+          <div class="min-w-[860px]">
+            <div class="grid h-64 items-end gap-2 border-b border-slate-200 pb-3 dark:border-slate-800"
+              [style.grid-template-columns]="receiptProcessingGridTemplate()">
+              <div *ngFor="let day of receiptProcessingSummary().days"
+                class="group flex h-full min-w-0 flex-col justify-end">
+                <div class="relative flex h-52 items-end rounded-md border bg-slate-100/80 p-0.5 dark:bg-slate-800/70"
+                  [class.opacity-40]="day.isFuture"
+                  [class.border-sky-400]="day.isCurrentDay"
+                  [class.bg-sky-50]="day.isCurrentDay"
+                  [class.ring-2]="day.isCurrentDay"
+                  [class.ring-sky-400/60]="day.isCurrentDay"
+                  [class.shadow-md]="day.isCurrentDay"
+                  [class.shadow-sky-900/10]="day.isCurrentDay"
+                  [class.dark:border-sky-400]="day.isCurrentDay"
+                  [class.dark:bg-sky-950/30]="day.isCurrentDay"
+                  [class.border-slate-100]="!day.isCurrentDay"
+                  [class.dark:border-slate-800]="!day.isCurrentDay">
+                  <span *ngIf="day.isCurrentDay"
+                    class="absolute left-1/2 top-1 -translate-x-1/2 rounded-full bg-sky-600 px-1.5 py-0.5 text-[9px] font-semibold uppercase text-white shadow-sm dark:bg-sky-400 dark:text-sky-950">
+                    Today
+                  </span>
+                  <div class="w-full rounded-[5px] bg-gradient-to-t from-slate-700 via-sky-500 to-emerald-300 transition-all duration-300 group-hover:from-slate-800 group-hover:via-sky-500 group-hover:to-teal-300"
+                    [class.from-sky-800]="day.isCurrentDay"
+                    [class.to-emerald-300]="day.isCurrentDay"
+                    [style.height.%]="receiptProcessingBarHeight(day.count)">
+                  </div>
+                  <div
+                    class="pointer-events-none absolute -top-3 left-1/2 z-10 hidden -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-lg group-hover:block dark:border-slate-700 dark:bg-slate-950">
+                    <p class="font-semibold text-slate-900 dark:text-white">
+                      {{ selectedReceiptProcessingMonthLabel() }} · Day {{ day.day }}
+                    </p>
+                    <p class="mt-1 text-slate-500 dark:text-slate-400">
+                      {{ day.count | number }} processed · {{ day.cumulative | number }} month-to-date
+                    </p>
+                  </div>
+                </div>
+                <div class="mt-2 h-8 text-center">
+                  <p class="text-[10px] font-semibold text-slate-600 dark:text-slate-300"
+                    [class.text-sky-700]="day.isCurrentDay"
+                    [class.dark:text-sky-300]="day.isCurrentDay">
+                    {{ day.count | number }}
+                  </p>
+                  <p *ngIf="day.day === 1 || day.day % 5 === 0 || day.day === receiptProcessingSummary().days.length || day.isCurrentDay"
+                    class="mt-1 text-[10px] font-medium text-slate-400 dark:text-slate-500"
+                    [class.text-sky-700]="day.isCurrentDay"
+                    [class.dark:text-sky-300]="day.isCurrentDay">
+                    {{ day.day }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
+              <span>{{ receiptProcessingSummary().total | number }} receipt(s) processed in {{ selectedReceiptProcessingMonthLabel() }}</span>
+              <span *ngIf="receiptProcessingStats()?.generatedAt">Updated from admin analytics.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <details class="group rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
       <summary class="flex cursor-pointer list-none items-center justify-between gap-4 border-b border-slate-100 px-4 py-3 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50">
         <div>

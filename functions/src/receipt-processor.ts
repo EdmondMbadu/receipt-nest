@@ -512,6 +512,7 @@ export const processReceipt = onDocumentCreated(
       if (!extraction) {
         await receiptRef.update({
           status: "needs_review",
+          processedAt: admin.firestore.FieldValue.serverTimestamp(),
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
         logger.warn("No extraction successful, marked for review");
@@ -558,6 +559,7 @@ export const processReceipt = onDocumentCreated(
       // Step 6: Update receipt with extraction results
       const updateData: Record<string, unknown> = {
         status,
+        processedAt: admin.firestore.FieldValue.serverTimestamp(),
         extraction,
         merchant,
         category,
@@ -612,6 +614,7 @@ export const processReceipt = onDocumentCreated(
       // Update status to needs_review on error
       await receiptRef.update({
         status: "needs_review",
+        processedAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     }

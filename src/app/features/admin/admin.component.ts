@@ -88,6 +88,32 @@ interface UserGrowthDaySummary {
   peakDay: UserGrowthDay | null;
 }
 
+interface ReceiptProcessingDay {
+  day: number;
+  count: number;
+  cumulative: number;
+  isCurrentDay: boolean;
+  isFuture: boolean;
+}
+
+interface ReceiptProcessingSummary {
+  days: ReceiptProcessingDay[];
+  total: number;
+  maxCount: number;
+  activeDayCount: number;
+  averagePerDay: number;
+  peakDay: ReceiptProcessingDay | null;
+}
+
+interface ReceiptProcessingStatsResponse {
+  ok: boolean;
+  allTimeTotal: number;
+  year: number;
+  month: number;
+  days: Array<{ day: number; count: number }>;
+  generatedAt?: string;
+}
+
 interface CustomEmailRecipient {
   key: string;
   source: 'system' | 'csv';
@@ -199,6 +225,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   private feedbackUnsubscribe: Unsubscribe | null = null;
   private billingConfigUnsubscribe: Unsubscribe | null = null;
   private readonly backfilledReceiptCountUserIds = new Set<string>();
+  private receiptProcessingStatsRequestId = 0;
 
   readonly users = signal<AdminUser[]>([]);
   readonly feedback = signal<AdminFeedback[]>([]);
@@ -272,6 +299,11 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly selectedGrowthView = signal<UserGrowthView>('year');
   readonly selectedGrowthYear = signal(new Date().getFullYear());
   readonly selectedGrowthMonth = signal(new Date().getMonth());
+  readonly selectedReceiptProcessingYear = signal(new Date().getFullYear());
+  readonly selectedReceiptProcessingMonth = signal(new Date().getMonth());
+  readonly receiptProcessingStats = signal<ReceiptProcessingStatsResponse | null>(null);
+  readonly receiptProcessingLoading = signal(true);
+  readonly receiptProcessingError = signal<string | null>(null);
   readonly customEmailSubject = signal('Unlock Pro in ReceiptNest AI');
   readonly customEmailPreheader = signal('A quick note from ReceiptNest AI about your account.');
   readonly customEmailHtml = signal(this.getDefaultCustomEmailHtml());
@@ -422,6 +454,58 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly isSelectedGrowthMonthCurrent = computed(() => {
     const today = new Date();
     return this.selectedGrowthYear() === today.getFullYear() && this.selectedGrowthMonth() === today.getMonth();
+  });
+  readonly selectedReceiptProcessingMonthLabel = computed(() =>
+    `${MONTH_LABELS[this.selectedReceiptProcessingMonth()].long} ${this.selectedReceiptProcessingYear()}`
+  );
+  readonly receiptProcessingAllTimeTotal = computed(() =>
+    this.receiptProcessingStats()?.allTimeTotal ?? this.users().reduce((sum, user) => sum + (user.receiptCount ?? 0), 0)
+  );
+  readonly receiptProcessingSummary = computed<ReceiptProcessingSummary>(() => {
+    const selectedYear = this.selectedReceiptProcessingYear();
+    const selectedMonth = this.selectedReceiptProcessingMonth();
+    const today = new Date();
+    const isCurrentMonth = selectedYear === today.getFullYear() && selectedMonth === today.getMonth();
+    const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+    const activeDayCount = isCurrentMonth ? today.getDate() : daysInMonth;
+    const counts = Array.from({ length: daysInMonth }, () => 0);
+
+    this.receiptProcessingStats()?.days.forEach((entry) => {
+      if (entry.day >= 1 && entry.day <= daysInMonth) {
+        counts[entry.day - 1] = entry.count;
+      }
+    });
+
+    let cumulative = 0;
+    const days = counts.map((count, index) => {
+      const day = index + 1;
+      cumulative += count;
+      return {
+        day,
+        count,
+        cumulative,
+        isCurrentDay: isCurrentMonth && day === today.getDate(),
+        isFuture: isCurrentMonth && day > today.getDate()
+      };
+    });
+    const total = counts.reduce((sum, count) => sum + count, 0);
+    const maxCount = Math.max(...counts, 0);
+    const peakDay = maxCount > 0
+      ? days.reduce((peak, day) => (day.count > peak.count ? day : peak), days[0])
+      : null;
+
+    return {
+      days,
+      total,
+      maxCount,
+      activeDayCount,
+      averagePerDay: total / activeDayCount,
+      peakDay
+    };
+  });
+  readonly receiptProcessingPeakLabel = computed(() => {
+    const peakDay = this.receiptProcessingSummary().peakDay;
+    return peakDay ? `Day ${peakDay.day} (${peakDay.count})` : 'No receipts yet';
   });
   readonly sortedUsers = computed(() => {
     const column = this.userSortColumn();
@@ -596,6 +680,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     void this.loadSpendSummarySchedule();
     void this.loadBillingModeStatus();
+    void this.loadReceiptProcessingStats();
 
     const usersRef = collection(this.db, 'users');
     const feedbackQuery = query(collection(this.db, 'feedback'), orderBy('createdAt', 'desc'));
@@ -1196,6 +1281,53 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
 
+  async loadReceiptProcessingStats(): Promise<void> {
+    const requestId = ++this.receiptProcessingStatsRequestId;
+    const year = this.selectedReceiptProcessingYear();
+    const month = this.selectedReceiptProcessingMonth();
+    const start = new Date(year, month, 1);
+    const end = new Date(year, month + 1, 1);
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+
+    this.receiptProcessingLoading.set(true);
+    this.receiptProcessingError.set(null);
+    this.receiptProcessingStats.set(null);
+
+    try {
+      const callable = httpsCallable<
+        {
+          year: number;
+          month: number;
+          startAtMillis: number;
+          endAtMillis: number;
+          timeZone: string;
+        },
+        ReceiptProcessingStatsResponse
+      >(this.functions, 'getReceiptProcessingStats');
+
+      const response = await callable({
+        year,
+        month: month + 1,
+        startAtMillis: start.getTime(),
+        endAtMillis: end.getTime(),
+        timeZone
+      });
+
+      if (requestId === this.receiptProcessingStatsRequestId) {
+        this.receiptProcessingStats.set(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to load receipt processing stats', error);
+      if (requestId === this.receiptProcessingStatsRequestId) {
+        this.receiptProcessingError.set('Unable to load receipt processing stats right now.');
+      }
+    } finally {
+      if (requestId === this.receiptProcessingStatsRequestId) {
+        this.receiptProcessingLoading.set(false);
+      }
+    }
+  }
+
   formatDate(value?: UserProfile['createdAt'] | null): string {
     if (!value || !(value instanceof Timestamp)) {
       return '—';
@@ -1266,6 +1398,22 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
 
+  setSelectedReceiptProcessingYear(value: string | number): void {
+    const parsedYear = typeof value === 'string' ? Number.parseInt(value, 10) : Number(value);
+    if (Number.isFinite(parsedYear)) {
+      this.selectedReceiptProcessingYear.set(parsedYear);
+      void this.loadReceiptProcessingStats();
+    }
+  }
+
+  setSelectedReceiptProcessingMonth(value: string | number): void {
+    const parsedMonth = typeof value === 'string' ? Number.parseInt(value, 10) : Number(value);
+    if (Number.isFinite(parsedMonth) && parsedMonth >= 0 && parsedMonth <= 11) {
+      this.selectedReceiptProcessingMonth.set(parsedMonth);
+      void this.loadReceiptProcessingStats();
+    }
+  }
+
   growthBarHeight(count: number): number {
     const maxCount = this.userGrowthSummary().maxCount;
     if (maxCount < 1) {
@@ -1286,6 +1434,19 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   dailyGrowthGridTemplate(): string {
     return `repeat(${this.userGrowthDaySummary().days.length}, minmax(18px, 1fr))`;
+  }
+
+  receiptProcessingBarHeight(count: number): number {
+    const maxCount = this.receiptProcessingSummary().maxCount;
+    if (maxCount < 1) {
+      return 2;
+    }
+
+    return Math.max(8, Math.round((count / maxCount) * 100));
+  }
+
+  receiptProcessingGridTemplate(): string {
+    return `repeat(${this.receiptProcessingSummary().days.length}, minmax(18px, 1fr))`;
   }
 
   toggleUserSort(column: UserSortColumn): void {

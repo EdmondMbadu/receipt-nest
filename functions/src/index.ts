@@ -33,6 +33,7 @@ export {
   sendTestEmail,
   sendCustomAdminEmail,
   backfillUserReceiptCounts,
+  getReceiptProcessingStats,
   setUserProAccess,
   getBillingModeStatus,
   setUserBillingMode,
