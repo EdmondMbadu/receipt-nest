@@ -26,8 +26,44 @@ const lazyAdminGuard: CanActivateFn = (route, state) => {
 export const routes: Routes = [
   {
     path: '',
-    title: 'ReceiptNest AI | Receipt Organizer & Expense Tracker',
+    title: 'ReceiptNest AI | Receipt Organizer, Receipt Tracker & Expense Tracker',
     loadComponent: () => import('./features/landing/landing.component').then((m) => m.LandingComponent)
+  },
+  {
+    path: 'receipt-tracker',
+    title: 'Receipt Tracker App for Organized Expenses | ReceiptNest AI',
+    data: { page: 'receipt-tracker' },
+    loadComponent: () => import('./features/seo-page/seo-page.component').then((m) => m.SeoPageComponent)
+  },
+  {
+    path: 'receipt-organizer',
+    title: 'Receipt Organizer App for Email, Photos, and PDFs | ReceiptNest AI',
+    data: { page: 'receipt-organizer' },
+    loadComponent: () => import('./features/seo-page/seo-page.component').then((m) => m.SeoPageComponent)
+  },
+  {
+    path: 'receipt-scanner',
+    title: 'Receipt Scanner App with AI Organization | ReceiptNest AI',
+    data: { page: 'receipt-scanner' },
+    loadComponent: () => import('./features/seo-page/seo-page.component').then((m) => m.SeoPageComponent)
+  },
+  {
+    path: 'receipt-management-software',
+    title: 'Receipt Management Software for Simple Expense Records | ReceiptNest AI',
+    data: { page: 'receipt-management-software' },
+    loadComponent: () => import('./features/seo-page/seo-page.component').then((m) => m.SeoPageComponent)
+  },
+  {
+    path: 'expense-tracker',
+    title: 'Expense Tracker Built Around Receipts | ReceiptNest AI',
+    data: { page: 'expense-tracker' },
+    loadComponent: () => import('./features/seo-page/seo-page.component').then((m) => m.SeoPageComponent)
+  },
+  {
+    path: 'tax-receipt-organizer',
+    title: 'Tax Receipt Organizer for Export-Ready Records | ReceiptNest AI',
+    data: { page: 'tax-receipt-organizer' },
+    loadComponent: () => import('./features/seo-page/seo-page.component').then((m) => m.SeoPageComponent)
   },
   {
     path: 'app/pricing',
@@ -119,7 +155,7 @@ export const routes: Routes = [
   },
   {
     path: 'support',
-    title: 'Support',
+    title: 'Support | ReceiptNest AI',
     loadComponent: () => import('./features/support/support.component').then((m) => m.SupportComponent)
   },
   {
@@ -129,7 +165,7 @@ export const routes: Routes = [
   },
   {
     path: 'terms',
-    title: 'Terms and Conditions',
+    title: 'Terms and Conditions | ReceiptNest AI',
     loadComponent: () => import('./features/terms/terms.component').then((m) => m.TermsComponent)
   },
   {

@@ -14,6 +14,30 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Prerender
   },
   {
+    path: 'receipt-tracker',
+    renderMode: RenderMode.Prerender
+  },
+  {
+    path: 'receipt-organizer',
+    renderMode: RenderMode.Prerender
+  },
+  {
+    path: 'receipt-scanner',
+    renderMode: RenderMode.Prerender
+  },
+  {
+    path: 'receipt-management-software',
+    renderMode: RenderMode.Prerender
+  },
+  {
+    path: 'expense-tracker',
+    renderMode: RenderMode.Prerender
+  },
+  {
+    path: 'tax-receipt-organizer',
+    renderMode: RenderMode.Prerender
+  },
+  {
     path: 'support',
     renderMode: RenderMode.Prerender
   },

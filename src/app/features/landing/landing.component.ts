@@ -9,12 +9,12 @@ import {
   signal,
   viewChild
 } from '@angular/core';
-import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { Meta, Title } from '@angular/platform-browser';
 
 import { AppConfigService } from '../../services/app-config.service';
 import { AuthService } from '../../services/auth.service';
+import { SeoService } from '../../services/seo.service';
 import { ThemeService } from '../../services/theme.service';
 
 type DemoMonth = string;
@@ -48,12 +48,10 @@ interface DemoReceipt {
 export class LandingComponent implements OnDestroy {
   readonly auth = inject(AuthService);
   private readonly theme = inject(ThemeService);
-  private readonly title = inject(Title);
-  private readonly meta = inject(Meta);
-  private readonly document = inject(DOCUMENT);
   private readonly appConfig = inject(AppConfigService);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly seo = inject(SeoService);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
   readonly user = this.auth.user;
@@ -448,39 +446,57 @@ export class LandingComponent implements OnDestroy {
   }
 
   private applySeoTags() {
-    const pageTitle = 'ReceiptNest AI | Receipt Organizer & Expense Tracker';
-    const description =
-      'ReceiptNest AI is a receipt organizer and expense tracker that turns scattered receipts into a clear picture of your spending: auto-organized, tax-ready, and private by default.';
-    const keywords =
-      'ReceiptNest AI, ReceiptNest, receipt organizer, AI receipt organizer, receipt scanner, receipt tracker, receipt management software, expense tracker, receipt inbox, tax-ready receipts';
-    const canonicalUrl = 'https://receipt-nest.com/';
-    const previewImage = 'https://receipt-nest.com/assets/og-image.png';
-    const previewAlt = 'ReceiptNest AI receipt organizer dashboard';
-
-    this.title.setTitle(pageTitle);
-    this.meta.updateTag({ name: 'description', content: description });
-    this.meta.updateTag({ name: 'keywords', content: keywords });
-    this.meta.updateTag({ name: 'author', content: 'ReceiptNest AI' });
-    this.meta.updateTag({ name: 'robots', content: 'index, follow' });
-    this.meta.updateTag({
-      name: 'googlebot',
-      content: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+    this.seo.apply({
+      title: 'ReceiptNest AI | Receipt Organizer, Receipt Tracker & Expense Tracker',
+      description:
+        'ReceiptNest AI is a receipt organizer, receipt tracker, receipt scanner, and expense tracker that turns scattered receipts into tax-ready monthly spending clarity.',
+      keywords:
+        'ReceiptNest AI, ReceiptNest, receipt organizer, AI receipt organizer, receipt scanner, receipt tracker, receipt tracking app, receipt management software, expense tracker, receipt inbox, tax-ready receipts',
+      canonicalPath: '/'
     });
-    this.meta.updateTag({ name: 'application-name', content: 'ReceiptNest AI' });
-    this.meta.updateTag({ property: 'og:type', content: 'website' }, "property='og:type'");
-    this.meta.updateTag({ property: 'og:url', content: canonicalUrl }, "property='og:url'");
-    this.meta.updateTag({ property: 'og:title', content: pageTitle }, "property='og:title'");
-    this.meta.updateTag({ property: 'og:description', content: description }, "property='og:description'");
-    this.meta.updateTag({ property: 'og:image', content: previewImage }, "property='og:image'");
-    this.meta.updateTag({ property: 'og:image:alt', content: previewAlt }, "property='og:image:alt'");
-    this.meta.updateTag({ property: 'og:site_name', content: 'ReceiptNest AI' }, "property='og:site_name'");
-    this.meta.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
-    this.meta.updateTag({ name: 'twitter:url', content: canonicalUrl });
-    this.meta.updateTag({ name: 'twitter:title', content: pageTitle });
-    this.meta.updateTag({ name: 'twitter:description', content: description });
-    this.meta.updateTag({ name: 'twitter:image', content: previewImage });
-    this.meta.updateTag({ name: 'twitter:image:alt', content: previewAlt });
-    this.updateCanonical(canonicalUrl);
+
+    this.seo.setJsonLd('home-faq', {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'What is ReceiptNest AI?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text:
+              'ReceiptNest AI is an AI receipt organizer, receipt scanner, and expense tracker for freelancers, self-employed people, and small teams. It captures receipts from email, photos, and PDFs, then turns them into a searchable monthly expense inbox.'
+          }
+        },
+        {
+          '@type': 'Question',
+          name: 'How do receipts get into ReceiptNest AI?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text:
+              'You can forward emails, upload PDF or photo receipts, or connect supported integrations. Everything lands in one organized inbox.'
+          }
+        },
+        {
+          '@type': 'Question',
+          name: 'Is ReceiptNest AI accounting software or a receipt tracker?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text:
+              'ReceiptNest AI is a receipt tracker and receipt organizer focused on capture, search, exports, and spending clarity. If you need invoicing, payroll, or double-entry accounting, tools like Wave or QuickBooks are better suited.'
+          }
+        },
+        {
+          '@type': 'Question',
+          name: 'Can I export receipts for taxes or accounting?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text:
+              'Yes. You can export any time by month, category, or tag to CSV or PDF and share the results with your accountant.'
+          }
+        }
+      ]
+    });
   }
 
   private async redirectSignedInUserToApp(): Promise<void> {
@@ -496,15 +512,4 @@ export class LandingComponent implements OnDestroy {
     }
   }
 
-  private updateCanonical(url: string) {
-    let canonical = this.document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-
-    if (!canonical) {
-      canonical = this.document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      this.document.head.appendChild(canonical);
-    }
-
-    canonical.setAttribute('href', url);
-  }
 }

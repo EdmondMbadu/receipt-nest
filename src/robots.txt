@@ -8,6 +8,9 @@ Allow: /
 Disallow: /app/
 Disallow: /home/
 Disallow: /app/receipt/
+Disallow: /share/
+Disallow: /mobile-return/
+Disallow: /goodbye
 
 # Sitemap location
 Sitemap: https://receipt-nest.com/sitemap.xml
