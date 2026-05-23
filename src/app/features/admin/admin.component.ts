@@ -522,6 +522,26 @@ export class AdminComponent implements OnInit, OnDestroy {
     const peakDay = this.receiptProcessingSummary().peakDay;
     return peakDay ? `Day ${peakDay.day} (${peakDay.count})` : 'No receipts yet';
   });
+  readonly receiptProcessingYAxisTicks = computed(() => {
+    const maxCount = this.receiptProcessingSummary().maxCount;
+    if (maxCount < 1) {
+      return [0];
+    }
+
+    const roughStep = Math.max(1, Math.ceil(maxCount / 4));
+    const magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
+    const normalized = roughStep / magnitude;
+    const niceNormalized = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+    const step = niceNormalized * magnitude;
+    const axisMax = Math.ceil(maxCount / step) * step;
+    const ticks: number[] = [];
+
+    for (let value = axisMax; value >= 0; value -= step) {
+      ticks.push(value);
+    }
+
+    return ticks;
+  });
   readonly sortedUsers = computed(() => {
     const column = this.userSortColumn();
     const direction = this.userSortDirection();
@@ -1465,7 +1485,20 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   receiptProcessingGridTemplate(): string {
-    return `repeat(${this.receiptProcessingSummary().days.length}, minmax(18px, 1fr))`;
+    return `repeat(${this.receiptProcessingSummary().days.length}, minmax(28px, 1fr))`;
+  }
+
+  receiptProcessingTickPosition(tick: number): number {
+    const maxTick = this.receiptProcessingYAxisTicks()[0] ?? 0;
+    if (maxTick < 1) {
+      return 0;
+    }
+
+    return (tick / maxTick) * 100;
+  }
+
+  receiptProcessingDayLabel(day: number): string {
+    return `${MONTH_LABELS[this.selectedReceiptProcessingMonth()].short} ${day}`;
   }
 
   toggleUserSort(column: UserSortColumn): void {

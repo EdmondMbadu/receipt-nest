@@ -1345,54 +1345,67 @@
         </div>
 
         <div class="overflow-x-auto">
-          <div class="min-w-[860px]">
-            <div class="grid h-64 items-end gap-2 border-b border-slate-200 pb-3 dark:border-slate-800"
-              [style.grid-template-columns]="receiptProcessingGridTemplate()">
-              <div *ngFor="let day of receiptProcessingSummary().days"
-                class="group flex h-full min-w-0 flex-col justify-end">
-                <div class="relative flex h-52 items-end rounded-md border bg-slate-100/80 p-0.5 dark:bg-slate-800/70"
-                  [class.opacity-40]="day.isFuture"
-                  [class.border-sky-400]="day.isCurrentDay"
-                  [class.bg-sky-50]="day.isCurrentDay"
-                  [class.ring-2]="day.isCurrentDay"
-                  [class.ring-sky-400/60]="day.isCurrentDay"
-                  [class.shadow-md]="day.isCurrentDay"
-                  [class.shadow-sky-900/10]="day.isCurrentDay"
-                  [class.dark:border-sky-400]="day.isCurrentDay"
-                  [class.dark:bg-sky-950/30]="day.isCurrentDay"
-                  [class.border-slate-100]="!day.isCurrentDay"
-                  [class.dark:border-slate-800]="!day.isCurrentDay">
-                  <span *ngIf="day.isCurrentDay"
-                    class="absolute left-1/2 top-1 -translate-x-1/2 rounded-full bg-sky-600 px-1.5 py-0.5 text-[9px] font-semibold uppercase text-white shadow-sm dark:bg-sky-400 dark:text-sky-950">
-                    Today
-                  </span>
-                  <div class="w-full rounded-[5px] bg-gradient-to-t from-slate-700 via-sky-500 to-emerald-300 transition-all duration-300 group-hover:from-slate-800 group-hover:via-sky-500 group-hover:to-teal-300"
-                    [class.from-sky-800]="day.isCurrentDay"
-                    [class.to-emerald-300]="day.isCurrentDay"
-                    [style.height.%]="receiptProcessingBarHeight(day.count)">
-                  </div>
-                  <div
-                    class="pointer-events-none absolute -top-3 left-1/2 z-10 hidden -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-lg group-hover:block dark:border-slate-700 dark:bg-slate-950">
-                    <p class="font-semibold text-slate-900 dark:text-white">
-                      {{ selectedReceiptProcessingMonthLabel() }} · Day {{ day.day }}
-                    </p>
-                    <p class="mt-1 text-slate-500 dark:text-slate-400">
-                      {{ day.count | number }} processed · {{ day.cumulative | number }} month-to-date
-                    </p>
-                  </div>
+          <div class="min-w-[980px]">
+            <div class="flex gap-3">
+              <div class="w-16 shrink-0">
+                <div class="h-6 text-right text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                  Receipts
                 </div>
-                <div class="mt-2 h-8 text-center">
-                  <p class="text-[10px] font-semibold text-slate-600 dark:text-slate-300"
-                    [class.text-sky-700]="day.isCurrentDay"
-                    [class.dark:text-sky-300]="day.isCurrentDay">
-                    {{ day.count | number }}
-                  </p>
-                  <p *ngIf="day.day === 1 || day.day % 5 === 0 || day.day === receiptProcessingSummary().days.length || day.isCurrentDay"
-                    class="mt-1 text-[10px] font-medium text-slate-400 dark:text-slate-500"
-                    [class.text-sky-700]="day.isCurrentDay"
-                    [class.dark:text-sky-300]="day.isCurrentDay">
-                    {{ day.day }}
-                  </p>
+                <div class="relative h-52 border-r border-slate-200 dark:border-slate-800">
+                  <span *ngFor="let tick of receiptProcessingYAxisTicks()"
+                    class="absolute right-2 translate-y-1/2 text-[10px] font-medium tabular-nums text-slate-400 dark:text-slate-500"
+                    [style.bottom.%]="receiptProcessingTickPosition(tick)">
+                    {{ tick | number }}
+                  </span>
+                </div>
+                <div class="h-10"></div>
+              </div>
+
+              <div class="flex-1">
+                <div class="grid h-[18.5rem] items-end gap-2 border-b border-slate-200 pb-2 dark:border-slate-800"
+                  [style.grid-template-columns]="receiptProcessingGridTemplate()">
+                  <div *ngFor="let day of receiptProcessingSummary().days"
+                    class="group flex h-full min-w-0 flex-col justify-end">
+                    <div class="relative flex h-52 items-end rounded-md border bg-slate-100/80 p-0.5 dark:bg-slate-800/70"
+                      [attr.title]="receiptProcessingDayLabel(day.day) + ': ' + (day.count | number) + ' processed, ' + (day.cumulative | number) + ' month-to-date'"
+                      [class.opacity-40]="day.isFuture"
+                      [class.border-sky-400]="day.isCurrentDay"
+                      [class.bg-sky-50]="day.isCurrentDay"
+                      [class.ring-2]="day.isCurrentDay"
+                      [class.ring-sky-400/60]="day.isCurrentDay"
+                      [class.shadow-md]="day.isCurrentDay"
+                      [class.shadow-sky-900/10]="day.isCurrentDay"
+                      [class.dark:border-sky-400]="day.isCurrentDay"
+                      [class.dark:bg-sky-950/30]="day.isCurrentDay"
+                      [class.border-slate-100]="!day.isCurrentDay"
+                      [class.dark:border-slate-800]="!day.isCurrentDay">
+                      <span *ngIf="day.count > 0"
+                        class="absolute left-1/2 z-10 -translate-x-1/2 rounded-md bg-white/95 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-slate-700 shadow-sm ring-1 ring-slate-200 dark:bg-slate-950/95 dark:text-slate-200 dark:ring-slate-700"
+                        [class.text-sky-700]="day.isCurrentDay"
+                        [class.dark:text-sky-300]="day.isCurrentDay"
+                        [style.bottom.%]="receiptProcessingBarHeight(day.count)"
+                        [style.transform]="'translate(-50%, -0.25rem)'">
+                        {{ day.count | number }}
+                      </span>
+                      <span *ngIf="day.isCurrentDay"
+                        class="absolute left-1/2 top-1 -translate-x-1/2 rounded-full bg-sky-600 px-1.5 py-0.5 text-[9px] font-semibold uppercase text-white shadow-sm dark:bg-sky-400 dark:text-sky-950">
+                        Today
+                      </span>
+                      <div *ngIf="day.count > 0"
+                        class="w-full rounded-[5px] bg-gradient-to-t from-slate-700 via-sky-500 to-emerald-300 transition-all duration-300 group-hover:from-slate-800 group-hover:via-sky-500 group-hover:to-teal-300"
+                        [class.from-sky-800]="day.isCurrentDay"
+                        [class.to-emerald-300]="day.isCurrentDay"
+                        [style.height.%]="receiptProcessingBarHeight(day.count)">
+                      </div>
+                    </div>
+                    <div class="mt-2 h-10 text-center">
+                      <p class="text-[10px] font-medium tabular-nums leading-tight text-slate-400 dark:text-slate-500"
+                        [class.text-sky-700]="day.isCurrentDay"
+                        [class.dark:text-sky-300]="day.isCurrentDay">
+                        {{ day.day }}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
