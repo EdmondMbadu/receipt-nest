@@ -394,6 +394,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     const peakMonth = this.userGrowthSummary().peakMonth;
     return peakMonth ? `${peakMonth.longLabel} (${peakMonth.count})` : 'No signups yet';
   });
+  readonly userGrowthYAxisTicks = computed(() => this.buildHistogramTicks(this.userGrowthSummary().maxCount));
   readonly isSelectedGrowthYearCurrent = computed(() => this.selectedGrowthYear() === new Date().getFullYear());
   readonly growthMonthOptions = MONTH_LABELS.map((month, index) => ({ ...month, index }));
   readonly selectedGrowthMonthLabel = computed(() =>
@@ -452,6 +453,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     const peakDay = this.userGrowthDaySummary().peakDay;
     return peakDay ? `Day ${peakDay.day} (${peakDay.count})` : 'No signups yet';
   });
+  readonly userGrowthDayYAxisTicks = computed(() => this.buildHistogramTicks(this.userGrowthDaySummary().maxCount));
   readonly isSelectedGrowthMonthCurrent = computed(() => {
     const today = new Date();
     return this.selectedGrowthYear() === today.getFullYear() && this.selectedGrowthMonth() === today.getMonth();
@@ -522,26 +524,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     const peakDay = this.receiptProcessingSummary().peakDay;
     return peakDay ? `Day ${peakDay.day} (${peakDay.count})` : 'No receipts yet';
   });
-  readonly receiptProcessingYAxisTicks = computed(() => {
-    const maxCount = this.receiptProcessingSummary().maxCount;
-    if (maxCount < 1) {
-      return [0];
-    }
-
-    const roughStep = Math.max(1, Math.ceil(maxCount / 4));
-    const magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
-    const normalized = roughStep / magnitude;
-    const niceNormalized = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
-    const step = niceNormalized * magnitude;
-    const axisMax = Math.ceil(maxCount / step) * step;
-    const ticks: number[] = [];
-
-    for (let value = axisMax; value >= 0; value -= step) {
-      ticks.push(value);
-    }
-
-    return ticks;
-  });
+  readonly receiptProcessingYAxisTicks = computed(() => this.buildHistogramTicks(this.receiptProcessingSummary().maxCount));
   readonly sortedUsers = computed(() => {
     const column = this.userSortColumn();
     const direction = this.userSortDirection();
@@ -1454,34 +1437,34 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   growthBarHeight(count: number): number {
-    const maxCount = this.userGrowthSummary().maxCount;
-    if (maxCount < 1) {
+    const axisMax = this.userGrowthYAxisTicks()[0] ?? 0;
+    if (axisMax < 1 || count < 1) {
       return 2;
     }
 
-    return Math.max(7, Math.round((count / maxCount) * 100));
+    return Math.max(7, Math.round((count / axisMax) * 100));
   }
 
   dailyGrowthBarHeight(count: number): number {
-    const maxCount = this.userGrowthDaySummary().maxCount;
-    if (maxCount < 1) {
+    const axisMax = this.userGrowthDayYAxisTicks()[0] ?? 0;
+    if (axisMax < 1 || count < 1) {
       return 2;
     }
 
-    return Math.max(8, Math.round((count / maxCount) * 100));
+    return Math.max(8, Math.round((count / axisMax) * 100));
   }
 
   dailyGrowthGridTemplate(): string {
-    return `repeat(${this.userGrowthDaySummary().days.length}, minmax(18px, 1fr))`;
+    return `repeat(${this.userGrowthDaySummary().days.length}, minmax(28px, 1fr))`;
   }
 
   receiptProcessingBarHeight(count: number): number {
-    const maxCount = this.receiptProcessingSummary().maxCount;
-    if (maxCount < 1) {
+    const axisMax = this.receiptProcessingYAxisTicks()[0] ?? 0;
+    if (axisMax < 1 || count < 1) {
       return 2;
     }
 
-    return Math.max(8, Math.round((count / maxCount) * 100));
+    return Math.max(8, Math.round((count / axisMax) * 100));
   }
 
   receiptProcessingGridTemplate(): string {
@@ -1489,7 +1472,23 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   receiptProcessingTickPosition(tick: number): number {
-    const maxTick = this.receiptProcessingYAxisTicks()[0] ?? 0;
+    return this.histogramTickPosition(tick, this.receiptProcessingYAxisTicks());
+  }
+
+  receiptProcessingDayLabel(day: number): string {
+    return `${MONTH_LABELS[this.selectedReceiptProcessingMonth()].short} ${day}`;
+  }
+
+  userGrowthTickPosition(tick: number): number {
+    return this.histogramTickPosition(tick, this.userGrowthYAxisTicks());
+  }
+
+  userGrowthDayTickPosition(tick: number): number {
+    return this.histogramTickPosition(tick, this.userGrowthDayYAxisTicks());
+  }
+
+  private histogramTickPosition(tick: number, ticks: number[]): number {
+    const maxTick = ticks[0] ?? 0;
     if (maxTick < 1) {
       return 0;
     }
@@ -1497,8 +1496,24 @@ export class AdminComponent implements OnInit, OnDestroy {
     return (tick / maxTick) * 100;
   }
 
-  receiptProcessingDayLabel(day: number): string {
-    return `${MONTH_LABELS[this.selectedReceiptProcessingMonth()].short} ${day}`;
+  private buildHistogramTicks(maxCount: number): number[] {
+    if (maxCount < 1) {
+      return [0];
+    }
+
+    const roughStep = Math.max(1, Math.ceil(maxCount / 4));
+    const magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
+    const normalized = roughStep / magnitude;
+    const niceNormalized = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+    const step = niceNormalized * magnitude;
+    const axisMax = Math.ceil(maxCount / step) * step;
+    const ticks: number[] = [];
+
+    for (let value = axisMax; value >= 0; value -= step) {
+      ticks.push(value);
+    }
+
+    return ticks;
   }
 
   toggleUserSort(column: UserSortColumn): void {
