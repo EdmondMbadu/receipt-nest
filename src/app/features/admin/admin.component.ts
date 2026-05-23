@@ -129,6 +129,13 @@ interface CustomEmailRecipient {
   receiptCount?: number;
 }
 
+interface CustomEmailHtmlTemplate {
+  id: string;
+  name: string;
+  html: string;
+  updatedAt: string;
+}
+
 interface CustomEmailSendResponse {
   ok: boolean;
   sentCount: number;
@@ -195,6 +202,7 @@ interface UserBillingModeResponse {
 type UserProAccessMode = 'grant' | 'revoke';
 
 const RECEIPT_COUNT_BACKFILL_BATCH_SIZE = 50;
+const CUSTOM_EMAIL_TEMPLATE_STORAGE_KEY = 'receiptNestAdminCustomEmailHtmlTemplates';
 const MONTH_LABELS = [
   { short: 'Jan', long: 'January' },
   { short: 'Feb', long: 'February' },
@@ -324,6 +332,10 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly customEmailSuccess = signal<string | null>(null);
   readonly customEmailCsvError = signal<string | null>(null);
   readonly customEmailPreviewKey = signal<string | null>(null);
+  readonly customEmailTemplateName = signal('');
+  readonly customEmailTemplates = signal<CustomEmailHtmlTemplate[]>([]);
+  readonly customEmailTemplateError = signal<string | null>(null);
+  readonly customEmailTemplateSuccess = signal<string | null>(null);
 
   readonly totalUsers = computed(() => this.users().length);
   readonly adminCount = computed(() => this.users().filter((user) => user.role === 'admin').length);
@@ -696,6 +708,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.loadCustomEmailTemplates();
     void this.loadSpendSummarySchedule();
     void this.loadBillingModeStatus();
     void this.loadReceiptProcessingStats();
@@ -931,6 +944,94 @@ export class AdminComponent implements OnInit, OnDestroy {
     previewWindow.document.open();
     previewWindow.document.write(this.customEmailRenderedPreview());
     previewWindow.document.close();
+  }
+
+  saveCustomEmailHtmlTemplate(): void {
+    this.customEmailTemplateError.set(null);
+    this.customEmailTemplateSuccess.set(null);
+
+    const name = this.customEmailTemplateName().trim();
+    const html = this.customEmailHtml().trim();
+
+    if (!name) {
+      this.customEmailTemplateError.set('Give this HTML template a name before saving.');
+      return;
+    }
+
+    if (!html) {
+      this.customEmailTemplateError.set('Add HTML before saving this template.');
+      return;
+    }
+
+    const templates = this.customEmailTemplates();
+    const existingTemplate = templates.find((template) => template.name.toLowerCase() === name.toLowerCase());
+    const updatedTemplate: CustomEmailHtmlTemplate = {
+      id: existingTemplate?.id || this.createCustomEmailTemplateId(),
+      name,
+      html,
+      updatedAt: new Date().toISOString()
+    };
+    const nextTemplates = this.sortCustomEmailTemplates([
+      updatedTemplate,
+      ...templates.filter((template) => template.id !== updatedTemplate.id)
+    ]);
+
+    this.customEmailTemplates.set(nextTemplates);
+    this.persistCustomEmailTemplates(nextTemplates);
+    this.customEmailTemplateName.set(name);
+    this.customEmailTemplateSuccess.set(
+      existingTemplate ? `Updated "${name}".` : `Saved "${name}".`
+    );
+  }
+
+  loadCustomEmailHtmlTemplate(templateId: string): void {
+    const template = this.customEmailTemplates().find((item) => item.id === templateId);
+    if (!template) {
+      this.customEmailTemplateError.set('That saved template could not be found.');
+      this.customEmailTemplateSuccess.set(null);
+      return;
+    }
+
+    this.customEmailHtml.set(template.html);
+    this.customEmailTemplateName.set(template.name);
+    this.customEmailTemplateError.set(null);
+    this.customEmailTemplateSuccess.set(`Loaded "${template.name}" into the editor.`);
+  }
+
+  downloadCustomEmailHtmlTemplate(template: CustomEmailHtmlTemplate): void {
+    if (typeof document === 'undefined' || typeof URL === 'undefined') {
+      return;
+    }
+
+    const blob = new Blob([template.html], { type: 'text/html;charset=utf-8' });
+    const downloadUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = `${this.sanitizeTemplateFileName(template.name)}.html`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(downloadUrl);
+  }
+
+  deleteCustomEmailHtmlTemplate(templateId: string): void {
+    const template = this.customEmailTemplates().find((item) => item.id === templateId);
+    if (!template) {
+      return;
+    }
+
+    if (
+      typeof window !== 'undefined' &&
+      !window.confirm(`Delete saved HTML template "${template.name}"?`)
+    ) {
+      return;
+    }
+
+    const nextTemplates = this.customEmailTemplates().filter((item) => item.id !== templateId);
+    this.customEmailTemplates.set(nextTemplates);
+    this.persistCustomEmailTemplates(nextTemplates);
+    this.customEmailTemplateError.set(null);
+    this.customEmailTemplateSuccess.set(`Deleted "${template.name}".`);
   }
 
   effectivePlan(user: AdminUser): 'free' | 'pro' {
@@ -1536,6 +1637,85 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     return this.userSortDirection() === 'asc' ? '↑' : '↓';
+  }
+
+  private loadCustomEmailTemplates(): void {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+
+    try {
+      const storedTemplates = localStorage.getItem(CUSTOM_EMAIL_TEMPLATE_STORAGE_KEY);
+      if (!storedTemplates) {
+        return;
+      }
+
+      const parsedTemplates = JSON.parse(storedTemplates);
+      if (!Array.isArray(parsedTemplates)) {
+        return;
+      }
+
+      const templates = parsedTemplates
+        .map((template): CustomEmailHtmlTemplate | null => {
+          if (
+            typeof template?.id !== 'string' ||
+            typeof template?.name !== 'string' ||
+            typeof template?.html !== 'string' ||
+            typeof template?.updatedAt !== 'string'
+          ) {
+            return null;
+          }
+
+          return {
+            id: template.id,
+            name: template.name,
+            html: template.html,
+            updatedAt: template.updatedAt
+          };
+        })
+        .filter((template): template is CustomEmailHtmlTemplate => Boolean(template));
+
+      this.customEmailTemplates.set(this.sortCustomEmailTemplates(templates));
+    } catch (error) {
+      console.error('Failed to load saved custom email templates', error);
+      this.customEmailTemplateError.set('Saved email templates could not be loaded in this browser.');
+    }
+  }
+
+  private persistCustomEmailTemplates(templates: CustomEmailHtmlTemplate[]): void {
+    if (typeof localStorage === 'undefined') {
+      this.customEmailTemplateError.set('Saved templates are not available in this browser.');
+      return;
+    }
+
+    try {
+      localStorage.setItem(CUSTOM_EMAIL_TEMPLATE_STORAGE_KEY, JSON.stringify(templates));
+    } catch (error) {
+      console.error('Failed to save custom email templates', error);
+      this.customEmailTemplateError.set('Unable to save templates in this browser.');
+    }
+  }
+
+  private sortCustomEmailTemplates(templates: CustomEmailHtmlTemplate[]): CustomEmailHtmlTemplate[] {
+    return [...templates].sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
+  }
+
+  private createCustomEmailTemplateId(): string {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+      return crypto.randomUUID();
+    }
+
+    return `template-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+
+  private sanitizeTemplateFileName(name: string): string {
+    const fileName = name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    return fileName || 'receipt-nest-email-template';
   }
 
   private toCustomEmailRecipient(user: AdminUser): CustomEmailRecipient {
