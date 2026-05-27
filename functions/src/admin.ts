@@ -60,6 +60,14 @@ interface ReceiptProcessingStatsRequest {
 interface ReceiptProcessingDayCount {
   day: number;
   count: number;
+  latestProcessedAt?: string;
+}
+
+interface ReceiptProcessingUserCount {
+  userId: string;
+  monthCount: number;
+  days: ReceiptProcessingDayCount[];
+  latestProcessedAt?: string;
 }
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -580,20 +588,24 @@ export const getReceiptProcessingStats = onCall(
     }, 0);
     const processedStatuses = new Set(PROCESSED_RECEIPT_STATUSES);
     const counts = new Map<number, number>();
+    const userDayCounts = new Map<string, Map<number, number>>();
+    const userDayLatestProcessedAt = new Map<string, Map<number, admin.firestore.Timestamp>>();
+    const userLatestProcessedAt = new Map<string, admin.firestore.Timestamp>();
     const countedReceiptPaths = new Set<string>();
 
-    const addDay = (timestamp: admin.firestore.Timestamp) => {
+    const getDay = (timestamp: admin.firestore.Timestamp) => {
       const day = Number(dayFormatter.format(timestamp.toDate()));
       if (!Number.isInteger(day) || day < 1 || day > 31) {
-        return;
+        return null;
       }
 
-      counts.set(day, (counts.get(day) || 0) + 1);
+      return day;
     };
 
     const addReceipt = (
       doc: admin.firestore.QueryDocumentSnapshot,
-      timestamp: admin.firestore.Timestamp
+      timestamp: admin.firestore.Timestamp,
+      userId: string
     ) => {
       if (countedReceiptPaths.has(doc.ref.path)) {
         return;
@@ -604,7 +616,28 @@ export const getReceiptProcessingStats = onCall(
       }
 
       countedReceiptPaths.add(doc.ref.path);
-      addDay(timestamp);
+      const day = getDay(timestamp);
+      if (day === null) {
+        return;
+      }
+
+      counts.set(day, (counts.get(day) || 0) + 1);
+
+      const dayCounts = userDayCounts.get(userId) || new Map<number, number>();
+      dayCounts.set(day, (dayCounts.get(day) || 0) + 1);
+      userDayCounts.set(userId, dayCounts);
+
+      const dayLatest = userDayLatestProcessedAt.get(userId) || new Map<number, admin.firestore.Timestamp>();
+      const currentDayLatest = dayLatest.get(day);
+      if (!currentDayLatest || timestamp.toMillis() > currentDayLatest.toMillis()) {
+        dayLatest.set(day, timestamp);
+      }
+      userDayLatestProcessedAt.set(userId, dayLatest);
+
+      const currentLatest = userLatestProcessedAt.get(userId);
+      if (!currentLatest || timestamp.toMillis() > currentLatest.toMillis()) {
+        userLatestProcessedAt.set(userId, timestamp);
+      }
     };
 
     const loadUserReceiptStats = async (userId: string) => {
@@ -627,7 +660,7 @@ export const getReceiptProcessingStats = onCall(
       processedAtSnap.docs.forEach((doc) => {
         const timestamp = doc.get("processedAt");
         if (timestamp instanceof admin.firestore.Timestamp) {
-          addReceipt(doc, timestamp);
+          addReceipt(doc, timestamp, userId);
         }
       });
 
@@ -639,7 +672,7 @@ export const getReceiptProcessingStats = onCall(
 
         const timestamp = doc.get("extraction.processedAt");
         if (timestamp instanceof admin.firestore.Timestamp) {
-          addReceipt(doc, timestamp);
+          addReceipt(doc, timestamp, userId);
         }
       });
 
@@ -655,7 +688,7 @@ export const getReceiptProcessingStats = onCall(
 
         const timestamp = doc.get("updatedAt");
         if (timestamp instanceof admin.firestore.Timestamp) {
-          addReceipt(doc, timestamp);
+          addReceipt(doc, timestamp, userId);
         }
       });
     };
@@ -672,11 +705,30 @@ export const getReceiptProcessingStats = onCall(
       userCount: usersSnap.size,
       allTimeTotal,
       monthlyTotal: countedReceiptPaths.size,
+      activeUserCount: userDayCounts.size,
     });
 
     const days: ReceiptProcessingDayCount[] = [...counts.entries()]
       .map(([day, count]) => ({ day, count }))
       .sort((a, b) => a.day - b.day);
+    const users: ReceiptProcessingUserCount[] = [...userDayCounts.entries()]
+      .map(([userId, dayCountMap]) => {
+        const dayLatest = userDayLatestProcessedAt.get(userId) || new Map<number, admin.firestore.Timestamp>();
+        const userDays = [...dayCountMap.entries()]
+          .map(([day, count]) => ({
+            day,
+            count,
+            latestProcessedAt: dayLatest.get(day)?.toDate().toISOString(),
+          }))
+          .sort((a, b) => a.day - b.day);
+        return {
+          userId,
+          monthCount: userDays.reduce((sum, entry) => sum + entry.count, 0),
+          days: userDays,
+          latestProcessedAt: userLatestProcessedAt.get(userId)?.toDate().toISOString(),
+        };
+      })
+      .sort((a, b) => b.monthCount - a.monthCount || a.userId.localeCompare(b.userId));
 
     return {
       ok: true,
@@ -684,6 +736,7 @@ export const getReceiptProcessingStats = onCall(
       year,
       month,
       days,
+      users,
       generatedAt: new Date().toISOString(),
     };
   }

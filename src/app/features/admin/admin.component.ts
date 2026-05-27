@@ -51,6 +51,7 @@ type CustomEmailProSourceFilter = 'all' | 'paid' | 'admin' | 'none';
 type CustomEmailBillingFilter = 'all' | 'live' | 'test';
 type CustomEmailReceiptFilter = 'all' | 'hasReceipts' | 'noReceipts';
 type UserGrowthView = 'year' | 'month';
+type ReceiptProcessingUserView = 'day' | 'month';
 
 interface UserGrowthMonth {
   index: number;
@@ -110,8 +111,26 @@ interface ReceiptProcessingStatsResponse {
   allTimeTotal: number;
   year: number;
   month: number;
-  days: Array<{ day: number; count: number }>;
+  days: Array<{ day: number; count: number; latestProcessedAt?: string }>;
+  users?: ReceiptProcessingUserCount[];
   generatedAt?: string;
+}
+
+interface ReceiptProcessingUserCount {
+  userId: string;
+  monthCount: number;
+  days: Array<{ day: number; count: number; latestProcessedAt?: string }>;
+  latestProcessedAt?: string;
+}
+
+interface ReceiptProcessingUserRow {
+  user: AdminUser | null;
+  userId: string;
+  name: string;
+  email: string;
+  count: number;
+  monthCount: number;
+  latestProcessedAt?: string;
 }
 
 interface CustomEmailRecipient {
@@ -309,6 +328,8 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly selectedGrowthMonth = signal(new Date().getMonth());
   readonly selectedReceiptProcessingYear = signal(new Date().getFullYear());
   readonly selectedReceiptProcessingMonth = signal(new Date().getMonth());
+  readonly selectedReceiptProcessingDay = signal(new Date().getDate());
+  readonly receiptProcessingUserView = signal<ReceiptProcessingUserView>('day');
   readonly receiptProcessingStats = signal<ReceiptProcessingStatsResponse | null>(null);
   readonly receiptProcessingOverviewStats = signal<ReceiptProcessingStatsResponse | null>(null);
   readonly receiptProcessingLoading = signal(true);
@@ -537,6 +558,69 @@ export class AdminComponent implements OnInit, OnDestroy {
     return peakDay ? `Day ${peakDay.day} (${peakDay.count})` : 'No receipts yet';
   });
   readonly receiptProcessingYAxisTicks = computed(() => this.buildHistogramTicks(this.receiptProcessingSummary().maxCount));
+  readonly receiptProcessingDayOptions = computed(() => {
+    const daysInMonth = new Date(
+      this.selectedReceiptProcessingYear(),
+      this.selectedReceiptProcessingMonth() + 1,
+      0
+    ).getDate();
+    return Array.from({ length: daysInMonth }, (_, index) => index + 1);
+  });
+  readonly selectedReceiptProcessingDayLabel = computed(() => {
+    const date = new Date(
+      this.selectedReceiptProcessingYear(),
+      this.selectedReceiptProcessingMonth(),
+      this.selectedReceiptProcessingDay()
+    );
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  });
+  readonly receiptProcessingUserRangeLabel = computed(() =>
+    this.receiptProcessingUserView() === 'day'
+      ? this.selectedReceiptProcessingDayLabel()
+      : this.selectedReceiptProcessingMonthLabel()
+  );
+  readonly receiptProcessingUserRows = computed<ReceiptProcessingUserRow[]>(() => {
+    const stats = this.receiptProcessingStats();
+    if (!stats?.users?.length) {
+      return [];
+    }
+
+    const usersById = new Map(this.users().map((user) => [user.id, user]));
+    const selectedDay = this.selectedReceiptProcessingDay();
+    const view = this.receiptProcessingUserView();
+
+    return stats.users
+      .map((entry) => {
+        const user = usersById.get(entry.userId) ?? null;
+        const dayEntry = entry.days.find((item) => item.day === selectedDay);
+        const count = view === 'day'
+          ? dayEntry?.count ?? 0
+          : entry.monthCount;
+
+        return {
+          user,
+          userId: entry.userId,
+          name: user ? this.displayName(user) : 'Deleted or unavailable user',
+          email: user?.email || entry.userId,
+          count,
+          monthCount: entry.monthCount,
+          latestProcessedAt: view === 'day' ? dayEntry?.latestProcessedAt : entry.latestProcessedAt
+        };
+      })
+      .filter((row) => row.count > 0)
+      .sort((a, b) =>
+        b.count - a.count ||
+        this.compareIsoDateTime(b.latestProcessedAt, a.latestProcessedAt) ||
+        this.compareText(a.name, b.name)
+      );
+  });
+  readonly receiptProcessingUserTotal = computed(() =>
+    this.receiptProcessingUserRows().reduce((sum, row) => sum + row.count, 0)
+  );
   readonly sortedUsers = computed(() => {
     const column = this.userSortColumn();
     const direction = this.userSortDirection();
@@ -1503,6 +1587,25 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
 
+  formatReceiptProcessingDateTime(value?: string): string {
+    if (!value) {
+      return '—';
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '—';
+    }
+
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  }
+
   setSelectedGrowthYear(value: string | number): void {
     const parsedYear = typeof value === 'string' ? Number.parseInt(value, 10) : Number(value);
     if (Number.isFinite(parsedYear)) {
@@ -1525,6 +1628,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     const parsedYear = typeof value === 'string' ? Number.parseInt(value, 10) : Number(value);
     if (Number.isFinite(parsedYear)) {
       this.selectedReceiptProcessingYear.set(parsedYear);
+      this.clampSelectedReceiptProcessingDay();
       void this.loadReceiptProcessingStats();
     }
   }
@@ -1533,8 +1637,27 @@ export class AdminComponent implements OnInit, OnDestroy {
     const parsedMonth = typeof value === 'string' ? Number.parseInt(value, 10) : Number(value);
     if (Number.isFinite(parsedMonth) && parsedMonth >= 0 && parsedMonth <= 11) {
       this.selectedReceiptProcessingMonth.set(parsedMonth);
+      this.clampSelectedReceiptProcessingDay();
       void this.loadReceiptProcessingStats();
     }
+  }
+
+  setSelectedReceiptProcessingDay(value: string | number): void {
+    const parsedDay = typeof value === 'string' ? Number.parseInt(value, 10) : Number(value);
+    const daysInMonth = new Date(
+      this.selectedReceiptProcessingYear(),
+      this.selectedReceiptProcessingMonth() + 1,
+      0
+    ).getDate();
+
+    if (Number.isFinite(parsedDay) && parsedDay >= 1 && parsedDay <= daysInMonth) {
+      this.selectedReceiptProcessingDay.set(parsedDay);
+      this.receiptProcessingUserView.set('day');
+    }
+  }
+
+  setReceiptProcessingUserView(view: ReceiptProcessingUserView): void {
+    this.receiptProcessingUserView.set(view);
   }
 
   growthBarHeight(count: number): number {
@@ -2022,6 +2145,12 @@ export class AdminComponent implements OnInit, OnDestroy {
     return (a || '').localeCompare(b || '', undefined, { sensitivity: 'base' });
   }
 
+  private compareIsoDateTime(a: string | undefined, b: string | undefined): number {
+    const aMillis = a ? new Date(a).getTime() : -1;
+    const bMillis = b ? new Date(b).getTime() : -1;
+    return (Number.isNaN(aMillis) ? -1 : aMillis) - (Number.isNaN(bMillis) ? -1 : bMillis);
+  }
+
   private compareTimestamp(
     a: UserProfile['createdAt'] | UserProfile['lastLoginAt'] | UserProfile['lastSeenAt'] | null | undefined,
     b: UserProfile['createdAt'] | UserProfile['lastLoginAt'] | UserProfile['lastSeenAt'] | null | undefined
@@ -2029,6 +2158,21 @@ export class AdminComponent implements OnInit, OnDestroy {
     const aMillis = a instanceof Timestamp ? a.toMillis() : -1;
     const bMillis = b instanceof Timestamp ? b.toMillis() : -1;
     return aMillis - bMillis;
+  }
+
+  private clampSelectedReceiptProcessingDay(): void {
+    const daysInMonth = new Date(
+      this.selectedReceiptProcessingYear(),
+      this.selectedReceiptProcessingMonth() + 1,
+      0
+    ).getDate();
+    const selectedDay = this.selectedReceiptProcessingDay();
+
+    if (selectedDay > daysInMonth) {
+      this.selectedReceiptProcessingDay.set(daysInMonth);
+    } else if (selectedDay < 1) {
+      this.selectedReceiptProcessingDay.set(1);
+    }
   }
 
   private async loadSpendSummarySchedule(): Promise<void> {
