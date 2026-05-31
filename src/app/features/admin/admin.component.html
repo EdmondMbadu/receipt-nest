@@ -17,8 +17,11 @@
 
     <div class="grid gap-4 sm:grid-cols-5">
       <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total users</p>
-        <p class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ totalUsers() }}</p>
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Real users</p>
+        <p class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ realUserCount() }}</p>
+        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+          {{ totalUsers() | number }} total, {{ likelyBotCount() | number }} likely bot(s)
+        </p>
       </div>
       <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
         <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Admins</p>
@@ -1649,7 +1652,7 @@
         <div>
           <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Users</h2>
           <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-            {{ totalUsers() | number }} account(s), sorted and editable.
+            {{ visibleDirectoryUsers().length | number }} shown of {{ totalUsers() | number }} account(s), sorted and editable.
           </p>
         </div>
         <div class="flex items-center gap-3">
@@ -1703,7 +1706,46 @@
         No users found yet.
       </div>
 
-      <div *ngIf="!isLoading() && users().length > 0" class="overflow-x-auto">
+      <div *ngIf="!isLoading() && users().length > 0"
+        class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/80 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/70">
+        <div>
+          <p class="text-sm font-semibold text-slate-900 dark:text-white">
+            {{ visibleDirectoryUsers().length | number }} {{ userDirectoryView() === 'real' ? 'real user(s)' : 'total user(s)' }}
+          </p>
+          <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+            Real view hides generated-token signups like private relay addresses whose name mirrors the email.
+          </p>
+        </div>
+        <div class="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-700 dark:bg-slate-950">
+          <button type="button" (click)="setUserDirectoryView('real')"
+            class="rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors"
+            [class.bg-emerald-600]="userDirectoryView() === 'real'"
+            [class.text-white]="userDirectoryView() === 'real'"
+            [class.text-slate-600]="userDirectoryView() !== 'real'"
+            [class.hover:bg-slate-100]="userDirectoryView() !== 'real'"
+            [class.dark:text-slate-300]="userDirectoryView() !== 'real'"
+            [class.dark:hover:bg-slate-800]="userDirectoryView() !== 'real'">
+            Real
+          </button>
+          <button type="button" (click)="setUserDirectoryView('all')"
+            class="rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors"
+            [class.bg-emerald-600]="userDirectoryView() === 'all'"
+            [class.text-white]="userDirectoryView() === 'all'"
+            [class.text-slate-600]="userDirectoryView() !== 'all'"
+            [class.hover:bg-slate-100]="userDirectoryView() !== 'all'"
+            [class.dark:text-slate-300]="userDirectoryView() !== 'all'"
+            [class.dark:hover:bg-slate-800]="userDirectoryView() !== 'all'">
+            All
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="!isLoading() && users().length > 0 && sortedUsers().length === 0"
+        class="px-4 py-6 text-sm text-slate-500 dark:text-slate-400">
+        No real users found in this view.
+      </div>
+
+      <div *ngIf="!isLoading() && sortedUsers().length > 0" class="overflow-x-auto">
         <table class="min-w-full divide-y divide-slate-100 dark:divide-slate-800">
           <thead class="bg-slate-50 dark:bg-slate-900/60">
             <tr>
@@ -1779,7 +1821,13 @@
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
             <tr *ngFor="let user of sortedUsers()" class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
               <td class="px-4 py-3 text-sm font-medium text-slate-900 dark:text-white">
-                {{ displayName(user) }}
+                <div class="flex flex-wrap items-center gap-2">
+                  <span>{{ displayName(user) }}</span>
+                  <span *ngIf="userDirectoryView() === 'all' && isLikelyBotUser(user)"
+                    class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-200">
+                    likely bot
+                  </span>
+                </div>
               </td>
               <td class="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
                 {{ user.email }}

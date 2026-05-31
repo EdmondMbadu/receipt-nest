@@ -52,6 +52,7 @@ type CustomEmailBillingFilter = 'all' | 'live' | 'test';
 type CustomEmailReceiptFilter = 'all' | 'hasReceipts' | 'noReceipts';
 type UserGrowthView = 'year' | 'month';
 type ReceiptProcessingUserView = 'day' | 'month';
+type UserDirectoryView = 'real' | 'all';
 
 interface UserGrowthMonth {
   index: number;
@@ -323,6 +324,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly userPlanActionSuccess = signal<string | null>(null);
   readonly userSortColumn = signal<UserSortColumn>('created');
   readonly userSortDirection = signal<SortDirection>('desc');
+  readonly userDirectoryView = signal<UserDirectoryView>('real');
   readonly selectedGrowthView = signal<UserGrowthView>('year');
   readonly selectedGrowthYear = signal(new Date().getFullYear());
   readonly selectedGrowthMonth = signal(new Date().getMonth());
@@ -359,6 +361,12 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly customEmailTemplateSuccess = signal<string | null>(null);
 
   readonly totalUsers = computed(() => this.users().length);
+  readonly realUsers = computed(() => this.users().filter((user) => !this.isLikelyBotUser(user)));
+  readonly realUserCount = computed(() => this.realUsers().length);
+  readonly likelyBotCount = computed(() => Math.max(0, this.totalUsers() - this.realUserCount()));
+  readonly visibleDirectoryUsers = computed(() =>
+    this.userDirectoryView() === 'real' ? this.realUsers() : this.users()
+  );
   readonly adminCount = computed(() => this.users().filter((user) => user.role === 'admin').length);
   readonly proCount = computed(() => this.users().filter((user) => this.effectivePlan(user) === 'pro').length);
   readonly openFeedbackCount = computed(() => this.feedback().filter((item) => item.status !== 'archived').length);
@@ -626,7 +634,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     const direction = this.userSortDirection();
     const multiplier = direction === 'asc' ? 1 : -1;
 
-    return [...this.users()].sort((a, b) => this.compareUsers(a, b, column) * multiplier);
+    return [...this.visibleDirectoryUsers()].sort((a, b) => this.compareUsers(a, b, column) * multiplier);
   });
   readonly summaryUsers = computed(() =>
     [...this.users()].sort((a, b) => this.compareText(this.displayName(a), this.displayName(b)))
@@ -860,6 +868,34 @@ export class AdminComponent implements OnInit, OnDestroy {
   displayName(user: AdminUser): string {
     const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
     return fullName || user.email || user.id || 'Unknown user';
+  }
+
+  isLikelyBotUser(user: AdminUser): boolean {
+    if (user.role === 'admin') {
+      return false;
+    }
+
+    const firstName = (user.firstName || '').trim();
+    const lastName = (user.lastName || '').trim();
+    const email = (user.email || '').trim().toLowerCase();
+    const emailLocalPart = email.split('@')[0] || '';
+    const firstNameToken = this.normalizeIdentityToken(firstName.includes('@') ? firstName.split('@')[0] : firstName);
+    const lastNameToken = this.normalizeIdentityToken(lastName);
+    const emailLocalToken = this.normalizeIdentityToken(emailLocalPart);
+    const displayName = this.displayName(user).trim().toLowerCase();
+
+    const generatedEmailLocal = this.isGeneratedIdentityToken(emailLocalToken);
+    if (!generatedEmailLocal) {
+      return false;
+    }
+
+    const nameMirrorsEmail = Boolean(firstNameToken && firstNameToken === emailLocalToken);
+    const nameIsEmail = Boolean(firstName && firstName.toLowerCase() === email);
+    const displayIsEmail = displayName === email;
+    const generatedFirstNameOnly = Boolean(firstNameToken && !lastNameToken && this.isGeneratedIdentityToken(firstNameToken));
+    const anonymousPrivateRelay = !firstName && !lastName && email.endsWith('@privaterelay.appleid.com');
+
+    return nameMirrorsEmail || nameIsEmail || displayIsEmail || generatedFirstNameOnly || anonymousPrivateRelay;
   }
 
   customEmailUserKey(userId: string): string {
@@ -1660,6 +1696,10 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.receiptProcessingUserView.set(view);
   }
 
+  setUserDirectoryView(view: UserDirectoryView): void {
+    this.userDirectoryView.set(view);
+  }
+
   growthBarHeight(count: number): number {
     const axisMax = this.userGrowthYAxisTicks()[0] ?? 0;
     if (axisMax < 1 || count < 1) {
@@ -2143,6 +2183,30 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   private compareText(a: string | undefined, b: string | undefined): number {
     return (a || '').localeCompare(b || '', undefined, { sensitivity: 'base' });
+  }
+
+  private normalizeIdentityToken(value: string): string {
+    return value.toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+
+  private isGeneratedIdentityToken(token: string): boolean {
+    if (token.length < 8 || token.length > 24 || !/^[a-z0-9]+$/.test(token)) {
+      return false;
+    }
+
+    const letters = token.replace(/[^a-z]/g, '');
+    if (letters.length < 5) {
+      return false;
+    }
+
+    const vowelCount = (letters.match(/[aeiou]/g) || []).length;
+    const vowelRatio = vowelCount / letters.length;
+    const consonantRuns = letters.match(/[^aeiou]+/g) || [];
+    const maxConsonantRun = consonantRuns.reduce((max, run) => Math.max(max, run.length), 0);
+    const hasDigit = /\d/.test(token);
+    const uncommonNameShape = maxConsonantRun >= 5 || vowelRatio <= 0.15;
+
+    return uncommonNameShape && (hasDigit || letters.length >= 9);
   }
 
   private compareIsoDateTime(a: string | undefined, b: string | undefined): number {
