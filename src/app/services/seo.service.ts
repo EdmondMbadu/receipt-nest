@@ -10,6 +10,7 @@ export interface SeoPageMeta {
   image?: string;
   imageAlt?: string;
   robots?: string;
+  type?: 'website' | 'article';
 }
 
 const SITE_URL = 'https://receipt-nest.com';
@@ -27,7 +28,7 @@ export class SeoService {
 
   apply(meta: SeoPageMeta): void {
     const canonicalUrl = this.absoluteUrl(meta.canonicalPath);
-    const image = meta.image ?? DEFAULT_IMAGE;
+    const image = this.absoluteUrl(meta.image ?? DEFAULT_IMAGE);
     const imageAlt = meta.imageAlt ?? DEFAULT_IMAGE_ALT;
     const robots = meta.robots ?? 'index, follow';
 
@@ -45,7 +46,7 @@ export class SeoService {
       this.meta.updateTag({ name: 'keywords', content: meta.keywords });
     }
 
-    this.meta.updateTag({ property: 'og:type', content: 'website' }, "property='og:type'");
+    this.meta.updateTag({ property: 'og:type', content: meta.type ?? 'website' }, "property='og:type'");
     this.meta.updateTag({ property: 'og:url', content: canonicalUrl }, "property='og:url'");
     this.meta.updateTag({ property: 'og:title', content: meta.title }, "property='og:title'");
     this.meta.updateTag({ property: 'og:description', content: meta.description }, "property='og:description'");

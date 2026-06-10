@@ -66,6 +66,15 @@ export const routes: Routes = [
     loadComponent: () => import('./features/seo-page/seo-page.component').then((m) => m.SeoPageComponent)
   },
   {
+    path: 'blog',
+    title: 'The ReceiptNest Blog | Receipts, Taxes, and Money Clarity',
+    loadComponent: () => import('./features/blog/blog-index.component').then((m) => m.BlogIndexComponent)
+  },
+  {
+    path: 'blog/:slug',
+    loadComponent: () => import('./features/blog/blog-article.component').then((m) => m.BlogArticleComponent)
+  },
+  {
     path: 'app/pricing',
     title: 'Pricing',
     canActivate: [lazyAuthGuard],

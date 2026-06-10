@@ -1,5 +1,7 @@
 import { RenderMode, ServerRoute } from '@angular/ssr';
 
+import { blogPosts } from './features/blog/blog-posts';
+
 export const serverRoutes: ServerRoute[] = [
   {
     path: '',
@@ -36,6 +38,17 @@ export const serverRoutes: ServerRoute[] = [
   {
     path: 'tax-receipt-organizer',
     renderMode: RenderMode.Prerender
+  },
+  {
+    path: 'blog',
+    renderMode: RenderMode.Prerender
+  },
+  {
+    path: 'blog/:slug',
+    renderMode: RenderMode.Prerender,
+    async getPrerenderParams() {
+      return blogPosts.map(post => ({ slug: post.slug }));
+    }
   },
   {
     path: 'support',
