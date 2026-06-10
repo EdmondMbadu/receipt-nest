@@ -21,6 +21,8 @@ export class BlogIndexComponent {
   readonly categories = blogCategories;
   readonly selectedCategory = signal<BlogCategory | 'All'>('All');
   readonly posts = blogPosts;
+  readonly featuredPost = blogPosts[0];
+  readonly remainingPosts = blogPosts.slice(1);
   readonly filteredPosts = computed(() => {
     const selected = this.selectedCategory();
     return selected === 'All' ? this.posts : this.posts.filter(post => post.category === selected);

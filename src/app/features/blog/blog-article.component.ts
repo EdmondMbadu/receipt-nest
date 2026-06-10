@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { Component, PLATFORM_ID, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { SeoService } from '../../services/seo.service';
@@ -16,6 +16,8 @@ export class BlogArticleComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly seo = inject(SeoService);
   private readonly theme = inject(ThemeService);
+  private readonly document = inject(DOCUMENT);
+  private readonly platformId = inject(PLATFORM_ID);
 
   readonly isDarkMode = this.theme.isDarkMode;
   readonly currentYear = new Date().getFullYear();
@@ -103,14 +105,23 @@ export class BlogArticleComponent {
       return '';
     }
 
-    const base = 'rounded-2xl border p-5';
+    const base = 'border-l-4 px-5 py-4';
     const tones = {
-      note: 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-200',
-      tip: 'border-emerald-200 bg-emerald-50 text-emerald-950 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100',
-      warning: 'border-amber-200 bg-amber-50 text-amber-950 dark:border-amber-900 dark:bg-amber-950/35 dark:text-amber-100'
+      note: 'border-slate-300 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200',
+      tip: 'border-emerald-600 bg-emerald-50 text-emerald-950 dark:border-emerald-500 dark:bg-emerald-950/40 dark:text-emerald-100',
+      warning: 'border-amber-500 bg-amber-50 text-amber-950 dark:border-amber-400 dark:bg-amber-950/35 dark:text-amber-100'
     };
 
     return `${base} ${tones[block.tone ?? 'note']}`;
+  }
+
+  scrollToSection(sectionId: string): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    const section = this.document.getElementById(sectionId);
+    section?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   toggleTheme(): void {
