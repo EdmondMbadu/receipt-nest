@@ -252,7 +252,7 @@ export class ReceiptService {
 
     try {
       const receiptsRef = collection(this.db, `users/${userId}/receipts`);
-      const q = query(receiptsRef, orderBy('createdAt', 'desc'), limit(100));
+      const q = query(receiptsRef, orderBy('createdAt', 'desc'));
 
       this.receiptsUnsubscribe = onSnapshot(
         q,
