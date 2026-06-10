@@ -1,6 +1,7 @@
 import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { Component, PLATFORM_ID, inject } from '@angular/core';
+import { Component, OnDestroy, PLATFORM_ID, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 import { SeoService } from '../../services/seo.service';
 import { ThemeService } from '../../services/theme.service';
@@ -12,7 +13,7 @@ import { BlogBlock, BlogPost, blogPosts, getBlogPost, getRelatedPosts } from './
   imports: [CommonModule, RouterLink],
   templateUrl: './blog-article.component.html'
 })
-export class BlogArticleComponent {
+export class BlogArticleComponent implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly seo = inject(SeoService);
   private readonly theme = inject(ThemeService);
@@ -21,10 +22,24 @@ export class BlogArticleComponent {
 
   readonly isDarkMode = this.theme.isDarkMode;
   readonly currentYear = new Date().getFullYear();
-  readonly article: BlogPost = getBlogPost(this.route.snapshot.paramMap.get('slug')) ?? blogPosts[0];
-  readonly relatedPosts = getRelatedPosts(this.article);
+  article: BlogPost = getBlogPost(this.route.snapshot.paramMap.get('slug')) ?? blogPosts[0];
+  relatedPosts = getRelatedPosts(this.article);
+  private readonly routeSubscription: Subscription;
 
   constructor() {
+    this.routeSubscription = this.route.paramMap.subscribe(paramMap => {
+      this.article = getBlogPost(paramMap.get('slug')) ?? blogPosts[0];
+      this.relatedPosts = getRelatedPosts(this.article);
+      this.applySeo();
+      this.scrollToTop();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.routeSubscription.unsubscribe();
+  }
+
+  private applySeo(): void {
     this.seo.apply({
       title: `${this.article.seoTitle} | ReceiptNest AI`,
       description: this.article.description,
@@ -35,7 +50,7 @@ export class BlogArticleComponent {
       type: 'article'
     });
 
-    this.seo.setJsonLd(`blog-${this.article.slug}`, {
+    this.seo.setJsonLd('blog-article', {
       '@context': 'https://schema.org',
       '@graph': [
         {
@@ -98,6 +113,14 @@ export class BlogArticleComponent {
         }
       ]
     });
+  }
+
+  private scrollToTop(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'auto' }));
   }
 
   calloutClasses(block: BlogBlock): string {
