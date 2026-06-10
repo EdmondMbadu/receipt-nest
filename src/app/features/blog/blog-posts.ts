@@ -67,7 +67,7 @@ export const blogPosts: readonly BlogPost[] = [
     datePublished: '2026-06-09',
     dateModified: '2026-06-09',
     readTime: '9 min read',
-    image: '/assets/monthly-dashboard.png',
+    image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Freceiptnest-expensify.png?alt=media&token=4592bdb9-22e6-438c-8644-9b20ec9810d6',
     imageAlt: 'ReceiptNest AI monthly dashboard with receipt totals and categories',
     keywords: ['Expensify alternative', 'ReceiptNest vs Expensify', 'freelancer receipt app'],
     intro: [
@@ -213,7 +213,7 @@ export const blogPosts: readonly BlogPost[] = [
     datePublished: '2026-06-09',
     dateModified: '2026-06-09',
     readTime: '12 min read',
-    image: '/assets/auto-categorization.png',
+    image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Forganizing-chaos.png?alt=media&token=a4ddd1e9-0056-4011-bf78-fe1e297f89ef',
     imageAlt: 'Receipt categories and tax-ready expense records in ReceiptNest AI',
     keywords: ['how to organize receipts for taxes self employed', '1099 receipt organizer', 'freelancer tax receipts'],
     intro: [
@@ -388,7 +388,7 @@ export const blogPosts: readonly BlogPost[] = [
     datePublished: '2026-06-09',
     dateModified: '2026-06-09',
     readTime: '10 min read',
-    image: '/assets/capture-anything.png',
+    image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Fetsy-more.png?alt=media&token=1ceeee19-d74e-4947-a240-4cb95dac0d4b',
     imageAlt: 'Receipts from photos, email, and PDFs captured in ReceiptNest AI',
     keywords: ['receipt tracking for Etsy sellers', 'Etsy seller receipts', 'Etsy tax deductions'],
     intro: [
@@ -531,7 +531,7 @@ export const blogPosts: readonly BlogPost[] = [
     datePublished: '2026-06-09',
     dateModified: '2026-06-09',
     readTime: '11 min read',
-    image: '/assets/images/auto_extracting_data.png',
+    image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Fdigital.png?alt=media&token=2debc0bf-3d6b-44b0-a804-8f9dcd2d6a41',
     imageAlt: 'AI extracting merchant, amount, and category data from a receipt',
     keywords: ['how to scan receipts automatically', 'automatic receipt scanning', 'digitize receipts'],
     intro: [
@@ -691,7 +691,7 @@ export const blogPosts: readonly BlogPost[] = [
     datePublished: '2026-06-09',
     dateModified: '2026-06-09',
     readTime: '10 min read',
-    image: '/assets/spend-insight.png',
+    image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Fnavigating-expenses.png?alt=media&token=6b293452-73ef-419f-a223-3ff660082cd1',
     imageAlt: 'Spending insight dashboard showing monthly receipt patterns',
     keywords: ['where does my money go every month', 'spending clarity', 'track monthly spending'],
     intro: [
