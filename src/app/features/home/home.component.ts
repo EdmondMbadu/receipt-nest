@@ -467,15 +467,38 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.categoryPieSlices().reduce((sum, slice) => sum + slice.total, 0)
   );
 
-  readonly activePieCategory = computed(() =>
-    this.hoveredPieCategory() ?? this.categoryPieSlices()[0] ?? null
-  );
-
+  readonly activePieCategory = computed(() => this.hoveredPieCategory());
   readonly activePieCategoryId = computed(() => this.activePieCategory()?.id ?? null);
   readonly activePieCategoryTotal = computed(() => this.activePieCategory()?.total ?? this.categoryPieTotal());
-  readonly activePieCategoryIcon = computed(() => this.activePieCategory()?.icon ?? '📦');
-  readonly activePieCategoryName = computed(() => this.activePieCategory()?.name ?? 'Categories');
+  readonly activePieCategoryIcon = computed(() => this.activePieCategory()?.icon ?? '$');
+  readonly activePieCategoryName = computed(() => this.activePieCategory()?.name ?? 'Total spend');
   readonly activePieCategoryPercentage = computed(() => this.activePieCategory()?.percentage ?? 0);
+  readonly activePieAccentColor = computed(() => this.activePieCategory()?.color ?? '#10b981');
+  readonly categoryPieReceiptCount = computed(() =>
+    this.categoryPieSlices().reduce((sum, slice) => sum + slice.receiptCount, 0)
+  );
+  readonly activePieCenterMetric = computed(() => {
+    const active = this.activePieCategory();
+    return active
+      ? `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(active.percentage)}%`
+      : this.formatCurrency(this.categoryPieTotal());
+  });
+  readonly activePieThirdMetricLabel = computed(() => this.activePieCategory() ? 'Share' : 'Categories');
+  readonly activePieThirdMetricValue = computed(() => {
+    const active = this.activePieCategory();
+    return active
+      ? `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(active.percentage)}%`
+      : String(this.categoryPieSlices().length);
+  });
+  readonly activePieDetailLine = computed(() => {
+    const active = this.activePieCategory();
+    if (active) {
+      return `Top merchant: ${active.topMerchant}`;
+    }
+
+    const largest = this.categoryPieSlices()[0];
+    return largest ? `Largest category: ${largest.name} · ${this.formatCurrency(largest.total)}` : '';
+  });
 
   readonly categoryPieRangeLabel = computed(() => {
     switch (this.spendingTimeRange()) {
@@ -1958,8 +1981,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private buildDonutSegmentPath(startAngle: number, endAngle: number): string {
-    const outerRadius = 94;
-    const innerRadius = 52;
+    const outerRadius = 104;
+    const innerRadius = 56;
     const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
     const outerStart = this.polarToPiePoint(startAngle, outerRadius);
     const outerEnd = this.polarToPiePoint(endAngle, outerRadius);
