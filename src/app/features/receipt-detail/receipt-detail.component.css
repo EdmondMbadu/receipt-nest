@@ -14,3 +14,6 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
+.receipt-preview-scroll {
+  -webkit-overflow-scrolling: touch;
+}
