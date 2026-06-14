@@ -499,6 +499,20 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     const largest = this.categoryPieSlices()[0];
     return largest ? `Largest category: ${largest.name} · ${this.formatCurrency(largest.total)}` : '';
   });
+  readonly activePieSummaryEyebrow = computed(() =>
+    this.activePieCategory() ? 'Selected category' : this.categoryPieRangeLabel()
+  );
+  readonly activePieSummaryTitle = computed(() => this.activePieCategoryName());
+  readonly activePieSummaryMeta = computed(() => {
+    const active = this.activePieCategory();
+    if (active) {
+      const percentage = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(active.percentage);
+      return `${this.formatCurrency(active.total)} · ${percentage}% · ${active.receiptCount} receipt${active.receiptCount === 1 ? '' : 's'}`;
+    }
+
+    const categoryCount = this.categoryPieSlices().length;
+    return `${this.formatCurrency(this.categoryPieTotal())} across ${categoryCount} categor${categoryCount === 1 ? 'y' : 'ies'}`;
+  });
 
   readonly categoryPieRangeLabel = computed(() => {
     switch (this.spendingTimeRange()) {
