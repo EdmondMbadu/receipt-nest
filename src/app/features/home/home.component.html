@@ -755,7 +755,7 @@
           </div>
 
           <div *ngIf="categoryPieSlices().length > 0"
-            class="pointer-events-none relative z-20 mb-3 sm:absolute sm:left-4 sm:right-4 sm:top-4 sm:mb-0">
+            class="pointer-events-none relative z-20 mb-3">
             <div
               class="mx-auto flex w-full max-w-md items-center justify-between gap-3 rounded-2xl border-2 bg-white/95 px-3 py-3 shadow-xl shadow-slate-900/12 backdrop-blur-md dark:bg-slate-950/90 sm:px-4"
               [style.border-color]="activePieAccentColor() + '55'">
@@ -786,7 +786,7 @@
             </div>
           </div>
 
-          <div *ngIf="categoryPieSlices().length > 0" class="relative mx-auto -mt-1 max-w-[540px] sm:pt-16 lg:pt-12">
+          <div *ngIf="categoryPieSlices().length > 0" class="relative mx-auto -mt-1 max-w-[540px]">
             <svg class="pie-chart h-auto w-full" viewBox="0 0 240 240" role="img"
               [attr.aria-label]="'Category spending breakdown for ' + categoryPieRangeLabel()"
               (mouseleave)="hoveredPieCategory.set(null)" (touchend)="hoveredPieCategory.set(null)">
