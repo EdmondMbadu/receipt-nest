@@ -755,9 +755,9 @@
           </div>
 
           <div *ngIf="categoryPieSlices().length > 0"
-            class="pointer-events-none absolute left-3 right-3 top-3 z-20 sm:left-4 sm:right-4">
+            class="pointer-events-none relative z-20 mb-3 sm:absolute sm:left-4 sm:right-4 sm:top-4 sm:mb-0">
             <div
-              class="mx-auto flex max-w-md items-center justify-between gap-3 rounded-2xl border-2 bg-white/95 px-4 py-3 shadow-xl shadow-slate-900/12 backdrop-blur-md dark:bg-slate-950/90"
+              class="mx-auto flex w-full max-w-md items-center justify-between gap-3 rounded-2xl border-2 bg-white/95 px-3 py-3 shadow-xl shadow-slate-900/12 backdrop-blur-md dark:bg-slate-950/90 sm:px-4"
               [style.border-color]="activePieAccentColor() + '55'">
               <div class="flex min-w-0 items-center gap-3">
                 <span
@@ -786,7 +786,7 @@
             </div>
           </div>
 
-          <div *ngIf="categoryPieSlices().length > 0" class="relative mx-auto -mt-1 max-w-[540px] pt-14 sm:pt-16 lg:pt-12">
+          <div *ngIf="categoryPieSlices().length > 0" class="relative mx-auto -mt-1 max-w-[540px] sm:pt-16 lg:pt-12">
             <svg class="pie-chart h-auto w-full" viewBox="0 0 240 240" role="img"
               [attr.aria-label]="'Category spending breakdown for ' + categoryPieRangeLabel()"
               (mouseleave)="hoveredPieCategory.set(null)" (touchend)="hoveredPieCategory.set(null)">
@@ -862,18 +862,18 @@
               <span class="h-3 w-3 shrink-0 rounded-full shadow-sm"
                 [style.background-color]="activePieAccentColor()"></span>
             </div>
-            <div class="mt-4 grid grid-cols-3 gap-2">
-              <div class="rounded-xl bg-slate-50 p-3 dark:bg-slate-900/60">
+            <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+              <div class="flex min-h-16 flex-col items-center justify-center rounded-xl bg-slate-50 p-3 text-center dark:bg-slate-900/60">
                 <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Spend</p>
-                <p class="mt-1 truncate text-sm font-bold text-slate-900 dark:text-white">{{ formatCurrency(activePieCategoryTotal()) }}</p>
+                <p class="mt-1 max-w-full truncate text-sm font-black text-slate-900 dark:text-white">{{ formatCurrency(activePieCategoryTotal()) }}</p>
               </div>
-              <div class="rounded-xl bg-slate-50 p-3 dark:bg-slate-900/60">
+              <div class="flex min-h-16 flex-col items-center justify-center rounded-xl bg-slate-50 p-3 text-center dark:bg-slate-900/60">
                 <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Receipts</p>
-                <p class="mt-1 text-sm font-bold text-slate-900 dark:text-white">{{ activePieCategory()?.receiptCount ?? categoryPieReceiptCount() }}</p>
+                <p class="mt-1 text-sm font-black text-slate-900 dark:text-white">{{ activePieCategory()?.receiptCount ?? categoryPieReceiptCount() }}</p>
               </div>
-              <div class="rounded-xl bg-slate-50 p-3 dark:bg-slate-900/60">
+              <div class="flex min-h-16 flex-col items-center justify-center rounded-xl bg-slate-50 p-3 text-center dark:bg-slate-900/60">
                 <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ activePieThirdMetricLabel() }}</p>
-                <p class="mt-1 text-sm font-bold text-slate-900 dark:text-white">{{ activePieThirdMetricValue() }}</p>
+                <p class="mt-1 text-sm font-black text-slate-900 dark:text-white">{{ activePieThirdMetricValue() }}</p>
               </div>
             </div>
             <p class="mt-3 truncate text-xs text-slate-500 dark:text-slate-400">
