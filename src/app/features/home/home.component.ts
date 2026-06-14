@@ -23,7 +23,7 @@ interface MonthGroup {
   receipts: Receipt[];
 }
 
-type GraphViewMode = 'daily' | 'histogram';
+type GraphViewMode = 'daily' | 'histogram' | 'pie';
 type HistogramRange = 'this-year' | '5y' | 'all';
 type SpendingTimeRange = '1d' | '1w' | '1m' | '3m' | '1y' | 'all';
 
@@ -71,6 +71,22 @@ interface HistogramYAxisTick {
   position: number;
 }
 
+interface CategoryPieSlice {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  total: number;
+  percentage: number;
+  receiptCount: number;
+  merchantCount: number;
+  topMerchant: string;
+  path: string;
+  labelX: number;
+  labelY: number;
+  midAngle: number;
+}
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -105,6 +121,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly spendingTimeRange = signal<SpendingTimeRange>('1m');
   readonly spendingTimeRanges = SPENDING_TIME_RANGES;
   readonly hoveredHistogramMonth = signal<HistogramMonthPoint | null>(null);
+  readonly hoveredPieCategory = signal<CategoryPieSlice | null>(null);
   readonly showShareModal = signal(false);
   readonly shareIncludeName = signal(true);
   readonly shareIncludeEmail = signal(true);
@@ -365,6 +382,110 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       label: this.formatCompactCurrency(maxAmount * fraction),
       position: fraction * 100
     }));
+  });
+
+  readonly categoryPieSlices = computed<CategoryPieSlice[]>(() => {
+    const { start, end } = this.getActiveSpendingRange();
+    const groups = new Map<string, {
+      total: number;
+      receiptCount: number;
+      category: Category;
+      merchants: Map<string, number>;
+    }>();
+
+    for (const receipt of this.receipts()) {
+      const amount = this.receiptService.getEffectiveAmount(receipt);
+      const date = this.resolveReceiptDate(receipt);
+      if (amount === null || amount <= 0 || !date) continue;
+
+      const receiptDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      if (receiptDay < start || receiptDay > end) continue;
+
+      const categoryId = receipt.category?.id || 'other';
+      const category = getCategoryById(categoryId) || DEFAULT_CATEGORIES.find(c => c.id === 'other')!;
+      const merchant = receipt.merchant?.canonicalName
+        || receipt.merchant?.rawName
+        || receipt.extraction?.supplierName?.value
+        || receipt.file?.originalName
+        || 'Unknown merchant';
+
+      const group = groups.get(category.id) ?? {
+        total: 0,
+        receiptCount: 0,
+        category,
+        merchants: new Map<string, number>()
+      };
+
+      group.total += amount;
+      group.receiptCount += 1;
+      group.merchants.set(merchant, (group.merchants.get(merchant) ?? 0) + amount);
+      groups.set(category.id, group);
+    }
+
+    const total = Array.from(groups.values()).reduce((sum, group) => sum + group.total, 0);
+    if (total <= 0) {
+      return [];
+    }
+
+    const sorted = Array.from(groups.values()).sort((a, b) => b.total - a.total);
+    let cursor = 0;
+    const gap = sorted.length > 1 ? 1.3 : 0;
+
+    return sorted.map((group) => {
+      const sweep = (group.total / total) * 360;
+      const startAngle = cursor + gap / 2;
+      const endAngle = cursor + sweep - gap / 2;
+      const safeEndAngle = Math.min(
+        endAngle > startAngle ? endAngle : cursor + sweep,
+        startAngle + 359.99
+      );
+      const midAngle = startAngle + (safeEndAngle - startAngle) / 2;
+      const topMerchant = Array.from(group.merchants.entries())
+        .sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'Unknown merchant';
+
+      cursor += sweep;
+
+      return {
+        id: group.category.id,
+        name: group.category.name,
+        icon: group.category.icon,
+        color: group.category.color,
+        total: group.total,
+        percentage: (group.total / total) * 100,
+        receiptCount: group.receiptCount,
+        merchantCount: group.merchants.size,
+        topMerchant,
+        path: this.buildDonutSegmentPath(startAngle, safeEndAngle),
+        labelX: this.polarToPiePoint(midAngle, 111).x,
+        labelY: this.polarToPiePoint(midAngle, 111).y,
+        midAngle
+      };
+    });
+  });
+
+  readonly categoryPieTotal = computed(() =>
+    this.categoryPieSlices().reduce((sum, slice) => sum + slice.total, 0)
+  );
+
+  readonly activePieCategory = computed(() =>
+    this.hoveredPieCategory() ?? this.categoryPieSlices()[0] ?? null
+  );
+
+  readonly activePieCategoryId = computed(() => this.activePieCategory()?.id ?? null);
+  readonly activePieCategoryTotal = computed(() => this.activePieCategory()?.total ?? this.categoryPieTotal());
+  readonly activePieCategoryIcon = computed(() => this.activePieCategory()?.icon ?? '📦');
+  readonly activePieCategoryName = computed(() => this.activePieCategory()?.name ?? 'Categories');
+  readonly activePieCategoryPercentage = computed(() => this.activePieCategory()?.percentage ?? 0);
+
+  readonly categoryPieRangeLabel = computed(() => {
+    switch (this.spendingTimeRange()) {
+      case '1d': return 'Today by category';
+      case '1w': return 'Past 7 days by category';
+      case '1m': return `${this.selectedMonthLabel()} by category`;
+      case '3m': return 'Past 3 months by category';
+      case '1y': return 'Past year by category';
+      case 'all': return 'All time by category';
+    }
   });
 
   readonly timeRangeData = computed<TimeRangeDayPoint[]>(() => {
@@ -1580,7 +1701,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.graphViewMode.set(mode);
     this.hoveredDay.set(null);
     this.hoveredHistogramMonth.set(null);
-    if (mode === 'histogram') {
+    this.hoveredPieCategory.set(null);
+    if (mode === 'histogram' || mode === 'pie') {
       this.clearDaySelection();
       this.closeMonthPickerGraph();
     }
@@ -1590,6 +1712,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.spendingTimeRange.set(range);
     this.hoveredDay.set(null);
     this.hoveredHistogramMonth.set(null);
+    this.hoveredPieCategory.set(null);
     this.clearDaySelection();
     if (range !== '1m') {
       this.closeMonthPickerGraph();
@@ -1599,6 +1722,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   setHistogramRange(range: HistogramRange): void {
     this.histogramRange.set(range);
     this.hoveredHistogramMonth.set(null);
+  }
+
+  setHoveredPieCategory(slice: CategoryPieSlice): void {
+    this.hoveredPieCategory.set(slice);
   }
 
   setHoveredMonthDay(day: { day: number; amount: number; cumulative: number }): void {
@@ -1630,6 +1757,23 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   trackHistogramYAxisTick(index: number, tick: HistogramYAxisTick): string {
     return tick.key;
+  }
+
+  trackPieCategory(index: number, slice: CategoryPieSlice): string {
+    return slice.id;
+  }
+
+  getPieSliceTransform(slice: CategoryPieSlice): string {
+    if (this.activePieCategory()?.id !== slice.id) {
+      return '';
+    }
+
+    const point = this.polarToPiePoint(slice.midAngle, 5);
+    return `translate(${(point.x - 120).toFixed(2)} ${(point.y - 120).toFixed(2)})`;
+  }
+
+  getPieSliceAriaLabel(slice: CategoryPieSlice): string {
+    return `${slice.name}: ${this.formatCurrency(slice.total)}, ${Math.round(slice.percentage)}% of spending`;
   }
 
   // Click on a day in the graph to filter receipts
@@ -1772,6 +1916,71 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     return selection;
+  }
+
+  private getActiveSpendingRange(): { start: Date; end: Date } {
+    const range = this.spendingTimeRange();
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    switch (range) {
+      case '1d':
+        return { start: today, end: today };
+      case '1w':
+        return {
+          start: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6),
+          end: today
+        };
+      case '1m': {
+        const selectedYear = this.receiptService.selectedYear();
+        const selectedMonth = this.receiptService.selectedMonth();
+        return {
+          start: new Date(selectedYear, selectedMonth, 1),
+          end: new Date(selectedYear, selectedMonth + 1, 0)
+        };
+      }
+      case '3m':
+        return {
+          start: new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()),
+          end: today
+        };
+      case '1y':
+        return {
+          start: new Date(today.getFullYear() - 1, today.getMonth(), today.getDate()),
+          end: today
+        };
+      case 'all':
+        return {
+          start: new Date(1900, 0, 1),
+          end: today
+        };
+    }
+  }
+
+  private buildDonutSegmentPath(startAngle: number, endAngle: number): string {
+    const outerRadius = 94;
+    const innerRadius = 52;
+    const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
+    const outerStart = this.polarToPiePoint(startAngle, outerRadius);
+    const outerEnd = this.polarToPiePoint(endAngle, outerRadius);
+    const innerEnd = this.polarToPiePoint(endAngle, innerRadius);
+    const innerStart = this.polarToPiePoint(startAngle, innerRadius);
+
+    return [
+      `M ${outerStart.x} ${outerStart.y}`,
+      `A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 1 ${outerEnd.x} ${outerEnd.y}`,
+      `L ${innerEnd.x} ${innerEnd.y}`,
+      `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${innerStart.x} ${innerStart.y}`,
+      'Z'
+    ].join(' ');
+  }
+
+  private polarToPiePoint(angle: number, radius: number): { x: number; y: number } {
+    const radians = (angle - 90) * Math.PI / 180;
+    return {
+      x: Number((120 + radius * Math.cos(radians)).toFixed(3)),
+      y: Number((120 + radius * Math.sin(radians)).toFixed(3))
+    };
   }
 
   private formatDateLabel(date: Date): string {

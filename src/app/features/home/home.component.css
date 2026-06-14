@@ -44,3 +44,23 @@
     transform: translate(100%, 100%) rotate(45deg);
   }
 }
+
+.pie-chart {
+  overflow: visible;
+}
+
+.pie-slice {
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    filter 180ms ease;
+  transform-box: fill-box;
+  transform-origin: center;
+  stroke: rgba(255, 255, 255, 0.82);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+:host-context(.dark) .pie-slice {
+  stroke: rgba(15, 23, 42, 0.72);
+}
