@@ -503,15 +503,23 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.activePieCategory() ? 'Selected category' : this.categoryPieRangeLabel()
   );
   readonly activePieSummaryTitle = computed(() => this.activePieCategoryName());
-  readonly activePieSummaryMeta = computed(() => {
+  readonly activePieSummaryPrimary = computed(() => {
+    const active = this.activePieCategory();
+    if (active) {
+      return this.formatCurrency(active.total);
+    }
+
+    return this.formatCurrency(this.categoryPieTotal());
+  });
+  readonly activePieSummarySecondary = computed(() => {
     const active = this.activePieCategory();
     if (active) {
       const percentage = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(active.percentage);
-      return `${this.formatCurrency(active.total)} · ${percentage}% · ${active.receiptCount} receipt${active.receiptCount === 1 ? '' : 's'}`;
+      return `${percentage}% of total · ${active.receiptCount} receipt${active.receiptCount === 1 ? '' : 's'}`;
     }
 
     const categoryCount = this.categoryPieSlices().length;
-    return `${this.formatCurrency(this.categoryPieTotal())} across ${categoryCount} categor${categoryCount === 1 ? 'y' : 'ies'}`;
+    return `${categoryCount} categor${categoryCount === 1 ? 'y' : 'ies'} · ${this.categoryPieReceiptCount()} receipts`;
   });
 
   readonly categoryPieRangeLabel = computed(() => {
@@ -1800,9 +1808,9 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     return slice.id;
   }
 
-  getPieSliceTransform(slice: CategoryPieSlice): string {
+  getPieSliceTransform(slice: CategoryPieSlice): string | null {
     if (this.activePieCategory()?.id !== slice.id) {
-      return '';
+      return null;
     }
 
     const point = this.polarToPiePoint(slice.midAngle, 5);
