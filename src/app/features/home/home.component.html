@@ -321,15 +321,16 @@
             </button>
             <!-- Month Picker Dropdown -->
             <div *ngIf="showMonthPickerCard()"
-              class="absolute left-0 top-full mt-1 z-30 w-48 max-h-64 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl">
-              <button *ngFor="let month of availableMonths()" type="button"
-                (click)="selectMonthFromCard(month.year, month.month)"
-                class="w-full px-4 py-2.5 text-left text-xs font-medium hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors"
-                [class.bg-emerald-50]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
-                [class.dark:bg-slate-700]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
-                [class.text-emerald-600]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
-                [class.dark:text-emerald-400]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()">
-                {{ month.label }}
+              class="absolute left-0 top-full mt-1 z-30 w-64 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 shadow-xl">
+              <label for="card-month-picker" class="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Jump to any month
+              </label>
+              <input id="card-month-picker" type="month" [ngModel]="selectedMonthInputValue()"
+                (ngModelChange)="selectAnyMonth($event, 'card')"
+                class="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-600 dark:bg-slate-900 dark:text-white">
+              <button type="button" (click)="selectCurrentMonthFrom('card')"
+                class="mt-2 w-full rounded-lg px-3 py-2 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-slate-700">
+                Current month
               </button>
             </div>
           </div>
@@ -456,15 +457,16 @@
                 </svg>
               </button>
               <div *ngIf="showMonthPickerGraph()"
-                class="absolute left-0 top-full mt-1 z-20 w-48 max-h-64 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl">
-                <button *ngFor="let month of availableMonths()" type="button"
-                  (click)="selectMonthFromGraph(month.year, month.month)"
-                  class="w-full px-4 py-2.5 text-left text-xs font-medium hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors"
-                  [class.bg-emerald-50]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
-                  [class.dark:bg-slate-700]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
-                  [class.text-emerald-600]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
-                  [class.dark:text-emerald-400]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()">
-                  {{ month.label }}
+                class="absolute left-0 top-full mt-1 z-20 w-64 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 shadow-xl">
+                <label for="daily-graph-month-picker" class="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Jump to any month
+                </label>
+                <input id="daily-graph-month-picker" type="month" [ngModel]="selectedMonthInputValue()"
+                  (ngModelChange)="selectAnyMonth($event, 'graph')"
+                  class="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-600 dark:bg-slate-900 dark:text-white">
+                <button type="button" (click)="selectCurrentMonthFrom('graph')"
+                  class="mt-2 w-full rounded-lg px-3 py-2 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-slate-700">
+                  Current month
                 </button>
               </div>
             </div>
@@ -485,15 +487,16 @@
                 </svg>
               </button>
               <div *ngIf="showMonthPickerGraph()"
-                class="absolute left-0 top-full mt-1 z-20 w-48 max-h-64 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl">
-                <button *ngFor="let month of availableMonths()" type="button"
-                  (click)="selectMonthFromGraph(month.year, month.month)"
-                  class="w-full px-4 py-2.5 text-left text-xs font-medium hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors"
-                  [class.bg-emerald-50]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
-                  [class.dark:bg-slate-700]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
-                  [class.text-emerald-600]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()"
-                  [class.dark:text-emerald-400]="month.month === receiptService.selectedMonth() && month.year === receiptService.selectedYear()">
-                  {{ month.label }}
+                class="absolute left-0 top-full mt-1 z-20 w-64 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 shadow-xl">
+                <label for="summary-graph-month-picker" class="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Jump to any month
+                </label>
+                <input id="summary-graph-month-picker" type="month" [ngModel]="selectedMonthInputValue()"
+                  (ngModelChange)="selectAnyMonth($event, 'graph')"
+                  class="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-600 dark:bg-slate-900 dark:text-white">
+                <button type="button" (click)="selectCurrentMonthFrom('graph')"
+                  class="mt-2 w-full rounded-lg px-3 py-2 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-slate-700">
+                  Current month
                 </button>
               </div>
             </div>

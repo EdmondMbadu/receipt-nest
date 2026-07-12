@@ -26,6 +26,7 @@ interface MonthGroup {
 type GraphViewMode = 'daily' | 'histogram' | 'pie';
 type HistogramRange = 'this-year' | '5y' | 'all';
 type SpendingTimeRange = '1d' | '1w' | '1m' | '3m' | '1y' | 'all';
+type MonthPickerSource = 'card' | 'graph';
 
 interface TimeRangeDayPoint {
   day: number;
@@ -211,6 +212,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly selectedMonthReceipts = this.receiptService.selectedMonthReceipts;
   readonly isCurrentMonth = this.receiptService.isCurrentMonth;
   readonly monthOverMonthChange = this.receiptService.monthOverMonthChange;
+  readonly selectedMonthInputValue = computed(() => {
+    const month = String(this.receiptService.selectedMonth() + 1).padStart(2, '0');
+    return `${this.receiptService.selectedYear()}-${month}`;
+  });
 
   // Chart data from service
   readonly dailySpendingData = this.receiptService.dailySpendingData;
@@ -800,22 +805,29 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.closeMonthPickerGraph();
   }
 
-  // Available months for picker (last 24 months)
-  readonly availableMonths = computed(() => {
-    const months: { year: number; month: number; label: string }[] = [];
-    const now = new Date();
+  selectAnyMonth(value: string, source: MonthPickerSource): void {
+    const match = /^(\d{4,})-(\d{2})$/.exec(value);
+    if (!match) return;
 
-    for (let i = 0; i < 24; i++) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      months.push({
-        year: date.getFullYear(),
-        month: date.getMonth(),
-        label: date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-      });
+    const year = Number(match[1]);
+    const month = Number(match[2]) - 1;
+    if (!Number.isInteger(year) || month < 0 || month > 11) return;
+
+    if (source === 'card') {
+      this.selectMonthFromCard(year, month);
+    } else {
+      this.selectMonthFromGraph(year, month);
     }
+  }
 
-    return months;
-  });
+  selectCurrentMonthFrom(source: MonthPickerSource): void {
+    const now = new Date();
+    if (source === 'card') {
+      this.selectMonthFromCard(now.getFullYear(), now.getMonth());
+    } else {
+      this.selectMonthFromGraph(now.getFullYear(), now.getMonth());
+    }
+  }
 
   // Search functionality
   readonly filteredReceipts = computed(() => {
