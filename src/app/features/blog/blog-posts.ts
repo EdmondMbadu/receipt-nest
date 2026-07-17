@@ -55,6 +55,452 @@ export const blogCategories: readonly BlogCategory[] = [
 
 export const blogPosts: readonly BlogPost[] = [
   {
+    slug: 'can-bank-statements-replace-receipts',
+    path: '/blog/can-bank-statements-replace-receipts',
+    category: 'Tax Guides',
+    title: 'Can Bank Statements Replace Receipts for Taxes? What Self-Employed People Need to Know',
+    seoTitle: 'Can Bank Statements Replace Receipts for Taxes?',
+    description:
+      'Learn when bank and credit card statements can support a business expense, when an itemized receipt matters, and what to do when a receipt is missing.',
+    excerpt:
+      'A bank statement can prove that money moved, but it may not prove what you bought or why it was for business. Here is how to build a stronger record.',
+    datePublished: '2026-07-16',
+    dateModified: '2026-07-16',
+    readTime: '10 min read',
+    image: '/assets/images/blog/bank-statements-vs-receipts.jpg',
+    imageAlt: 'An itemized receipt beside a bank statement on an organized desk',
+    keywords: [
+      'can bank statements replace receipts for taxes',
+      'missing receipt business expense',
+      'proof of business expense'
+    ],
+    intro: [
+      `You are reviewing last year's expenses and find a charge you recognize immediately—but the receipt is gone. Can the bank statement replace it? The honest answer is: sometimes it can help, but a line on a statement is not automatically a complete record of a business expense.`,
+      `The IRS allows businesses to use a recordkeeping system that clearly shows income and expenses. Supporting documents can include receipts, invoices, canceled checks, and bank or credit card statements. The strongest record is the one that shows not only that you paid, but also what you purchased and how it relates to your business.`
+    ],
+    sections: [
+      {
+        id: 'short-answer',
+        title: 'The short answer: a statement is evidence, not always the whole story',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `A bank or credit card statement usually identifies the merchant, transaction date, and amount. That makes it useful proof of payment. But many statement descriptions are vague, shortened, or routed through a payment processor. They rarely show the individual items purchased, and they do not explain the business purpose.`
+          },
+          {
+            kind: 'callout',
+            tone: 'note',
+            title: 'A practical rule',
+            text: `Think of the statement as one part of the evidence. If it does not establish the item or business purpose, pair it with another document or note that does.`
+          },
+          {
+            kind: 'table',
+            table: {
+              columns: ['Record', 'What it usually shows', 'What may be missing'],
+              rows: [
+                ['Itemized receipt', 'Merchant, date, items, subtotal, tax, and total', 'Business purpose or who used the purchase'],
+                ['Bank statement', 'Merchant description, date, and amount paid', 'Items purchased and business purpose'],
+                ['Credit card statement', 'Merchant description, date, and charged amount', 'Item detail, returns, discounts, and business purpose'],
+                ['Invoice or order confirmation', 'Seller, buyer, items or services, date, and amount', 'Proof that the invoice was actually paid'],
+                ['Expense note', 'Your explanation of the business purpose', 'Independent proof of the purchase and payment']
+              ]
+            }
+          }
+        ]
+      },
+      {
+        id: 'what-record-needs-to-show',
+        title: 'What a useful business-expense record needs to show',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `IRS recordkeeping guidance says supporting documents for expenses should identify the payee, amount paid, proof of payment, date incurred, and a description of the item or service that shows it was a business expense. One document does not always contain every element, so a combination of records may be needed.`
+          },
+          {
+            kind: 'list',
+            items: [
+              'Who you paid: the merchant, vendor, or service provider.',
+              'How much you paid, including tax and fees when relevant.',
+              'When the expense occurred.',
+              'What product or service you received.',
+              'Why the purchase was ordinary and relevant to your work.',
+              'Evidence that payment was completed.'
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `This is why the same statement line can be strong evidence for one purchase and weak evidence for another. A monthly charge from a clearly named software provider may be easy to connect to an invoice and your work. A large charge from a general retailer could include groceries, office supplies, a gift, and a return—all in one transaction.`
+          }
+        ]
+      },
+      {
+        id: 'when-statements-help',
+        title: 'When a bank statement may be enough—and when it probably is not',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `There is no universal rule that makes every statement line sufficient or insufficient. The question is whether your records, taken together, substantiate the expense. A statement is more useful when the merchant and business purpose are unambiguous and another record confirms what was purchased.`
+          },
+          {
+            kind: 'table',
+            table: {
+              columns: ['Situation', 'Record strength', 'Helpful next step'],
+              rows: [
+                ['Recurring business software with a matching invoice', 'Relatively clear', 'Save the invoice and statement together'],
+                ['Purchase from a general retailer', 'Ambiguous', 'Find the itemized receipt or order history'],
+                ['Cash purchase', 'Statement provides no support', 'Keep the receipt and add a business-purpose note'],
+                ['Mixed personal and business transaction', 'Incomplete', 'Keep the itemized receipt and identify only the business items'],
+                ['Equipment or another long-lived asset', 'Incomplete', 'Preserve the invoice, purchase date, cost, and usage records'],
+                ['Travel, vehicle, or gift expense', 'Often needs added detail', 'Keep the required dates, destinations, mileage, recipients, or business purpose']
+              ]
+            }
+          },
+          {
+            kind: 'callout',
+            tone: 'warning',
+            title: 'Tax guidance, not tax advice',
+            text: `ReceiptNest AI organizes your records; it does not decide whether an expense is deductible or whether your evidence is sufficient. Ask a qualified tax professional about your specific facts.`
+          }
+        ]
+      },
+      {
+        id: 'missing-receipt',
+        title: 'What to do when a receipt is missing',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `A missing slip does not mean your first move should be guessing. Reconstruct the record while the purchase is still familiar, and preserve the documents you used to do it.`
+          },
+          {
+            kind: 'ordered',
+            items: [
+              'Search your email for the merchant name, amount, order number, or approximate purchase date.',
+              'Open the merchant account or app and download the invoice, order confirmation, or transaction detail.',
+              'Ask the merchant for a duplicate receipt if the purchase was made in person.',
+              'Match the replacement document to the bank or credit card transaction that proves payment.',
+              'Add a short note explaining what you bought and the specific business purpose.',
+              'If you cannot reconstruct the purchase confidently, flag it for your tax professional instead of inventing detail.'
+            ]
+          },
+          {
+            kind: 'callout',
+            tone: 'tip',
+            title: 'Write useful notes',
+            text: `“Client meeting with Jordan to review the website launch” is more useful than “business meal.” Specific notes preserve the context that disappears months later.`
+          }
+        ]
+      },
+      {
+        id: 'monthly-system',
+        title: 'A monthly system that keeps statements and receipts together',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `The easiest time to resolve a missing receipt is not during tax season. It is during a short monthly review, while the merchant and purchase are still recognizable.`
+          },
+          {
+            kind: 'ordered',
+            items: [
+              'Capture paper receipts when you receive them and forward email receipts as they arrive.',
+              'Review extracted merchant, date, amount, and category details for accuracy.',
+              'Compare your receipt list with business bank and credit card activity once a month.',
+              'Investigate unmatched transactions and attach a replacement invoice or useful note.',
+              'Keep mixed purchases clearly labeled so only the business portion is considered later.',
+              'Export an organized record for your own archive or tax-professional review.'
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `ReceiptNest AI helps with the receipt side of that workflow: photos, PDFs, and forwarded emails become searchable records instead of loose files. Your bank statement remains a valuable cross-check, not the only place the purchase exists.`
+          }
+        ]
+      },
+      {
+        id: 'bottom-line',
+        title: 'The bottom line',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Bank and credit card statements are legitimate supporting documents, but they do not automatically replace itemized receipts. They are strongest when combined with an invoice, order detail, or contemporaneous note that shows what the purchase was and why it belonged to the business.`
+          },
+          {
+            kind: 'paragraph',
+            text: `Do not aim for a perfect shoebox at the end of the year. Aim for a clear trail: purchase detail, proof of payment, business purpose, and a monthly habit that catches gaps early.`
+          }
+        ]
+      }
+    ],
+    faq: [
+      {
+        question: 'Can a credit card statement be used as a receipt for taxes?',
+        answer:
+          'A credit card statement can support the date, merchant, and amount paid, but it may not show what was purchased or the business purpose. A receipt, invoice, order confirmation, or note may be needed to complete the record.'
+      },
+      {
+        question: 'What should I do if I lost a business receipt?',
+        answer:
+          'Look for an emailed receipt or online order history, request a duplicate from the merchant, match it to proof of payment, and add a specific business-purpose note. Ask a tax professional if the expense cannot be reconstructed confidently.'
+      },
+      {
+        question: 'Are digital copies of receipts acceptable?',
+        answer:
+          'Electronic records can follow the same basic recordkeeping principles as paper records. Keep digital copies accurate, readable, organized, and available for as long as the underlying record must be retained.'
+      },
+      {
+        question: 'Does ReceiptNest decide which expenses are tax deductible?',
+        answer:
+          'No. ReceiptNest captures and organizes receipt records. Deductibility depends on your circumstances and should be confirmed with a qualified tax professional.'
+      }
+    ],
+    relatedSlugs: [
+      'organize-receipts-taxes-freelancer-guide',
+      'scan-receipts-automatically',
+      'receipt-tracking-delivery-drivers'
+    ]
+  },
+  {
+    slug: 'receipt-tracking-delivery-drivers',
+    path: '/blog/receipt-tracking-delivery-drivers',
+    category: 'By Profession',
+    title: 'Receipt Tracking for Delivery Drivers: What DoorDash, Uber Eats, and Instacart Workers Should Save in 2026',
+    seoTitle: 'Receipt Tracking for Delivery Drivers (2026)',
+    description:
+      'A practical receipt and expense-record workflow for DoorDash, Uber Eats, Instacart, and other independent delivery drivers in 2026.',
+    excerpt:
+      'Your delivery app tracks orders, not every cost of doing the work. Learn which records to preserve and how to build a five-minute end-of-shift routine.',
+    datePublished: '2026-07-16',
+    dateModified: '2026-07-16',
+    readTime: '11 min read',
+    image: '/assets/images/blog/delivery-driver-receipts.jpg',
+    imageAlt: 'Delivery bag, phone map, mileage notebook, keys, and fuel receipt in a car',
+    keywords: [
+      'receipt tracking for delivery drivers',
+      'DoorDash receipts taxes',
+      'Uber Eats expense tracker',
+      'Instacart driver expenses'
+    ],
+    intro: [
+      `Delivery work creates a strange kind of financial blur. Your phone is personal and business. Your car is personal and business. A fuel stop might support both. Meanwhile, the platform records completed orders and payouts, but it does not build a complete record of every cost you incurred to earn them.`,
+      `A useful system separates two streams: records of the income you received and records of the expenses you paid. This guide focuses on preserving the second stream so you and your tax professional can review it later. It is organization guidance, not a promise that every listed cost is deductible.`
+    ],
+    sections: [
+      {
+        id: 'two-record-streams',
+        title: 'Your delivery app is not your complete business record',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `The IRS treats delivery services as part of the gig economy and says gig income is taxable even when it is part-time, temporary, paid in cash, or not reported on an information return. Platform summaries can help document income, but your business records also need to support the expenses you claim.`
+          },
+          {
+            kind: 'table',
+            table: {
+              columns: ['Record stream', 'Examples', 'Why it matters'],
+              rows: [
+                ['Income', 'Platform payout summaries, 1099 forms, tips, bonuses, and adjustments', 'Shows how much the work produced'],
+                ['Vehicle use', 'Mileage log, trip dates, destinations, and business purpose', 'Separates delivery driving from personal use'],
+                ['Purchases', 'Fuel, supplies, phone accessories, bags, cleaning, repairs, and maintenance records', 'Preserves cost and item detail for later review'],
+                ['Fees', 'Platform fees, tolls, parking, and payment-processing records', 'Captures costs that may not look like ordinary store receipts'],
+                ['Work context', 'Calendar notes, shift history, and delivery activity', 'Helps connect dates and purchases to the business']
+              ]
+            }
+          },
+          {
+            kind: 'callout',
+            tone: 'note',
+            title: 'Start with separation',
+            text: `Keep income records and expense records in the same monthly system, but do not treat a platform payout as a complete picture of profit.`
+          }
+        ]
+      },
+      {
+        id: 'records-to-save',
+        title: 'Receipts and records worth preserving',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Save records broadly and decide tax treatment later. Throwing away a receipt is permanent; asking a tax professional whether it applies is easy. The exact treatment depends on whether the cost was ordinary, necessary, and properly allocated to your work.`
+          },
+          {
+            kind: 'list',
+            items: [
+              'Vehicle records: fuel, oil, repairs, tires, insurance, registration, lease payments, and depreciation-related purchase documents.',
+              'Trip records: business miles, delivery dates, starting and ending locations, and business purpose.',
+              'Road costs: business-related parking and toll records.',
+              'Delivery equipment: insulated bags, drink carriers, carts, flashlights, phone mounts, charging cables, and portable batteries.',
+              'Phone and connectivity: phone bills, data-plan records, and device purchase documents when the phone has business use.',
+              'Cleaning and safety supplies used for delivery work.',
+              'Platform statements showing fees, adjustments, incentives, and payouts.',
+              'Professional costs such as tax preparation or business software records when applicable.'
+            ]
+          },
+          {
+            kind: 'callout',
+            tone: 'warning',
+            title: 'Keep does not mean deduct',
+            text: `Preserving a document simply keeps the question open. Personal expenses are not transformed into business expenses because they happened during a shift, and mixed-use costs may require allocation.`
+          }
+        ]
+      },
+      {
+        id: 'mileage-vs-actual',
+        title: 'Mileage method vs actual vehicle expenses',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Self-employed drivers generally calculate eligible car expenses using either the standard mileage rate or the actual-expense method, subject to IRS rules and qualifications. For 2026, the IRS business standard mileage rate is 72.5 cents per business mile. Rates can change each year, so verify the rate for the tax year you are filing.`
+          },
+          {
+            kind: 'table',
+            table: {
+              columns: ['Method', 'Core record', 'What to preserve'],
+              rows: [
+                ['Standard mileage rate', 'A reliable log of business miles', 'Trip date, destination, purpose, business miles, and total annual vehicle miles'],
+                ['Actual expenses', 'Business-use percentage plus actual vehicle costs', 'Mileage records and receipts for fuel, repairs, insurance, registration, lease costs, or depreciation support'],
+                ['Either method', 'Separate business-related road costs', 'Records for qualifying parking fees and tolls']
+              ]
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: `ReceiptNest organizes purchase records; it is not a mileage tracker. Use a contemporaneous mileage log or a suitable mileage app for trips, then keep the resulting report beside your receipt archive.`
+          },
+          {
+            kind: 'callout',
+            tone: 'tip',
+            title: 'Do not wait to choose what to record',
+            text: `Keep mileage and vehicle-cost records during the year. That gives your tax professional better information for evaluating which permitted method fits your situation.`
+          }
+        ]
+      },
+      {
+        id: 'mixed-use',
+        title: 'How to handle expenses that are both personal and business',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Mixed use is normal for independent drivers. The goal is not to pretend the personal use disappeared. The goal is to preserve enough information to calculate and explain the business portion.`
+          },
+          {
+            kind: 'list',
+            items: [
+              'Keep a consistent mileage log that distinguishes delivery trips from personal driving and commuting.',
+              'Save the complete phone bill and document a reasonable business-use method instead of labeling the entire bill as work.',
+              'For a store transaction containing personal and delivery supplies, keep the itemized receipt and mark the business items.',
+              'Keep refunds and returns connected to the original purchase so your records do not overstate cost.',
+              'Add a short note when the business relationship would not be obvious to someone reviewing the record later.'
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `A clean record makes the gray areas visible. That is far more useful than a folder where every gas charge and phone payment is assumed to be entirely business-related.`
+          }
+        ]
+      },
+      {
+        id: 'end-of-shift',
+        title: 'The five-minute end-of-shift receipt routine',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Delivery drivers do not need a second job as a bookkeeper. The best workflow happens while you are already sitting in the car and the day's purchases are still easy to remember.`
+          },
+          {
+            kind: 'ordered',
+            items: [
+              'End or confirm the shift in your delivery apps and make sure the trip is captured in your mileage log.',
+              'Photograph paper receipts before they reach the cup holder, glove box, or floor.',
+              'Forward email receipts or upload PDFs for online purchases and phone bills.',
+              'Add a brief business-purpose note to unusual or mixed transactions.',
+              'Review anything marked as needing attention, then leave the deeper reconciliation for your monthly review.'
+            ]
+          },
+          {
+            kind: 'callout',
+            tone: 'tip',
+            title: 'Use the car as a capture point, not a filing cabinet',
+            text: `Once a paper receipt is photographed and safely stored, move it out of the car. Heat, sunlight, spills, and time make thermal receipts fade quickly.`
+          }
+        ]
+      },
+      {
+        id: 'monthly-quarterly',
+        title: 'Monthly and quarterly review checklist',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Daily capture keeps information from disappearing. Monthly and quarterly reviews turn those small records into a usable business history.`
+          },
+          {
+            kind: 'table',
+            table: {
+              columns: ['Timing', 'Review'],
+              rows: [
+                ['After each shift', 'Capture receipts, log mileage, and note unusual purchases'],
+                ['Weekly', 'Resolve unreadable images, missing amounts, and obvious duplicates'],
+                ['Monthly', 'Compare receipts with statements, platform activity, refunds, and mileage totals'],
+                ['Quarterly', 'Export organized records, review income and expenses, and discuss estimated tax needs if applicable'],
+                ['Year-end', 'Preserve platform tax forms, annual mileage totals, receipt exports, and asset records']
+              ]
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: `The result should be easy for another person to follow. A tax professional should not have to decode screenshots, unexplained bank transactions, and a single annual mileage estimate.`
+          }
+        ]
+      },
+      {
+        id: 'tax-pro-handoff',
+        title: 'What to prepare for a tax-professional handoff',
+        blocks: [
+          {
+            kind: 'list',
+            items: [
+              'Platform income summaries and tax forms.',
+              'A monthly receipt export grouped by merchant, date, amount, and category.',
+              'Your mileage report with business and total vehicle miles.',
+              'Vehicle purchase or lease documents and records of major repairs or improvements.',
+              'Notes explaining mixed-use calculations and unusual transactions.',
+              'A short list of unresolved questions instead of silently guessing.'
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `Good records do more than support tax preparation. They show whether the work is actually profitable after vehicle, phone, equipment, and platform costs. That is the number worth knowing before you accept the next shift.`
+          }
+        ]
+      }
+    ],
+    faq: [
+      {
+        question: 'What receipts should a delivery driver keep?',
+        answer:
+          'Preserve records for vehicle costs, business mileage, tolls and parking, delivery equipment, phone and connectivity costs, supplies, platform fees, and other purchases related to the work. A tax professional can determine which costs qualify and how mixed-use expenses should be allocated.'
+      },
+      {
+        question: 'Do I need fuel receipts if I use the standard mileage rate?',
+        answer:
+          'The standard mileage method depends primarily on adequate mileage records rather than deducting each operating cost separately. Keeping vehicle-cost records during the year can still help with comparisons, business analysis, and situations where your method or eligibility needs review.'
+      },
+      {
+        question: 'Can delivery drivers deduct both mileage and gas?',
+        answer:
+          'Generally, the standard mileage rate and actual vehicle expenses are alternative methods for the same vehicle use; you do not add gas on top of the standard mileage rate. Rules and eligibility vary, so confirm your method with a qualified tax professional.'
+      },
+      {
+        question: 'Does ReceiptNest track delivery mileage?',
+        answer:
+          'No. ReceiptNest organizes receipts from photos, email, and PDFs. Use a mileage log or mileage-tracking app for trips, and keep that report with your receipt records.'
+      }
+    ],
+    relatedSlugs: [
+      'organize-receipts-taxes-freelancer-guide',
+      'can-bank-statements-replace-receipts',
+      'scan-receipts-automatically'
+    ]
+  },
+  {
     slug: 'receiptnest-vs-expensify',
     path: '/blog/receiptnest-vs-expensify',
     category: 'Comparisons',

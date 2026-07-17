@@ -29,6 +29,11 @@ export class SeoService {
   apply(meta: SeoPageMeta): void {
     const canonicalUrl = this.absoluteUrl(meta.canonicalPath);
     const image = this.absoluteUrl(meta.image ?? DEFAULT_IMAGE);
+    const imageType = /\.jpe?g(?:$|\?)/i.test(image)
+      ? 'image/jpeg'
+      : /\.webp(?:$|\?)/i.test(image)
+        ? 'image/webp'
+        : 'image/png';
     const imageAlt = meta.imageAlt ?? DEFAULT_IMAGE_ALT;
     const robots = meta.robots ?? 'index, follow';
 
@@ -54,7 +59,7 @@ export class SeoService {
     this.meta.updateTag({ property: 'og:image:alt', content: imageAlt }, "property='og:image:alt'");
     this.meta.updateTag({ property: 'og:image:width', content: '1200' }, "property='og:image:width'");
     this.meta.updateTag({ property: 'og:image:height', content: '630' }, "property='og:image:height'");
-    this.meta.updateTag({ property: 'og:image:type', content: 'image/png' }, "property='og:image:type'");
+    this.meta.updateTag({ property: 'og:image:type', content: imageType }, "property='og:image:type'");
     this.meta.updateTag({ property: 'og:site_name', content: SITE_NAME }, "property='og:site_name'");
     this.meta.updateTag({ property: 'og:locale', content: 'en_US' }, "property='og:locale'");
 
