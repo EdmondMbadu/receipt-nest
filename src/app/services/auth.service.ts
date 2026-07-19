@@ -262,7 +262,13 @@ export class AuthService {
     const auth = this.requireAuth();
     const db = this.requireDb();
     this.resetAuthStateReady();
-    const credential = await createUserWithEmailAndPassword(auth, form.email, form.password);
+    let credential: UserCredential;
+    try {
+      credential = await createUserWithEmailAndPassword(auth, form.email, form.password);
+    } catch (error) {
+      this.resolvePendingAuthState();
+      throw error;
+    }
 
     const profile: UserProfile = {
       id: credential.user.uid,
@@ -276,8 +282,10 @@ export class AuthService {
       updatedAt: serverTimestamp()
     };
 
-    await setDoc(doc(db, 'users', credential.user.uid), profile);
-    await this.sendVerificationEmail();
+    await Promise.all([
+      setDoc(doc(db, 'users', credential.user.uid), profile),
+      this.sendVerificationEmail()
+    ]);
 
     return credential;
   }
@@ -285,7 +293,13 @@ export class AuthService {
   async login(email: string, password: string) {
     const auth = this.requireAuth();
     this.resetAuthStateReady();
-    const credential = await signInWithEmailAndPassword(auth, email, password);
+    let credential: UserCredential;
+    try {
+      credential = await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      this.resolvePendingAuthState();
+      throw error;
+    }
     const user = credential.user;
 
     if (!user.emailVerified) {
@@ -301,8 +315,13 @@ export class AuthService {
     this.resetAuthStateReady();
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    const credential = await signInWithPopup(auth, provider);
-    await this.finishProviderSignIn(credential);
+    try {
+      const credential = await signInWithPopup(auth, provider);
+      await this.finishProviderSignIn(credential);
+    } catch (error) {
+      this.resolvePendingAuthState();
+      throw error;
+    }
   }
 
   async loginWithApple() {
@@ -316,6 +335,7 @@ export class AuthService {
       const credential = await this.withPopupTimeout(signInWithPopup(auth, provider), 'Apple');
       await this.finishProviderSignIn(credential);
     } catch (error: any) {
+      this.resolvePendingAuthState();
       if (error?.code === 'auth/operation-not-allowed') {
         throw new Error('Apple sign-in is not enabled in Firebase Authentication.');
       }

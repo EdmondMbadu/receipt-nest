@@ -5,6 +5,7 @@ import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../services/auth.service';
+import { getAuthErrorMessage } from '../../../utils/auth-error.utils';
 
 @Component({
   selector: 'app-reset-password',
@@ -127,6 +128,10 @@ export class ResetPasswordComponent implements OnInit {
       return 'Choose a stronger password with at least 6 characters.';
     }
 
-    return error?.message ?? 'We could not reset your password right now. Please request a new reset link.';
+    return getAuthErrorMessage(
+      error,
+      'password-reset',
+      'We could not reset your password right now. Please request a new reset link.'
+    );
   }
 }

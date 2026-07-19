@@ -5,6 +5,7 @@ import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../services/auth.service';
+import { getAuthErrorMessage } from '../../../utils/auth-error.utils';
 
 @Component({
   selector: 'app-login',
@@ -71,10 +72,11 @@ export class LoginComponent {
         this.errorMessage = 'Please verify your email to sign in.';
         await this.router.navigateByUrl('/verify', { state: { email: this.form.get('email')?.value ?? '' } });
       } else {
-        this.errorMessage = error?.message ?? 'Unable to sign you in right now.';
+        this.errorMessage = getAuthErrorMessage(error, 'login', 'Unable to sign you in right now. Please try again.');
       }
     } finally {
       this.isSubmitting = false;
+      this.detectChanges();
     }
   }
 
@@ -106,7 +108,11 @@ export class LoginComponent {
       this.resetErrorMessage = '';
       this.detectChanges();
     } catch (error: any) {
-      this.resetErrorMessage = error?.message ?? 'Unable to send reset link right now.';
+      this.resetErrorMessage = getAuthErrorMessage(
+        error,
+        'password-reset',
+        'Unable to send a reset link right now. Please try again.'
+      );
       this.detectChanges();
     } finally {
       this.isSendingReset = false;
@@ -140,9 +146,10 @@ export class LoginComponent {
       await this.authService.waitForAuthState();
       await this.router.navigateByUrl(this.getRedirectUrl());
     } catch (error: any) {
-      this.errorMessage = error?.message ?? 'Unable to sign you in with Google right now.';
+      this.errorMessage = getAuthErrorMessage(error, 'provider', 'Unable to sign you in with Google right now.');
     } finally {
       this.isSubmitting = false;
+      this.detectChanges();
     }
   }
 
@@ -155,9 +162,10 @@ export class LoginComponent {
       await this.authService.waitForAuthState();
       await this.router.navigateByUrl(this.getRedirectUrl());
     } catch (error: any) {
-      this.errorMessage = error?.message ?? 'Unable to sign you in with Apple right now.';
+      this.errorMessage = getAuthErrorMessage(error, 'provider', 'Unable to sign you in with Apple right now.');
     } finally {
       this.isSubmitting = false;
+      this.detectChanges();
     }
   }
 
