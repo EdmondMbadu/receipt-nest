@@ -137,7 +137,7 @@ export const sendVerificationEmail = onCall(
     }
 
     const link = await admin.auth().generateEmailVerificationLink(email, {
-      url: `${appBaseUrl.value()}/login?verified=1`,
+      url: `${appBaseUrl.value()}/email-verified`,
       handleCodeInApp: false
     });
 
@@ -229,12 +229,13 @@ export const sendWelcomeEmail = onCall(
       throw new HttpsError("unauthenticated", "User must be authenticated.");
     }
 
-    const email = request.auth.token.email as string | undefined;
+    const firebaseUser = await admin.auth().getUser(request.auth.uid);
+    const email = firebaseUser.email || (request.auth.token.email as string | undefined);
     if (!email) {
       throw new HttpsError("failed-precondition", "Missing authenticated email.");
     }
 
-    if (!request.auth.token.email_verified) {
+    if (!firebaseUser.emailVerified) {
       throw new HttpsError("failed-precondition", "Email not verified.");
     }
 

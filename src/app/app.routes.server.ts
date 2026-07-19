@@ -12,6 +12,10 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Prerender
   },
   {
+    path: 'email-verified',
+    renderMode: RenderMode.Prerender
+  },
+  {
     path: 'register',
     renderMode: RenderMode.Prerender
   },

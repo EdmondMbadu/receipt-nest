@@ -46,9 +46,13 @@ export class LoginComponent {
       this.form.patchValue({ email });
     }
 
+    const isVerificationReturn =
+      this.route.snapshot.queryParamMap.get('verified') === '1' ||
+      this.route.snapshot.data['verificationReturn'] === true;
+
     if (this.route.snapshot.queryParamMap.get('reset') === 'success') {
       this.pageNotice = 'Your password was updated successfully. Sign in with your new password.';
-    } else if (this.route.snapshot.queryParamMap.get('verified') === '1') {
+    } else if (isVerificationReturn) {
       this.pageNotice = 'Your email is verified. Sign in to continue to your account.';
       afterNextRender(() => {
         this.pageNotice = 'Your email is verified. Signing you in…';
