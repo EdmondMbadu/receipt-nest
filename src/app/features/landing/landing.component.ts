@@ -60,7 +60,7 @@ export class LandingComponent implements OnDestroy {
   readonly isMobileMenuOpen = signal(false);
   readonly isDemoOpen = signal(false);
   readonly openFaqIndex = signal<number | null>(null);
-  readonly billingInterval = signal<'monthly' | 'annual'>('monthly');
+  readonly billingInterval = signal<'monthly' | 'annual'>('annual');
   readonly googlePlayUrl = 'https://play.google.com/store/apps/details?id=com.receiptnest.mobile';
   readonly appStoreUrl = 'https://apps.apple.com/us/app/receiptnest-ai/id6762539388';
   readonly mobileStorePlatform = signal<MobileStorePlatform>('unknown');
