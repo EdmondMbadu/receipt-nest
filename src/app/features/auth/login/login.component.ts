@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, afterNextRender, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Meta, Title } from '@angular/platform-browser';
@@ -49,8 +49,11 @@ export class LoginComponent {
     if (this.route.snapshot.queryParamMap.get('reset') === 'success') {
       this.pageNotice = 'Your password was updated successfully. Sign in with your new password.';
     } else if (this.route.snapshot.queryParamMap.get('verified') === '1') {
-      this.pageNotice = 'Your email is verified. Signing you in…';
-      void this.resumeVerifiedSession();
+      this.pageNotice = 'Your email is verified. Sign in to continue to your account.';
+      afterNextRender(() => {
+        this.pageNotice = 'Your email is verified. Signing you in…';
+        void this.resumeVerifiedSession();
+      });
     }
   }
 
@@ -173,6 +176,7 @@ export class LoginComponent {
 
   private async resumeVerifiedSession(): Promise<void> {
     this.isSubmitting = true;
+    this.detectChanges();
 
     try {
       const resumed = await this.authService.resumeVerifiedSession();

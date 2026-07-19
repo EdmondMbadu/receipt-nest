@@ -367,6 +367,10 @@ export class AuthService {
   }
 
   async resumeVerifiedSession(): Promise<boolean> {
+    if (!this.isBrowser) {
+      return false;
+    }
+
     await this.waitForInitialization();
     const auth = this.requireAuth();
     const currentUser = auth.currentUser;
@@ -390,6 +394,8 @@ export class AuthService {
         return false;
       }
 
+      const lastLoginAt = this.parseLastLoginTimestamp(currentUser.metadata.lastSignInTime);
+      void this.runPostSignInSync(currentUser.uid, profile, lastLoginAt, true);
       return true;
     } catch (error) {
       console.error('Failed to resume verified session', error);
