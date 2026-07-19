@@ -65,7 +65,6 @@ export class LoginComponent {
     try {
       const { email, password } = this.form.getRawValue();
       await this.authService.login(email ?? '', password ?? '');
-      await this.authService.waitForAuthState();
       await this.router.navigateByUrl(this.getRedirectUrl());
     } catch (error: any) {
       if (error?.code === 'auth/email-not-verified') {
@@ -143,7 +142,6 @@ export class LoginComponent {
 
     try {
       await this.authService.loginWithGoogle();
-      await this.authService.waitForAuthState();
       await this.router.navigateByUrl(this.getRedirectUrl());
     } catch (error: any) {
       this.errorMessage = getAuthErrorMessage(error, 'provider', 'Unable to sign you in with Google right now.');
@@ -159,7 +157,6 @@ export class LoginComponent {
 
     try {
       await this.authService.loginWithApple();
-      await this.authService.waitForAuthState();
       await this.router.navigateByUrl(this.getRedirectUrl());
     } catch (error: any) {
       this.errorMessage = getAuthErrorMessage(error, 'provider', 'Unable to sign you in with Apple right now.');

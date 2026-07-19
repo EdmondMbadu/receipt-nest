@@ -293,19 +293,20 @@ export class AuthService {
   async login(email: string, password: string) {
     const auth = this.requireAuth();
     this.resetAuthStateReady();
-    let credential: UserCredential;
     try {
-      credential = await signInWithEmailAndPassword(auth, email, password);
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      const user = credential.user;
+
+      if (!user.emailVerified) {
+        await this.sendVerificationEmail();
+        const error: any = new Error('Email not verified');
+        error.code = 'auth/email-not-verified';
+        throw error;
+      }
+
+      await this.finishSignIn(credential);
     } catch (error) {
       this.resolvePendingAuthState();
-      throw error;
-    }
-    const user = credential.user;
-
-    if (!user.emailVerified) {
-      await this.sendVerificationEmail();
-      const error: any = new Error('Email not verified');
-      error.code = 'auth/email-not-verified';
       throw error;
     }
   }
@@ -317,7 +318,7 @@ export class AuthService {
     provider.setCustomParameters({ prompt: 'select_account' });
     try {
       const credential = await signInWithPopup(auth, provider);
-      await this.finishProviderSignIn(credential);
+      await this.finishSignIn(credential);
     } catch (error) {
       this.resolvePendingAuthState();
       throw error;
@@ -333,7 +334,7 @@ export class AuthService {
     provider.setCustomParameters({ locale: 'en' });
     try {
       const credential = await this.withPopupTimeout(signInWithPopup(auth, provider), 'Apple');
-      await this.finishProviderSignIn(credential);
+      await this.finishSignIn(credential);
     } catch (error: any) {
       this.resolvePendingAuthState();
       if (error?.code === 'auth/operation-not-allowed') {
@@ -346,7 +347,7 @@ export class AuthService {
     }
   }
 
-  private async finishProviderSignIn(credential: UserCredential): Promise<void> {
+  private async finishSignIn(credential: UserCredential): Promise<void> {
     const userProfile = await this.withAuthOperationTimeout(
       this.loadSignedInUserProfile(credential.user),
       'Loading your account after sign-in'
@@ -530,6 +531,10 @@ export class AuthService {
   }
 
   async waitForAuthState(): Promise<void> {
+    if (this.user()) {
+      return;
+    }
+
     return this.withAuthOperationTimeout(this.authStateReady, 'Waiting for sign-in to complete');
   }
 

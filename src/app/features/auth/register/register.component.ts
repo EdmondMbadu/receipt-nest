@@ -75,7 +75,6 @@ export class RegisterComponent {
 
     try {
       await this.authService.loginWithGoogle();
-      await this.authService.waitForAuthState();
       await this.router.navigateByUrl('/app');
     } catch (error: any) {
       this.errorMessage = getAuthErrorMessage(error, 'provider', 'Unable to continue with Google right now.');
@@ -91,7 +90,6 @@ export class RegisterComponent {
 
     try {
       await this.authService.loginWithApple();
-      await this.authService.waitForAuthState();
       await this.router.navigateByUrl('/app');
     } catch (error: any) {
       this.errorMessage = getAuthErrorMessage(error, 'provider', 'Unable to continue with Apple right now.');
