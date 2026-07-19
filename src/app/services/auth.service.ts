@@ -10,7 +10,9 @@ import {
   confirmPasswordReset as firebaseConfirmPasswordReset,
   createUserWithEmailAndPassword,
   getAuth,
+  getIdToken,
   onAuthStateChanged,
+  reload,
   reauthenticateWithCredential,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -49,8 +51,6 @@ export class AuthService {
 
   private initialized = false;
   private readonly initPromise: Promise<void>;
-  private authStateReady: Promise<void> = Promise.resolve();
-  private resolveAuthStateReady: (() => void) | null = null;
   private userProfileUnsubscribe: Unsubscribe | null = null;
   private lastSeenWriteAt = 0;
   private lastSeenUpdateInFlight = false;
@@ -95,8 +95,6 @@ export class AuthService {
 
           authStateSettled = true;
           this.finishInit(resolve);
-          this.resolveAuthStateReady?.();
-          this.resolveAuthStateReady = null;
         };
 
         try {
@@ -122,17 +120,6 @@ export class AuthService {
         }
       });
     });
-  }
-
-  private resetAuthStateReady() {
-    this.authStateReady = new Promise((resolve) => {
-      this.resolveAuthStateReady = resolve;
-    });
-  }
-
-  private resolvePendingAuthState() {
-    this.resolveAuthStateReady?.();
-    this.resolveAuthStateReady = null;
   }
 
   private finishInit(resolve: () => void) {
@@ -180,6 +167,16 @@ export class AuthService {
 
   private async loadSignedInUserProfile(firebaseUser: User): Promise<UserProfile | null> {
     if (!firebaseUser.emailVerified) {
+      const activeUser = this.auth?.currentUser;
+      const existingProfile = this.user();
+      if (
+        existingProfile?.id === firebaseUser.uid &&
+        activeUser?.uid === firebaseUser.uid &&
+        activeUser.emailVerified
+      ) {
+        return existingProfile;
+      }
+
       this.clearUserProfileSubscription();
       this.user.set(null);
       return null;
@@ -187,6 +184,11 @@ export class AuthService {
 
     const lastLoginAt = this.parseLastLoginTimestamp(firebaseUser.metadata.lastSignInTime);
     const userProfile = await this.loadOrCreateUserProfile(firebaseUser.uid, firebaseUser.email ?? '', lastLoginAt);
+    const activeUser = this.auth?.currentUser;
+    if (!activeUser || activeUser.uid !== firebaseUser.uid || !activeUser.emailVerified) {
+      return null;
+    }
+
     this.user.set(userProfile);
     this.subscribeToUserProfile(firebaseUser.uid);
     return userProfile;
@@ -261,14 +263,7 @@ export class AuthService {
   }): Promise<UserCredential> {
     const auth = this.requireAuth();
     const db = this.requireDb();
-    this.resetAuthStateReady();
-    let credential: UserCredential;
-    try {
-      credential = await createUserWithEmailAndPassword(auth, form.email, form.password);
-    } catch (error) {
-      this.resolvePendingAuthState();
-      throw error;
-    }
+    const credential = await createUserWithEmailAndPassword(auth, form.email, form.password);
 
     const profile: UserProfile = {
       id: credential.user.uid,
@@ -292,42 +287,29 @@ export class AuthService {
 
   async login(email: string, password: string) {
     const auth = this.requireAuth();
-    this.resetAuthStateReady();
-    try {
-      const credential = await signInWithEmailAndPassword(auth, email, password);
-      const user = credential.user;
+    const credential = await signInWithEmailAndPassword(auth, email, password);
+    const user = credential.user;
 
-      if (!user.emailVerified) {
-        await this.sendVerificationEmail();
-        const error: any = new Error('Email not verified');
-        error.code = 'auth/email-not-verified';
-        throw error;
-      }
-
-      await this.finishSignIn(credential);
-    } catch (error) {
-      this.resolvePendingAuthState();
+    if (!user.emailVerified) {
+      await this.sendVerificationEmail();
+      const error: any = new Error('Email not verified');
+      error.code = 'auth/email-not-verified';
       throw error;
     }
+
+    await this.finishSignIn(credential);
   }
 
   async loginWithGoogle() {
     const auth = this.requireAuth();
-    this.resetAuthStateReady();
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    try {
-      const credential = await signInWithPopup(auth, provider);
-      await this.finishSignIn(credential);
-    } catch (error) {
-      this.resolvePendingAuthState();
-      throw error;
-    }
+    const credential = await signInWithPopup(auth, provider);
+    await this.finishSignIn(credential);
   }
 
   async loginWithApple() {
     const auth = this.requireAuth();
-    this.resetAuthStateReady();
     const provider = new OAuthProvider('apple.com');
     provider.addScope('email');
     provider.addScope('name');
@@ -336,7 +318,6 @@ export class AuthService {
       const credential = await this.withPopupTimeout(signInWithPopup(auth, provider), 'Apple');
       await this.finishSignIn(credential);
     } catch (error: any) {
-      this.resolvePendingAuthState();
       if (error?.code === 'auth/operation-not-allowed') {
         throw new Error('Apple sign-in is not enabled in Firebase Authentication.');
       }
@@ -357,7 +338,6 @@ export class AuthService {
       error.code = 'auth/email-not-verified';
       throw error;
     }
-    this.resolvePendingAuthState();
   }
 
   async sendVerificationEmail(): Promise<void> {
@@ -384,6 +364,37 @@ export class AuthService {
     const functions = this.requireFunctions();
     const callable = httpsCallable<{ email: string }, { ok: boolean }>(functions, 'sendPasswordResetEmail');
     await callable({ email });
+  }
+
+  async resumeVerifiedSession(): Promise<boolean> {
+    await this.waitForInitialization();
+    const auth = this.requireAuth();
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      return false;
+    }
+
+    try {
+      await reload(currentUser);
+      if (!currentUser.emailVerified) {
+        return false;
+      }
+
+      await getIdToken(currentUser, true);
+
+      const profile = await this.withAuthOperationTimeout(
+        this.loadSignedInUserProfile(currentUser),
+        'Loading your verified account'
+      );
+      if (!profile) {
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Failed to resume verified session', error);
+      return false;
+    }
   }
 
   async verifyPasswordResetCode(oobCode: string): Promise<string> {
@@ -531,11 +542,22 @@ export class AuthService {
   }
 
   async waitForAuthState(): Promise<void> {
+    await this.waitForInitialization();
+
     if (this.user()) {
       return;
     }
 
-    return this.withAuthOperationTimeout(this.authStateReady, 'Waiting for sign-in to complete');
+    const currentUser = this.auth?.currentUser;
+    if (currentUser?.emailVerified) {
+      const profile = await this.withAuthOperationTimeout(
+        this.loadSignedInUserProfile(currentUser),
+        'Loading your account'
+      );
+      if (profile) {
+        return;
+      }
+    }
   }
 
   private subscribeToUserProfile(uid: string): void {

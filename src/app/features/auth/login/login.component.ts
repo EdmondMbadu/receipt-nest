@@ -49,7 +49,8 @@ export class LoginComponent {
     if (this.route.snapshot.queryParamMap.get('reset') === 'success') {
       this.pageNotice = 'Your password was updated successfully. Sign in with your new password.';
     } else if (this.route.snapshot.queryParamMap.get('verified') === '1') {
-      this.pageNotice = 'Your email is verified. Welcome to ReceiptNest AI.';
+      this.pageNotice = 'Your email is verified. Signing you in…';
+      void this.resumeVerifiedSession();
     }
   }
 
@@ -168,6 +169,23 @@ export class LoginComponent {
 
   private detectChanges() {
     this.cdr.detectChanges();
+  }
+
+  private async resumeVerifiedSession(): Promise<void> {
+    this.isSubmitting = true;
+
+    try {
+      const resumed = await this.authService.resumeVerifiedSession();
+      if (resumed) {
+        await this.router.navigateByUrl(this.getRedirectUrl(), { replaceUrl: true });
+        return;
+      }
+
+      this.pageNotice = 'Your email is verified. Sign in to continue to your account.';
+    } finally {
+      this.isSubmitting = false;
+      this.detectChanges();
+    }
   }
 
   private getRedirectUrl(): string {
