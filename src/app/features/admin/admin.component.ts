@@ -199,6 +199,14 @@ interface ReceiptCountBackfillResponse {
   updatedCount: number;
 }
 
+interface UserDirectorySyncResponse {
+  ok: boolean;
+  authUserCount: number;
+  createdProfiles: number;
+  updatedProfiles: number;
+  orphanedProfiles: number;
+}
+
 interface UserProAccessResponse {
   ok: boolean;
   userId: string;
@@ -252,6 +260,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   private usersUnsubscribe: Unsubscribe | null = null;
   private feedbackUnsubscribe: Unsubscribe | null = null;
   private billingConfigUnsubscribe: Unsubscribe | null = null;
+  private isDestroyed = false;
   private readonly backfilledReceiptCountUserIds = new Set<string>();
   private receiptProcessingStatsRequestId = 0;
 
@@ -634,7 +643,9 @@ export class AdminComponent implements OnInit, OnDestroy {
     const direction = this.userSortDirection();
     const multiplier = direction === 'asc' ? 1 : -1;
 
-    return [...this.visibleDirectoryUsers()].sort((a, b) => this.compareUsers(a, b, column) * multiplier);
+    return [...this.visibleDirectoryUsers()].sort((a, b) =>
+      this.compareUsers(a, b, column) * multiplier || this.compareText(a.id, b.id)
+    );
   });
   readonly summaryUsers = computed(() =>
     [...this.users()].sort((a, b) => this.compareText(this.displayName(a), this.displayName(b)))
@@ -823,23 +834,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
     );
 
-    this.usersUnsubscribe = onSnapshot(
-      usersRef,
-      (snapshot) => {
-        const users = snapshot.docs.map((doc) => {
-          const data = doc.data() as Omit<UserProfile, 'id'>;
-          return { id: doc.id, ...data };
-        });
-        this.users.set(users);
-        this.isLoading.set(false);
-        void this.backfillMissingReceiptCounts(users);
-      },
-      (error) => {
-        console.error('Failed to load users', error);
-        this.error.set('Unable to load users right now.');
-        this.isLoading.set(false);
-      }
-    );
+    void this.initializeUserDirectory(usersRef);
 
     this.feedbackUnsubscribe = onSnapshot(
       feedbackQuery,
@@ -860,9 +855,45 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.isDestroyed = true;
     this.usersUnsubscribe?.();
     this.feedbackUnsubscribe?.();
     this.billingConfigUnsubscribe?.();
+  }
+
+  private async initializeUserDirectory(usersRef: ReturnType<typeof collection>): Promise<void> {
+    try {
+      const callable = httpsCallable<Record<string, never>, UserDirectorySyncResponse>(
+        this.functions,
+        'syncUserDirectoryFromAuth'
+      );
+      await callable({});
+    } catch (error) {
+      // The Firestore directory remains usable if Auth reconciliation is temporarily unavailable.
+      console.error('Failed to reconcile user directory with Firebase Auth', error);
+    }
+
+    if (this.isDestroyed) {
+      return;
+    }
+
+    this.usersUnsubscribe = onSnapshot(
+      usersRef,
+      (snapshot) => {
+        const users = snapshot.docs.map((doc) => {
+          const data = doc.data() as Omit<UserProfile, 'id'>;
+          return { id: doc.id, ...data };
+        });
+        this.users.set(users);
+        this.isLoading.set(false);
+        void this.backfillMissingReceiptCounts(users);
+      },
+      (error) => {
+        console.error('Failed to load users', error);
+        this.error.set('Unable to load users right now.');
+        this.isLoading.set(false);
+      }
+    );
   }
 
   displayName(user: AdminUser): string {
@@ -871,6 +902,10 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   isLikelyBotUser(user: AdminUser): boolean {
+    if (user.authAccountMissing === true) {
+      return true;
+    }
+
     if (user.role === 'admin') {
       return false;
     }

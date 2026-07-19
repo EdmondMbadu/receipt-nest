@@ -30,6 +30,7 @@ const stripePriceIdAnnualTest = defineSecret("STRIPE_PRICE_ID_ANNUAL_TEST");
 const fromEmail = "info@receipt-nest.com";
 
 const MAX_RECEIPT_COUNT_BACKFILL_USERS = 50;
+const AUTH_DIRECTORY_WRITE_BATCH_SIZE = 400;
 const MAX_CUSTOM_EMAIL_RECIPIENTS = 200;
 const MAX_CUSTOM_EMAIL_TEMPLATE_CHARS = 120_000;
 const RECEIPT_PROCESSING_STATS_USER_BATCH_SIZE = 20;
@@ -71,6 +72,21 @@ interface ReceiptProcessingUserCount {
 }
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const defaultNotificationSettings = {
+  receiptProcessing: true,
+  productUpdates: false,
+  securityAlerts: true,
+  weeklySummaryEmails: true,
+  monthlySummaryEmails: true,
+  weeklySummaryPush: true,
+  monthlySummaryPush: true,
+};
+
+const parseAuthMetadataTimestamp = (value: string | undefined) => {
+  const millis = value ? Date.parse(value) : Number.NaN;
+  return Number.isFinite(millis) ? admin.firestore.Timestamp.fromMillis(millis) : null;
+};
 
 const escapeHtml = (value: string) =>
   value
@@ -531,6 +547,166 @@ export const backfillUserReceiptCounts = onCall(
     });
 
     return { ok: true, updatedCount: updatedUsers.length };
+  }
+);
+
+/**
+ * Reconciles the admin-facing Firestore user directory with Firebase Auth.
+ *
+ * Firebase Auth is authoritative for account identity and metadata. Some legacy
+ * or provider-created Firestore profiles predate the fields used by the admin
+ * table, so they can otherwise appear as a UID with no sortable creation date.
+ */
+export const syncUserDirectoryFromAuth = onCall(
+  { region: "us-central1" },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "User must be authenticated.");
+    }
+
+    await assertAdmin(request.auth.uid, request.auth.token as Record<string, unknown>);
+
+    const authUsers: admin.auth.UserRecord[] = [];
+    let pageToken: string | undefined;
+
+    do {
+      const page = await admin.auth().listUsers(1000, pageToken);
+      authUsers.push(...page.users);
+      pageToken = page.pageToken;
+    } while (pageToken);
+
+    const db = admin.firestore();
+    const firestoreUsersSnapshot = await db.collection("users").get();
+    const snapshotsByUid = new Map(
+      firestoreUsersSnapshot.docs.map((snapshot) => [snapshot.id, snapshot])
+    );
+    const authUserIds = new Set(authUsers.map((authUser) => authUser.uid));
+
+    let writeBatch = db.batch();
+    let pendingWrites = 0;
+    let createdProfiles = 0;
+    let updatedProfiles = 0;
+    let orphanedProfiles = 0;
+
+    const commitPendingWrites = async () => {
+      if (pendingWrites === 0) {
+        return;
+      }
+
+      await writeBatch.commit();
+      writeBatch = db.batch();
+      pendingWrites = 0;
+    };
+
+    for (const authUser of authUsers) {
+      const userRef = db.doc(`users/${authUser.uid}`);
+      const userSnapshot = snapshotsByUid.get(authUser.uid);
+      const userData = userSnapshot?.data() || {};
+      const email = authUser.email?.trim() || "";
+      const createdAt = parseAuthMetadataTimestamp(authUser.metadata.creationTime);
+      const lastLoginAt = parseAuthMetadataTimestamp(authUser.metadata.lastSignInTime);
+      const currentFirstName = String(userData.firstName || "").trim();
+      const currentLastName = String(userData.lastName || "").trim();
+      const authName = splitFullName(authUser.displayName || "");
+      const updates: admin.firestore.DocumentData = {};
+
+      if (!userSnapshot?.exists) {
+        Object.assign(updates, {
+          firstName: authName.firstName,
+          lastName: authName.lastName,
+          email,
+          receiptCount: 0,
+          role: "user",
+          notificationSettings: defaultNotificationSettings,
+          createdAt: createdAt || admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        if (lastLoginAt) {
+          updates.lastLoginAt = lastLoginAt;
+        }
+
+        createdProfiles += 1;
+      } else {
+        if (userData.authAccountMissing === true) {
+          updates.authAccountMissing = admin.firestore.FieldValue.delete();
+          updates.authAccountMissingAt = admin.firestore.FieldValue.delete();
+        }
+
+        if (!String(userData.email || "").trim() && email) {
+          updates.email = email;
+        }
+
+        if (!(userData.createdAt instanceof admin.firestore.Timestamp) && createdAt) {
+          updates.createdAt = createdAt;
+        }
+
+        if (!(userData.lastLoginAt instanceof admin.firestore.Timestamp) && lastLoginAt) {
+          updates.lastLoginAt = lastLoginAt;
+        }
+
+        if (!currentFirstName && !currentLastName && authUser.displayName) {
+          updates.firstName = authName.firstName;
+          updates.lastName = authName.lastName;
+        }
+
+        if (Object.keys(updates).length > 0) {
+          updates.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+          updatedProfiles += 1;
+        }
+      }
+
+      if (Object.keys(updates).length === 0) {
+        continue;
+      }
+
+      writeBatch.set(userRef, updates, { merge: true });
+      pendingWrites += 1;
+
+      if (pendingWrites >= AUTH_DIRECTORY_WRITE_BATCH_SIZE) {
+        await commitPendingWrites();
+      }
+    }
+
+    for (const userSnapshot of firestoreUsersSnapshot.docs) {
+      if (authUserIds.has(userSnapshot.id) || userSnapshot.get("authAccountMissing") === true) {
+        continue;
+      }
+
+      writeBatch.set(
+        userSnapshot.ref,
+        {
+          authAccountMissing: true,
+          authAccountMissingAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+      pendingWrites += 1;
+      orphanedProfiles += 1;
+
+      if (pendingWrites >= AUTH_DIRECTORY_WRITE_BATCH_SIZE) {
+        await commitPendingWrites();
+      }
+    }
+
+    await commitPendingWrites();
+
+    logger.info("Reconciled user directory with Firebase Auth", {
+      requestedBy: request.auth.uid,
+      authUserCount: authUsers.length,
+      createdProfiles,
+      updatedProfiles,
+      orphanedProfiles,
+    });
+
+    return {
+      ok: true,
+      authUserCount: authUsers.length,
+      createdProfiles,
+      updatedProfiles,
+      orphanedProfiles,
+    };
   }
 );
 

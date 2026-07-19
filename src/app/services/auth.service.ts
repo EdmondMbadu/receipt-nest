@@ -133,7 +133,8 @@ export class AuthService {
   private async loadOrCreateUserProfile(
     uid: string,
     email: string,
-    lastLoginAt: Timestamp | null
+    lastLoginAt: Timestamp | null,
+    authCreatedAt: Timestamp | null
   ): Promise<UserProfile> {
     const db = this.requireDb();
     const userRef = doc(db, 'users', uid);
@@ -141,8 +142,30 @@ export class AuthService {
 
     if (snapshot.exists()) {
       const data = snapshot.data() as UserProfile;
+      const repairs: Partial<UserProfile> = {};
+
+      if (!data.email?.trim() && email.trim()) {
+        repairs.email = email.trim();
+      }
+
+      if (!(data.createdAt instanceof Timestamp) && authCreatedAt) {
+        repairs.createdAt = authCreatedAt;
+      }
+
+      if (Object.keys(repairs).length > 0) {
+        await setDoc(
+          userRef,
+          {
+            ...repairs,
+            updatedAt: serverTimestamp()
+          },
+          { merge: true }
+        );
+      }
+
       return {
         ...data,
+        ...repairs,
         id: uid,
         notificationSettings: this.getDefaultNotificationSettings(data)
       };
@@ -157,7 +180,7 @@ export class AuthService {
       lastLoginAt: lastLoginAt ?? undefined,
       role: 'user',
       notificationSettings: this.getDefaultNotificationSettings(),
-      createdAt: serverTimestamp(),
+      createdAt: authCreatedAt ?? serverTimestamp(),
       updatedAt: serverTimestamp()
     };
 
@@ -183,7 +206,13 @@ export class AuthService {
     }
 
     const lastLoginAt = this.parseLastLoginTimestamp(firebaseUser.metadata.lastSignInTime);
-    const userProfile = await this.loadOrCreateUserProfile(firebaseUser.uid, firebaseUser.email ?? '', lastLoginAt);
+    const authCreatedAt = this.parseLastLoginTimestamp(firebaseUser.metadata.creationTime);
+    const userProfile = await this.loadOrCreateUserProfile(
+      firebaseUser.uid,
+      firebaseUser.email ?? '',
+      lastLoginAt,
+      authCreatedAt
+    );
     const activeUser = this.auth?.currentUser;
     if (!activeUser || activeUser.uid !== firebaseUser.uid || !activeUser.emailVerified) {
       return null;

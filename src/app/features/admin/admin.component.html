@@ -20,7 +20,7 @@
         <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Real users</p>
         <p class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ realUserCount() }}</p>
         <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-          {{ totalUsers() | number }} total, {{ likelyBotCount() | number }} likely bot(s)
+          {{ totalUsers() | number }} total, {{ likelyBotCount() | number }} excluded record(s)
         </p>
       </div>
       <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
@@ -1823,7 +1823,11 @@
               <td class="px-4 py-3 text-sm font-medium text-slate-900 dark:text-white">
                 <div class="flex flex-wrap items-center gap-2">
                   <span>{{ displayName(user) }}</span>
-                  <span *ngIf="userDirectoryView() === 'all' && isLikelyBotUser(user)"
+                  <span *ngIf="userDirectoryView() === 'all' && user.authAccountMissing"
+                    class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+                    no auth account
+                  </span>
+                  <span *ngIf="userDirectoryView() === 'all' && !user.authAccountMissing && isLikelyBotUser(user)"
                     class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-200">
                     likely bot
                   </span>
