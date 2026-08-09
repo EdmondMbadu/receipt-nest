@@ -96,8 +96,44 @@
           </button>
         </form>
 
+        <form *ngIf="!email() && !requestLinkSent()" class="mt-8 space-y-5"
+          (submit)="requestUnsubscribeLink($event)">
+          <div class="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm leading-relaxed text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">
+            Enter your email and we will send you a secure confirmation link. Your preference will not change until you use that link.
+          </div>
+
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+            Email address
+            <input type="email" required maxlength="160" autocomplete="email"
+              [ngModel]="requestEmail()" (ngModelChange)="requestEmail.set($event)" name="requestEmail"
+              placeholder="you@example.com"
+              class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-800 dark:bg-slate-950 dark:text-white" />
+          </label>
+
+          <button type="submit" [disabled]="requestingLink()"
+            class="inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60">
+            {{ requestingLink() ? 'Sending confirmation...' : 'Send unsubscribe link' }}
+          </button>
+
+          <p *ngIf="requestLinkError()" class="text-sm text-rose-600 dark:text-rose-300">
+            {{ requestLinkError() }}
+          </p>
+        </form>
+
+        <div *ngIf="!email() && requestLinkSent()"
+          class="mt-8 rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-center dark:border-emerald-900/50 dark:bg-emerald-950/30">
+          <h2 class="text-lg font-semibold text-emerald-900 dark:text-emerald-100">Check your email</h2>
+          <p class="mt-2 text-sm leading-relaxed text-emerald-800 dark:text-emerald-200">
+            If <span class="font-semibold">{{ requestEmail() }}</span> can receive email, a confirmation link is on its way. It may take a few minutes.
+          </p>
+          <button type="button" (click)="requestLinkSent.set(false); requestLinkError.set(null)"
+            class="mt-4 text-sm font-semibold text-emerald-800 underline dark:text-emerald-200">
+            Use a different email
+          </button>
+        </div>
+
         <div *ngIf="error()" class="mt-6 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm leading-relaxed text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-200">
-          {{ error() }}
+          {{ error() }} You can request a new confirmation link above.
           <a routerLink="/support" class="ml-1 font-semibold underline">Contact support</a>
         </div>
       </div>

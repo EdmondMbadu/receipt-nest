@@ -30,6 +30,7 @@ Hosting routes `/api/email/unsubscribe` to the one-click POST handler and `/unsu
 - Custom sends can include suppressed recipients only through the explicit admin override.
 - Verification, password-reset, billing, security, account-deletion, receipt-processing, and test emails are not suppressed.
 - Public browser links use `/unsubscribe?token=...` and never mutate state on GET.
+- Direct `/unsubscribe` visits accept an email address and send a signed confirmation link. Requests are throttled per address and per IP, and entering an email never unsubscribes it immediately.
 - Email-client one-click requests use a signed POST to `/api/email/unsubscribe?token=...`.
 - Admins can review and restore addresses from the custom email section of `/app/admin`.
 

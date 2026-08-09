@@ -20,6 +20,10 @@ interface UnsubscribeResponse {
   alreadyUnsubscribed: boolean;
 }
 
+interface UnsubscribeLinkResponse {
+  ok: boolean;
+}
+
 @Component({
   selector: 'app-unsubscribe',
   standalone: true,
@@ -44,6 +48,10 @@ export class UnsubscribeComponent {
   readonly success = signal(false);
   readonly alreadyUnsubscribed = signal(false);
   readonly error = signal<string | null>(null);
+  readonly requestEmail = signal('');
+  readonly requestingLink = signal(false);
+  readonly requestLinkSent = signal(false);
+  readonly requestLinkError = signal<string | null>(null);
 
   private readonly token = this.route.snapshot.queryParamMap.get('token')?.trim() ?? '';
 
@@ -86,9 +94,38 @@ export class UnsubscribeComponent {
     }
   }
 
+  async requestUnsubscribeLink(event?: SubmitEvent): Promise<void> {
+    event?.preventDefault();
+    if (this.requestingLink()) {
+      return;
+    }
+
+    const email = this.requestEmail().trim().toLowerCase();
+    this.requestLinkError.set(null);
+    if (!/^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(email)) {
+      this.requestLinkError.set('Enter a valid email address.');
+      return;
+    }
+
+    this.requestingLink.set(true);
+    try {
+      const callable = httpsCallable<{ email: string }, UnsubscribeLinkResponse>(
+        this.functions,
+        'requestEmailUnsubscribeLink'
+      );
+      await callable({ email });
+      this.requestEmail.set(email);
+      this.requestLinkSent.set(true);
+    } catch (error) {
+      console.error('Failed to request unsubscribe link', error);
+      this.requestLinkError.set('We could not send a confirmation link right now. Please try again later.');
+    } finally {
+      this.requestingLink.set(false);
+    }
+  }
+
   private async loadContext(): Promise<void> {
     if (!this.token) {
-      this.error.set('This unsubscribe link is incomplete. Please use the link from your email.');
       this.loading.set(false);
       return;
     }

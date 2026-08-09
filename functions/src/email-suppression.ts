@@ -7,6 +7,9 @@ export const unsubscribeAppBaseUrl = defineSecret("APP_BASE_URL");
 
 export const EMAIL_SUPPRESSIONS_COLLECTION = "emailSuppressions";
 export const MAX_UNSUBSCRIBE_REASON_LENGTH = 500;
+const EMAIL_LINK_REQUEST_COOLDOWN_MS = 15 * 60 * 1_000;
+const IP_LINK_REQUEST_WINDOW_MS = 60 * 60 * 1_000;
+const MAX_LINK_REQUESTS_PER_IP_WINDOW = 10;
 
 export type EmailSuppressionSource = "unsubscribe_page" | "one_click" | "admin";
 
@@ -15,7 +18,7 @@ type UnsubscribeTokenPayload = {
   email: string;
 };
 
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const emailPattern = /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/;
 
 export const normalizeEmailAddress = (value: unknown): string =>
   typeof value === "string" ? value.trim().toLowerCase() : "";
@@ -224,4 +227,72 @@ export const restoreEmailAddress = async (
     },
     { merge: true }
   );
+};
+
+const rateLimitDocumentId = (value: string, secret: string): string =>
+  createHmac("sha256", secret).update(value).digest("hex");
+
+const timestampMillis = (value: unknown): number =>
+  value instanceof admin.firestore.Timestamp ? value.toMillis() : 0;
+
+export const reserveUnsubscribeLinkRequest = async (
+  db: admin.firestore.Firestore,
+  email: string,
+  ipAddress: string,
+  secret: string
+): Promise<boolean> => {
+  const normalizedEmail = normalizeEmailAddress(email);
+  if (!isValidEmailAddress(normalizedEmail)) {
+    return false;
+  }
+
+  const now = admin.firestore.Timestamp.now();
+  const nowMillis = now.toMillis();
+  const emailReference = db
+    .collection("emailUnsubscribeLinkRequests")
+    .doc(emailSuppressionDocumentId(normalizedEmail));
+  const ipReference = db
+    .collection("emailUnsubscribeRateLimits")
+    .doc(rateLimitDocumentId(ipAddress || "unknown", secret));
+
+  return db.runTransaction(async (transaction) => {
+    const [emailSnapshot, ipSnapshot] = await Promise.all([
+      transaction.get(emailReference),
+      transaction.get(ipReference),
+    ]);
+
+    const lastRequestedAtMillis = timestampMillis(emailSnapshot.data()?.lastRequestedAt);
+    if (lastRequestedAtMillis > nowMillis - EMAIL_LINK_REQUEST_COOLDOWN_MS) {
+      return false;
+    }
+
+    const storedWindowStartedAtMillis = timestampMillis(ipSnapshot.data()?.windowStartedAt);
+    const isCurrentWindow = storedWindowStartedAtMillis > nowMillis - IP_LINK_REQUEST_WINDOW_MS;
+    const currentRequestCount = isCurrentWindow ? Number(ipSnapshot.data()?.requestCount ?? 0) : 0;
+    if (currentRequestCount >= MAX_LINK_REQUESTS_PER_IP_WINDOW) {
+      return false;
+    }
+
+    transaction.set(
+      emailReference,
+      {
+        emailHash: emailSuppressionDocumentId(normalizedEmail),
+        lastRequestedAt: now,
+        updatedAt: now,
+      },
+      { merge: true }
+    );
+    transaction.set(
+      ipReference,
+      {
+        windowStartedAt: isCurrentWindow
+          ? admin.firestore.Timestamp.fromMillis(storedWindowStartedAtMillis)
+          : now,
+        requestCount: currentRequestCount + 1,
+        updatedAt: now,
+      },
+      { merge: true }
+    );
+    return true;
+  });
 };

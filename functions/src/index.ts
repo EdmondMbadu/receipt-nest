@@ -54,6 +54,7 @@ export { deleteUserAccount } from "./account";
 export {
   getEmailUnsubscribeContext,
   submitEmailUnsubscribe,
+  requestEmailUnsubscribeLink,
   oneClickEmailUnsubscribe,
   restoreSuppressedEmail,
 } from "./unsubscribe";
