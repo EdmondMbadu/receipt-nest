@@ -50,6 +50,8 @@ export class FeedbackComponent {
       name: 'description',
       content: 'Share feedback, ideas, bug reports, and product suggestions with ReceiptNest AI.'
     });
+    this.meta.updateTag({ name: 'robots', content: 'noindex, follow' });
+    this.meta.updateTag({ name: 'googlebot', content: 'noindex, follow' });
   }
 
   toggleTheme() {

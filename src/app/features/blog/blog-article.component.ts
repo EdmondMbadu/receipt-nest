@@ -47,21 +47,35 @@ export class BlogArticleComponent implements OnDestroy {
       image: this.article.image,
       imageAlt: this.article.imageAlt,
       keywords: this.article.keywords.join(', '),
-      type: 'article'
+      type: 'article',
+      publishedTime: this.article.datePublished,
+      modifiedTime: this.article.dateModified,
+      section: this.article.category,
+      tags: this.article.keywords
     });
 
     this.seo.setJsonLd('blog-article', {
       '@context': 'https://schema.org',
       '@graph': [
         {
-          '@type': 'Article',
+          '@type': 'BlogPosting',
           '@id': this.seo.absoluteUrl(`${this.article.path}#article`),
-          mainEntityOfPage: this.seo.absoluteUrl(this.article.path),
+          url: this.seo.absoluteUrl(this.article.path),
+          mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': this.seo.absoluteUrl(`${this.article.path}#webpage`)
+          },
           headline: this.article.title,
           description: this.article.description,
           image: this.seo.absoluteUrl(this.article.image),
           datePublished: this.article.datePublished,
           dateModified: this.article.dateModified,
+          articleSection: this.article.category,
+          keywords: this.article.keywords.join(', '),
+          inLanguage: 'en-US',
+          isPartOf: {
+            '@id': this.seo.absoluteUrl('/blog#blog')
+          },
           author: {
             '@type': 'Organization',
             name: 'The ReceiptNest Team',

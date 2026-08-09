@@ -67,7 +67,7 @@ export const routes: Routes = [
   },
   {
     path: 'blog',
-    title: 'The ReceiptNest Blog | Receipts, Taxes, and Money Clarity',
+    title: 'Receipt Tracking & Tax Guides | ReceiptNest AI',
     loadComponent: () => import('./features/blog/blog-index.component').then((m) => m.BlogIndexComponent)
   },
   {

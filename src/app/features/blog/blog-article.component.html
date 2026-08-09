@@ -58,7 +58,7 @@
       <div class="border-y border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40">
         <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
           <div class="overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-900">
-            <img [src]="article.image" [alt]="article.imageAlt" class="aspect-[16/7] w-full object-cover" />
+            <img [src]="article.image" [alt]="article.imageAlt" fetchpriority="high" decoding="async" class="aspect-[16/7] w-full object-cover" />
           </div>
         </div>
       </div>
@@ -183,7 +183,7 @@
           <article *ngFor="let post of relatedPosts" class="group">
             <a [routerLink]="post.path" class="block">
               <div class="overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-900">
-                <img [src]="post.image" [alt]="post.imageAlt" class="aspect-[16/10] w-full object-cover transition duration-300 group-hover:scale-[1.03]" />
+                <img [src]="post.image" [alt]="post.imageAlt" loading="lazy" decoding="async" class="aspect-[16/10] w-full object-cover transition duration-300 group-hover:scale-[1.03]" />
               </div>
               <p class="mt-5 text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">{{ post.category }}</p>
               <h3 class="mt-2 text-xl font-semibold leading-snug text-slate-950 group-hover:text-emerald-700 dark:text-white dark:group-hover:text-emerald-300">{{ post.title }}</h3>
@@ -199,6 +199,8 @@
     <div class="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 text-sm text-slate-500 dark:text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
       <p>© {{ currentYear }} ReceiptNest AI. All rights reserved.</p>
       <div class="flex flex-wrap gap-4">
+        <a routerLink="/receipt-tracker" class="hover:text-slate-950 dark:hover:text-white">Receipt tracker</a>
+        <a routerLink="/receipt-organizer" class="hover:text-slate-950 dark:hover:text-white">Receipt organizer</a>
         <a routerLink="/blog" class="hover:text-slate-950 dark:hover:text-white">Blog</a>
         <a routerLink="/support" class="hover:text-slate-950 dark:hover:text-white">Support</a>
         <a routerLink="/terms" class="hover:text-slate-950 dark:hover:text-white">Terms</a>

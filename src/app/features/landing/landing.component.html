@@ -761,6 +761,15 @@
           Tax-ready receipt reports
         </span>
       </div>
+
+      <nav aria-label="Receipt tools" class="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm font-semibold">
+        <a routerLink="/receipt-tracker" class="text-emerald-700 hover:text-emerald-800 hover:underline dark:text-emerald-300 dark:hover:text-emerald-200">Receipt tracker app</a>
+        <a routerLink="/receipt-organizer" class="text-emerald-700 hover:text-emerald-800 hover:underline dark:text-emerald-300 dark:hover:text-emerald-200">Receipt organizer app</a>
+        <a routerLink="/receipt-scanner" class="text-emerald-700 hover:text-emerald-800 hover:underline dark:text-emerald-300 dark:hover:text-emerald-200">AI receipt scanner</a>
+        <a routerLink="/receipt-management-software" class="text-emerald-700 hover:text-emerald-800 hover:underline dark:text-emerald-300 dark:hover:text-emerald-200">Receipt management software</a>
+        <a routerLink="/expense-tracker" class="text-emerald-700 hover:text-emerald-800 hover:underline dark:text-emerald-300 dark:hover:text-emerald-200">Receipt-based expense tracker</a>
+        <a routerLink="/tax-receipt-organizer" class="text-emerald-700 hover:text-emerald-800 hover:underline dark:text-emerald-300 dark:hover:text-emerald-200">Tax receipt organizer</a>
+      </nav>
     </div>
   </section>
 
@@ -1559,7 +1568,7 @@
             <div class="showcase-glow"></div>
             <div class="showcase-card-inner bg-white dark:bg-slate-900 p-2">
               <img [src]="isDarkMode() ? 'assets/monthly-dashboard.png' : 'assets/monthly-light.png'"
-                alt="Monthly Dashboard showing spending breakdown by category" class="w-full rounded-xl" />
+                alt="Monthly Dashboard showing spending breakdown by category" loading="lazy" decoding="async" class="w-full rounded-xl" />
             </div>
           </div>
           <div class="mt-3 px-1">
@@ -1574,7 +1583,7 @@
             <div class="showcase-glow" style="animation-delay: -1.5s;"></div>
             <div class="showcase-card-inner bg-white dark:bg-slate-900 p-2">
               <img [src]="isDarkMode() ? 'assets/auto-categorization.png' : 'assets/auto-light.png'"
-                alt="Auto-organized receipts tagged and searchable" class="w-full rounded-xl" />
+                alt="Auto-organized receipts tagged and searchable" loading="lazy" decoding="async" class="w-full rounded-xl" />
             </div>
           </div>
           <div class="mt-3 px-1">
@@ -1590,7 +1599,7 @@
             <div class="showcase-glow" style="animation-delay: -3s;"></div>
             <div class="showcase-card-inner bg-white dark:bg-slate-900 p-2">
               <img [src]="isDarkMode() ? 'assets/capture-anything.png' : 'assets/capture-light.png'"
-                alt="Capture receipts from email, photo, or PDF" class="w-full rounded-xl" />
+                alt="Capture receipts from email, photo, or PDF" loading="lazy" decoding="async" class="w-full rounded-xl" />
             </div>
           </div>
           <div class="mt-3 px-1">
@@ -1611,7 +1620,7 @@
                 </span>
               </div>
               <img [src]="isDarkMode() ? 'assets/spend-insight.png' : 'assets/spend-light.png'"
-                alt="Spending insights showing patterns and trends" class="w-full rounded-xl" />
+                alt="Spending insights showing patterns and trends" loading="lazy" decoding="async" class="w-full rounded-xl" />
             </div>
           </div>
           <div class="mt-3 px-1">

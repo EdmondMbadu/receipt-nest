@@ -349,6 +349,7 @@ export class SeoPageComponent {
           url: this.seo.absoluteUrl(this.page.path),
           name: this.page.title,
           description: this.page.description,
+          inLanguage: 'en-US',
           isPartOf: {
             '@id': 'https://receipt-nest.com/#website'
           },

@@ -24,6 +24,8 @@
   "hosting": {
     "site": "receiptnest",
     "public": "dist/receipt-nest/browser",
+    "cleanUrls": true,
+    "trailingSlash": false,
     "headers": [
       {
         "source": "**",
@@ -82,7 +84,35 @@
     ],
     "rewrites": [
       {
-        "source": "**",
+        "source": "/app{,/**}",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/home",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/verify",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/reset-password",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/share{,/**}",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/mobile-return{,/**}",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/feedback",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/goodbye",
         "destination": "/index.html"
       }
     ],

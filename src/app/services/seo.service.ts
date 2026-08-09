@@ -11,6 +11,10 @@ export interface SeoPageMeta {
   imageAlt?: string;
   robots?: string;
   type?: 'website' | 'article';
+  publishedTime?: string;
+  modifiedTime?: string;
+  section?: string;
+  tags?: readonly string[];
 }
 
 const SITE_URL = 'https://receipt-nest.com';
@@ -69,6 +73,37 @@ export class SeoService {
     this.meta.updateTag({ name: 'twitter:description', content: meta.description });
     this.meta.updateTag({ name: 'twitter:image', content: image });
     this.meta.updateTag({ name: 'twitter:image:alt', content: imageAlt });
+    this.meta.updateTag({ name: 'twitter:site', content: '@ReceiptNestAI' });
+
+    if (meta.type === 'article') {
+      if (meta.publishedTime) {
+        this.meta.updateTag(
+          { property: 'article:published_time', content: meta.publishedTime },
+          "property='article:published_time'"
+        );
+      }
+      if (meta.modifiedTime) {
+        this.meta.updateTag(
+          { property: 'article:modified_time', content: meta.modifiedTime },
+          "property='article:modified_time'"
+        );
+      }
+      if (meta.section) {
+        this.meta.updateTag(
+          { property: 'article:section', content: meta.section },
+          "property='article:section'"
+        );
+      }
+      this.meta.removeTag("property='article:tag'");
+      meta.tags?.forEach(tag => {
+        this.meta.addTag({ property: 'article:tag', content: tag });
+      });
+    } else {
+      this.meta.removeTag("property='article:published_time'");
+      this.meta.removeTag("property='article:modified_time'");
+      this.meta.removeTag("property='article:section'");
+      this.meta.removeTag("property='article:tag'");
+    }
 
     this.updateCanonical(canonicalUrl);
   }

@@ -30,7 +30,7 @@ export class BlogIndexComponent {
 
   constructor() {
     this.seo.apply({
-      title: 'The ReceiptNest Blog | Receipts, Taxes, and Money Clarity',
+      title: 'Receipt Tracking & Tax Guides | ReceiptNest AI',
       description:
         'Clarity on receipts, taxes, and money for freelancers and self-employed people. Read guides, comparisons, and receipt workflows from ReceiptNest AI.',
       canonicalPath: '/blog',
@@ -53,8 +53,12 @@ export class BlogIndexComponent {
         '@type': 'BlogPosting',
         headline: post.title,
         url: this.seo.absoluteUrl(post.path),
+        description: post.description,
+        image: this.seo.absoluteUrl(post.image),
         datePublished: post.datePublished,
-        dateModified: post.dateModified
+        dateModified: post.dateModified,
+        articleSection: post.category,
+        inLanguage: 'en-US'
       }))
     });
   }
