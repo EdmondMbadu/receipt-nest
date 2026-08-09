@@ -63,4 +63,10 @@ For more information on using the Angular CLI, including detailed command refere
 ReceiptNest AI supports forwarding receipt emails into your account through a shared inbound webhook + per-user alias strategy.
 
 Setup details: `docs/email-forwarding.md`
+
+## Email Unsubscribe
+
+Bulk and scheduled non-essential emails use a signed unsubscribe flow and a server-enforced Firestore suppression list.
+
+Setup details: `docs/email-unsubscribe.md`
 # receipt-nest

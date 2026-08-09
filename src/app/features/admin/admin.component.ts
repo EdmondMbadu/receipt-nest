@@ -159,8 +159,21 @@ interface CustomEmailHtmlTemplate {
 interface CustomEmailSendResponse {
   ok: boolean;
   sentCount: number;
+  suppressedCount: number;
+  suppressedRecipients?: Array<{ email: string }>;
   failedCount: number;
   failedRecipients?: Array<{ email: string; reason: string }>;
+}
+
+interface EmailSuppression {
+  id: string;
+  email: string;
+  emailNormalized: string;
+  status: 'unsubscribed' | 'resubscribed';
+  reason?: string | null;
+  source?: 'unsubscribe_page' | 'one_click' | 'admin';
+  unsubscribedAt?: Timestamp | null;
+  updatedAt?: Timestamp | null;
 }
 
 interface SpendSummaryScheduleResponse {
@@ -260,6 +273,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   private usersUnsubscribe: Unsubscribe | null = null;
   private feedbackUnsubscribe: Unsubscribe | null = null;
   private billingConfigUnsubscribe: Unsubscribe | null = null;
+  private emailSuppressionsUnsubscribe: Unsubscribe | null = null;
   private isDestroyed = false;
   private readonly backfilledReceiptCountUserIds = new Set<string>();
   private receiptProcessingStatsRequestId = 0;
@@ -368,6 +382,13 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly customEmailTemplates = signal<CustomEmailHtmlTemplate[]>([]);
   readonly customEmailTemplateError = signal<string | null>(null);
   readonly customEmailTemplateSuccess = signal<string | null>(null);
+  readonly includeSuppressedRecipients = signal(false);
+  readonly emailSuppressions = signal<EmailSuppression[]>([]);
+  readonly emailSuppressionsLoading = signal(true);
+  readonly emailSuppressionsError = signal<string | null>(null);
+  readonly emailSuppressionSearch = signal('');
+  readonly emailSuppressionRestorePending = signal<string | null>(null);
+  readonly emailSuppressionSuccess = signal<string | null>(null);
 
   readonly totalUsers = computed(() => this.users().length);
   readonly realUsers = computed(() => this.users().filter((user) => !this.isLikelyBotUser(user)));
@@ -650,6 +671,23 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly summaryUsers = computed(() =>
     [...this.users()].sort((a, b) => this.compareText(this.displayName(a), this.displayName(b)))
   );
+  readonly activeEmailSuppressions = computed(() =>
+    this.emailSuppressions().filter((suppression) => suppression.status === 'unsubscribed')
+  );
+  readonly suppressedEmailSet = computed(() =>
+    new Set(this.activeEmailSuppressions().map((suppression) => suppression.emailNormalized))
+  );
+  readonly visibleEmailSuppressions = computed(() => {
+    const search = this.emailSuppressionSearch().trim().toLowerCase();
+    return this.activeEmailSuppressions().filter((suppression) => {
+      if (!search) {
+        return true;
+      }
+      return `${suppression.email} ${suppression.reason || ''} ${suppression.source || ''}`
+        .toLowerCase()
+        .includes(search);
+    });
+  });
   readonly customEmailSystemRecipients = computed(() => {
     const search = this.customEmailSearch().trim().toLowerCase();
     const planFilter = this.customEmailPlanFilter();
@@ -725,7 +763,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
 
       seenEmails.add(emailKey);
-      return true;
+      return this.includeSuppressedRecipients() || !this.suppressedEmailSet().has(emailKey);
     });
   });
   readonly selectedCustomEmailRecipients = computed(() => {
@@ -738,7 +776,10 @@ export class AdminComponent implements OnInit, OnDestroy {
 
     return [...systemRecipients, ...csvRecipients].filter((recipient) => {
       const emailKey = recipient.email.toLowerCase();
-      if (seenEmails.has(emailKey)) {
+      if (
+        seenEmails.has(emailKey) ||
+        (!this.includeSuppressedRecipients() && this.suppressedEmailSet().has(emailKey))
+      ) {
         return false;
       }
 
@@ -818,6 +859,10 @@ export class AdminComponent implements OnInit, OnDestroy {
 
     const usersRef = collection(this.db, 'users');
     const feedbackQuery = query(collection(this.db, 'feedback'), orderBy('createdAt', 'desc'));
+    const emailSuppressionsQuery = query(
+      collection(this.db, 'emailSuppressions'),
+      orderBy('updatedAt', 'desc')
+    );
     const billingConfigRef = doc(this.db, PUBLIC_BILLING_CONFIG_COLLECTION, PUBLIC_BILLING_CONFIG_DOC_ID);
 
     this.billingConfigUnsubscribe = onSnapshot(
@@ -852,6 +897,24 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.feedbackLoading.set(false);
       }
     );
+
+    this.emailSuppressionsUnsubscribe = onSnapshot(
+      emailSuppressionsQuery,
+      (snapshot) => {
+        this.emailSuppressions.set(
+          snapshot.docs.map((suppressionDoc) => ({
+            id: suppressionDoc.id,
+            ...(suppressionDoc.data() as Omit<EmailSuppression, 'id'>)
+          }))
+        );
+        this.emailSuppressionsLoading.set(false);
+      },
+      (error) => {
+        console.error('Failed to load email suppressions', error);
+        this.emailSuppressionsError.set('Unable to load unsubscribed emails right now.');
+        this.emailSuppressionsLoading.set(false);
+      }
+    );
   }
 
   ngOnDestroy(): void {
@@ -859,6 +922,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.usersUnsubscribe?.();
     this.feedbackUnsubscribe?.();
     this.billingConfigUnsubscribe?.();
+    this.emailSuppressionsUnsubscribe?.();
   }
 
   private async initializeUserDirectory(usersRef: ReturnType<typeof collection>): Promise<void> {
@@ -939,6 +1003,40 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   isCustomEmailRecipientSelected(key: string): boolean {
     return this.customEmailSelectedKeys().has(key);
+  }
+
+  isEmailSuppressed(email: string): boolean {
+    return this.suppressedEmailSet().has(email.trim().toLowerCase());
+  }
+
+  async restoreSuppressedEmail(suppression: EmailSuppression): Promise<void> {
+    if (this.emailSuppressionRestorePending()) {
+      return;
+    }
+
+    if (
+      typeof window !== 'undefined' &&
+      !window.confirm(`Restore ${suppression.email}? Future non-essential emails may be sent to this address.`)
+    ) {
+      return;
+    }
+
+    this.emailSuppressionsError.set(null);
+    this.emailSuppressionSuccess.set(null);
+    this.emailSuppressionRestorePending.set(suppression.id);
+    try {
+      const callable = httpsCallable<{ email: string }, { ok: boolean; email: string }>(
+        this.functions,
+        'restoreSuppressedEmail'
+      );
+      await callable({ email: suppression.email });
+      this.emailSuppressionSuccess.set(`${suppression.email} can receive non-essential emails again.`);
+    } catch (error: any) {
+      console.error('Failed to restore suppressed email', error);
+      this.emailSuppressionsError.set(error?.message || 'Unable to restore that email right now.');
+    } finally {
+      this.emailSuppressionRestorePending.set(null);
+    }
   }
 
   toggleCustomEmailRecipient(key: string, selected: boolean): void {
@@ -1033,11 +1131,13 @@ export class AdminComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (
-      typeof window !== 'undefined' &&
-      !window.confirm(`Send "${subject}" to ${recipients.length} recipient(s)?`)
-    ) {
-      return;
+    if (typeof window !== 'undefined') {
+      const overrideWarning = this.includeSuppressedRecipients()
+        ? `\n\nWARNING: The suppression override is enabled. This may send to people who unsubscribed.`
+        : '';
+      if (!window.confirm(`Send "${subject}" to ${recipients.length} recipient(s)?${overrideWarning}`)) {
+        return;
+      }
     }
 
     this.customEmailSending.set(true);
@@ -1049,6 +1149,7 @@ export class AdminComponent implements OnInit, OnDestroy {
           html: string;
           text: string;
           recipients: CustomEmailRecipient[];
+          includeSuppressedRecipients: boolean;
         },
         CustomEmailSendResponse
       >(this.functions, 'sendCustomAdminEmail');
@@ -1058,15 +1159,20 @@ export class AdminComponent implements OnInit, OnDestroy {
         preheader,
         html,
         text,
-        recipients
+        recipients,
+        includeSuppressedRecipients: this.includeSuppressedRecipients()
       });
 
       const failedCount = response.data.failedCount ?? 0;
-      this.customEmailSuccess.set(
-        failedCount > 0
-          ? `Sent ${response.data.sentCount} email(s). ${failedCount} recipient(s) failed.`
-          : `Sent ${response.data.sentCount} custom email(s).`
-      );
+      const suppressedCount = response.data.suppressedCount ?? 0;
+      const resultParts = [`Sent ${response.data.sentCount} custom email(s).`];
+      if (suppressedCount > 0) {
+        resultParts.push(`Skipped ${suppressedCount} unsubscribed recipient(s).`);
+      }
+      if (failedCount > 0) {
+        resultParts.push(`${failedCount} recipient(s) failed.`);
+      }
+      this.customEmailSuccess.set(resultParts.join(' '));
       if (failedCount > 0) {
         this.customEmailError.set(
           (response.data.failedRecipients || [])

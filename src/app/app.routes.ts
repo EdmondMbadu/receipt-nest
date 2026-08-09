@@ -189,6 +189,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/goodbye/goodbye.component').then((m) => m.GoodbyeComponent)
   },
   {
+    path: 'unsubscribe',
+    title: 'Unsubscribe',
+    loadComponent: () =>
+      import('./features/unsubscribe/unsubscribe.component').then((m) => m.UnsubscribeComponent)
+  },
+  {
     path: '**',
     redirectTo: ''
   }

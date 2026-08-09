@@ -84,6 +84,13 @@
     ],
     "rewrites": [
       {
+        "source": "/api/email/unsubscribe",
+        "function": {
+          "functionId": "oneClickEmailUnsubscribe",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "/app{,/**}",
         "destination": "/index.html"
       },
@@ -113,6 +120,10 @@
       },
       {
         "source": "/goodbye",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/unsubscribe",
         "destination": "/index.html"
       }
     ],

@@ -214,6 +214,11 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    match /emailSuppressions/{suppressionId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     match /categories/{categoryId} {
       allow read: if isAuthenticated();
       allow write: if false;

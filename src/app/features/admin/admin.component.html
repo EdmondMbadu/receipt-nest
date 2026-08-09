@@ -833,6 +833,63 @@
       </summary>
 
       <div class="border-t border-slate-100 dark:border-slate-800 px-4 py-4 space-y-5">
+        <details class="overflow-hidden rounded-xl border border-slate-200 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-950/50">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-3">
+            <div>
+              <p class="text-sm font-semibold text-slate-900 dark:text-white">Unsubscribed emails</p>
+              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                These addresses are automatically excluded from non-essential sends.
+              </p>
+            </div>
+            <span
+              class="inline-flex shrink-0 items-center rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-200">
+              {{ activeEmailSuppressions().length }} suppressed
+            </span>
+          </summary>
+
+          <div class="space-y-3 border-t border-slate-200 px-4 py-4 dark:border-slate-800">
+            <input type="search" [ngModel]="emailSuppressionSearch()"
+              (ngModelChange)="emailSuppressionSearch.set($event)"
+              placeholder="Search email, reason, or source"
+              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-800 dark:bg-slate-900 dark:text-white" />
+
+            <p *ngIf="emailSuppressionsLoading()" class="text-sm text-slate-500 dark:text-slate-400">
+              Loading unsubscribed emails...
+            </p>
+            <p *ngIf="emailSuppressionsError()" class="text-sm text-rose-600 dark:text-rose-300">
+              {{ emailSuppressionsError() }}
+            </p>
+            <p *ngIf="emailSuppressionSuccess()" class="text-sm text-emerald-600 dark:text-emerald-300">
+              {{ emailSuppressionSuccess() }}
+            </p>
+
+            <div *ngIf="!emailSuppressionsLoading() && visibleEmailSuppressions().length > 0"
+              class="max-h-72 overflow-y-auto rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+              <div *ngFor="let suppression of visibleEmailSuppressions()"
+                class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-3 py-3 last:border-b-0 dark:border-slate-800">
+                <div class="min-w-0 flex-1">
+                  <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ suppression.email }}</p>
+                  <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    {{ suppression.reason || 'No reason provided' }}
+                    <span *ngIf="suppression.unsubscribedAt"> · {{ suppression.unsubscribedAt.toDate() | date:'medium' }}</span>
+                    <span *ngIf="suppression.source"> · {{ suppression.source === 'one_click' ? 'Email one-click' : 'Unsubscribe page' }}</span>
+                  </p>
+                </div>
+                <button type="button" (click)="restoreSuppressedEmail(suppression)"
+                  [disabled]="emailSuppressionRestorePending() !== null"
+                  class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                  {{ emailSuppressionRestorePending() === suppression.id ? 'Restoring...' : 'Restore email' }}
+                </button>
+              </div>
+            </div>
+
+            <p *ngIf="!emailSuppressionsLoading() && visibleEmailSuppressions().length === 0"
+              class="rounded-xl border border-dashed border-slate-200 px-4 py-5 text-center text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+              {{ emailSuppressionSearch() ? 'No unsubscribed emails match this search.' : 'No one has unsubscribed yet.' }}
+            </p>
+          </div>
+        </details>
+
         <div class="grid gap-4 lg:grid-cols-2">
           <label class="text-sm text-slate-600 dark:text-slate-300">
             Subject
@@ -942,6 +999,10 @@
                   </span>
                   <span class="block truncate text-xs text-slate-500 dark:text-slate-400">
                     {{ recipient.email }} · {{ recipient.source === 'csv' ? 'CSV' : recipient.plan + ' · ' + recipient.role }}
+                  </span>
+                  <span *ngIf="isEmailSuppressed(recipient.email)"
+                    class="mt-1 inline-flex rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-700 dark:bg-rose-950/40 dark:text-rose-200">
+                    Unsubscribed override
                   </span>
                 </span>
                 <button *ngIf="recipient.source === 'csv'" type="button"
@@ -1060,10 +1121,35 @@
               <iframe title="Custom email preview" [srcdoc]="customEmailRenderedPreview()"
                 class="h-96 w-full bg-white"></iframe>
             </div>
+            <p class="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+              A recipient-specific unsubscribe footer and one-click email header are added automatically when the message is sent. They are intentionally not part of the editable template preview.
+            </p>
           </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+        <div class="space-y-4 border-t border-slate-100 pt-4 dark:border-slate-800">
+          <label
+            class="flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-colors"
+            [class.border-rose-300]="includeSuppressedRecipients()"
+            [class.bg-rose-50]="includeSuppressedRecipients()"
+            [class.dark:border-rose-800]="includeSuppressedRecipients()"
+            [class.dark:bg-rose-950/30]="includeSuppressedRecipients()"
+            [class.border-slate-200]="!includeSuppressedRecipients()"
+            [class.dark:border-slate-800]="!includeSuppressedRecipients()">
+            <input type="checkbox" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500"
+              [ngModel]="includeSuppressedRecipients()"
+              (ngModelChange)="includeSuppressedRecipients.set($event)" />
+            <span>
+              <span class="block text-sm font-semibold text-slate-900 dark:text-white">
+                Include unsubscribed recipients for this send
+              </span>
+              <span class="mt-1 block text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                Advanced exception. Keep this off for marketing and normal bulk email. Enabling it exposes suppressed addresses in the recipient list and requires another confirmation before sending.
+              </span>
+            </span>
+          </label>
+
+          <div class="flex flex-wrap items-center gap-3">
           <button type="button" (click)="sendCustomEmail()"
             [disabled]="customEmailSending() || selectedCustomEmailRecipients().length === 0"
             class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60">
@@ -1083,6 +1169,7 @@
           <span *ngIf="customEmailError()" class="text-sm text-rose-600 dark:text-rose-400">
             {{ customEmailError() }}
           </span>
+          </div>
         </div>
       </div>
     </details>

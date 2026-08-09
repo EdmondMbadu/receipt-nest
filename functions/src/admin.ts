@@ -17,6 +17,14 @@ import {
 import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
 import { sendSendgridMail } from "./sendgrid";
 import { getEffectiveSubscriptionPlan } from "./subscription";
+import {
+  appendUnsubscribeHtml,
+  appendUnsubscribeText,
+  buildUnsubscribeUrls,
+  getSuppressedEmailSet,
+  unsubscribeAppBaseUrl,
+  unsubscribeTokenSecret,
+} from "./email-suppression";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
@@ -373,7 +381,11 @@ export const sendTestEmail = onCall(
 );
 
 export const sendCustomAdminEmail = onCall(
-  { region: "us-central1", secrets: [sendgridApiKey], timeoutSeconds: 300 },
+  {
+    region: "us-central1",
+    secrets: [sendgridApiKey, unsubscribeAppBaseUrl, unsubscribeTokenSecret],
+    timeoutSeconds: 300,
+  },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "User must be authenticated.");
@@ -390,6 +402,11 @@ export const sendCustomAdminEmail = onCall(
     const htmlTemplate = String(request.data?.html || "").trim();
     const textTemplate = String(request.data?.text || "").trim();
     const rawRecipients: unknown[] = Array.isArray(request.data?.recipients) ? request.data.recipients : [];
+    const includeSuppressedRecipients = request.data?.includeSuppressedRecipients === true;
+
+    if (!unsubscribeAppBaseUrl.value() || !unsubscribeTokenSecret.value()) {
+      throw new HttpsError("failed-precondition", "Email unsubscribe configuration is missing.");
+    }
 
     if (!subject) {
       throw new HttpsError("invalid-argument", "Email subject is required.");
@@ -440,15 +457,28 @@ export const sendCustomAdminEmail = onCall(
     const actingUserEmail =
       typeof request.auth.token?.email === "string" ? request.auth.token.email : null;
     const failedRecipients: Array<{ email: string; reason: string }> = [];
+    const suppressedEmails = await getSuppressedEmailSet(
+      db,
+      recipients.map((recipient) => recipient.email)
+    );
+    const suppressedRecipients = recipients.filter((recipient) => suppressedEmails.has(recipient.email));
+    const eligibleRecipients = includeSuppressedRecipients
+      ? recipients
+      : recipients.filter((recipient) => !suppressedEmails.has(recipient.email));
     let sentCount = 0;
 
-    for (const recipient of recipients) {
+    for (const recipient of eligibleRecipients) {
       const values = buildTemplateValues(recipient, preheader);
       const renderedSubject = renderTemplate(subject, values, (value) =>
         value.replace(/[\r\n]+/g, " ").trim()
       );
       const renderedHtml = renderTemplate(htmlTemplate, values, escapeHtml);
       const renderedText = renderTemplate(textTemplate || stripHtmlToText(htmlTemplate), values, (value) => value);
+      const unsubscribeUrls = buildUnsubscribeUrls(
+        recipient.email,
+        unsubscribeAppBaseUrl.value(),
+        unsubscribeTokenSecret.value()
+      );
 
       try {
         await sendSendgridMail(sendgridApiKey.value(), {
@@ -456,8 +486,12 @@ export const sendCustomAdminEmail = onCall(
           from: { email: fromEmail, name: "ReceiptNest AI" },
           replyTo: { email: fromEmail, name: "ReceiptNest AI" },
           subject: renderedSubject,
-          text: renderedText,
-          html: renderedHtml,
+          text: appendUnsubscribeText(renderedText, unsubscribeUrls.pageUrl),
+          html: appendUnsubscribeHtml(renderedHtml, unsubscribeUrls.pageUrl),
+          headers: {
+            "List-Unsubscribe": `<${unsubscribeUrls.oneClickUrl}>`,
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+          },
         });
         sentCount += 1;
       } catch (error) {
@@ -480,17 +514,24 @@ export const sendCustomAdminEmail = onCall(
       subject,
       requestedRecipientCount: rawRecipients.length,
       dedupedRecipientCount: recipients.length,
+      eligibleRecipientCount: eligibleRecipients.length,
+      suppressedCount: suppressedRecipients.length,
+      suppressionOverrideUsed: includeSuppressedRecipients,
       sentCount,
       failedCount: failedRecipients.length,
     });
 
-    if (sentCount === 0) {
+    if (sentCount === 0 && eligibleRecipients.length > 0) {
       throw new HttpsError("internal", "No emails were sent. Check the template and recipient list.");
     }
 
     return {
       ok: true,
       sentCount,
+      suppressedCount: includeSuppressedRecipients ? 0 : suppressedRecipients.length,
+      suppressedRecipients: includeSuppressedRecipients
+        ? []
+        : suppressedRecipients.slice(0, 10).map((recipient) => ({ email: recipient.email })),
       failedCount: failedRecipients.length,
       failedRecipients: failedRecipients.slice(0, 10),
     };

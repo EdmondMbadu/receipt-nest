@@ -51,3 +51,9 @@ export { sendPasswordResetEmail, sendVerificationEmail, sendWelcomeEmail } from 
 export { generateReceiptForwardingAddress, inboundEmailWebhook } from "./email-ingest";
 export { telegramWebhook, generateTelegramLinkToken, setupTelegramWebhook, onTelegramReceiptProcessed } from "./telegram";
 export { deleteUserAccount } from "./account";
+export {
+  getEmailUnsubscribeContext,
+  submitEmailUnsubscribe,
+  oneClickEmailUnsubscribe,
+  restoreSuppressedEmail,
+} from "./unsubscribe";

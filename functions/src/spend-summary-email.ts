@@ -6,6 +6,13 @@ import * as admin from "firebase-admin";
 import { assertAdmin } from "./authz";
 import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
 import { sendSendgridMail } from "./sendgrid";
+import {
+  appendUnsubscribeText,
+  buildUnsubscribeUrls,
+  getSuppressedEmailSet,
+  normalizeEmailAddress,
+  unsubscribeTokenSecret,
+} from "./email-suppression";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
 const appBaseUrl = defineSecret("APP_BASE_URL");
@@ -1596,14 +1603,34 @@ const buildEmailText = (data: SpendSummaryData) => {
   return appendAppDownloadText(lines.join("\n"));
 };
 
-const sendSummaryEmailMessage = async (to: string, summary: SpendSummaryData, links: SummaryLinks) => {
+const sendSummaryEmailMessage = async (
+  to: string,
+  summary: SpendSummaryData,
+  links: SummaryLinks,
+  includeUnsubscribe = false,
+) => {
+  const text = buildEmailText(summary);
+  const unsubscribeUrls = includeUnsubscribe
+    ? buildUnsubscribeUrls(to, appBaseUrl.value(), unsubscribeTokenSecret.value())
+    : null;
+  const html = buildEmailHtml(
+    summary,
+    unsubscribeUrls ? { ...links, unsubscribeUrl: unsubscribeUrls.pageUrl } : links
+  );
+
   await sendSendgridMail(sendgridApiKey.value(), {
     to,
     from: { email: fromEmail, name: "ReceiptNest AI" },
     replyTo: { email: fromEmail, name: "ReceiptNest AI" },
     subject: buildSummarySubject(summary),
-    text: buildEmailText(summary),
-    html: buildEmailHtml(summary, links),
+    text: unsubscribeUrls ? appendUnsubscribeText(text, unsubscribeUrls.pageUrl) : text,
+    html,
+    headers: unsubscribeUrls
+      ? {
+        "List-Unsubscribe": `<${unsubscribeUrls.oneClickUrl}>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+      }
+      : undefined,
     attachments: getEmailAppIconAttachments(),
   });
 };
@@ -1821,15 +1848,21 @@ const dispatchSummaryPeriodToAllUsers = async (
   timeZone: string,
 ) => {
   const links = getSummaryLinks();
-  const usersSnap = await admin.firestore().collection("users").get();
+  const db = admin.firestore();
+  const usersSnap = await db.collection("users").get();
+  const candidateEmails = usersSnap.docs
+    .map((userDoc) => normalizeEmailAddress(userDoc.data().email))
+    .filter(Boolean);
+  const suppressedEmails = await getSuppressedEmailSet(db, candidateEmails);
 
   let eligibleUsers = 0;
+  let suppressedCount = 0;
   let sentCount = 0;
   let failedCount = 0;
 
   for (const userDoc of usersSnap.docs) {
     const userData = userDoc.data();
-    const email = String(userData.email ?? "").trim();
+    const email = normalizeEmailAddress(userData.email);
     if (!email) {
       continue;
     }
@@ -1843,11 +1876,16 @@ const dispatchSummaryPeriodToAllUsers = async (
       continue;
     }
 
+    if (suppressedEmails.has(email)) {
+      suppressedCount += 1;
+      continue;
+    }
+
     eligibleUsers += 1;
 
     try {
       const summary = await loadUserSpendSummary(userDoc.id, userData, period, timeZone);
-      await sendSummaryEmailMessage(email, summary, links);
+      await sendSummaryEmailMessage(email, summary, links, true);
       sentCount += 1;
     } catch (error) {
       failedCount += 1;
@@ -1863,6 +1901,7 @@ const dispatchSummaryPeriodToAllUsers = async (
 
   return {
     eligibleUsers,
+    suppressedCount,
     sentCount,
     failedCount,
   };
@@ -1932,11 +1971,15 @@ export const dispatchScheduledSpendSummaryEmails = onSchedule(
   {
     region: "us-central1",
     schedule: "every 1 minutes",
-    secrets: [sendgridApiKey, appBaseUrl],
+    secrets: [sendgridApiKey, appBaseUrl, unsubscribeTokenSecret],
   },
   async (event) => {
     if (!sendgridApiKey.value()) {
       logger.error("Spend summary automation skipped because SendGrid is not configured.");
+      return;
+    }
+    if (!appBaseUrl.value() || !unsubscribeTokenSecret.value()) {
+      logger.error("Spend summary automation skipped because email unsubscribe configuration is missing.");
       return;
     }
 
