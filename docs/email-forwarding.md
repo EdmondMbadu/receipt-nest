@@ -18,7 +18,7 @@ This project now supports receipt ingestion from forwarded emails without creati
 - No dedicated mailbox per user.
 - One catch-all inbound route for all users.
 - Reuses existing Firestore/Storage + extraction pipeline.
-- Free-plan cap (200 receipts) is enforced server-side for inbound email as well.
+- The configured free-plan cap (default: 50 receipts) is enforced server-side for inbound email as well. Keep the runtime app configuration and published pricing aligned when changing this limit.
 
 ## Required Secrets
 

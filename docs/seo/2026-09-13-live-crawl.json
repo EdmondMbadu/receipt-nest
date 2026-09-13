@@ -1,0 +1,1003 @@
+{
+  "auditedAt": "2026-09-13",
+  "scope": "Public unauthenticated HTTP GET responses only; 17 sitemap URLs and 15 diagnostic URLs. No private account data accessed.",
+  "method": "curl, no automatic redirect following, HTML metadata extracted from initial server response. Text normalization is approximate; mainWords counts only the main element and includes template text. Homepage has no main element, not no content. Request timing is not a Core Web Vitals or TTFB measurement. JSON-LD parsing is not Google Rich Results validation.",
+  "limitations": [
+    "Search Console indexing and performance data not accessed",
+    "GA4 reports and event delivery not accessed",
+    "PageSpeed API returned HTTP 429 quota exceeded; no lab score or field performance pass claimed",
+    "Production deployment is not guaranteed to match every local source file"
+  ],
+  "results": [
+    {
+      "url": "https://receipt-nest.com/",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 261166,
+      "title": "ReceiptNest AI | Receipt Organizer, Receipt Tracker Expense Tracker",
+      "description": [
+        "ReceiptNest AI is a receipt organizer, receipt tracker, receipt scanner, and expense tracker that turns scattered receipts into tax-ready monthly spending clarity."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/"
+      ],
+      "h1": [
+        "Finally know where your money goes."
+      ],
+      "mainWords": 0,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "FAQPage"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 39,
+      "imageCount": 7
+    },
+    {
+      "url": "https://receipt-nest.com/receipt-tracker",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 55975,
+      "title": "Receipt Tracker App for Organized Expenses | ReceiptNest AI",
+      "description": [
+        "Track receipts by month, merchant, category, and total with ReceiptNest AI, a private receipt tracker app for everyday spending, taxes, and clean expense records."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/receipt-tracker"
+      ],
+      "h1": [
+        "Receipt tracker app for people who want spending clarity"
+      ],
+      "mainWords": 394,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "WebPage",
+        "FAQPage",
+        "BreadcrumbList"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 13,
+      "imageCount": 2
+    },
+    {
+      "url": "https://receipt-nest.com/receipt-organizer",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 55988,
+      "title": "Receipt Organizer App for Email, Photos, and PDFs | ReceiptNest AI",
+      "description": [
+        "Organize receipts from email, photos, and PDFs with ReceiptNest AI. Search merchants, categories, monthly totals, taxes, and receipt exports in one private receipt organizer."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/receipt-organizer"
+      ],
+      "h1": [
+        "A receipt organizer app for messy real-life receipts"
+      ],
+      "mainWords": 374,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "WebPage",
+        "FAQPage",
+        "BreadcrumbList"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 13,
+      "imageCount": 2
+    },
+    {
+      "url": "https://receipt-nest.com/receipt-scanner",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 55673,
+      "title": "Receipt Scanner App with AI Organization | ReceiptNest AI",
+      "description": [
+        "Scan receipts from photos, PDFs, and emails. ReceiptNest AI extracts merchant, date, total, tax, and category details into a searchable receipt scanner and tracker."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/receipt-scanner"
+      ],
+      "h1": [
+        "Receipt scanning that becomes organized expense history"
+      ],
+      "mainWords": 370,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "WebPage",
+        "FAQPage",
+        "BreadcrumbList"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 13,
+      "imageCount": 2
+    },
+    {
+      "url": "https://receipt-nest.com/receipt-management-software",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 55847,
+      "title": "Receipt Management Software for Simple Expense Records | ReceiptNest AI",
+      "description": [
+        "ReceiptNest AI is receipt management software for storing, organizing, searching, and exporting receipts without heavy accounting software."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/receipt-management-software"
+      ],
+      "h1": [
+        "Receipt management software without accounting bloat"
+      ],
+      "mainWords": 365,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "WebPage",
+        "FAQPage",
+        "BreadcrumbList"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 13,
+      "imageCount": 2
+    },
+    {
+      "url": "https://receipt-nest.com/expense-tracker",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 55651,
+      "title": "Expense Tracker Built Around Receipts | ReceiptNest AI",
+      "description": [
+        "ReceiptNest AI is an expense tracker built around receipts, helping you capture spending records, categorize purchases, review monthly totals, and export clean reports."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/expense-tracker"
+      ],
+      "h1": [
+        "An expense tracker that starts with the receipt"
+      ],
+      "mainWords": 356,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "WebPage",
+        "FAQPage",
+        "BreadcrumbList"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 13,
+      "imageCount": 2
+    },
+    {
+      "url": "https://receipt-nest.com/tax-receipt-organizer",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 55656,
+      "title": "Tax Receipt Organizer for Export-Ready Records | ReceiptNest AI",
+      "description": [
+        "Organize tax receipts throughout the year with ReceiptNest AI. Capture receipts, search categories and merchants, and export receipt records for tax review."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/tax-receipt-organizer"
+      ],
+      "h1": [
+        "A tax receipt organizer for the receipts you need later"
+      ],
+      "mainWords": 360,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "WebPage",
+        "FAQPage",
+        "BreadcrumbList"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 13,
+      "imageCount": 2
+    },
+    {
+      "url": "https://receipt-nest.com/blog",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 53393,
+      "title": "Receipt Tracking Tax Guides | ReceiptNest AI",
+      "description": [
+        "Clarity on receipts, taxes, and money for freelancers and self-employed people. Read guides, comparisons, and receipt workflows from ReceiptNest AI."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/blog"
+      ],
+      "h1": [
+        "The ReceiptNest Blog"
+      ],
+      "mainWords": 310,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "Blog"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 15,
+      "imageCount": 8
+    },
+    {
+      "url": "https://receipt-nest.com/blog/can-bank-statements-replace-receipts",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 77933,
+      "title": "Can Bank Statements Replace Receipts for Taxes? | ReceiptNest AI",
+      "description": [
+        "Learn when bank and credit card statements can support a business expense, when an itemized receipt matters, and what to do when a receipt is missing."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/blog/can-bank-statements-replace-receipts"
+      ],
+      "h1": [
+        "Can Bank Statements Replace Receipts for Taxes? What Self-Employed People Need to Know"
+      ],
+      "mainWords": 1470,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "BlogPosting",
+        "FAQPage",
+        "BreadcrumbList"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 17,
+      "imageCount": 5
+    },
+    {
+      "url": "https://receipt-nest.com/blog/receipt-tracking-delivery-drivers",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 82522,
+      "title": "Receipt Tracking for Delivery Drivers (2026) | ReceiptNest AI",
+      "description": [
+        "A practical receipt and expense-record workflow for DoorDash, Uber Eats, Instacart, and other independent delivery drivers in 2026."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/blog/receipt-tracking-delivery-drivers"
+      ],
+      "h1": [
+        "Receipt Tracking for Delivery Drivers: What DoorDash, Uber Eats, and Instacart Workers Should Save in 2026"
+      ],
+      "mainWords": 1609,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "BlogPosting",
+        "FAQPage",
+        "BreadcrumbList"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 17,
+      "imageCount": 5
+    },
+    {
+      "url": "https://receipt-nest.com/blog/receiptnest-vs-expensify",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 67890,
+      "title": "ReceiptNest vs Expensify for Freelancers | ReceiptNest AI",
+      "description": [
+        "Compare ReceiptNest and Expensify for freelancers: pricing, receipt capture, exports, team workflows, and the simpler Expensify alternative."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/blog/receiptnest-vs-expensify"
+      ],
+      "h1": [
+        "ReceiptNest vs Expensify: Which Receipt App Is Right for Freelancers in 2026?"
+      ],
+      "mainWords": 913,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "BlogPosting",
+        "FAQPage",
+        "BreadcrumbList"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 17,
+      "imageCount": 5
+    },
+    {
+      "url": "https://receipt-nest.com/blog/organize-receipts-taxes-freelancer-guide",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 72105,
+      "title": "How to Organize Receipts for Taxes | ReceiptNest AI",
+      "description": [
+        "Learn how to organize receipts for taxes as a self-employed freelancer, including retention rules, categories, digital receipts, and a monthly system."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/blog/organize-receipts-taxes-freelancer-guide"
+      ],
+      "h1": [
+        "How to Organize Receipts for Taxes: The Complete 1099 Freelancer Guide (2026)"
+      ],
+      "mainWords": 1129,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "BlogPosting",
+        "FAQPage",
+        "BreadcrumbList"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 17,
+      "imageCount": 5
+    },
+    {
+      "url": "https://receipt-nest.com/blog/receipt-tracking-etsy-sellers",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 66867,
+      "title": "Receipt Tracking for Etsy Sellers | ReceiptNest AI",
+      "description": [
+        "Receipt tracking for Etsy sellers: what receipts to keep, common missed deductions, monthly workflows, and how to automate receipt organization."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/blog/receipt-tracking-etsy-sellers"
+      ],
+      "h1": [
+        "Receipt Tracking for Etsy Sellers: What to Keep, What to Deduct, and How to Automate It"
+      ],
+      "mainWords": 873,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "BlogPosting",
+        "FAQPage",
+        "BreadcrumbList"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 17,
+      "imageCount": 5
+    },
+    {
+      "url": "https://receipt-nest.com/blog/scan-receipts-automatically",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 69099,
+      "title": "How to Scan Receipts Automatically | ReceiptNest AI",
+      "description": [
+        "Learn how to scan receipts automatically with photos, email forwarding, PDF upload, OCR, AI extraction, categories, and export-ready records."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/blog/scan-receipts-automatically"
+      ],
+      "h1": [
+        "How to Scan and Digitize Receipts Automatically in 2026 (Without Manual Entry)"
+      ],
+      "mainWords": 903,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "BlogPosting",
+        "FAQPage",
+        "BreadcrumbList"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 17,
+      "imageCount": 5
+    },
+    {
+      "url": "https://receipt-nest.com/blog/where-does-my-money-go",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 63352,
+      "title": "Where Does My Money Go Every Month? | ReceiptNest AI",
+      "description": [
+        "Wondering where your money goes every month? Learn a visibility-first system for spending clarity without starting with a strict budget."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/blog/where-does-my-money-go"
+      ],
+      "h1": [
+        "Where Does My Money Go? How to Finally See Your Spending Clearly (Without a Budget)"
+      ],
+      "mainWords": 745,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "BlogPosting",
+        "FAQPage",
+        "BreadcrumbList"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 17,
+      "imageCount": 5
+    },
+    {
+      "url": "https://receipt-nest.com/support",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 34240,
+      "title": "Support | ReceiptNest AI",
+      "description": [
+        "Get help with ReceiptNest AI. Contact support for questions about receipt scanning, receipt tracking, expense tracking, and account assistance."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/support"
+      ],
+      "h1": [
+        "Support"
+      ],
+      "mainWords": 74,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 3,
+      "imageCount": 1
+    },
+    {
+      "url": "https://receipt-nest.com/terms",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 37954,
+      "title": "Terms and Conditions | ReceiptNest AI",
+      "description": [
+        "Read the Terms and Conditions for ReceiptNest AI, an AI-powered receipt scanner, receipt organizer, receipt tracker, and expense tracker."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/terms"
+      ],
+      "h1": [
+        "Terms and Conditions"
+      ],
+      "mainWords": 513,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 3,
+      "imageCount": 1
+    },
+    {
+      "url": "http://receipt-nest.com/",
+      "status": 301,
+      "location": "https://receipt-nest.com/",
+      "type": null,
+      "cache": null,
+      "xRobots": null,
+      "lastModified": null,
+      "htmlBytes": 0,
+      "title": "",
+      "description": [],
+      "robots": [],
+      "canonicals": [],
+      "h1": [],
+      "mainWords": 0,
+      "jsonLdTypes": [],
+      "jsonLdErrors": [],
+      "linkCount": 0,
+      "imageCount": 0
+    },
+    {
+      "url": "https://www.receipt-nest.com/",
+      "status": 301,
+      "location": "https://receipt-nest.com/",
+      "type": "text/plain; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": null,
+      "htmlBytes": 40,
+      "title": "",
+      "description": [],
+      "robots": [],
+      "canonicals": [],
+      "h1": [],
+      "mainWords": 0,
+      "jsonLdTypes": [],
+      "jsonLdErrors": [],
+      "linkCount": 0,
+      "imageCount": 0
+    },
+    {
+      "url": "https://receipt-nest.com/receipt-tracker/",
+      "status": 301,
+      "location": "/receipt-tracker",
+      "type": "text/plain; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": null,
+      "htmlBytes": 31,
+      "title": "",
+      "description": [],
+      "robots": [],
+      "canonicals": [],
+      "h1": [],
+      "mainWords": 0,
+      "jsonLdTypes": [],
+      "jsonLdErrors": [],
+      "linkCount": 0,
+      "imageCount": 0
+    },
+    {
+      "url": "https://receipt-nest.com/receipt-tracker.html",
+      "status": 404,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 1848,
+      "title": "Page Not Found | ReceiptNest AI",
+      "description": [],
+      "robots": [
+        "noindex, follow"
+      ],
+      "canonicals": [],
+      "h1": [
+        "That page is not in the nest."
+      ],
+      "mainWords": 31,
+      "jsonLdTypes": [],
+      "jsonLdErrors": [],
+      "linkCount": 4,
+      "imageCount": 1
+    },
+    {
+      "url": "https://receipt-nest.com/seo-audit-missing-20260913",
+      "status": 404,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 1848,
+      "title": "Page Not Found | ReceiptNest AI",
+      "description": [],
+      "robots": [
+        "noindex, follow"
+      ],
+      "canonicals": [],
+      "h1": [
+        "That page is not in the nest."
+      ],
+      "mainWords": 31,
+      "jsonLdTypes": [],
+      "jsonLdErrors": [],
+      "linkCount": 4,
+      "imageCount": 1
+    },
+    {
+      "url": "https://receipt-nest.com/blog/seo-audit-missing-20260913",
+      "status": 404,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 1848,
+      "title": "Page Not Found | ReceiptNest AI",
+      "description": [],
+      "robots": [
+        "noindex, follow"
+      ],
+      "canonicals": [],
+      "h1": [
+        "That page is not in the nest."
+      ],
+      "mainWords": 31,
+      "jsonLdTypes": [],
+      "jsonLdErrors": [],
+      "linkCount": 4,
+      "imageCount": 1
+    },
+    {
+      "url": "https://receipt-nest.com/login",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 46599,
+      "title": "Sign In - ReceiptNest AI",
+      "description": [
+        "Sign in to your ReceiptNest AI account."
+      ],
+      "robots": [
+        "noindex, follow",
+        "noindex, follow"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/"
+      ],
+      "h1": [
+        "Sign in to your account"
+      ],
+      "mainWords": 50,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 5,
+      "imageCount": 1
+    },
+    {
+      "url": "https://receipt-nest.com/register",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 50635,
+      "title": "Create Account - ReceiptNest AI",
+      "description": [
+        "Create your ReceiptNest AI account."
+      ],
+      "robots": [
+        "noindex, follow",
+        "noindex, follow"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/"
+      ],
+      "h1": [
+        "Create your account"
+      ],
+      "mainWords": 55,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 5,
+      "imageCount": 1
+    },
+    {
+      "url": "https://receipt-nest.com/privacy",
+      "status": 404,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 1848,
+      "title": "Page Not Found | ReceiptNest AI",
+      "description": [],
+      "robots": [
+        "noindex, follow"
+      ],
+      "canonicals": [],
+      "h1": [
+        "That page is not in the nest."
+      ],
+      "mainWords": 31,
+      "jsonLdTypes": [],
+      "jsonLdErrors": [],
+      "linkCount": 4,
+      "imageCount": 1
+    },
+    {
+      "url": "https://receipt-nest.com/pricing",
+      "status": 404,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 1848,
+      "title": "Page Not Found | ReceiptNest AI",
+      "description": [],
+      "robots": [
+        "noindex, follow"
+      ],
+      "canonicals": [],
+      "h1": [
+        "That page is not in the nest."
+      ],
+      "mainWords": 31,
+      "jsonLdTypes": [],
+      "jsonLdErrors": [],
+      "linkCount": 4,
+      "imageCount": 1
+    },
+    {
+      "url": "https://receipt-nest.com/robots.txt",
+      "status": 200,
+      "location": null,
+      "type": "text/plain; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 281,
+      "title": "",
+      "description": [],
+      "robots": [],
+      "canonicals": [],
+      "h1": [],
+      "mainWords": 0,
+      "jsonLdTypes": [],
+      "jsonLdErrors": [],
+      "linkCount": 0,
+      "imageCount": 0
+    },
+    {
+      "url": "https://receipt-nest.com/sitemap.xml",
+      "status": 200,
+      "location": null,
+      "type": "application/xml",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 3161,
+      "title": "",
+      "description": [],
+      "robots": [],
+      "canonicals": [],
+      "h1": [],
+      "mainWords": 0,
+      "jsonLdTypes": [],
+      "jsonLdErrors": [],
+      "linkCount": 0,
+      "imageCount": 0
+    },
+    {
+      "url": "https://receipt-nest.com/share/seo-audit-missing-20260913",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 261166,
+      "title": "ReceiptNest AI | Receipt Organizer, Receipt Tracker Expense Tracker",
+      "description": [
+        "ReceiptNest AI is a receipt organizer, receipt tracker, receipt scanner, and expense tracker that turns scattered receipts into tax-ready monthly spending clarity."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/"
+      ],
+      "h1": [
+        "Finally know where your money goes."
+      ],
+      "mainWords": 0,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "FAQPage"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 39,
+      "imageCount": 7
+    },
+    {
+      "url": "https://receipt-nest.com/app",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 261166,
+      "title": "ReceiptNest AI | Receipt Organizer, Receipt Tracker Expense Tracker",
+      "description": [
+        "ReceiptNest AI is a receipt organizer, receipt tracker, receipt scanner, and expense tracker that turns scattered receipts into tax-ready monthly spending clarity."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/"
+      ],
+      "h1": [
+        "Finally know where your money goes."
+      ],
+      "mainWords": 0,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "FAQPage"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 39,
+      "imageCount": 7
+    },
+    {
+      "url": "https://receipt-nest.com/reset-password",
+      "status": 200,
+      "location": null,
+      "type": "text/html; charset=utf-8",
+      "cache": "no-cache, no-store, must-revalidate",
+      "xRobots": null,
+      "lastModified": "Sun, 09 Aug 2026 06:01:40 GMT",
+      "htmlBytes": 261166,
+      "title": "ReceiptNest AI | Receipt Organizer, Receipt Tracker Expense Tracker",
+      "description": [
+        "ReceiptNest AI is a receipt organizer, receipt tracker, receipt scanner, and expense tracker that turns scattered receipts into tax-ready monthly spending clarity."
+      ],
+      "robots": [
+        "index, follow",
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      ],
+      "canonicals": [
+        "https://receipt-nest.com/"
+      ],
+      "h1": [
+        "Finally know where your money goes."
+      ],
+      "mainWords": 0,
+      "jsonLdTypes": [
+        "Organization",
+        "WebSite",
+        "SoftwareApplication",
+        "FAQPage"
+      ],
+      "jsonLdErrors": [],
+      "linkCount": 39,
+      "imageCount": 7
+    }
+  ]
+}

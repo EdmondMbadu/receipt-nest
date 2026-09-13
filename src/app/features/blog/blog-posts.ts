@@ -65,7 +65,7 @@ export const blogPosts: readonly BlogPost[] = [
     excerpt:
       'A bank statement can prove that money moved, but it may not prove what you bought or why it was for business. Here is how to build a stronger record.',
     datePublished: '2026-07-16',
-    dateModified: '2026-07-16',
+    dateModified: '2026-09-13',
     readTime: '10 min read',
     image: '/assets/images/blog/bank-statements-vs-receipts.jpg',
     imageAlt: 'An itemized receipt beside a bank statement on an organized desk',
@@ -269,7 +269,7 @@ export const blogPosts: readonly BlogPost[] = [
     excerpt:
       'Your delivery app tracks orders, not every cost of doing the work. Learn which records to preserve and how to build a five-minute end-of-shift routine.',
     datePublished: '2026-07-16',
-    dateModified: '2026-07-16',
+    dateModified: '2026-09-13',
     readTime: '11 min read',
     image: '/assets/images/blog/delivery-driver-receipts.jpg',
     imageAlt: 'Delivery bag, phone map, mileage notebook, keys, and fuel receipt in a car',
@@ -458,7 +458,7 @@ export const blogPosts: readonly BlogPost[] = [
             kind: 'list',
             items: [
               'Platform income summaries and tax forms.',
-              'A monthly receipt export grouped by merchant, date, amount, and category.',
+              'Receipt exports with merchant, date, and amount. ReceiptNest category-view exports also include the category; monthly exports do not.',
               'Your mileage report with business and total vehicle miles.',
               'Vehicle purchase or lease documents and records of major repairs or improvements.',
               'Notes explaining mixed-use calculations and unusual transactions.',
@@ -507,18 +507,18 @@ export const blogPosts: readonly BlogPost[] = [
     title: 'ReceiptNest vs Expensify: Which Receipt App Is Right for Freelancers in 2026?',
     seoTitle: 'ReceiptNest vs Expensify for Freelancers',
     description:
-      'Compare ReceiptNest and Expensify for freelancers: pricing, receipt capture, exports, team workflows, and the simpler Expensify alternative.',
+      'Compare ReceiptNest and Expensify for freelancers, including free receipt scanning, CSV exports, plan limits, and when a team expense platform fits.',
     excerpt:
       'A fair comparison of ReceiptNest and Expensify for solo freelancers, small teams, and people who want receipt clarity without corporate expense complexity.',
     datePublished: '2026-06-09',
-    dateModified: '2026-06-09',
+    dateModified: '2026-09-13',
     readTime: '9 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Freceiptnest-expensify.png?alt=media&token=4592bdb9-22e6-438c-8644-9b20ec9810d6',
     imageAlt: 'ReceiptNest AI monthly dashboard with receipt totals and categories',
     keywords: ['Expensify alternative', 'ReceiptNest vs Expensify', 'freelancer receipt app'],
     intro: [
       `If you are searching for an Expensify alternative, the real question is not which app has the longest feature list. The better question is which receipt workflow matches how you actually work.`,
-      `Expensify is a mature expense platform with strong company controls. ReceiptNest AI is built for freelancers and self-employed people who want fast receipt capture, simple organization, and clear spending records without managing a corporate expense process.`
+      `Both products can serve an individual. Expensify documents a free personal workflow without a paid workspace. ReceiptNest AI focuses on a receipt-first inbox, categories, and monthly review. This comparison is published by ReceiptNest, not an independent reviewer.`
     ],
     sections: [
       {
@@ -530,11 +530,11 @@ export const blogPosts: readonly BlogPost[] = [
             table: {
               columns: ['Feature', 'ReceiptNest AI', 'Expensify'],
               rows: [
-                ['Best fit', 'Solo freelancers, 1099 workers, self-employed people', 'Companies, teams, travel-heavy organizations'],
-                ['Core job', 'Organize receipts and reveal monthly spending', 'Manage expense reports, approvals, cards, and reimbursements'],
-                ['Workflow', 'Upload, forward, or scan receipts into a searchable receipt record', 'Submit expenses into a policy and approval workflow'],
-                ['Complexity', 'Lightweight and receipt-first', 'Powerful, with more setup and admin structure'],
-                ['Exports', 'Useful for tax review and personal records', 'Useful for finance teams and reimbursement processes']
+                ['Individual use', 'Receipt-first records and monthly review', 'Free personal expenses; paid workspaces for team needs'],
+                ['Free capture', 'Up to 50 receipts on Starter', 'Unlimited personal SmartScans'],
+                ['Email capture', 'Forward to your account address', 'Receipt forwarding included for individuals'],
+                ['Categories', 'Receipt category suggestions for review', 'Requires a paid workspace under the linked free-feature guidance'],
+                ['CSV export', 'Included on Starter; see the sample and columns', 'Free individual CSV export on web']
               ]
             }
           },
@@ -565,7 +565,7 @@ export const blogPosts: readonly BlogPost[] = [
             kind: 'callout',
             tone: 'note',
             title: 'Fair comparison',
-            text: `A freelancer can use Expensify, but many solo users are paying attention to features that were designed for teams. If those features matter, that is a valid reason to choose it.`
+            text: `If unlimited free receipt scanning or distance tracking is your priority, test Expensify first. Do not assume that using its individual features requires paying for a team workspace.`
           }
         ]
       },
@@ -598,7 +598,7 @@ export const blogPosts: readonly BlogPost[] = [
         blocks: [
           {
             kind: 'paragraph',
-            text: `People often search for a cheaper alternative to Expensify because they feel they are paying for an expense department they do not have. Price is part of that frustration. The deeper issue is fit.`
+            text: `ReceiptNest Starter is free for up to 50 receipts with CSV export. Pro is $9 per month or $100 per year on the web. Expensify offers unlimited free individual SmartScans, forwarding, distance tracking, and web CSV export. ReceiptNest is not automatically the cheaper option.`
           },
           {
             kind: 'paragraph',
@@ -627,12 +627,12 @@ export const blogPosts: readonly BlogPost[] = [
       {
         question: 'Is there a cheaper alternative to Expensify for freelancers?',
         answer:
-          'ReceiptNest AI is designed as a simpler receipt-focused alternative for freelancers who do not need corporate expense reports, approvals, or reimbursement administration.'
+          'Both have free options. ReceiptNest Starter has a 50-receipt cap. Expensify documents unlimited individual SmartScans and free web CSV export, so ReceiptNest is not necessarily cheaper. Compare the features you actually need.'
       },
       {
         question: 'Should a solo freelancer use Expensify?',
         answer:
-          'A solo freelancer can use Expensify, especially if they want its broader expense platform. ReceiptNest is a better fit when the main need is organizing receipts and understanding spending.'
+          'Yes. Expensify has free individual features without a paid workspace. Test its personal workflow alongside ReceiptNest if receipt organization is your main need.'
       },
       {
         question: 'Does ReceiptNest replace accounting software?',
@@ -657,13 +657,13 @@ export const blogPosts: readonly BlogPost[] = [
     excerpt:
       'A practical receipt organization system for 1099 freelancers, with retention rules, Schedule C categories, audit prep, and a month-by-month workflow.',
     datePublished: '2026-06-09',
-    dateModified: '2026-06-09',
+    dateModified: '2026-09-13',
     readTime: '12 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Forganizing-chaos.png?alt=media&token=a4ddd1e9-0056-4011-bf78-fe1e297f89ef',
     imageAlt: 'Receipt categories and tax-ready expense records in ReceiptNest AI',
     keywords: ['how to organize receipts for taxes self employed', '1099 receipt organizer', 'freelancer tax receipts'],
     intro: [
-      `How to organize receipts for taxes self employed is a question most freelancers ask too late: after the year is over, when the receipts are in email, paper bags, downloads, bank statements, and memory.`,
+      `Most freelancers start organizing tax receipts after the year is over, when the records are scattered across email, paper bags, downloads, and bank statements.`,
       `The better system is boring in the best way. Capture the receipt when it happens, give it a category, keep the original proof, and review once a month. This guide is organization guidance, not tax advice, but it will help you show up to tax season with cleaner records.`
     ],
     sections: [
@@ -695,7 +695,7 @@ export const blogPosts: readonly BlogPost[] = [
       },
       {
         id: 'how-long-to-keep',
-        title: 'How long to keep tax receipts: the 3 to 7 year rule',
+        title: 'How long to keep tax receipts: periods and exceptions',
         blocks: [
           {
             kind: 'paragraph',
@@ -707,12 +707,13 @@ export const blogPosts: readonly BlogPost[] = [
               'Three years is the general period for many income tax records when special situations do not apply.',
               'Six years can apply if you do not report income that is more than 25 percent of the gross income shown on the return.',
               'Seven years can apply for records connected to a worthless securities loss or bad debt deduction.',
-              'Employment tax records have their own rules, and property records may need to be kept until after the property is disposed of.'
+              'Unfiled or fraudulent returns can require records to be kept indefinitely.',
+              'Employment and property records have separate retention rules. Other legal, insurance, and creditor requirements can also last longer.'
             ]
           },
           {
             kind: 'paragraph',
-            text: `For most freelancers, the practical habit is to keep business receipts for at least three years, keep longer when the record supports property, debt, unusual claims, or underreported income risk, and ask a tax professional if you are unsure.`
+            text: `Do not use a purchase date plus three years as an automatic deletion rule. Filing and payment dates, amended returns, property, and exceptions can change the period. Check the IRS retention guidance linked above and confirm your requirements before disposing of anything.`
           }
         ]
       },
@@ -825,14 +826,14 @@ export const blogPosts: readonly BlogPost[] = [
     slug: 'receipt-tracking-etsy-sellers',
     path: '/blog/receipt-tracking-etsy-sellers',
     category: 'By Profession',
-    title: 'Receipt Tracking for Etsy Sellers: What to Keep, What to Deduct, and How to Automate It',
+    title: 'Receipt Tracking for Etsy Sellers: Records to Keep and a Monthly Routine',
     seoTitle: 'Receipt Tracking for Etsy Sellers',
     description:
-      'Receipt tracking for Etsy sellers: what receipts to keep, common missed deductions, monthly workflows, and how to automate receipt organization.',
+      'A receipt routine for Etsy sellers: preserve supply and shipping records, reconcile marketplace reports, and prepare organized records for tax review.',
     excerpt:
       'A receipt workflow for Etsy sellers that covers supplies, shipping, fees, photos, home office support, and quarterly tax prep.',
     datePublished: '2026-06-09',
-    dateModified: '2026-06-09',
+    dateModified: '2026-09-13',
     readTime: '10 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Fetsy-more.png?alt=media&token=1ceeee19-d74e-4947-a240-4cb95dac0d4b',
     imageAlt: 'Receipts from photos, email, and PDFs captured in ReceiptNest AI',
@@ -968,21 +969,21 @@ export const blogPosts: readonly BlogPost[] = [
     slug: 'scan-receipts-automatically',
     path: '/blog/scan-receipts-automatically',
     category: 'How-To',
-    title: 'How to Scan and Digitize Receipts Automatically in 2026 (Without Manual Entry)',
+    title: 'How to Scan and Digitize Receipts: Capture, Review, and Export',
     seoTitle: 'How to Scan Receipts Automatically',
     description:
       'Learn how to scan receipts automatically with photos, email forwarding, PDF upload, OCR, AI extraction, categories, and export-ready records.',
     excerpt:
       'A practical guide to automatic receipt scanning, OCR, capture methods, app selection, setup, and common scanning fixes.',
     datePublished: '2026-06-09',
-    dateModified: '2026-06-09',
+    dateModified: '2026-09-13',
     readTime: '11 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Fdigital.png?alt=media&token=2debc0bf-3d6b-44b0-a804-8f9dcd2d6a41',
     imageAlt: 'AI extracting merchant, amount, and category data from a receipt',
     keywords: ['how to scan receipts automatically', 'automatic receipt scanning', 'digitize receipts'],
     intro: [
       `How to scan receipts automatically is not really a scanning question. It is a habit question. Manual entry fails because it asks people to do tiny accounting work at the exact moment they are busy, tired, or on the way to something else.`,
-      `Automatic receipt scanning works when capture is fast and the app turns the image, email, or PDF into useful data: merchant, date, total, tax, category, and searchable text.`
+      `Automatic receipt scanning works when capture is fast and the app turns the image, email, or PDF into useful data: merchant, date, total, currency, and category. ReceiptNest extracts those fields for review; it does not promise separate tax or line-item extraction.`
     ],
     sections: [
       {
@@ -995,7 +996,7 @@ export const blogPosts: readonly BlogPost[] = [
           },
           {
             kind: 'paragraph',
-            text: `The friction is small but constant. Automatic scanning removes the repetitive typing so the only habit is capture.`
+            text: `The friction is small but constant. Automatic scanning reduces repetitive typing. The habit still includes checking the date, amount, currency, and category against the original.`
           }
         ]
       },
@@ -1005,7 +1006,7 @@ export const blogPosts: readonly BlogPost[] = [
         blocks: [
           {
             kind: 'paragraph',
-            text: `OCR reads text from an image. AI extraction goes further by identifying which text matters. A receipt can include a store address, cashier number, loyalty text, item list, subtotal, tax, total, and payment details. The useful app has to recognize the merchant, date, total, tax, category, and context.`
+            text: `OCR reads text from an image. AI extraction goes further by identifying which text matters. A receipt can include a store address, cashier number, loyalty text, item list, subtotal, tax, total, and payment details. Different apps extract different fields. Check whether an app handles the details you need; the original receipt remains important when tax, individual items, or payment details are not separate fields.`
           },
           {
             kind: 'callout',
@@ -1105,7 +1106,7 @@ export const blogPosts: readonly BlogPost[] = [
       {
         question: 'Can receipts be scanned automatically without typing totals?',
         answer:
-          'Yes. Receipt scanning apps use OCR and extraction logic to read receipt text and identify fields such as merchant, date, tax, and total.'
+          'Receipt scanning apps can extract fields such as merchant, date, and total. You still need to review the results, especially on blurry images, unusual layouts, and mixed currencies.'
       },
       {
         question: 'Is a photo of a receipt enough?',
@@ -1135,7 +1136,7 @@ export const blogPosts: readonly BlogPost[] = [
     excerpt:
       'A calm, visibility-first approach to money clarity: see spending first, reduce avoidance, and make better decisions without beginning with a budget.',
     datePublished: '2026-06-09',
-    dateModified: '2026-06-09',
+    dateModified: '2026-09-13',
     readTime: '10 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Fnavigating-expenses.png?alt=media&token=6b293452-73ef-419f-a223-3ff660082cd1',
     imageAlt: 'Spending insight dashboard showing monthly receipt patterns',

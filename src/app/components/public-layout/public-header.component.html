@@ -1,0 +1,24 @@
+<a [routerLink]="[]" fragment="main-content" class="sr-only focus:not-sr-only focus:block focus:bg-emerald-700 focus:p-3 focus:text-white">Skip to content</a>
+<header class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+  <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-5 sm:px-6 lg:px-8">
+    <a routerLink="/" class="flex items-center gap-2 font-semibold" aria-label="ReceiptNest AI home">
+      <img src="/assets/receipt-nest.png" alt="" width="36" height="36" class="h-9 w-9 object-contain">
+      <span>Receipt<span class="text-emerald-700 dark:text-emerald-300">Nest</span><span class="ml-1 text-xs">AI</span></span>
+    </a>
+    <nav aria-label="Main navigation" class="order-3 flex w-full flex-wrap gap-x-5 gap-y-3 text-sm sm:order-none sm:w-auto">
+      <a routerLink="/receipt-tracker" routerLinkActive="text-emerald-700" class="hover:underline">Track receipts</a>
+      <a routerLink="/receipt-to-csv" routerLinkActive="text-emerald-700" class="hover:underline">CSV exports</a>
+      <a routerLink="/blog" routerLinkActive="text-emerald-700" class="hover:underline">Guides</a>
+      <a routerLink="/pricing" routerLinkActive="text-emerald-700" class="hover:underline">Pricing</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <button type="button" (click)="theme.toggleTheme()" class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-300 dark:border-slate-700" aria-label="Toggle color theme">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" />
+        </svg>
+      </button>
+      <a routerLink="/register" class="rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800">Start free</a>
+    </div>
+  </div>
+</header>

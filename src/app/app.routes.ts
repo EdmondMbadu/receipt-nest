@@ -1,5 +1,6 @@
 import { EnvironmentInjector, inject, runInInjectionContext } from '@angular/core';
-import { CanActivateFn, GuardResult, MaybeAsync, Routes } from '@angular/router';
+import { CanActivateFn, CanMatchFn, GuardResult, MaybeAsync, Routes } from '@angular/router';
+import { getPublicPage, workflowPages, informationPages } from './content/public-pages';
 import { firstValueFrom, isObservable } from 'rxjs';
 
 function toGuardResultPromise(result: MaybeAsync<GuardResult>): Promise<GuardResult> {
@@ -23,55 +24,37 @@ const lazyAdminGuard: CanActivateFn = (route, state) => {
     .then(toGuardResultPromise);
 };
 
+const knownBlogPost: CanMatchFn = async (_route, segments) => {
+  const { getBlogPost } = await import('./features/blog/blog-posts');
+  return !!getBlogPost(segments[1]?.path);
+};
+
 export const routes: Routes = [
   {
     path: '',
-    title: 'ReceiptNest AI | Receipt Organizer, Receipt Tracker & Expense Tracker',
+    title: getPublicPage('/').title,
     loadComponent: () => import('./features/landing/landing.component').then((m) => m.LandingComponent)
   },
-  {
-    path: 'receipt-tracker',
-    title: 'Receipt Tracker App for Organized Expenses | ReceiptNest AI',
-    data: { page: 'receipt-tracker' },
-    loadComponent: () => import('./features/seo-page/seo-page.component').then((m) => m.SeoPageComponent)
-  },
-  {
-    path: 'receipt-organizer',
-    title: 'Receipt Organizer App for Email, Photos, and PDFs | ReceiptNest AI',
-    data: { page: 'receipt-organizer' },
-    loadComponent: () => import('./features/seo-page/seo-page.component').then((m) => m.SeoPageComponent)
-  },
-  {
-    path: 'receipt-scanner',
-    title: 'Receipt Scanner App with AI Organization | ReceiptNest AI',
-    data: { page: 'receipt-scanner' },
-    loadComponent: () => import('./features/seo-page/seo-page.component').then((m) => m.SeoPageComponent)
-  },
-  {
-    path: 'receipt-management-software',
-    title: 'Receipt Management Software for Simple Expense Records | ReceiptNest AI',
-    data: { page: 'receipt-management-software' },
-    loadComponent: () => import('./features/seo-page/seo-page.component').then((m) => m.SeoPageComponent)
-  },
-  {
-    path: 'expense-tracker',
-    title: 'Expense Tracker Built Around Receipts | ReceiptNest AI',
-    data: { page: 'expense-tracker' },
-    loadComponent: () => import('./features/seo-page/seo-page.component').then((m) => m.SeoPageComponent)
-  },
-  {
-    path: 'tax-receipt-organizer',
-    title: 'Tax Receipt Organizer for Export-Ready Records | ReceiptNest AI',
-    data: { page: 'tax-receipt-organizer' },
-    loadComponent: () => import('./features/seo-page/seo-page.component').then((m) => m.SeoPageComponent)
-  },
+  ...workflowPages.map(page => ({
+    path: page.path.slice(1),
+    title: page.title,
+    data: { page: page.path.slice(1) },
+    loadComponent: () => import('./features/seo-page/seo-page.component').then(m => m.SeoPageComponent)
+  })),
+  ...informationPages.map(page => ({
+    path: page.path.slice(1),
+    title: page.title,
+    data: { page: page.path.slice(1) },
+    loadComponent: () => import('./features/public-info/public-info.component').then(m => m.PublicInfoComponent)
+  })),
   {
     path: 'blog',
-    title: 'Receipt Tracking & Tax Guides | ReceiptNest AI',
+    title: getPublicPage('/blog').title,
     loadComponent: () => import('./features/blog/blog-index.component').then((m) => m.BlogIndexComponent)
   },
   {
     path: 'blog/:slug',
+    canMatch: [knownBlogPost],
     loadComponent: () => import('./features/blog/blog-article.component').then((m) => m.BlogArticleComponent)
   },
   {
@@ -170,7 +153,7 @@ export const routes: Routes = [
   },
   {
     path: 'support',
-    title: 'Support | ReceiptNest AI',
+    title: getPublicPage('/support').title,
     loadComponent: () => import('./features/support/support.component').then((m) => m.SupportComponent)
   },
   {
@@ -180,7 +163,7 @@ export const routes: Routes = [
   },
   {
     path: 'terms',
-    title: 'Terms and Conditions | ReceiptNest AI',
+    title: getPublicPage('/terms').title,
     loadComponent: () => import('./features/terms/terms.component').then((m) => m.TermsComponent)
   },
   {
@@ -196,6 +179,7 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: ''
+    title: 'Page Not Found | ReceiptNest AI',
+    loadComponent: () => import('./features/not-found/not-found.component').then(m => m.NotFoundComponent)
   }
 ];

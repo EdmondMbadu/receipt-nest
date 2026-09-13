@@ -2,6 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { getPublicPage } from '../../content/public-pages';
+import { PublicHeaderComponent } from '../../components/public-layout/public-header.component';
+import { PublicFooterComponent } from '../../components/public-layout/public-footer.component';
 import { SeoService } from '../../services/seo.service';
 import { ThemeService } from '../../services/theme.service';
 import { BlogCategory, blogCategories, blogPosts } from './blog-posts';
@@ -9,7 +12,7 @@ import { BlogCategory, blogCategories, blogPosts } from './blog-posts';
 @Component({
   selector: 'app-blog-index',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PublicHeaderComponent, PublicFooterComponent],
   templateUrl: './blog-index.component.html'
 })
 export class BlogIndexComponent {
@@ -29,13 +32,8 @@ export class BlogIndexComponent {
   });
 
   constructor() {
-    this.seo.apply({
-      title: 'Receipt Tracking & Tax Guides | ReceiptNest AI',
-      description:
-        'Clarity on receipts, taxes, and money for freelancers and self-employed people. Read guides, comparisons, and receipt workflows from ReceiptNest AI.',
-      canonicalPath: '/blog',
-      keywords: 'receipt blog, freelancer receipts, self employed taxes, receipt tracker guides'
-    });
+    const page = getPublicPage('/blog');
+    this.seo.apply({ title: page.title, description: page.description, canonicalPath: page.path });
 
     this.seo.setJsonLd('blog-index', {
       '@context': 'https://schema.org',

@@ -3,14 +3,17 @@ import { Component, OnDestroy, PLATFORM_ID, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 
+import { getBlogEditorial } from './blog-editorial';
+import { PublicHeaderComponent } from '../../components/public-layout/public-header.component';
+import { PublicFooterComponent } from '../../components/public-layout/public-footer.component';
 import { SeoService } from '../../services/seo.service';
 import { ThemeService } from '../../services/theme.service';
-import { BlogBlock, BlogPost, blogPosts, getBlogPost, getRelatedPosts } from './blog-posts';
+import { BlogBlock, BlogPost, getBlogPost, getRelatedPosts } from './blog-posts';
 
 @Component({
   selector: 'app-blog-article',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PublicHeaderComponent, PublicFooterComponent],
   templateUrl: './blog-article.component.html'
 })
 export class BlogArticleComponent implements OnDestroy {
@@ -22,17 +25,26 @@ export class BlogArticleComponent implements OnDestroy {
 
   readonly isDarkMode = this.theme.isDarkMode;
   readonly currentYear = new Date().getFullYear();
-  article: BlogPost = getBlogPost(this.route.snapshot.paramMap.get('slug')) ?? blogPosts[0];
+  article: BlogPost = this.requirePost(this.route.snapshot.paramMap.get('slug'));
+  editorial = getBlogEditorial(this.article.slug);
   relatedPosts = getRelatedPosts(this.article);
   private readonly routeSubscription: Subscription;
 
   constructor() {
     this.routeSubscription = this.route.paramMap.subscribe(paramMap => {
-      this.article = getBlogPost(paramMap.get('slug')) ?? blogPosts[0];
+      this.article = this.requirePost(paramMap.get('slug'));
+      this.editorial = getBlogEditorial(this.article.slug);
       this.relatedPosts = getRelatedPosts(this.article);
       this.applySeo();
       this.scrollToTop();
     });
+  }
+
+  private requirePost(slug: string | null): BlogPost {
+    const post = getBlogPost(slug);
+    // The route's canMatch guard sends unknown slugs to the real not-found view.
+    if (!post) throw new Error('Unknown blog article');
+    return post;
   }
 
   ngOnDestroy(): void {
@@ -46,7 +58,7 @@ export class BlogArticleComponent implements OnDestroy {
       canonicalPath: this.article.path,
       image: this.article.image,
       imageAlt: this.article.imageAlt,
-      keywords: this.article.keywords.join(', '),
+      authorName: 'ReceiptNest AI',
       type: 'article',
       publishedTime: this.article.datePublished,
       modifiedTime: this.article.dateModified,
@@ -78,8 +90,8 @@ export class BlogArticleComponent implements OnDestroy {
           },
           author: {
             '@type': 'Organization',
-            name: 'The ReceiptNest Team',
-            url: 'https://receipt-nest.com/'
+            name: 'ReceiptNest AI',
+            url: 'https://receipt-nest.com/about'
           },
           publisher: {
             '@type': 'Organization',
@@ -89,18 +101,6 @@ export class BlogArticleComponent implements OnDestroy {
               url: this.seo.absoluteUrl('/assets/receipt-nest.png')
             }
           }
-        },
-        {
-          '@type': 'FAQPage',
-          '@id': this.seo.absoluteUrl(`${this.article.path}#faq`),
-          mainEntity: this.article.faq.map(item => ({
-            '@type': 'Question',
-            name: item.question,
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: item.answer
-            }
-          }))
         },
         {
           '@type': 'BreadcrumbList',

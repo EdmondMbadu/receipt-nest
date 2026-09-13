@@ -14,6 +14,7 @@ import { Router, RouterLink } from '@angular/router';
 
 import { AppConfigService } from '../../services/app-config.service';
 import { AuthService } from '../../services/auth.service';
+import { getPublicPage, workflowPages, informationPages } from '../../content/public-pages';
 import { SeoService } from '../../services/seo.service';
 import { ThemeService } from '../../services/theme.service';
 
@@ -57,6 +58,7 @@ export class LandingComponent implements OnDestroy {
   readonly user = this.auth.user;
   readonly isDarkMode = this.theme.isDarkMode;
   readonly currentYear = new Date().getFullYear();
+  readonly publicLinks = [...workflowPages, ...informationPages];
   readonly isMobileMenuOpen = signal(false);
   readonly isDemoOpen = signal(false);
   readonly openFaqIndex = signal<number | null>(null);
@@ -446,57 +448,9 @@ export class LandingComponent implements OnDestroy {
   }
 
   private applySeoTags() {
-    this.seo.apply({
-      title: 'ReceiptNest AI | Receipt Organizer, Receipt Tracker & Expense Tracker',
-      description:
-        'ReceiptNest AI is a receipt organizer, receipt tracker, receipt scanner, and expense tracker that turns scattered receipts into tax-ready monthly spending clarity.',
-      keywords:
-        'ReceiptNest AI, ReceiptNest, receipt organizer, AI receipt organizer, receipt scanner, receipt tracker, receipt tracking app, receipt management software, expense tracker, receipt inbox, tax-ready receipts',
-      canonicalPath: '/'
-    });
-
-    this.seo.setJsonLd('home-faq', {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: [
-        {
-          '@type': 'Question',
-          name: 'What is ReceiptNest AI?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text:
-              'ReceiptNest AI is an AI receipt organizer, receipt scanner, and expense tracker for freelancers, self-employed people, and small teams. It captures receipts from email, photos, and PDFs, then turns them into a searchable monthly expense inbox.'
-          }
-        },
-        {
-          '@type': 'Question',
-          name: 'How do receipts get into ReceiptNest AI?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text:
-              'You can forward emails, upload PDF or photo receipts, or connect supported integrations. Everything lands in one organized inbox.'
-          }
-        },
-        {
-          '@type': 'Question',
-          name: 'Is ReceiptNest AI accounting software or a receipt tracker?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text:
-              'ReceiptNest AI is a receipt tracker and receipt organizer focused on capture, search, exports, and spending clarity. If you need invoicing, payroll, or double-entry accounting, tools like Wave or QuickBooks are better suited.'
-          }
-        },
-        {
-          '@type': 'Question',
-          name: 'Can I export receipts for taxes or accounting?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text:
-              'Yes. You can export any time by month, category, or tag to CSV or PDF and share the results with your accountant.'
-          }
-        }
-      ]
-    });
+    const page = getPublicPage('/');
+    this.seo.apply({ title: page.title, description: page.description, canonicalPath: page.path });
+    this.seo.setSoftwareApplication();
   }
 
   private async redirectSignedInUserToApp(): Promise<void> {

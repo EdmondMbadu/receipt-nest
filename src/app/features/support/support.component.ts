@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
+import { getPublicPage } from '../../content/public-pages';
 import { SeoService } from '../../services/seo.service';
 
 @Component({
@@ -18,13 +19,8 @@ export class SupportComponent {
   readonly currentYear = new Date().getFullYear();
 
   constructor() {
-    this.seo.apply({
-      title: 'Support | ReceiptNest AI',
-      description:
-        'Get help with ReceiptNest AI. Contact support for questions about receipt scanning, receipt tracking, expense tracking, and account assistance.',
-      canonicalPath: '/support',
-      keywords: 'ReceiptNest AI support, receipt scanner support, receipt tracker help'
-    });
+    const page = getPublicPage('/support');
+    this.seo.apply({ title: page.title, description: page.description, canonicalPath: page.path });
   }
 
   toggleTheme() {

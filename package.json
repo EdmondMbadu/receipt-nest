@@ -4,7 +4,10 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "npm run seo:sitemap && ng build",
+    "seo:sitemap": "node --experimental-strip-types scripts/generate-sitemap.mjs",
+    "seo:check": "node --experimental-strip-types scripts/check-seo.mjs",
+    "postbuild": "npm run seo:check",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -53,6 +56,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "parse5": "8.0.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.17",
     "typescript": "~5.9.2"

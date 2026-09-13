@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
+import { getPublicPage } from '../../content/public-pages';
 import { SeoService } from '../../services/seo.service';
 
 @Component({
@@ -19,13 +20,8 @@ export class TermsComponent {
   readonly lastUpdated = 'December 29, 2025';
 
   constructor() {
-    this.seo.apply({
-      title: 'Terms and Conditions | ReceiptNest AI',
-      description:
-        'Read the Terms and Conditions for ReceiptNest AI, an AI-powered receipt scanner, receipt organizer, receipt tracker, and expense tracker.',
-      canonicalPath: '/terms',
-      keywords: 'ReceiptNest AI terms, receipt scanner terms, receipt tracker terms'
-    });
+    const page = getPublicPage('/terms');
+    this.seo.apply({ title: page.title, description: page.description, canonicalPath: page.path });
   }
 
   toggleTheme() {

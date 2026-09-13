@@ -214,6 +214,7 @@
     </div>
   </div>
 
+  <main id="main-content">
   <!-- Hero Section -->
   <section class="relative pt-28 pb-14 sm:pt-36 sm:pb-20 overflow-hidden">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -640,7 +641,7 @@
                   <svg class="h-3.5 w-3.5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-1.5 0h12a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014.5 18v-6a1.5 1.5 0 011.5-1.5z" />
                   </svg>
-                  Private by default — your real receipts never leave your account.
+                  Illustrative demo — no real receipts are uploaded here.
                 </p>
               </div>
             </div>
@@ -702,8 +703,8 @@
             </svg>
           </div>
           <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
-            Use ReceiptNest AI to capture receipts from email, photos, and PDFs, then automatically sort merchants,
-            categories, taxes, totals, and payment methods in one searchable receipt inbox.
+            Use ReceiptNest AI to capture receipts from email, photos, and PDFs, then review extracted
+            merchants, dates, totals, currencies, and categories in one searchable receipt inbox.
           </p>
         </div>
 
@@ -835,8 +836,7 @@
           </div>
           <h3 class="text-lg font-bold text-slate-900 dark:text-white">Capture from anywhere</h3>
           <p class="mt-3 text-[15px] text-slate-600 dark:text-slate-300 leading-relaxed">
-            Forward emails, snap a photo, or upload a PDF. If it's a receipt, ReceiptNest AI catches it — no manual
-            entry, ever.
+            Forward emails, snap a photo, or upload a PDF. ReceiptNest AI extracts the details so you can review and correct them without starting from a blank spreadsheet.
           </p>
           <div class="mt-5 flex items-center gap-2">
             <span
@@ -921,7 +921,7 @@
           </style>
           <h3 class="text-lg font-bold text-slate-900 dark:text-white">Smart auto-tagging</h3>
           <p class="mt-3 text-[15px] text-slate-600 dark:text-slate-300 leading-relaxed">
-            Merchant, category, amount, tax — extracted in seconds. Your receipts organize themselves.
+            Merchant, date, amount, currency, and category — extracted for your review. Check the details against the original.
           </p>
           <div class="mt-5 flex flex-wrap items-center gap-2">
             <span
@@ -1045,15 +1045,14 @@
           </div>
           <h3 class="text-lg font-bold text-slate-900 dark:text-white">Private by default</h3>
           <p class="mt-3 text-[15px] text-slate-600 dark:text-slate-300 leading-relaxed">
-            Your financial data never leaves your control. We don't sell it, share it, or train AI on it. Export or
-            delete everything, anytime.
+            Receipts are stored in your account and processed by cloud services to extract their details. Review your records, export them, and use the account's deletion controls.
           </p>
           <div class="mt-5 flex items-center gap-2 text-[13px] text-sky-600 dark:text-sky-400 font-medium">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-1.5 0h12a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014.5 18v-6a1.5 1.5 0 011.5-1.5z" />
             </svg>
-            End-to-end encrypted
+            Account-based access
           </div>
         </div>
       </div>
@@ -1816,8 +1815,7 @@
               <span class="text-emerald-700 dark:text-emerald-300">Period.</span>
             </h2>
             <p class="mt-6 text-lg sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed">
-              Most apps profit from your financial data. We don't. ReceiptNest AI is funded by subscriptions, not by
-              selling what you spend.
+              Know how your receipts are handled before you upload. ReceiptNest AI uses cloud storage and AI processing, with controls to review, export, and delete receipt records.
             </p>
 
             <ul class="mt-10 space-y-4 text-slate-700 dark:text-slate-200 text-base sm:text-lg">
@@ -1837,7 +1835,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
                 </div>
-                <span>Never sold to advertisers or data brokers</span>
+                <span>Receipts stored in your authenticated account</span>
               </li>
               <li class="flex items-center gap-3">
                 <div
@@ -1846,7 +1844,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
                 </div>
-                <span>Never used to train AI models</span>
+                <span>Cloud AI processing explained before you upload</span>
               </li>
               <li class="flex items-center gap-3">
                 <div
@@ -1864,13 +1862,13 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
                 </div>
-                <span>Permanent delete on request</span>
+                <span>Deletion controls and support for account requests</span>
               </li>
             </ul>
 
-            <a routerLink="/terms"
+            <a routerLink="/security"
               class="group mt-10 inline-flex items-center gap-2 text-base font-semibold text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 dark:hover:text-emerald-200 transition-colors">
-              Read our privacy commitment
+              Read how your data is handled
               <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor"
                 stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
@@ -2080,11 +2078,10 @@
               </span>
             </button>
             <div class="faq-answer overflow-hidden transition-all duration-300 ease-in-out"
-              [style.max-height]="openFaqIndex() === 0 ? '200px' : '0'"
+              [style.max-height]="openFaqIndex() === 0 ? '32rem' : '0'"
               [style.opacity]="openFaqIndex() === 0 ? '1' : '0'">
               <p class="pb-6 text-[15px] sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed pr-12">
-                Yes. Receipts are encrypted in transit and at rest. We never sell your data, and you can export or
-                delete everything at any time.
+                ReceiptNest AI uses account-based access and cloud services for storage and extraction. Read our data-handling overview before uploading sensitive records. Export and deletion controls are available in your account.
               </p>
             </div>
           </div>
@@ -2142,8 +2139,7 @@
               [style.max-height]="openFaqIndex() === 2 ? '200px' : '0'"
               [style.opacity]="openFaqIndex() === 2 ? '1' : '0'">
               <p class="pb-6 text-[15px] sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed pr-12">
-                You can forward emails, upload PDF or photo receipts, or connect supported integrations. Everything
-                lands in one organized inbox.
+                You can forward receipt emails to the address in your account, or upload PDF and photo receipts. Forwarding is not a connection to your entire email inbox.
               </p>
             </div>
           </div>
@@ -2314,11 +2310,10 @@
               </span>
             </button>
             <div class="faq-answer overflow-hidden transition-all duration-300 ease-in-out"
-              [style.max-height]="openFaqIndex() === 8 ? '200px' : '0'"
+              [style.max-height]="openFaqIndex() === 8 ? '32rem' : '0'"
               [style.opacity]="openFaqIndex() === 8 ? '1' : '0'">
               <p class="pb-6 text-[15px] sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed pr-12">
-                Never. Your receipts are encrypted, never shared with third parties, and never used to train AI
-                models. You can export or permanently delete all your data at any time.
+                Service providers process receipt data to operate the product, including cloud storage and AI extraction. Our data-handling overview explains this workflow and how to contact support about deletion or privacy requirements.
               </p>
             </div>
           </div>
@@ -2397,6 +2392,7 @@
     </div>
   </section>
 
+  </main>
   <!-- Footer -->
   <footer class="border-t border-slate-200 dark:border-slate-800">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
@@ -2508,6 +2504,12 @@
         </div>
       </div>
 
+      <nav class="mt-10 border-t border-slate-200 pt-8 dark:border-slate-800" aria-label="Receipt workflows and product information">
+        <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Explore ReceiptNest AI</h2>
+        <ul class="mt-5 grid grid-cols-2 gap-4 text-sm text-slate-600 dark:text-slate-300 sm:grid-cols-3 lg:grid-cols-4">
+          <li *ngFor="let page of publicLinks"><a [routerLink]="page.path" class="hover:underline">{{ page.label }}</a></li>
+        </ul>
+      </nav>
       <!-- Bottom row: copyright + links -->
       <div class="mt-8 flex flex-col items-center gap-4 border-t border-slate-100 dark:border-slate-800/60 pt-6 sm:flex-row sm:justify-between">
         <p class="text-sm text-slate-400 dark:text-slate-500">
