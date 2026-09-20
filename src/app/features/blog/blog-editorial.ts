@@ -25,6 +25,15 @@ const scanner = { href: '/receipt-scanner', label: 'See the receipt-scanning wor
 const email = { href: '/email-receipt-organizer', label: 'Set up email-receipt forwarding' };
 
 const editorial: Readonly<Record<string, BlogEditorial>> = {
+  'digitization-business-clarity-compounds': {
+    note: productNote + ' This essay is about record visibility, not accounting or tax advice.',
+    sources: [],
+    workflows: [
+      { href: '/receipt-organizer', label: 'Turn scattered receipts into searchable records' },
+      { href: '/expense-tracker', label: 'See receipt-based spending by month and category' },
+      csv
+    ]
+  },
   'can-bank-statements-replace-receipts': {
     note: taxNote, sources: [records, retention], workflows: [tax, csv]
   },

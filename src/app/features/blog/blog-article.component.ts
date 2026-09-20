@@ -14,7 +14,8 @@ import { BlogBlock, BlogPost, getBlogPost, getRelatedPosts } from './blog-posts'
   selector: 'app-blog-article',
   standalone: true,
   imports: [CommonModule, RouterLink, PublicHeaderComponent, PublicFooterComponent],
-  templateUrl: './blog-article.component.html'
+  templateUrl: './blog-article.component.html',
+  styleUrl: './blog-article.component.css'
 })
 export class BlogArticleComponent implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
@@ -58,6 +59,8 @@ export class BlogArticleComponent implements OnDestroy {
       canonicalPath: this.article.path,
       image: this.article.image,
       imageAlt: this.article.imageAlt,
+      imageWidth: this.article.imageWidth,
+      imageHeight: this.article.imageHeight,
       authorName: 'ReceiptNest AI',
       type: 'article',
       publishedTime: this.article.datePublished,
@@ -79,7 +82,12 @@ export class BlogArticleComponent implements OnDestroy {
           },
           headline: this.article.title,
           description: this.article.description,
-          image: this.seo.absoluteUrl(this.article.image),
+          image: {
+            '@type': 'ImageObject',
+            url: this.seo.absoluteUrl(this.article.image),
+            ...(this.article.imageWidth ? { width: this.article.imageWidth } : {}),
+            ...(this.article.imageHeight ? { height: this.article.imageHeight } : {})
+          },
           datePublished: this.article.datePublished,
           dateModified: this.article.dateModified,
           articleSection: this.article.category,
@@ -142,7 +150,7 @@ export class BlogArticleComponent implements OnDestroy {
       return '';
     }
 
-    const base = 'border-l-4 px-5 py-4';
+    const base = 'article-callout rounded-r-xl border-l-4 px-5 py-4';
     const tones = {
       note: 'border-slate-300 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200',
       tip: 'border-emerald-600 bg-emerald-50 text-emerald-950 dark:border-emerald-500 dark:bg-emerald-950/40 dark:text-emerald-100',

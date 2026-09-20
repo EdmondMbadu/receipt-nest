@@ -1,0 +1,24 @@
+:host {
+  display: block;
+}
+
+.editorial-display {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+  font-weight: 500;
+}
+
+.editorial-masthead {
+  background:
+    radial-gradient(circle at 84% 18%, rgb(16 185 129 / 0.09), transparent 27rem),
+    linear-gradient(180deg, rgb(248 250 252 / 0.7), transparent 85%);
+}
+
+:host-context(.dark) .editorial-masthead {
+  background:
+    radial-gradient(circle at 84% 18%, rgb(16 185 129 / 0.08), transparent 27rem),
+    linear-gradient(180deg, rgb(15 23 42 / 0.35), transparent 85%);
+}
+
+.featured-image {
+  box-shadow: 0 30px 80px -45px rgb(15 23 42 / 0.5);
+}

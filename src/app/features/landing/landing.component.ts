@@ -17,6 +17,7 @@ import { AuthService } from '../../services/auth.service';
 import { getPublicPage, workflowPages, informationPages } from '../../content/public-pages';
 import { SeoService } from '../../services/seo.service';
 import { ThemeService } from '../../services/theme.service';
+import { blogPosts } from '../blog/blog-posts';
 
 type DemoMonth = string;
 type MobileStorePlatform = 'ios' | 'android' | 'unknown';
@@ -59,6 +60,7 @@ export class LandingComponent implements OnDestroy {
   readonly isDarkMode = this.theme.isDarkMode;
   readonly currentYear = new Date().getFullYear();
   readonly publicLinks = [...workflowPages, ...informationPages];
+  readonly latestArticles = blogPosts.slice(0, 3);
   readonly isMobileMenuOpen = signal(false);
   readonly isDemoOpen = signal(false);
   readonly openFaqIndex = signal<number | null>(null);

@@ -13,7 +13,8 @@ import { BlogCategory, blogCategories, blogPosts } from './blog-posts';
   selector: 'app-blog-index',
   standalone: true,
   imports: [CommonModule, RouterLink, PublicHeaderComponent, PublicFooterComponent],
-  templateUrl: './blog-index.component.html'
+  templateUrl: './blog-index.component.html',
+  styleUrl: './blog-index.component.css'
 })
 export class BlogIndexComponent {
   private readonly seo = inject(SeoService);
