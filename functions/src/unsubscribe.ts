@@ -4,6 +4,7 @@ import { HttpsError, onCall, onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import { assertAdmin } from "./authz";
 import { sendSendgridMail } from "./sendgrid";
+import { addEmailDarkMode } from "./email-theme";
 import {
   buildUnsubscribeUrls,
   isEmailSuppressed,
@@ -129,7 +130,7 @@ export const requestEmailUnsubscribeLink = onCall(
           replyTo: { email: fromEmail, name: "ReceiptNest AI" },
           subject,
           text,
-          html,
+          html: addEmailDarkMode(html),
         });
       } catch (error) {
         logger.error("Failed to send unsubscribe confirmation link", { error });

@@ -15,6 +15,7 @@ import {
   getModeBillingSnapshot,
 } from "./billing-state";
 import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
+import { addEmailDarkMode } from "./email-theme";
 import { sendSendgridMail } from "./sendgrid";
 import { getEffectiveSubscriptionPlan } from "./subscription";
 import {
@@ -312,8 +313,8 @@ export const sendTestEmail = onCall(
                       <p style="margin:8px 0 0; font-size:14px; color:#d1fae5; font-family:Arial, sans-serif;">A quick confirmation that your mail setup is working.</p>
                     </td>
                     <td align="right" style="vertical-align:top;">
-                      <div style="width:46px; height:46px; border-radius:14px; background:rgba(167, 243, 208, 0.18); display:inline-block; text-align:center; line-height:46px; font-size:20px;">
-                        &#x1F4E7;
+                      <div style="width:46px; height:46px; border-radius:14px; background:#17362f; color:#d1fae5; display:inline-block; text-align:center; line-height:46px; font-size:14px; font-weight:800;">
+                        RN
                       </div>
                     </td>
                   </tr>
@@ -368,7 +369,7 @@ export const sendTestEmail = onCall(
         replyTo: { email: fromEmail, name: "ReceiptNest AI" },
         subject,
         text: appendAppDownloadText(message),
-        html,
+        html: addEmailDarkMode(html),
         attachments: getEmailAppIconAttachments(),
       });
     } catch (error) {

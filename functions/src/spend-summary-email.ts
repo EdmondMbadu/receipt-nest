@@ -5,6 +5,7 @@ import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import { assertAdmin } from "./authz";
 import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
+import { addEmailDarkMode } from "./email-theme";
 import { sendSendgridMail } from "./sendgrid";
 import {
   appendUnsubscribeText,
@@ -902,7 +903,7 @@ const renderHighlightCard = (
       <td style="padding:26px 26px 24px; font-family:Inter, Arial, sans-serif;">
         <table role="presentation" cellpadding="0" cellspacing="0">
           <tr>
-            <td style="width:48px; height:48px; border-radius:12px; background:${accentColor}; color:#ffffff; text-align:center; font-size:22px; font-weight:800;">
+            <td style="width:48px; height:48px; border-radius:12px; background:${accentColor}; color:#ffffff; text-align:center; font-size:11px; letter-spacing:0.04em; font-weight:900;">
               ${badgeSymbol}
             </td>
           </tr>
@@ -1133,8 +1134,8 @@ const renderSecuritySection = (links: SummaryLinks) => {
               <td style="vertical-align:middle;">
                 <table role="presentation" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td style="width:54px; height:54px; border-radius:999px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.14); color:#6ffbbe; text-align:center; line-height:54px; font-family:Inter, Arial, sans-serif; font-size:24px;">
-                      &#128274;
+                    <td style="width:54px; height:54px; border-radius:999px; background:#17362f; border:1px solid #3d6b5b; color:#6ffbbe; text-align:center; line-height:54px; font-family:Inter, Arial, sans-serif; font-size:12px; font-weight:900;">
+                      SAFE
                     </td>
                     <td style="padding-left:18px; font-family:Inter, Arial, sans-serif;">
                       <p style="margin:0; font-size:22px; line-height:1.2; color:#ffffff; font-weight:800;">Encrypted &amp; Secure</p>
@@ -1255,8 +1256,8 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
         }
 
         .topbar-logo {
-          width: 28px !important;
-          height: 28px !important;
+          width: 36px !important;
+          height: 25px !important;
         }
 
         .mobile-px {
@@ -1347,7 +1348,9 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
                   <tr>
                     <td class="topbar-brand" style="font-family:Inter, Arial, sans-serif; font-size:26px; line-height:1.1; color:#ffffff; font-weight:900; letter-spacing:-0.03em;">
                       <a class="topbar-link" href="${MAIN_SITE_URL}" style="display:inline-flex; align-items:center; gap:12px; color:#ffffff; text-decoration:none;">
-                        <img class="topbar-logo" src="${MAIN_SITE_URL}/receipt-nest.png" alt="ReceiptNest AI" width="32" height="32" style="display:block; width:32px; height:32px; border-radius:8px;" />
+                        <span style="display:inline-block; padding:4px; border-radius:8px; background-color:#f1f5f9; background-image:linear-gradient(#f1f5f9,#f1f5f9); vertical-align:middle;">
+                          <img class="topbar-logo" src="${MAIN_SITE_URL}/receipt-nest.png" alt="ReceiptNest AI" width="44" height="31" style="display:block; width:44px; height:31px; border:0;" />
+                        </span>
                         <span style="display:inline-block; vertical-align:middle;">ReceiptNest AI</span>
                       </a>
                     </td>
@@ -1422,7 +1425,7 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
                               metrics.topCategory ? metrics.topCategory.name : "No category data",
                               metrics.topCategory ? formatCurrency(metrics.topCategory.total, data.currency) : formatCurrency(0, data.currency),
                               metrics.topCategory ? `${Math.round(metrics.topCategory.share * 100)}% of total` : "No spend data",
-                              "&#128179;",
+                              "CAT",
                               "#064e3b",
                               "#d6fae8",
                             )}
@@ -1433,7 +1436,7 @@ const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
                               metrics.topMerchant ? metrics.topMerchant.name : "No merchant data",
                               metrics.topMerchant ? formatCurrency(metrics.topMerchant.total, data.currency) : formatCurrency(0, data.currency),
                               metrics.topMerchant ? formatCountLabel(metrics.topMerchant.count, "transaction") : "No activity",
-                              "&#127980;",
+                              "SHOP",
                               "#0d1c2d",
                               "#dbe9ff",
                             )}
@@ -1624,7 +1627,7 @@ const sendSummaryEmailMessage = async (
     replyTo: { email: fromEmail, name: "ReceiptNest AI" },
     subject: buildSummarySubject(summary),
     text: unsubscribeUrls ? appendUnsubscribeText(text, unsubscribeUrls.pageUrl) : text,
-    html,
+    html: addEmailDarkMode(html),
     headers: unsubscribeUrls
       ? {
         "List-Unsubscribe": `<${unsubscribeUrls.oneClickUrl}>`,

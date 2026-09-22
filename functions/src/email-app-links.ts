@@ -50,7 +50,7 @@ export const renderAppDownloadHtmlCard = () => `
             <td width="50%" style="padding:0 6px 0 0; vertical-align:top;">
               <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                  <td style="border-radius:10px; background:#000000; border:1px solid #1f2937;">
+                  <td style="border-radius:10px; background-color:#111827; background-image:linear-gradient(#111827,#111827); border:1px solid #334155;">
                     <a
                       href="${APP_STORE_URL}"
                       style="display:block; padding:8px 12px; color:#ffffff; text-decoration:none; font-family:Arial, sans-serif;"
@@ -78,7 +78,7 @@ export const renderAppDownloadHtmlCard = () => `
             <td width="50%" style="padding:0 0 0 6px; vertical-align:top;">
               <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                  <td style="border-radius:10px; background:#000000; border:1px solid #1f2937;">
+                  <td style="border-radius:10px; background-color:#111827; background-image:linear-gradient(#111827,#111827); border:1px solid #334155;">
                     <a
                       href="${GOOGLE_PLAY_URL}"
                       style="display:block; padding:8px 12px; color:#ffffff; text-decoration:none; font-family:Arial, sans-serif;"

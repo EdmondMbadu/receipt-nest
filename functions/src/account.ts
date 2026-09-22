@@ -4,6 +4,7 @@ import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import Stripe from "stripe";
 import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
+import { addEmailDarkMode } from "./email-theme";
 import { sendSendgridMail } from "./sendgrid";
 
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
@@ -216,7 +217,7 @@ const sendAccountDeletionEmail = async (email: string): Promise<void> => {
       replyTo: { email: fromEmail, name: "ReceiptNest AI" },
       subject,
       text,
-      html,
+      html: addEmailDarkMode(html),
       attachments: getEmailAppIconAttachments(),
     });
   } catch (error) {

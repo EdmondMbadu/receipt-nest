@@ -3,6 +3,7 @@ import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
+import { addEmailDarkMode } from "./email-theme";
 import { sendSendgridMail } from "./sendgrid";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
@@ -67,8 +68,8 @@ const buildEmailShell = (title: string, bodyHtml: string, preheader: string) => 
                       <h1 style="margin:10px 0 0; font-size:24px; font-weight:600; font-family:Arial, sans-serif;">${safeTitle}</h1>
                     </td>
                     <td align="right" style="vertical-align:top;">
-                      <div style="width:46px; height:46px; border-radius:14px; background:rgba(167, 243, 208, 0.18); display:inline-block; text-align:center; line-height:46px; font-size:20px;">
-                        &#x1F9FE;
+                      <div style="width:46px; height:46px; border-radius:14px; background:#17362f; color:#d1fae5; display:inline-block; text-align:center; line-height:46px; font-size:14px; font-weight:800;">
+                        RN
                       </div>
                     </td>
                   </tr>
@@ -115,7 +116,7 @@ const sendEmail = async (to: string, subject: string, text: string, html: string
     replyTo: { email: fromEmail, name: "ReceiptNest AI" },
     subject,
     text,
-    html,
+    html: addEmailDarkMode(html),
     attachments: getEmailAppIconAttachments(),
   });
 };

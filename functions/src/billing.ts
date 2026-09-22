@@ -13,6 +13,7 @@ import {
   getStoredCustomerIdForMode,
 } from "./billing-state";
 import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
+import { addEmailDarkMode } from "./email-theme";
 import { sendSendgridMail } from "./sendgrid";
 
 const STRIPE_API_VERSION = "2024-06-20";
@@ -454,7 +455,7 @@ const sendSubscriptionReceiptEmail = async ({
     replyTo: { email: fromEmail, name: "ReceiptNest AI" },
     subject,
     text,
-    html,
+    html: addEmailDarkMode(html),
     attachments: getEmailAppIconAttachments(),
   });
 };
