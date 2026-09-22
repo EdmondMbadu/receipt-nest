@@ -57,6 +57,182 @@ export const blogCategories: readonly BlogCategory[] = [
 
 export const blogPosts: readonly BlogPost[] = [
   {
+    slug: 'the-last-mile',
+    path: '/blog/the-last-mile',
+    category: 'Money Clarity',
+    title: 'The Last Mile: Why Most People Never Become Great',
+    seoTitle: 'The Last Mile: Why Most People Never Become Great',
+    description:
+      'Why do a select few capture nearly all the upside? The last mile between competence and greatness begins with devotion—and ends with clarity.',
+    excerpt:
+      'Technique can make you competent. The final distance demands a devotion to the work—and a willingness to look more closely than everyone else.',
+    datePublished: '2026-09-22',
+    dateModified: '2026-09-22',
+    readTime: '6 min read',
+    image: '/assets/images/blog/the-last-mile.jpg',
+    imageAlt: 'A long mountain staircase narrowing toward one climber at the summit',
+    imageWidth: 1672,
+    imageHeight: 941,
+    keywords: [
+      'why most people never become great',
+      'the last mile of mastery',
+      'devotion versus technique',
+      'financial clarity'
+    ],
+    intro: [
+      `Why do a select few in almost every field capture nearly all the upside?`,
+      `The top musicians are the best paid and the most known, while most working musicians struggle to make rent, and many eventually leave the craft for something steadier. The same pattern holds for actors, composers, directors, writers, and most creative fields.`
+    ],
+    sections: [
+      {
+        id: 'upside-at-the-limit',
+        title: 'The upside gathers at the limit',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `The top companies in Silicon Valley dominate so completely they earned their own name: Big Tech, FAANG. They are in a league of their own, so much so that for many startups, the dream is not to compete with Big Tech. It is to be acquired by it the moment they show the faintest signs of working.`
+          },
+          {
+            kind: 'paragraph',
+            text: `This is not limited to human activity. In physics, traveling at 50% the speed of light produces a time-dilation factor of about 1.16. At 94%, it is about 2.93. At 99%, it crosses 7. And at six nines—99.9999% of light speed—the factor passes 700. The curve barely moves for most of its length, then explodes near the very end.`
+          },
+          {
+            kind: 'callout',
+            tone: 'note',
+            title: 'The last-mile curve',
+            text: `All the upside sits at the limit.`
+          },
+          {
+            kind: 'paragraph',
+            text: `The same concentration appears in wealth. In the United States in Q2 2025, the top 1% held 31.1% of household net worth. The top 10% held 67.5%. The bottom 50% held 2.4%. Think about that again: half the population, less than two and a half percent of household net worth.`
+          },
+          {
+            kind: 'paragraph',
+            text: `This pattern keeps repeating, almost everywhere you look.`
+          }
+        ]
+      },
+      {
+        id: 'desire-before-method',
+        title: 'Greatness begins with desire, not method',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `The question is why. What do the people at the very top understand about their craft that eludes almost everyone else? Countless books have tried to answer this, and not much has changed about the ratio. The world has not visibly benefited from all the wisdom sold at every corner.`
+          },
+          {
+            kind: 'paragraph',
+            text: `Greatness is a matter of desire first. You cannot start with technique and method—not really, not before this. Unless someone is devoted to their craft, waking up daily to sharpen it, greatness stays almost impossible. This is why most books on the subject are close to irrelevant. It is a matter of the heart first. Nothing substitutes for that.`
+          }
+        ]
+      },
+      {
+        id: 'where-technique-stops',
+        title: 'Technique stops being the differentiator',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `You might ask: what about all the professional players who never reach the very top? Do they not devote their lives too? There are levels to this. The average professional is maybe 80% of the way there. Getting from there to 99% is an entirely different game. Those percentages are a metaphor, but the distance they describe is real.`
+          },
+          {
+            kind: 'paragraph',
+            text: `So what actually separates the professional at 80% from the one at 99%?`
+          },
+          {
+            kind: 'paragraph',
+            text: `Not technique. By the time someone is working professionally in any field, they already have technique. Coaches can teach it. Books can describe it. A disciplined person absorbs almost all of it within a few years. Technique is teachable, which is exactly why it stops being the differentiator once everyone in the room already has it.`
+          }
+        ]
+      },
+      {
+        id: 'devotion-cannot-be-copied',
+        title: 'Devotion cannot be copied',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `What cannot be taught the same way is a devotion specific to that one person's relationship with the work. Not devotion to winning, not devotion to being seen as great, but devotion to the problem itself, for its own sake, whether or not anyone is watching or paying.`
+          },
+          {
+            kind: 'paragraph',
+            text: `That kind of devotion produces something technique alone never can: an original way of seeing the work that nobody handed them.`
+          },
+          {
+            kind: 'paragraph',
+            text: `This is why studying the greats so rarely produces another great. You can copy technique. You cannot copy devotion, because devotion is not a method. It is a relationship, and relationships cannot be transplanted from one person into another.`
+          },
+          {
+            kind: 'callout',
+            tone: 'tip',
+            title: 'Who owns the last mile?',
+            text: `The last mile belongs to whoever refuses to stop looking, long after everyone else has decided they have seen enough.`
+          }
+        ]
+      },
+      {
+        id: 'the-financial-last-mile',
+        title: 'The same gap exists in how we look at money',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `This same gap shows up somewhere far more ordinary: how closely people look at their own money.`
+          },
+          {
+            kind: 'paragraph',
+            text: `Most people are at roughly 80% with their finances. A rough sense of income, a rough sense of spending, enough general awareness to function, pay the bills, and feel like a responsible adult. That is real, and it is not nothing. But it is not the last mile either.`
+          },
+          {
+            kind: 'paragraph',
+            text: `The last mile in personal finance is not a better budget or more willpower. It is the same quality of attention that separates the top of any field from the merely competent: the willingness to look at the granular truth instead of the rough estimate.`
+          },
+          {
+            kind: 'list',
+            items: [
+              'What did you spend on food last month—exactly, not roughly?',
+              `Where did last Tuesday's forty dollars go?`,
+              'Which small purchases keep repeating without being noticed?'
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `Most people never take that last mile, not for lack of discipline, but because no one ever made it easy to take.`
+          }
+        ]
+      },
+      {
+        id: 'why-we-built-receiptnest',
+        title: 'That is the mile we built ReceiptNest AI for',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Not another app that keeps you comfortable at 80% awareness. A way to see your own numbers with the same precision the best in any field bring to their craft—because clarity, like mastery, only really pays off at the limit.`
+          }
+        ]
+      }
+    ],
+    faq: [
+      {
+        question: 'What does “the last mile” mean in this essay?',
+        answer:
+          'It is the final distance between competence and mastery: the point where ordinary methods stop producing ordinary gains and sustained attention begins to matter more.'
+      },
+      {
+        question: 'Why is technique not enough to become great?',
+        answer:
+          'Technique is teachable and eventually becomes common among professionals. The essay argues that what separates exceptional work is a personal devotion to the problem that produces an original way of seeing it.'
+      },
+      {
+        question: 'What is the last mile in personal finance?',
+        answer:
+          'It is moving from a rough sense of spending to clear, searchable records that can answer specific questions about where money went.'
+      }
+    ],
+    relatedSlugs: [
+      'digitization-business-clarity-compounds',
+      'where-does-my-money-go',
+      'scan-receipts-automatically'
+    ]
+  },
+  {
     slug: 'digitization-business-clarity-compounds',
     path: '/blog/digitization-business-clarity-compounds',
     category: 'Money Clarity',

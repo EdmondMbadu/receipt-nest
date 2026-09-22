@@ -25,6 +25,24 @@ const scanner = { href: '/receipt-scanner', label: 'See the receipt-scanning wor
 const email = { href: '/email-receipt-organizer', label: 'Set up email-receipt forwarding' };
 
 const editorial: Readonly<Record<string, BlogEditorial>> = {
+  'the-last-mile': {
+    note: productNote + ' This is an opinion essay about mastery and attention. Its 80% and 99% figures are metaphors, not measured performance or financial-awareness scores.',
+    sources: [
+      {
+        href: 'https://www.federalreserve.gov/releases/z1/dataviz/dfa/distribute/chart/index.html',
+        label: 'Federal Reserve: Distributional Financial Accounts wealth shares'
+      },
+      {
+        href: 'https://cosmicopia.gsfc.nasa.gov/qa_gp_sl.html',
+        label: 'NASA: special relativity and time dilation'
+      }
+    ],
+    workflows: [
+      { href: '/expense-tracker', label: 'See receipt-based spending by month and category' },
+      { href: '/receipt-organizer', label: 'Turn scattered receipts into searchable records' },
+      csv
+    ]
+  },
   'digitization-business-clarity-compounds': {
     note: productNote + ' This essay is about record visibility, not accounting or tax advice.',
     sources: [],
