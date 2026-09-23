@@ -10,6 +10,7 @@ import {
   confirmPasswordReset as firebaseConfirmPasswordReset,
   createUserWithEmailAndPassword,
   getAuth,
+  getAdditionalUserInfo,
   getIdToken,
   onAuthStateChanged,
   reload,
@@ -35,7 +36,7 @@ import {
 import { getFunctions, httpsCallable } from 'firebase/functions';
 
 import { app } from '../../../environments/environments';
-import { NotificationSettings, UserProfile } from '../models/user.model';
+import { NotificationSettings, SignupSource, UserProfile } from '../models/user.model';
 
 const LAST_SEEN_UPDATE_INTERVAL_MS = 5 * 60 * 1000;
 
@@ -289,6 +290,7 @@ export class AuthService {
     lastName: string;
     email: string;
     password: string;
+    signupSource: SignupSource;
   }): Promise<UserCredential> {
     const auth = this.requireAuth();
     const db = this.requireDb();
@@ -299,6 +301,7 @@ export class AuthService {
       firstName: form.firstName,
       lastName: form.lastName,
       email: form.email,
+      signupSource: form.signupSource,
       receiptCount: 0,
       role: 'user',
       notificationSettings: this.getDefaultNotificationSettings(),
@@ -329,15 +332,16 @@ export class AuthService {
     await this.finishSignIn(credential);
   }
 
-  async loginWithGoogle() {
+  async loginWithGoogle(signupSource?: SignupSource) {
     const auth = this.requireAuth();
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     const credential = await signInWithPopup(auth, provider);
     await this.finishSignIn(credential);
+    await this.saveSignupSourceForNewSocialUser(credential, signupSource);
   }
 
-  async loginWithApple() {
+  async loginWithApple(signupSource?: SignupSource) {
     const auth = this.requireAuth();
     const provider = new OAuthProvider('apple.com');
     provider.addScope('email');
@@ -346,6 +350,7 @@ export class AuthService {
     try {
       const credential = await this.withPopupTimeout(signInWithPopup(auth, provider), 'Apple');
       await this.finishSignIn(credential);
+      await this.saveSignupSourceForNewSocialUser(credential, signupSource);
     } catch (error: any) {
       if (error?.code === 'auth/operation-not-allowed') {
         throw new Error('Apple sign-in is not enabled in Firebase Authentication.');
@@ -367,6 +372,17 @@ export class AuthService {
       error.code = 'auth/email-not-verified';
       throw error;
     }
+  }
+
+  private async saveSignupSourceForNewSocialUser(
+    credential: UserCredential,
+    signupSource?: SignupSource
+  ): Promise<void> {
+    if (!signupSource || !getAdditionalUserInfo(credential)?.isNewUser) {
+      return;
+    }
+
+    await updateDoc(doc(this.requireDb(), 'users', credential.user.uid), { signupSource });
   }
 
   async sendVerificationEmail(): Promise<void> {

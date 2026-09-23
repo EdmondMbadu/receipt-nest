@@ -29,7 +29,7 @@ import {
   normalizeFreePlanReceiptLimit
 } from '../../config/subscription.constants';
 import { FeedbackMessage } from '../../models/feedback.model';
-import { UserProfile } from '../../models/user.model';
+import { SIGNUP_SOURCE_OPTIONS, UserProfile } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
 import {
   EffectiveSubscriptionSource,
@@ -1726,6 +1726,18 @@ export class AdminComponent implements OnInit, OnDestroy {
     } catch {
       return '—';
     }
+  }
+
+  signupSourceLabel(user: UserProfile): string {
+    if (!user.signupSource) {
+      return 'Not collected';
+    }
+
+    if (user.signupSource === 'not_answered') {
+      return 'Not answered';
+    }
+
+    return SIGNUP_SOURCE_OPTIONS.find((option) => option.value === user.signupSource)?.label ?? 'Other';
   }
 
   formatDateTime(value?: UserProfile['lastLoginAt'] | null): string {

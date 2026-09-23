@@ -41,6 +41,17 @@
           </div>
 
           <form class="space-y-5" [formGroup]="form" (ngSubmit)="submit()">
+            <div class="space-y-2">
+              <label for="signup-source" class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+                Where did you hear about us? <span class="font-normal text-slate-400 dark:text-slate-500">Optional</span>
+              </label>
+              <select id="signup-source" formControlName="signupSource"
+                class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-emerald-400 dark:focus:ring-emerald-400/20">
+                <option value="">Choose one</option>
+                <option *ngFor="let option of signupSourceOptions" [value]="option.value">{{ option.label }}</option>
+              </select>
+            </div>
+
             <!-- Google Sign Up -->
             <button type="button"
               class="group flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 disabled:cursor-not-allowed disabled:opacity-60"

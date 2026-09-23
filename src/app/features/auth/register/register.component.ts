@@ -5,6 +5,7 @@ import { Meta, Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../services/auth.service';
+import { SIGNUP_SOURCE_OPTIONS, SignupSource } from '../../../models/user.model';
 import { getAuthErrorMessage } from '../../../utils/auth-error.utils';
 
 @Component({
@@ -26,8 +27,11 @@ export class RegisterComponent {
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    signupSource: ['']
   });
+
+  readonly signupSourceOptions = SIGNUP_SOURCE_OPTIONS;
 
   isSubmitting = false;
   errorMessage = '';
@@ -54,7 +58,8 @@ export class RegisterComponent {
         firstName: firstName ?? '',
         lastName: lastName ?? '',
         email: email ?? '',
-        password: password ?? ''
+        password: password ?? '',
+        signupSource: this.selectedSignupSource()
       });
       await this.router.navigateByUrl('/verify', { state: { email: email ?? '' } });
     } catch (error: any) {
@@ -74,7 +79,7 @@ export class RegisterComponent {
     this.isSubmitting = true;
 
     try {
-      await this.authService.loginWithGoogle();
+      await this.authService.loginWithGoogle(this.selectedSignupSource());
       await this.router.navigateByUrl('/app');
     } catch (error: any) {
       this.errorMessage = getAuthErrorMessage(error, 'provider', 'Unable to continue with Google right now.');
@@ -89,7 +94,7 @@ export class RegisterComponent {
     this.isSubmitting = true;
 
     try {
-      await this.authService.loginWithApple();
+      await this.authService.loginWithApple(this.selectedSignupSource());
       await this.router.navigateByUrl('/app');
     } catch (error: any) {
       this.errorMessage = getAuthErrorMessage(error, 'provider', 'Unable to continue with Apple right now.');
@@ -101,5 +106,9 @@ export class RegisterComponent {
 
   private detectChanges(): void {
     this.cdr.detectChanges();
+  }
+
+  private selectedSignupSource(): SignupSource {
+    return (this.form.controls.signupSource.value || 'not_answered') as SignupSource;
   }
 }

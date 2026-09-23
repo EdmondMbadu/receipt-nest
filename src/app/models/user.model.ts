@@ -10,11 +10,34 @@ export interface NotificationSettings {
   monthlySummaryPush: boolean;
 }
 
+export type SignupSource =
+  | 'google_search'
+  | 'instagram'
+  | 'tiktok'
+  | 'youtube'
+  | 'friend_or_colleague'
+  | 'app_store'
+  | 'ai_search'
+  | 'other'
+  | 'not_answered';
+
+export const SIGNUP_SOURCE_OPTIONS: { value: SignupSource; label: string }[] = [
+  { value: 'google_search', label: 'Google or another search engine' },
+  { value: 'instagram', label: 'Instagram' },
+  { value: 'tiktok', label: 'TikTok' },
+  { value: 'youtube', label: 'YouTube' },
+  { value: 'friend_or_colleague', label: 'Friend or colleague' },
+  { value: 'app_store', label: 'App Store or Google Play' },
+  { value: 'ai_search', label: 'ChatGPT or another AI tool' },
+  { value: 'other', label: 'Other' }
+];
+
 export interface UserProfile {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
+  signupSource?: SignupSource;
   receiptCount?: number;
   role?: 'admin' | 'user';
   subscriptionPlan?: 'free' | 'pro';
