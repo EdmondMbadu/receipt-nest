@@ -12,10 +12,14 @@ export interface NotificationSettings {
 
 export type SignupSource =
   | 'google_search'
+  | 'facebook'
   | 'instagram'
+  | 'threads'
   | 'tiktok'
   | 'youtube'
+  | 'bookkeeper_or_accountant'
   | 'friend_or_colleague'
+  | 'paid_ad'
   | 'app_store'
   | 'ai_search'
   | 'other'
@@ -23,10 +27,14 @@ export type SignupSource =
 
 export const SIGNUP_SOURCE_OPTIONS: { value: SignupSource; label: string }[] = [
   { value: 'google_search', label: 'Google or another search engine' },
+  { value: 'facebook', label: 'Facebook' },
   { value: 'instagram', label: 'Instagram' },
+  { value: 'threads', label: 'Threads' },
   { value: 'tiktok', label: 'TikTok' },
   { value: 'youtube', label: 'YouTube' },
+  { value: 'bookkeeper_or_accountant', label: 'Bookkeeper or accountant' },
   { value: 'friend_or_colleague', label: 'Friend or colleague' },
+  { value: 'paid_ad', label: 'An ad' },
   { value: 'app_store', label: 'App Store or Google Play' },
   { value: 'ai_search', label: 'ChatGPT or another AI tool' },
   { value: 'other', label: 'Other' }
