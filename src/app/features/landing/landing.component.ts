@@ -60,7 +60,52 @@ export class LandingComponent implements OnDestroy {
   readonly isDarkMode = this.theme.isDarkMode;
   readonly currentYear = new Date().getFullYear();
   readonly publicLinks = [...workflowPages, ...informationPages];
-  readonly latestArticles = blogPosts.slice(0, 3);
+  readonly latestArticles = [
+    ...blogPosts.filter(article => article.slug === 'can-bank-statements-replace-receipts'),
+    ...blogPosts.filter(article => article.slug !== 'can-bank-statements-replace-receipts' && article.slug !== 'the-last-mile').slice(0, 2)
+  ];
+  readonly faqItems = [
+    {
+      question: 'What is ReceiptNest?',
+      answer: 'ReceiptNest is a receipt app for freelancers and self-employed people. Forward email receipts, snap photos, or upload PDFs, then review and find your receipts when you need them. Export your records when your accountant asks.'
+    },
+    {
+      question: 'Does ReceiptNest do my taxes?',
+      answer: 'No. ReceiptNest keeps your receipts organized and lets you export them for yourself or your accountant. It does not prepare or file tax returns or give tax advice.'
+    },
+    {
+      question: 'How do receipts get into ReceiptNest?',
+      answer: 'Forward receipt emails to the address in your account, snap a photo, or upload a PDF. Forwarding a receipt does not connect ReceiptNest to your inbox.'
+    },
+    {
+      question: 'Can I export receipts for my accountant?',
+      answer: 'Yes. Export receipt records to CSV, or use Pro for PDF exports. You can review and filter your records before handing them off.'
+    },
+    {
+      question: 'Is my data private?',
+      answer: 'ReceiptNest uses account-based access and cloud services for storage and extraction. Read the data-handling overview before uploading sensitive records. Export and deletion controls are available in your account.'
+    },
+    {
+      question: 'What happens if I cancel?',
+      answer: 'You keep access to your data. Pro features are disabled, but you can still view and export your existing receipts.'
+    },
+    {
+      question: 'Is ReceiptNest accounting software?',
+      answer: 'No. ReceiptNest focuses on capturing, finding, and exporting receipts. If you need invoicing, payroll, or double-entry accounting, a broader accounting tool is better suited.'
+    },
+    {
+      question: 'How is ReceiptNest different from Wave or Expensify?',
+      answer: 'Wave and Expensify support broader accounting and expense workflows. ReceiptNest focuses on the receipts you send it and keeps them ready to hand off. There is no bank connection or bookkeeping workflow.'
+    },
+    {
+      question: 'Can I switch plans later?',
+      answer: 'Yes. You can start on Free and upgrade to Pro when you need unlimited receipts and additional export tools.'
+    },
+    {
+      question: 'Do you sell my data?',
+      answer: 'Service providers process receipt data to operate the product, including cloud storage and AI extraction. Our data-handling overview explains this workflow and how to contact support about deletion or privacy requirements.'
+    }
+  ] as const;
   readonly isMobileMenuOpen = signal(false);
   readonly isDemoOpen = signal(false);
   readonly openFaqIndex = signal<number | null>(null);
@@ -99,18 +144,18 @@ export class LandingComponent implements OnDestroy {
   private readonly simReceiptsPerCycle = 6;
 
   private readonly demoMerchantCatalog: DemoMerchantTemplate[] = [
-    { name: 'Whole Foods Market', initials: 'WF', category: 'Groceries', amount: 86.41, toneClass: 'tone-emerald' },
-    { name: 'Spotify', initials: 'SP', category: 'Subscription', amount: 9.99, toneClass: 'tone-green' },
-    { name: 'Uber Eats', initials: 'UE', category: 'Food', amount: 34.20, toneClass: 'tone-orange' },
-    { name: 'Starbucks', initials: 'SB', category: 'Coffee', amount: 6.75, toneClass: 'tone-amber' },
-    { name: 'Target', initials: 'TG', category: 'Household', amount: 52.18, toneClass: 'tone-rose' },
-    { name: 'Shell', initials: 'SH', category: 'Fuel', amount: 48.90, toneClass: 'tone-yellow' },
-    { name: 'Apple', initials: 'AP', category: 'Electronics', amount: 129.00, toneClass: 'tone-slate' },
-    { name: 'Trader Joe\'s', initials: 'TJ', category: 'Groceries', amount: 41.27, toneClass: 'tone-emerald' },
-    { name: 'Netflix', initials: 'NF', category: 'Subscription', amount: 15.49, toneClass: 'tone-rose' },
-    { name: 'CVS Pharmacy', initials: 'CV', category: 'Health', amount: 23.65, toneClass: 'tone-blue' },
-    { name: 'Amazon', initials: 'AZ', category: 'Shopping', amount: 67.32, toneClass: 'tone-amber' },
-    { name: 'Chipotle', initials: 'CH', category: 'Food', amount: 13.85, toneClass: 'tone-orange' }
+    { name: 'Staples', initials: 'ST', category: 'Office supplies', amount: 86.41, toneClass: 'tone-emerald' },
+    { name: 'Adobe', initials: 'AD', category: 'Software', amount: 29.99, toneClass: 'tone-green' },
+    { name: 'USPS', initials: 'US', category: 'Shipping', amount: 34.20, toneClass: 'tone-orange' },
+    { name: 'Zoom', initials: 'ZM', category: 'Software', amount: 15.99, toneClass: 'tone-amber' },
+    { name: 'Office Depot', initials: 'OD', category: 'Office supplies', amount: 52.18, toneClass: 'tone-rose' },
+    { name: 'FedEx', initials: 'FX', category: 'Shipping', amount: 48.90, toneClass: 'tone-yellow' },
+    { name: 'Canva', initials: 'CA', category: 'Software', amount: 12.99, toneClass: 'tone-slate' },
+    { name: 'Dropbox', initials: 'DB', category: 'Software', amount: 11.99, toneClass: 'tone-emerald' },
+    { name: 'Parking', initials: 'PK', category: 'Travel', amount: 15.49, toneClass: 'tone-rose' },
+    { name: 'Print Shop', initials: 'PS', category: 'Marketing', amount: 23.65, toneClass: 'tone-blue' },
+    { name: 'Amazon Business', initials: 'AB', category: 'Office supplies', amount: 67.32, toneClass: 'tone-amber' },
+    { name: 'Domain Renewal', initials: 'DR', category: 'Software', amount: 13.85, toneClass: 'tone-orange' }
   ];
 
   readonly currentDemoReceipts = computed(() => this.demoReceiptsByMonth()[this.selectedDemoMonth()]);

@@ -49,7 +49,7 @@ for (const page of entries) {
   assert.equal(attr(meta('robots')[0], 'content'), 'index, follow', page.path + ': public indexing');
   assert.equal(tags('h1').length, 1, page.path + ': one H1');
   assert.ok(text(tags('h1')[0]).trim().length > 5, page.path + ': useful H1');
-  if (page.path === '/') assert.equal(text(tags('h1')[0]).trim(), 'Finally know where your money goes.', 'Preserve the owner-approved homepage hero');
+  if (page.path === '/') assert.equal(text(tags('h1')[0]).trim(), 'Just your receipts. None of the accounting.', 'Homepage hero matches the current positioning');
   assert.ok(tags('main').length, page.path + ': main landmark');
   const graphs = tags('script').filter(node => attr(node, 'type') === 'application/ld+json')
     .flatMap(node => { const json = JSON.parse(text(node)); return json['@graph'] || [json]; });

@@ -15,8 +15,8 @@ export interface PublicPage {
 export const publicPages: readonly PublicPage[] = [
   {
     path: '/', kind: 'home', label: 'ReceiptNest AI', updated: CONTENT_REVIEW_DATE,
-    title: 'ReceiptNest AI — Receipt Tracking for Freelancers',
-    description: 'Keep photos, PDFs, and forwarded receipts organized. Track purchases, find original receipts, and export your records with ReceiptNest AI.'
+    title: 'ReceiptNest — Receipt App for Freelancers. No Accounting Software.',
+    description: 'Forward the email, snap the photo, or upload the PDF. ReceiptNest organizes your receipts and gives your accountant one clean export. No bank login, no bookkeeping.'
   },
   {
     path: '/receipt-tracker', kind: 'workflow', label: 'Receipt tracker', updated: CONTENT_REVIEW_DATE,

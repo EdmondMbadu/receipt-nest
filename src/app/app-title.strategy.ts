@@ -14,8 +14,8 @@ export class AppTitleStrategy extends TitleStrategy {
     const routeTitle = this.buildTitle(snapshot);
     // Article components own their dynamic title and structured data.
     if (!routeTitle) return;
-    const fullTitle = routeTitle.includes(this.appName) ? routeTitle : `${routeTitle} - ${this.appName}`;
     const path = snapshot.url.split(/[?#]/)[0].replace(/\/$/, '') || '/';
+    const fullTitle = path === '/' || routeTitle.includes(this.appName) ? routeTitle : `${routeTitle} - ${this.appName}`;
     const isPublic = publicPages.some(page => page.path === path) || path.startsWith('/blog/');
     let leaf = snapshot.root;
     while (leaf.firstChild) leaf = leaf.firstChild;
