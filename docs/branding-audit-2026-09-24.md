@@ -1,6 +1,6 @@
 # ReceiptNest branding audit — September 24, 2026
 
-The product name used by the website and its backend-generated communications is **ReceiptNest**. The official App Store and Google Play listings retain **ReceiptNest AI**. Instagram links use `https://www.instagram.com/receiptnest`. The existing Facebook URL stays unchanged.
+The product name used by the website and its backend-generated communications is **ReceiptNest**. The official App Store and Google Play listings retain **ReceiptNest AI**. Instagram links use `https://www.instagram.com/receiptnest`, and TikTok links use `https://www.tiktok.com/@receiptnest`. The existing Facebook URL stays unchanged.
 
 ## Coverage and corrections
 
@@ -17,7 +17,7 @@ The product name used by the website and its backend-generated communications is
 ## Intentional remaining references
 
 - Official app-store names, store links, and download accessibility labels.
-- Working YouTube, X, TikTok, and Facebook account URLs/handles. Only Instagram had a replacement URL supplied.
+- Working YouTube, X, and Facebook account URLs/handles. Instagram and TikTok use the replacement URLs supplied by the owner.
 - Historical September 13 SEO crawl snapshots and citations identifying app-store listings.
 - Technical feature/disclosure text such as AI Insights, Document AI, and AI processing. Those describe functionality, not the product-name suffix.
 

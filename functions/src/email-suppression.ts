@@ -99,6 +99,7 @@ const escapeHtmlAttribute = (value: string): string =>
 export const appendUnsubscribeHtml = (html: string, unsubscribeUrl: string): string => {
   const safeUrl = escapeHtmlAttribute(unsubscribeUrl);
   const footer = `
+<!-- receiptnest-unsubscribe-footer -->
 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-top:24px;border-top:1px solid #e2e8f0;">
   <tr>
     <td align="center" style="padding:18px 12px 4px;font-family:Arial,sans-serif;font-size:12px;line-height:1.6;color:#64748b;">

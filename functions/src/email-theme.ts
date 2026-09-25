@@ -1,4 +1,4 @@
-// Adds dark-mode rules to our own inline-styled transactional email templates.
+// Adds dark-mode and narrow-screen rules to our inline-styled email templates.
 // Inline light-mode styles remain the fallback for clients that ignore this media query.
 const darkBackground = (value: string): string | null => {
   const color = value.trim().toLowerCase();
@@ -100,6 +100,15 @@ export const addEmailDarkMode = (html: string): string => {
   const head = `
     <meta name="color-scheme" content="light dark" />
     <meta name="supported-color-schemes" content="light dark" />
+    <style>
+      @media only screen and (max-width:480px) {
+        .rn-app-download-cell { display:block !important; width:100% !important; box-sizing:border-box !important; padding:0 0 8px !important; }
+        .rn-app-download-cell:last-child { padding-bottom:0 !important; }
+      }
+      @media only screen and (max-width:400px) {
+        .rn-summary-footer-link a { padding-left:8px !important; padding-right:8px !important; letter-spacing:normal !important; line-height:22px !important; }
+      }
+    </style>
     <style>@media (prefers-color-scheme: dark) {\n${css}\n}</style>
   `;
   return themedHtml.replace(/<\/head>/i, `${head}</head>`);

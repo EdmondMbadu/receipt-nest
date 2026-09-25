@@ -1,6 +1,7 @@
 import sgMail from "@sendgrid/mail";
 import Mail from "@sendgrid/helpers/classes/mail";
 import { logger } from "firebase-functions";
+import { appendEmailSocialHtml, appendEmailSocialText } from "./email-social-links";
 
 type SendgridMessage = Record<string, unknown> & {
   attachments?: Array<Record<string, unknown>>;
@@ -29,7 +30,12 @@ const normalizeAttachments = (attachments: unknown) => {
 export const sendSendgridMail = async (apiKey: string, message: SendgridMessage) => {
   sgMail.setApiKey(apiKey);
 
-  const mail = Mail.create(message as never) as Mail & { headers?: Record<string, string> };
+  const prepared = {
+    ...message,
+    ...(typeof message.html === "string" ? { html: appendEmailSocialHtml(message.html) } : {}),
+    ...(typeof message.text === "string" ? { text: appendEmailSocialText(message.text) } : {}),
+  };
+  const mail = Mail.create(prepared as never) as Mail & { headers?: Record<string, string> };
   const body = mail.toJSON() as unknown as Record<string, unknown>;
   body.attachments = normalizeAttachments(body.attachments) as Record<string, unknown>[] | undefined;
   const client = sgMail as typeof sgMail & {

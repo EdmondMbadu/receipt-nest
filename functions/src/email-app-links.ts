@@ -47,7 +47,7 @@ export const renderAppDownloadHtmlCard = () => `
         </p>
         <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
           <tr>
-            <td width="50%" style="padding:0 6px 0 0; vertical-align:top;">
+            <td class="rn-app-download-cell" width="50%" style="padding:0 6px 0 0; vertical-align:top;">
               <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                   <td style="border-radius:10px; background-color:#111827; background-image:linear-gradient(#111827,#111827); border:1px solid #334155;">
@@ -75,7 +75,7 @@ export const renderAppDownloadHtmlCard = () => `
                 </tr>
               </table>
             </td>
-            <td width="50%" style="padding:0 0 0 6px; vertical-align:top;">
+            <td class="rn-app-download-cell" width="50%" style="padding:0 0 0 6px; vertical-align:top;">
               <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                   <td style="border-radius:10px; background-color:#111827; background-image:linear-gradient(#111827,#111827); border:1px solid #334155;">

@@ -20,6 +20,7 @@ import {
 } from 'firebase/firestore';
 
 import { app } from '../../../../environments/environments';
+import { appendEmailSocialHtml } from '../../../../functions/src/email-social-links';
 import {
   BillingMode,
   DEFAULT_FREE_PLAN_RECEIPT_LIMIT,
@@ -801,7 +802,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   });
   readonly customEmailRenderedPreview = computed(() => {
     const recipient = this.customEmailPreviewRecipient();
-    return this.renderCustomEmailTemplate(this.customEmailHtml(), recipient);
+    return appendEmailSocialHtml(this.renderCustomEmailTemplate(this.customEmailHtml(), recipient));
   });
   readonly customEmailPreviewSelection = computed(() => this.customEmailPreviewRecipient()?.key ?? '');
   readonly selectedSummaryUser = computed(() =>
