@@ -64,7 +64,7 @@ const buildEmailShell = (title: string, bodyHtml: string, preheader: string) => 
                 <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                   <tr>
                     <td>
-                      <p style="margin:0; font-size:12px; letter-spacing:0.28em; text-transform:uppercase; font-weight:600; color:#a7f3d0;">ReceiptNest AI</p>
+                      <p style="margin:0; font-size:12px; letter-spacing:0.28em; text-transform:uppercase; font-weight:600; color:#a7f3d0;">ReceiptNest</p>
                       <h1 style="margin:10px 0 0; font-size:24px; font-weight:600; font-family:Arial, sans-serif;">${safeTitle}</h1>
                     </td>
                     <td align="right" style="vertical-align:top;">
@@ -87,18 +87,18 @@ const buildEmailShell = (title: string, bodyHtml: string, preheader: string) => 
                 <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                   <tr>
                     <td>
-                      <p style="margin:0 0 6px;">ReceiptNest AI • info@receipt-nest.com</p>
-                      <p style="margin:0;">You are receiving this email because you created a ReceiptNest AI account.</p>
+                      <p style="margin:0 0 6px;">ReceiptNest • info@receipt-nest.com</p>
+                      <p style="margin:0;">You are receiving this email because you created a ReceiptNest account.</p>
                     </td>
                     <td align="right">
-                      <span style="display:inline-block; padding:6px 10px; border-radius:999px; background:#0f172a; color:#e2e8f0; font-size:11px;">ReceiptNest AI</span>
+                      <span style="display:inline-block; padding:6px 10px; border-radius:999px; background:#0f172a; color:#e2e8f0; font-size:11px;">ReceiptNest</span>
                     </td>
                   </tr>
                 </table>
               </td>
             </tr>
           </table>
-          <p style="margin:16px 0 0; font-size:11px; color:#94a3b8;">© ${new Date().getFullYear()} ReceiptNest AI. All rights reserved.</p>
+          <p style="margin:16px 0 0; font-size:11px; color:#94a3b8;">© ${new Date().getFullYear()} ReceiptNest. All rights reserved.</p>
         </td>
       </tr>
     </table>
@@ -112,8 +112,8 @@ const sendEmail = async (to: string, subject: string, text: string, html: string
   }
   await sendSendgridMail(sendgridApiKey.value(), {
     to,
-    from: { email: fromEmail, name: "ReceiptNest AI" },
-    replyTo: { email: fromEmail, name: "ReceiptNest AI" },
+    from: { email: fromEmail, name: "ReceiptNest" },
+    replyTo: { email: fromEmail, name: "ReceiptNest" },
     subject,
     text,
     html: addEmailDarkMode(html),
@@ -142,11 +142,11 @@ export const sendVerificationEmail = onCall(
       handleCodeInApp: false
     });
 
-    const subject = "Verify your ReceiptNest AI email";
-    const text = appendAppDownloadText(`Welcome to ReceiptNest AI!\n\nPlease verify your email to finish setting up your account: ${link}\n\nOnce verified, you can head to your dashboard and start organizing receipts.`);
+    const subject = "Verify your ReceiptNest email";
+    const text = appendAppDownloadText(`Welcome to ReceiptNest!\n\nPlease verify your email to finish setting up your account: ${link}\n\nOnce verified, you can head to your dashboard and start organizing receipts.`);
     const bodyHtml = `
       <p style="margin:0 0 12px; font-size:15px; line-height:1.6;">Hello,</p>
-      <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">Thanks for signing up for ReceiptNest AI. Please verify your email to finish setting up your account.</p>
+      <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">Thanks for signing up for ReceiptNest. Please verify your email to finish setting up your account.</p>
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:18px 0;">
         <tr>
           <td align="center" bgcolor="#10b981" style="border-radius:999px;">
@@ -183,9 +183,9 @@ export const sendPasswordResetEmail = onCall(
     try {
       const generatedLink = await admin.auth().generatePasswordResetLink(email);
       const resetLink = buildCustomActionLink(generatedLink, appBaseUrl.value(), "/reset-password");
-      const subject = "Reset your ReceiptNest AI password";
+      const subject = "Reset your ReceiptNest password";
       const text = appendAppDownloadText([
-        "We received a request to reset your ReceiptNest AI password.",
+        "We received a request to reset your ReceiptNest password.",
         "",
         `Use this secure link to choose a new password: ${resetLink}`,
         "",
@@ -193,7 +193,7 @@ export const sendPasswordResetEmail = onCall(
       ].join("\n"));
       const bodyHtml = `
         <p style="margin:0 0 12px; font-size:15px; line-height:1.6;">Hello,</p>
-        <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">We received a request to reset the password for your ReceiptNest AI account associated with <strong style="color:#0f172a;">${escapeHtml(email)}</strong>.</p>
+        <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">We received a request to reset the password for your ReceiptNest account associated with <strong style="color:#0f172a;">${escapeHtml(email)}</strong>.</p>
         <p style="margin:0 0 18px; font-size:15px; line-height:1.6;">Use the button below to choose a new password and get back into your workspace.</p>
         <table role="presentation" cellpadding="0" cellspacing="0" style="margin:18px 0;">
           <tr>
@@ -206,7 +206,7 @@ export const sendPasswordResetEmail = onCall(
           If you did not request a password reset, you can safely ignore this email. Your password will stay unchanged until you create a new one.
         </div>
       `;
-      const html = buildEmailShell(subject, bodyHtml, "Reset your ReceiptNest AI password securely.");
+      const html = buildEmailShell(subject, bodyHtml, "Reset your ReceiptNest password securely.");
 
       await sendEmail(email, subject, text, html);
     } catch (error: any) {
@@ -247,10 +247,10 @@ export const sendWelcomeEmail = onCall(
       return { ok: true };
     }
 
-    const subject = "Welcome to ReceiptNest AI";
-    const text = appendAppDownloadText(`Welcome to ReceiptNest AI!\n\nYour account is ready. Capture receipts, keep expenses organized, and stay on top of your spending in one place.\n\nGo to your dashboard: ${appBaseUrl.value()}/app`);
+    const subject = "Welcome to ReceiptNest";
+    const text = appendAppDownloadText(`Welcome to ReceiptNest!\n\nYour account is ready. Capture receipts, keep expenses organized, and stay on top of your spending in one place.\n\nGo to your dashboard: ${appBaseUrl.value()}/app`);
     const bodyHtml = `
-      <p style="margin:0 0 12px; font-size:15px; line-height:1.6;">Welcome to ReceiptNest AI,</p>
+      <p style="margin:0 0 12px; font-size:15px; line-height:1.6;">Welcome to ReceiptNest,</p>
       <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">Your account is ready. From here, you can upload receipts, keep expenses organized, and build a cleaner record of every purchase.</p>
       <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">When you are ready, head to your dashboard and add your first receipt.</p>
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:18px 0;">
@@ -261,10 +261,10 @@ export const sendWelcomeEmail = onCall(
         </tr>
       </table>
       <div style="margin-top:18px; padding:14px 16px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; font-size:13px; color:#475569;">
-        Need a quick start? Upload your first receipt and let ReceiptNest AI do the organizing.
+        Need a quick start? Upload your first receipt and let ReceiptNest do the organizing.
       </div>
     `;
-    const html = buildEmailShell(subject, bodyHtml, "Welcome to ReceiptNest AI. Your receipts just got organized.");
+    const html = buildEmailShell(subject, bodyHtml, "Welcome to ReceiptNest. Your receipts just got organized.");
 
     try {
       await sendEmail(email, subject, text, html);

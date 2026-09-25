@@ -119,7 +119,7 @@ Public results surfaced multiple apparent products using ReceiptNest. The offici
 
 That is evidence of potential buyer and search-entity confusion, not a trademark finding or a measured loss of rankings.
 
-Use a consistent “ReceiptNest AI” identity, official domain, logo, developer/company attribution, and app IDs across owned surfaces. Existing sameAs links already provide a useful foundation. Add an About page that makes the operator and product history clear. Check third-party listings for accidental linkage to the wrong app.
+Use a consistent “ReceiptNest” identity, official domain, logo, developer/company attribution, and app IDs across owned surfaces. Per the September 24, 2026 brand update, retain “ReceiptNest AI” only when identifying the official App Store and Google Play listings; preserve working social handles until those accounts are renamed. Existing sameAs links already provide a useful foundation. Add an About page that makes the operator and product history clear. Check third-party listings for accidental linkage to the wrong app.
 
 A domain migration or rebrand is not justified by this audit alone.
 
@@ -151,7 +151,7 @@ The following is an editorial targeting map, not a search-volume forecast. Each 
 
 | Priority | Search-intent cluster and example queries | Destination | Required differentiation |
 |---|---|---|---|
-| First | ReceiptNest AI; ReceiptNest pricing; ReceiptNest privacy | Homepage; new /pricing, /privacy, /about | Clear official identity, real plan limits, ownership, support |
+| First | ReceiptNest; ReceiptNest pricing; ReceiptNest privacy | Homepage; new /pricing, /privacy, /about | Clear official identity, real plan limits, ownership, support |
 | First | receipt tracker; receipt tracking app; receipt tracker for freelancers | Existing /receipt-tracker | Capture → find → monthly review → export, demonstrated |
 | First | receipt scanner; scan receipts to digital records | Existing /receipt-scanner | Before/after sample, supported formats, review/correction, limitations |
 | First | tax receipt organizer; receipt organizer for self-employed | Existing /tax-receipt-organizer | Record-preparation workflow, original-file access, sample export; no tax guarantees |
@@ -181,7 +181,7 @@ The current headline, “Finally know where your money goes,” communicates an 
 
 Suggested direction, subject to audience validation:
 
-- Title: “ReceiptNest AI — Receipt Tracking for Freelancers”
+- Title: “ReceiptNest — Receipt Tracking for Freelancers”
 - H1: “Track your receipts. Keep your expenses organized.”
 - Supporting copy: “Capture photos, PDFs, and forwarded receipts. Find what you need and export your records for review.”
 - Primary action: “Try ReceiptNest free.”

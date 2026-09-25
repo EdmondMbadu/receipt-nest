@@ -1,5 +1,5 @@
 /**
- * ReceiptNest AI Cloud Functions
+ * ReceiptNest Cloud Functions
  *
  * Main entry point for all Firebase Cloud Functions.
  * Handles receipt processing with Document AI and Gemini.

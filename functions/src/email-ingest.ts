@@ -187,7 +187,7 @@ export const inboundEmailWebhook = onRequest(
   },
   async (req, res) => {
     if (req.method === "GET") {
-      res.status(200).send("ReceiptNest AI inbound email webhook is live.");
+      res.status(200).send("ReceiptNest inbound email webhook is live.");
       return;
     }
 
@@ -904,9 +904,9 @@ ${bodyExcerpt}`;
 async function generateEmailDocumentPdf(input: EmailDocumentPdfInput): Promise<Buffer> {
   const pdfDoc = await PDFDocument.create();
   pdfDoc.setTitle(input.subject || "Forwarded Email Receipt");
-  pdfDoc.setAuthor("ReceiptNest AI");
-  pdfDoc.setCreator("ReceiptNest AI inbound email ingestion");
-  pdfDoc.setProducer("ReceiptNest AI");
+  pdfDoc.setAuthor("ReceiptNest");
+  pdfDoc.setCreator("ReceiptNest inbound email ingestion");
+  pdfDoc.setProducer("ReceiptNest");
   pdfDoc.setSubject("Forwarded email receipt");
   pdfDoc.setKeywords(["receipt", "email", "forwarded"]);
 
@@ -1070,7 +1070,7 @@ async function generateEmailDocumentPdf(input: EmailDocumentPdfInput): Promise<B
   }
 
   pages.forEach((page, index) => {
-    const footerText = `ReceiptNest AI • Forwarded email • Page ${index + 1} of ${pages.length}`;
+    const footerText = `ReceiptNest • Forwarded email • Page ${index + 1} of ${pages.length}`;
     page.drawLine({
       start: { x: margin, y: bodyBottomY + 8 },
       end: { x: pageWidth - margin, y: bodyBottomY + 8 },
@@ -1239,7 +1239,7 @@ async function generateEmailPreviewImage(input: EmailPreviewImageInput): Promise
   <rect x="70" y="70" width="1060" height="1460" rx="40" fill="#ffffff" filter="url(#shadow)"/>
   <rect x="70" y="70" width="1060" height="120" rx="40" fill="#0f172a"/>
   <rect x="70" y="150" width="1060" height="40" fill="#0f172a"/>
-  <text x="120" y="145" class="title">ReceiptNest AI Email Receipt</text>
+  <text x="120" y="145" class="title">ReceiptNest Email Receipt</text>
 
   <rect x="880" y="250" width="190" height="44" rx="22" fill="${statusBg}"/>
   <text x="975" y="278" text-anchor="middle" class="status" fill="${statusColor}">${escapeSvgText(statusLabel)}</text>
@@ -1748,7 +1748,7 @@ function buildStoredEmailHtmlDocument(input: {
   const safeTitle = escapeHtmlAttribute(input.subject || "Forwarded Email Receipt");
   const headerHtml = `
     <section style="margin:0 0 24px; padding:20px 24px; border-radius:16px; border:1px solid #dbe3ee; background:#f8fafc; font-family:Arial,sans-serif;">
-      <div style="font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:12px;">ReceiptNest AI Email Capture</div>
+      <div style="font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:12px;">ReceiptNest Email Capture</div>
       <div style="font-size:13px; color:#334155; line-height:1.6;">
         <div><strong>Subject:</strong> ${escapeHtmlContent(input.subject || "(no subject)")}</div>
         <div><strong>From:</strong> ${escapeHtmlContent(input.sender || "(unknown sender)")}</div>

@@ -98,8 +98,8 @@ export const requestEmailUnsubscribeLink = onCall(
       );
       const safeEmail = escapeHtml(email);
       const safePageUrl = escapeHtml(pageUrl);
-      const subject = "Confirm your ReceiptNest AI unsubscribe request";
-      const text = `We received a request to unsubscribe ${email} from non-essential ReceiptNest AI emails.\n\nConfirm your request: ${pageUrl}\n\nIf you did not request this, you can ignore this email.`;
+      const subject = "Confirm your ReceiptNest unsubscribe request";
+      const text = `We received a request to unsubscribe ${email} from non-essential ReceiptNest emails.\n\nConfirm your request: ${pageUrl}\n\nIf you did not request this, you can ignore this email.`;
       const html = `<!DOCTYPE html>
 <html lang="en">
   <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /></head>
@@ -108,7 +108,7 @@ export const requestEmailUnsubscribeLink = onCall(
       <tr><td align="center">
         <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:620px;background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;overflow:hidden;">
           <tr><td style="padding:26px 30px;background:linear-gradient(135deg,#0f172a 0%,#065f46 100%);color:#ffffff;">
-            <p style="margin:0;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#a7f3d0;">ReceiptNest AI</p>
+            <p style="margin:0;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#a7f3d0;">ReceiptNest</p>
             <h1 style="margin:10px 0 0;font-size:22px;line-height:1.35;">Confirm your unsubscribe request</h1>
           </td></tr>
           <tr><td style="padding:28px 30px;">
@@ -126,8 +126,8 @@ export const requestEmailUnsubscribeLink = onCall(
       try {
         await sendSendgridMail(sendgridApiKey.value(), {
           to: email,
-          from: { email: fromEmail, name: "ReceiptNest AI" },
-          replyTo: { email: fromEmail, name: "ReceiptNest AI" },
+          from: { email: fromEmail, name: "ReceiptNest" },
+          replyTo: { email: fromEmail, name: "ReceiptNest" },
           subject,
           text,
           html: addEmailDarkMode(html),

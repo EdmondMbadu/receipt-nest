@@ -1,5 +1,5 @@
 /**
- * Telegram Bot Integration for ReceiptNest AI
+ * Telegram Bot Integration for ReceiptNest
  *
  * Handles:
  * 1. Account linking via deep-link tokens
@@ -172,7 +172,7 @@ async function downloadTelegramFile(
 // ─── Firestore Helpers ──────────────────────────────────────────────────────
 
 /**
- * Look up a ReceiptNest AI user by their Telegram chat ID.
+ * Look up a ReceiptNest user by their Telegram chat ID.
  */
 async function findUserByTelegramChatId(
   chatId: number
@@ -469,7 +469,7 @@ async function handleStartCommand(
     await sendTelegramMessage(
       token,
       chatId,
-      "Welcome to ReceiptNest AI Bot! To link your account, please use the QR code or link from the ReceiptNest AI app.\n\nGo to AI Insights > Connect to Telegram."
+      "Welcome to ReceiptNest Bot! To link your account, please use the QR code or link from the ReceiptNest app.\n\nGo to AI Insights > Connect to Telegram."
     );
     return;
   }
@@ -482,7 +482,7 @@ async function handleStartCommand(
     await sendTelegramMessage(
       token,
       chatId,
-      "Invalid or expired link token. Please generate a new one from the ReceiptNest AI app."
+      "Invalid or expired link token. Please generate a new one from the ReceiptNest app."
     );
     return;
   }
@@ -507,7 +507,7 @@ async function handleStartCommand(
     await sendTelegramMessage(
       token,
       chatId,
-      "This link token has expired. Please generate a new one from the ReceiptNest AI app."
+      "This link token has expired. Please generate a new one from the ReceiptNest app."
     );
     return;
   }
@@ -528,7 +528,7 @@ async function handleStartCommand(
   await sendTelegramMessage(
     token,
     chatId,
-    `Hi ${firstName}! Your ReceiptNest AI account is now linked.\n\nYou can:\n- Send me a text message to chat about your expenses\n- Send a photo of a receipt to add it to your account\n- Type /help for more commands`
+    `Hi ${firstName}! Your ReceiptNest account is now linked.\n\nYou can:\n- Send me a text message to chat about your expenses\n- Send a photo of a receipt to add it to your account\n- Type /help for more commands`
   );
 
   logger.info("Telegram account linked", { userId, chatId });
@@ -905,7 +905,7 @@ async function handleHelpCommand(
     "- Send a photo or PDF of a receipt to add it to your account\n" +
     "- /help - Show this help message\n" +
     "- /status - Check your account status\n" +
-    "- /unlink - Disconnect your Telegram from ReceiptNest AI"
+    "- /unlink - Disconnect your Telegram from ReceiptNest"
   );
 }
 
@@ -917,7 +917,7 @@ async function handleStatusCommand(
   try {
     const insightData = await buildServerInsightData(userId);
     const statusMsg =
-      `Your ReceiptNest AI Account:\n\n` +
+      `Your ReceiptNest Account:\n\n` +
       `Current Month: ${insightData.monthLabel}\n` +
       `Receipts This Month: ${insightData.receiptCount}\n` +
       `Spending This Month: ${formatCurrency(insightData.totalSpend)}\n` +
@@ -952,7 +952,7 @@ async function handleUnlinkCommand(
   await sendTelegramMessage(
     token,
     chatId,
-    "Your Telegram account has been unlinked from ReceiptNest AI. You can re-link anytime from the app."
+    "Your Telegram account has been unlinked from ReceiptNest. You can re-link anytime from the app."
   );
 
   logger.info("Telegram account unlinked", { userId, chatId });
@@ -1048,7 +1048,7 @@ export const telegramWebhook = onRequest(
         await sendTelegramMessage(
           token,
           chatId,
-          "Your Telegram account is not linked to ReceiptNest AI yet.\n\nTo get started, open the ReceiptNest AI app, go to AI Insights, and click 'Connect to Telegram'."
+          "Your Telegram account is not linked to ReceiptNest yet.\n\nTo get started, open the ReceiptNest app, go to AI Insights, and click 'Connect to Telegram'."
         );
         res.status(200).send("OK");
         return;

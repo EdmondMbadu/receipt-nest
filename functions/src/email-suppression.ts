@@ -102,7 +102,7 @@ export const appendUnsubscribeHtml = (html: string, unsubscribeUrl: string): str
 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-top:24px;border-top:1px solid #e2e8f0;">
   <tr>
     <td align="center" style="padding:18px 12px 4px;font-family:Arial,sans-serif;font-size:12px;line-height:1.6;color:#64748b;">
-      You can stop receiving non-essential ReceiptNest AI emails at any time.<br />
+      You can stop receiving non-essential ReceiptNest emails at any time.<br />
       <a href="${safeUrl}" style="color:#047857;text-decoration:underline;">Unsubscribe</a>
     </td>
   </tr>
@@ -117,7 +117,7 @@ export const appendUnsubscribeHtml = (html: string, unsubscribeUrl: string): str
 };
 
 export const appendUnsubscribeText = (text: string, unsubscribeUrl: string): string =>
-  `${text.trim()}\n\nUnsubscribe from non-essential ReceiptNest AI emails: ${unsubscribeUrl}`;
+  `${text.trim()}\n\nUnsubscribe from non-essential ReceiptNest emails: ${unsubscribeUrl}`;
 
 export const normalizeUnsubscribeReason = (value: unknown): string | null => {
   if (typeof value !== "string") {

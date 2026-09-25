@@ -290,7 +290,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly receiptCountSyncError = signal<string | null>(null);
   readonly testEmailTo = signal('');
   readonly testEmailSubject = signal('Test Email');
-  readonly testEmailMessage = signal('This is a test email from ReceiptNest AI.');
+  readonly testEmailMessage = signal('This is a test email from ReceiptNest.');
   readonly testEmailSending = signal(false);
   readonly testEmailError = signal<string | null>(null);
   readonly testEmailSuccess = signal<string | null>(null);
@@ -359,11 +359,11 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly receiptProcessingOverviewStats = signal<ReceiptProcessingStatsResponse | null>(null);
   readonly receiptProcessingLoading = signal(true);
   readonly receiptProcessingError = signal<string | null>(null);
-  readonly customEmailSubject = signal('Unlock Pro in ReceiptNest AI');
-  readonly customEmailPreheader = signal('A quick note from ReceiptNest AI about your account.');
+  readonly customEmailSubject = signal('Unlock Pro in ReceiptNest');
+  readonly customEmailPreheader = signal('A quick note from ReceiptNest about your account.');
   readonly customEmailHtml = signal(this.getDefaultCustomEmailHtml());
   readonly customEmailText = signal(
-    'Dear {{firstName}},\n\nYou signed up for ReceiptNest AI, and Pro is ready when you want unlimited receipt capture and deeper spending insights.\n\nOpen your account: https://receipt-nest.com/app/pricing\n\nReceiptNest AI'
+    'Dear {{firstName}},\n\nYou signed up for ReceiptNest, and Pro is ready when you want unlimited receipt capture and deeper spending insights.\n\nOpen your account: https://receipt-nest.com/app/pricing\n\nReceiptNest'
   );
   readonly customEmailSearch = signal('');
   readonly customEmailPlanFilter = signal<CustomEmailPlanFilter>('free');
@@ -1646,7 +1646,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     const subject = this.testEmailSubject().trim() || 'Test Email';
-    const message = this.testEmailMessage().trim() || 'This is a test email from ReceiptNest AI.';
+    const message = this.testEmailMessage().trim() || 'This is a test email from ReceiptNest.';
 
     this.testEmailSending.set(true);
     try {
@@ -2227,7 +2227,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Unlock Pro in ReceiptNest AI</title>
+    <title>Unlock Pro in ReceiptNest</title>
   </head>
   <body style="margin:0; padding:0; background:#f8fafc; font-family:Arial, sans-serif; color:#0f172a;">
     <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;">{{preheader}}</div>
@@ -2237,7 +2237,7 @@ export class AdminComponent implements OnInit, OnDestroy {
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px; background:#ffffff; border:1px solid #e2e8f0; border-radius:18px; overflow:hidden;">
             <tr>
               <td style="padding:30px 34px; background:#064e3b; color:#ffffff;">
-                <p style="margin:0; font-size:12px; letter-spacing:0.22em; text-transform:uppercase; color:#a7f3d0;">ReceiptNest AI</p>
+                <p style="margin:0; font-size:12px; letter-spacing:0.22em; text-transform:uppercase; color:#a7f3d0;">ReceiptNest</p>
                 <h1 style="margin:12px 0 0; font-size:28px; line-height:1.2;">Your Pro workspace is ready</h1>
                 <p style="margin:10px 0 0; font-size:15px; line-height:1.6; color:#d1fae5;">Unlimited receipt capture, cleaner reports, and deeper spending insight.</p>
               </td>
@@ -2245,7 +2245,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             <tr>
               <td style="padding:32px 34px;">
                 <p style="margin:0 0 16px; font-size:16px; line-height:1.65;">Dear {{firstName}},</p>
-                <p style="margin:0 0 16px; font-size:16px; line-height:1.65;">You signed up for ReceiptNest AI, and your account is ready for Pro. Pro removes free-plan limits and gives you a stronger workspace for receipts, categories, summaries, and tax-time organization.</p>
+                <p style="margin:0 0 16px; font-size:16px; line-height:1.65;">You signed up for ReceiptNest, and your account is ready for Pro. Pro removes free-plan limits and gives you a stronger workspace for receipts, categories, summaries, and tax-time organization.</p>
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:24px 0;">
                   <tr>
                     <td style="padding:18px; border:1px solid #d1fae5; border-radius:14px; background:#ecfdf5;">
@@ -2260,7 +2260,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             </tr>
             <tr>
               <td style="padding:22px 34px; border-top:1px solid #e2e8f0; color:#64748b; font-size:12px; line-height:1.6;">
-                ReceiptNest AI · info@receipt-nest.com
+                ReceiptNest · info@receipt-nest.com
               </td>
             </tr>
           </table>

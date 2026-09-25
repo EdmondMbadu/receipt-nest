@@ -169,10 +169,10 @@ const sendAccountDeletionEmail = async (email: string): Promise<void> => {
     return;
   }
 
-  const subject = "Your ReceiptNest AI account has been fully deleted";
+  const subject = "Your ReceiptNest account has been fully deleted";
   const text = appendAppDownloadText(
     "Hi,\n\n" +
-    "This confirms that your ReceiptNest AI account and all associated data were fully deleted.\n\n" +
+    "This confirms that your ReceiptNest account and all associated data were fully deleted.\n\n" +
     "Thank you for using us. We hope you come back.\n\n" +
     "If you did not request this, please contact support immediately at info@receipt-nest.com."
   );
@@ -190,14 +190,14 @@ const sendAccountDeletionEmail = async (email: string): Promise<void> => {
           <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:620px;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;">
             <tr>
               <td style="padding:24px 28px;background:linear-gradient(135deg,#0f172a 0%, #0b2f24 45%, #065f46 100%);color:#ffffff;">
-                <p style="margin:0;font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:#a7f3d0;">ReceiptNest AI</p>
+                <p style="margin:0;font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:#a7f3d0;">ReceiptNest</p>
                 <h1 style="margin:10px 0 0;font-size:22px;line-height:1.35;">Account deletion confirmed</h1>
               </td>
             </tr>
             <tr>
               <td style="padding:26px 28px;">
                 <p style="margin:0 0 14px;font-size:15px;line-height:1.6;">Hi,</p>
-                <p style="margin:0 0 14px;font-size:15px;line-height:1.6;">This confirms that your ReceiptNest AI account and all associated data were fully deleted.</p>
+                <p style="margin:0 0 14px;font-size:15px;line-height:1.6;">This confirms that your ReceiptNest account and all associated data were fully deleted.</p>
                 <p style="margin:0 0 18px;font-size:15px;line-height:1.6;">Thank you for using us once upon a time. We hope you come back.</p>
                 <p style="margin:0;font-size:13px;line-height:1.6;color:#475569;">If you did not request this, contact us immediately at <a href="mailto:info@receipt-nest.com" style="color:#065f46;text-decoration:none;">info@receipt-nest.com</a>.</p>
                 ${renderAppDownloadHtmlCard()}
@@ -213,8 +213,8 @@ const sendAccountDeletionEmail = async (email: string): Promise<void> => {
   try {
     await sendSendgridMail(apiKey, {
       to: recipient,
-      from: { email: fromEmail, name: "ReceiptNest AI" },
-      replyTo: { email: fromEmail, name: "ReceiptNest AI" },
+      from: { email: fromEmail, name: "ReceiptNest" },
+      replyTo: { email: fromEmail, name: "ReceiptNest" },
       subject,
       text,
       html: addEmailDarkMode(html),

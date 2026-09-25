@@ -359,12 +359,12 @@ const sendSubscriptionReceiptEmail = async ({
   ).join("");
 
   const subject = isInitialPurchase
-    ? "Your ReceiptNest AI Pro receipt and activation details"
-    : "Your ReceiptNest AI Pro renewal receipt";
+    ? "Your ReceiptNest Pro receipt and activation details"
+    : "Your ReceiptNest Pro renewal receipt";
   const text = appendAppDownloadText([
     isInitialPurchase
-      ? "Congratulations. Your ReceiptNest AI Pro plan is now active."
-      : "Your ReceiptNest AI Pro renewal was successful.",
+      ? "Congratulations. Your ReceiptNest Pro plan is now active."
+      : "Your ReceiptNest Pro renewal was successful.",
     "",
     `Amount paid: ${amountLabel}`,
     renewalDate ? `Next renewal: ${renewalDate}` : null,
@@ -383,8 +383,8 @@ const sendSubscriptionReceiptEmail = async ({
     <p style="margin:0 0 12px; font-size:15px; line-height:1.6;">${isInitialPurchase ? "Congratulations," : "Hello,"}</p>
     <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">
       ${isInitialPurchase
-        ? "Your ReceiptNest AI Pro plan is now active and your payment was processed successfully."
-        : "Your ReceiptNest AI Pro subscription renewed successfully."}
+        ? "Your ReceiptNest Pro plan is now active and your payment was processed successfully."
+        : "Your ReceiptNest Pro subscription renewed successfully."}
     </p>
     <div style="margin:0 0 18px; padding:16px; background:#ecfdf5; border:1px solid #d1fae5; border-radius:14px;">
       <p style="margin:0 0 8px; font-size:13px; font-weight:700; color:#065f46; text-transform:uppercase; letter-spacing:0.08em;">Payment summary</p>
@@ -426,7 +426,7 @@ const sendSubscriptionReceiptEmail = async ({
           <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:620px; background:#ffffff; border-radius:20px; border:1px solid #e2e8f0; overflow:hidden; box-shadow:0 20px 40px rgba(15, 23, 42, 0.08);">
             <tr>
               <td style="padding:28px 32px; background:linear-gradient(135deg,#0f172a 0%, #0b2f24 45%, #065f46 100%); color:#ffffff;">
-                <p style="margin:0; font-size:12px; letter-spacing:0.28em; text-transform:uppercase; font-weight:600; color:#a7f3d0;">ReceiptNest AI</p>
+                <p style="margin:0; font-size:12px; letter-spacing:0.28em; text-transform:uppercase; font-weight:600; color:#a7f3d0;">ReceiptNest</p>
                 <h1 style="margin:10px 0 0; font-size:24px; font-weight:600; font-family:Arial, sans-serif;">${escapeHtml(subject)}</h1>
               </td>
             </tr>
@@ -438,8 +438,8 @@ const sendSubscriptionReceiptEmail = async ({
             <tr>
               <td style="padding:22px 32px 30px; font-family:Arial, sans-serif; font-size:12px; color:#64748b;">
                 ${renderAppDownloadHtmlCard()}
-                <p style="margin:0 0 6px;">ReceiptNest AI • ${escapeHtml(fromEmail)}</p>
-                <p style="margin:0;">You are receiving this email because a subscription payment succeeded on your ReceiptNest AI account.</p>
+                <p style="margin:0 0 6px;">ReceiptNest • ${escapeHtml(fromEmail)}</p>
+                <p style="margin:0;">You are receiving this email because a subscription payment succeeded on your ReceiptNest account.</p>
               </td>
             </tr>
           </table>
@@ -451,8 +451,8 @@ const sendSubscriptionReceiptEmail = async ({
 
   await sendSendgridMail(sendgridApiKey.value(), {
     to: recipient,
-    from: { email: fromEmail, name: "ReceiptNest AI" },
-    replyTo: { email: fromEmail, name: "ReceiptNest AI" },
+    from: { email: fromEmail, name: "ReceiptNest" },
+    replyTo: { email: fromEmail, name: "ReceiptNest" },
     subject,
     text,
     html: addEmailDarkMode(html),

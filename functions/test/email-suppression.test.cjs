@@ -44,7 +44,7 @@ test("adds unsubscribe content to HTML and text versions", () => {
   const text = appendUnsubscribeText("Hello", url);
 
   assert.match(html, /<p>Hello<\/p>[\s\S]*Unsubscribe[\s\S]*<\/body>/);
-  assert.match(text, /Hello[\s\S]*Unsubscribe from non-essential ReceiptNest AI emails/);
+  assert.match(text, /Hello[\s\S]*Unsubscribe from non-essential ReceiptNest emails/);
 });
 
 test("SendGrid serialization preserves one-click unsubscribe headers", () => {
