@@ -24,8 +24,8 @@ export class VerifyEmailComponent {
   error = '';
 
   constructor() {
-    this.title.setTitle('Verify Email - ReceiptNest AI');
-    this.meta.updateTag({ name: 'description', content: 'Verify your email to continue with ReceiptNest AI.' });
+    this.title.setTitle('Verify Email - ReceiptNest');
+    this.meta.updateTag({ name: 'description', content: 'Verify your email to continue with ReceiptNest.' });
     this.meta.updateTag({ name: 'robots', content: 'noindex, follow' });
     this.meta.updateTag({ name: 'googlebot', content: 'noindex, follow' });
   }

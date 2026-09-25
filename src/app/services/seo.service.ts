@@ -22,8 +22,8 @@ export interface SeoPageMeta {
   tags?: readonly string[];
 }
 
-const DEFAULT_IMAGE = `${SITE_URL}/assets/og-image.png`;
-const DEFAULT_IMAGE_ALT = 'ReceiptNest AI receipt organizer and receipt tracking dashboard';
+const DEFAULT_IMAGE = `${SITE_URL}/assets/og-image-receiptnest.png`;
+const DEFAULT_IMAGE_ALT = 'ReceiptNest receipt organizer and receipt tracking dashboard';
 
 @Injectable({
   providedIn: 'root'

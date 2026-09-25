@@ -17,8 +17,8 @@ const retention: EditorialLink = {
   href: 'https://www.irs.gov/businesses/small-businesses-self-employed/how-long-should-i-keep-records',
   label: 'IRS: record retention periods and exceptions'
 };
-const taxNote = 'Published by ReceiptNest AI, the product discussed here. This is general U.S. record-organization guidance, not individual tax advice or a professional tax review. Check the linked IRS guidance and your own requirements before discarding records or claiming an expense.';
-const productNote = 'Published by ReceiptNest AI. Product examples describe our own software, not an independent review. AI-extracted details need checking against the original receipt.';
+const taxNote = 'Published by ReceiptNest, the product discussed here. This is general U.S. record-organization guidance, not individual tax advice or a professional tax review. Check the linked IRS guidance and your own requirements before discarding records or claiming an expense.';
+const productNote = 'Published by ReceiptNest. Product examples describe our own software, not an independent review. AI-extracted details need checking against the original receipt.';
 const csv = { href: '/receipt-to-csv', label: 'Inspect the CSV columns and download a sample' };
 const tax = { href: '/tax-receipt-organizer', label: 'Prepare receipt records for tax review' };
 const scanner = { href: '/receipt-scanner', label: 'See the receipt-scanning workflow and its limits' };
@@ -67,7 +67,7 @@ const editorial: Readonly<Record<string, BlogEditorial>> = {
     note: taxNote, sources: [records], workflows: [email, tax, csv]
   },
   'receiptnest-vs-expensify': {
-    note: 'Disclosure: we build ReceiptNest AI, so this is a vendor comparison, not an independent ranking or a hands-on accuracy benchmark. Expensify also has free individual features. Compare the current plans and test the same receipts in both products.',
+    note: 'Disclosure: we build ReceiptNest, so this is a vendor comparison, not an independent ranking or a hands-on accuracy benchmark. Expensify also has free individual features. Compare the current plans and test the same receipts in both products.',
     sources: [{ href: 'https://help.expensify.com/articles/new-expensify/getting-started/Free-Features-in-Expensify', label: 'Expensify: free individual features and web CSV export' }],
     workflows: [{ href: '/pricing', label: 'See ReceiptNest Starter and Pro limits' }, csv]
   },

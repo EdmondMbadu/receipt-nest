@@ -39,8 +39,8 @@ export class ResetPasswordComponent implements OnInit {
   successMessage = '';
 
   constructor() {
-    this.title.setTitle('Reset Password - ReceiptNest AI');
-    this.meta.updateTag({ name: 'description', content: 'Reset your ReceiptNest AI password securely.' });
+    this.title.setTitle('Reset Password - ReceiptNest');
+    this.meta.updateTag({ name: 'description', content: 'Reset your ReceiptNest password securely.' });
     this.meta.updateTag({ name: 'robots', content: 'noindex, follow' });
     this.meta.updateTag({ name: 'googlebot', content: 'noindex, follow' });
   }

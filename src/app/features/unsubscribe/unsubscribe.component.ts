@@ -56,10 +56,10 @@ export class UnsubscribeComponent {
   private readonly token = this.route.snapshot.queryParamMap.get('token')?.trim() ?? '';
 
   constructor() {
-    this.title.setTitle('Unsubscribe - ReceiptNest AI');
+    this.title.setTitle('Unsubscribe - ReceiptNest');
     this.meta.updateTag({
       name: 'description',
-      content: 'Manage non-essential ReceiptNest AI email preferences.'
+      content: 'Manage non-essential ReceiptNest email preferences.'
     });
     this.meta.updateTag({ name: 'robots', content: 'noindex, nofollow' });
     this.meta.updateTag({ name: 'googlebot', content: 'noindex, nofollow' });

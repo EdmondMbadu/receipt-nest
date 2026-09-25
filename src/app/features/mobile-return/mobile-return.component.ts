@@ -18,15 +18,15 @@ export class MobileReturnComponent {
 
   readonly title = computed(() => {
     if (this.flow() === 'checkout' && this.status() === 'success') {
-      return 'Opening ReceiptNest AI';
+      return 'Opening ReceiptNest';
     }
     if (this.flow() === 'checkout' && this.status() === 'cancel') {
       return 'Checkout Canceled';
     }
     if (this.flow() === 'portal') {
-      return 'Returning To ReceiptNest AI';
+      return 'Returning To ReceiptNest';
     }
-    return 'Opening ReceiptNest AI';
+    return 'Opening ReceiptNest';
   });
 
   readonly description = computed(() => {

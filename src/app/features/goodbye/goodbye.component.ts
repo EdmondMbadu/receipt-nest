@@ -15,8 +15,8 @@ export class GoodbyeComponent {
   private readonly meta = inject(Meta);
 
   constructor() {
-    this.title.setTitle('Goodbye - ReceiptNest AI');
-    this.meta.updateTag({ name: 'description', content: 'Manage your ReceiptNest AI account status.' });
+    this.title.setTitle('Goodbye - ReceiptNest');
+    this.meta.updateTag({ name: 'description', content: 'Manage your ReceiptNest account status.' });
     this.meta.updateTag({ name: 'robots', content: 'noindex, follow' });
     this.meta.updateTag({ name: 'googlebot', content: 'noindex, follow' });
   }

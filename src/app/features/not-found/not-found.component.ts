@@ -13,7 +13,7 @@ import { PublicFooterComponent } from '../../components/public-layout/public-foo
 export class NotFoundComponent {
   constructor() {
     inject(SeoService).apply({
-      title: 'Page Not Found | ReceiptNest AI',
+      title: 'Page Not Found | ReceiptNest',
       description: 'This page could not be found. Explore receipt tracking or visit support.',
       canonicalPath: null,
       robots: 'noindex, follow'

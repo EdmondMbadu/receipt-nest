@@ -54,14 +54,14 @@ export class BlogArticleComponent implements OnDestroy {
 
   private applySeo(): void {
     this.seo.apply({
-      title: `${this.article.seoTitle} | ReceiptNest AI`,
+      title: `${this.article.seoTitle} | ReceiptNest`,
       description: this.article.description,
       canonicalPath: this.article.path,
       image: this.article.image,
       imageAlt: this.article.imageAlt,
       imageWidth: this.article.imageWidth,
       imageHeight: this.article.imageHeight,
-      authorName: 'ReceiptNest AI',
+      authorName: 'ReceiptNest',
       type: 'article',
       publishedTime: this.article.datePublished,
       modifiedTime: this.article.dateModified,
@@ -98,12 +98,12 @@ export class BlogArticleComponent implements OnDestroy {
           },
           author: {
             '@type': 'Organization',
-            name: 'ReceiptNest AI',
+            name: 'ReceiptNest',
             url: 'https://receipt-nest.com/about'
           },
           publisher: {
             '@type': 'Organization',
-            name: 'ReceiptNest AI',
+            name: 'ReceiptNest',
             logo: {
               '@type': 'ImageObject',
               url: this.seo.absoluteUrl('/assets/receipt-nest.png')
@@ -116,7 +116,7 @@ export class BlogArticleComponent implements OnDestroy {
             {
               '@type': 'ListItem',
               position: 1,
-              name: 'ReceiptNest AI',
+              name: 'ReceiptNest',
               item: 'https://receipt-nest.com/'
             },
             {

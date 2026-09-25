@@ -14,7 +14,7 @@ const text = node => node.nodeName === '#text' ? node.value : (node.childNodes |
 const nodes = node => [node, ...(node.childNodes || []).flatMap(nodes)];
 const entries = [
   ...publicPages,
-  ...blogPosts.map(post => ({ ...post, title: post.seoTitle + ' | ReceiptNest AI' }))
+  ...blogPosts.map(post => ({ ...post, title: post.seoTitle + ' | ReceiptNest' }))
 ];
 const documents = new Map(entries.map(page => {
   const file = join(root, page.path, 'index.html');

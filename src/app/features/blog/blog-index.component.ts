@@ -45,7 +45,7 @@ export class BlogIndexComponent {
       description: 'Clarity on receipts, taxes, and money for the self-employed.',
       publisher: {
         '@type': 'Organization',
-        name: 'ReceiptNest AI',
+        name: 'ReceiptNest',
         url: 'https://receipt-nest.com/'
       },
       blogPost: this.posts.map(post => ({

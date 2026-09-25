@@ -28,7 +28,7 @@ describe('Public SEO navigation', () => {
     await harness.navigateByUrl('/pricing');
     expect(document.querySelector('#json-ld-blog-article')).toBeNull();
     expect(document.querySelector('meta[property^="article:"]')).toBeNull();
-    expect(document.title).toBe('ReceiptNest AI Pricing — Free & Pro Receipt Plans');
+    expect(document.title).toBe('ReceiptNest Pricing — Free & Pro Receipt Plans');
     const monthly = Array.from(harness.routeNativeElement?.querySelectorAll('button') ?? [])
       .find(button => button.textContent?.trim() === 'Monthly');
     monthly?.click();
@@ -41,7 +41,7 @@ describe('Public SEO navigation', () => {
     const harness = await RouterTestingHarness.create('/blog/no-such-article-for-seo-test');
     const document = TestBed.inject(DOCUMENT);
     expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain('page');
-    expect(document.title).toBe('Page Not Found | ReceiptNest AI');
+    expect(document.title).toBe('Page Not Found | ReceiptNest');
     expect(document.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe('noindex, follow');
     expect(document.querySelector('link[rel="canonical"]')).toBeNull();
     expect(document.querySelector('#json-ld-blog-article')).toBeNull();

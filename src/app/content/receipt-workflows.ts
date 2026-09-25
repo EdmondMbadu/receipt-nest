@@ -27,13 +27,13 @@ export interface ReceiptWorkflow {
 export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
   "receipt-tracker": {
     "h1": "A receipt tracker for the purchases you need to find again.",
-    "intro": "A paper receipt in your wallet. A PDF in Downloads. An email you cannot find. ReceiptNest AI brings those records together so a simple question—what did I buy, and where is the receipt?—does not turn into an evening of searching.",
+    "intro": "A paper receipt in your wallet. A PDF in Downloads. An email you cannot find. ReceiptNest brings those records together so a simple question—what did I buy, and where is the receipt?—does not turn into an evening of searching.",
     "benefit": "Capture now. Review by month. Export when you need to.",
     "image": "/assets/monthly-light.png",
     "imageWidth": 744,
     "imageHeight": 1507,
-    "imageAlt": "ReceiptNest AI monthly spending screen",
-    "imageCaption": "ReceiptNest AI product screen. Your totals depend on the records you add.",
+    "imageAlt": "ReceiptNest monthly spending screen",
+    "imageCaption": "ReceiptNest product screen. Your totals depend on the records you add.",
     "steps": [
       {
         "title": "Capture purchases as they happen",
@@ -120,13 +120,13 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
   },
   "receipt-organizer": {
     "h1": "One receipt organizer for your inbox, camera roll, and paper pile.",
-    "intro": "The hard part is often not saving a receipt. It is finding the right one later. ReceiptNest AI gives photos, PDFs, and forwarded receipts a shared place, with merchant, date, amount, and category details you can review.",
+    "intro": "The hard part is often not saving a receipt. It is finding the right one later. ReceiptNest gives photos, PDFs, and forwarded receipts a shared place, with merchant, date, amount, and category details you can review.",
     "benefit": "Keep the document and the useful details together.",
     "image": "/assets/auto-light.png",
     "imageWidth": 772,
     "imageHeight": 1559,
-    "imageAlt": "ReceiptNest AI screen showing receipts organized in categories",
-    "imageCaption": "An existing ReceiptNest AI product screen; interface details can vary by platform.",
+    "imageAlt": "ReceiptNest screen showing receipts organized in categories",
+    "imageCaption": "An existing ReceiptNest product screen; interface details can vary by platform.",
     "steps": [
       {
         "title": "Choose a small starting point",
@@ -213,13 +213,13 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
   },
   "receipt-scanner": {
     "h1": "Scan a receipt. Review the details. Keep a usable record.",
-    "intro": "A receipt photo is a useful start. ReceiptNest AI turns it into a record with a merchant, date, total, currency, and suggested category, while keeping the original available for review. Upload a photo or PDF and check the result before you use it.",
+    "intro": "A receipt photo is a useful start. ReceiptNest turns it into a record with a merchant, date, total, currency, and suggested category, while keeping the original available for review. Upload a photo or PDF and check the result before you use it.",
     "benefit": "Less retyping, with room to check and correct.",
     "image": "/assets/capture-light.png",
     "imageWidth": 770,
     "imageHeight": 1554,
-    "imageAlt": "ReceiptNest AI receipt-upload screen with camera, gallery, and file options",
-    "imageCaption": "ReceiptNest AI mobile capture screen. Available controls can vary by platform.",
+    "imageAlt": "ReceiptNest receipt-upload screen with camera, gallery, and file options",
+    "imageCaption": "ReceiptNest mobile capture screen. Available controls can vary by platform.",
     "steps": [
       {
         "title": "Capture a readable receipt",
@@ -311,12 +311,12 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
   },
   "receipt-management-software": {
     "h1": "Receipt management for a small business—not a whole finance department.",
-    "intro": "If your immediate problem is collecting receipts and preparing them for review, a full accounting rollout may be more than you need. ReceiptNest AI focuses on capture, organization, original-document access, and exports.",
+    "intro": "If your immediate problem is collecting receipts and preparing them for review, a full accounting rollout may be more than you need. ReceiptNest focuses on capture, organization, original-document access, and exports.",
     "benefit": "A repeatable handoff from scattered receipts to reviewed records.",
     "image": "/assets/auto-light.png",
     "imageWidth": 772,
     "imageHeight": 1559,
-    "imageAlt": "ReceiptNest AI categorized receipt view",
+    "imageAlt": "ReceiptNest categorized receipt view",
     "imageCaption": "Receipt organization in the app. This is not an employee approval or bookkeeping ledger screen.",
     "steps": [
       {
@@ -404,12 +404,12 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
   },
   "expense-tracker": {
     "h1": "See your receipt-backed expenses, one month at a time.",
-    "intro": "What did those small purchases add up to? ReceiptNest AI connects the amounts in your receipt history to merchants and categories, so you can review spending with the original records close at hand.",
+    "intro": "What did those small purchases add up to? ReceiptNest connects the amounts in your receipt history to merchants and categories, so you can review spending with the original records close at hand.",
     "benefit": "Understand the purchases you captured—not an assumed picture of every transaction.",
     "image": "/assets/monthly-light.png",
     "imageWidth": 744,
     "imageHeight": 1507,
-    "imageAlt": "ReceiptNest AI monthly spending view with a chart and total",
+    "imageAlt": "ReceiptNest monthly spending view with a chart and total",
     "imageCaption": "Product screen illustrating a monthly view. Your receipts determine your totals.",
     "steps": [
       {
@@ -497,12 +497,12 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
   },
   "tax-receipt-organizer": {
     "h1": "Organize tax receipts before the year-end scramble.",
-    "intro": "Give your future self a better starting point. ReceiptNest AI helps freelancers collect receipt photos, PDFs, and forwarded emails, review the purchase details, and export records for tax-preparation review.",
+    "intro": "Give your future self a better starting point. ReceiptNest helps freelancers collect receipt photos, PDFs, and forwarded emails, review the purchase details, and export records for tax-preparation review.",
     "benefit": "Record organization—not tax advice or a guarantee of deductibility.",
     "image": "/assets/auto-light.png",
     "imageWidth": 772,
     "imageHeight": 1559,
-    "imageAlt": "ReceiptNest AI receipt categories for reviewing purchase records",
+    "imageAlt": "ReceiptNest receipt categories for reviewing purchase records",
     "imageCaption": "Categories help organize records. They do not determine tax treatment.",
     "steps": [
       {
@@ -600,7 +600,7 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
   },
   "receipt-to-csv": {
     "h1": "Turn receipt records into a CSV you can actually inspect.",
-    "intro": "Need your receipts in Excel or Google Sheets? ReceiptNest AI exports a simple CSV of recorded purchases. See the columns and download an example before creating an account, so you know whether the format fits your workflow.",
+    "intro": "Need your receipts in Excel or Google Sheets? ReceiptNest exports a simple CSV of recorded purchases. See the columns and download an example before creating an account, so you know whether the format fits your workflow.",
     "benefit": "Sample download: no account. Exporting your own receipts: account required.",
     "steps": [
       {

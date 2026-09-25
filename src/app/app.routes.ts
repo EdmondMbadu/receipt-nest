@@ -147,7 +147,7 @@ export const routes: Routes = [
   },
   {
     path: 'mobile-return/:flow',
-    title: 'Open ReceiptNest AI',
+    title: 'Open ReceiptNest',
     loadComponent: () =>
       import('./features/mobile-return/mobile-return.component').then((m) => m.MobileReturnComponent)
   },
@@ -179,7 +179,7 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    title: 'Page Not Found | ReceiptNest AI',
+    title: 'Page Not Found | ReceiptNest',
     loadComponent: () => import('./features/not-found/not-found.component').then(m => m.NotFoundComponent)
   }
 ];

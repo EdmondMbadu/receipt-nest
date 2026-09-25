@@ -37,8 +37,8 @@ export class RegisterComponent {
   errorMessage = '';
 
   constructor() {
-    this.title.setTitle('Create Account - ReceiptNest AI');
-    this.meta.updateTag({ name: 'description', content: 'Create your ReceiptNest AI account.' });
+    this.title.setTitle('Create Account - ReceiptNest');
+    this.meta.updateTag({ name: 'description', content: 'Create your ReceiptNest account.' });
     this.meta.updateTag({ name: 'robots', content: 'noindex, follow' });
     this.meta.updateTag({ name: 'googlebot', content: 'noindex, follow' });
   }

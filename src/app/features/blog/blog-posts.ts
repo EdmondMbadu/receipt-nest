@@ -200,7 +200,7 @@ export const blogPosts: readonly BlogPost[] = [
       },
       {
         id: 'why-we-built-receiptnest',
-        title: 'That is the mile we built ReceiptNest AI for',
+        title: 'That is the mile we built ReceiptNest for',
         blocks: [
           {
             kind: 'paragraph',
@@ -346,7 +346,7 @@ export const blogPosts: readonly BlogPost[] = [
         blocks: [
           {
             kind: 'paragraph',
-            text: `This is the problem we built ReceiptNest AI to solve at the individual and small-business level. Snap a receipt, forward an email, or upload a PDF, and it is organized automatically: searchable, totaled, and ready whenever the question comes up.`
+            text: `This is the problem we built ReceiptNest to solve at the individual and small-business level. Snap a receipt, forward an email, or upload a PDF, and it is organized automatically: searchable, totaled, and ready whenever the question comes up.`
           },
           {
             kind: 'paragraph',
@@ -483,7 +483,7 @@ export const blogPosts: readonly BlogPost[] = [
             kind: 'callout',
             tone: 'warning',
             title: 'Tax guidance, not tax advice',
-            text: `ReceiptNest AI organizes your records; it does not decide whether an expense is deductible or whether your evidence is sufficient. Ask a qualified tax professional about your specific facts.`
+            text: `ReceiptNest organizes your records; it does not decide whether an expense is deductible or whether your evidence is sufficient. Ask a qualified tax professional about your specific facts.`
           }
         ]
       },
@@ -535,7 +535,7 @@ export const blogPosts: readonly BlogPost[] = [
           },
           {
             kind: 'paragraph',
-            text: `ReceiptNest AI helps with the receipt side of that workflow: photos, PDFs, and forwarded emails become searchable records instead of loose files. Your bank statement remains a valuable cross-check, not the only place the purchase exists.`
+            text: `ReceiptNest helps with the receipt side of that workflow: photos, PDFs, and forwarded emails become searchable records instead of loose files. Your bank statement remains a valuable cross-check, not the only place the purchase exists.`
           }
         ]
       },
@@ -838,11 +838,11 @@ export const blogPosts: readonly BlogPost[] = [
     dateModified: '2026-09-13',
     readTime: '9 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Freceiptnest-expensify.png?alt=media&token=4592bdb9-22e6-438c-8644-9b20ec9810d6',
-    imageAlt: 'ReceiptNest AI monthly dashboard with receipt totals and categories',
+    imageAlt: 'ReceiptNest monthly dashboard with receipt totals and categories',
     keywords: ['Expensify alternative', 'ReceiptNest vs Expensify', 'freelancer receipt app'],
     intro: [
       `If you are searching for an Expensify alternative, the real question is not which app has the longest feature list. The better question is which receipt workflow matches how you actually work.`,
-      `Both products can serve an individual. Expensify documents a free personal workflow without a paid workspace. ReceiptNest AI focuses on a receipt-first inbox, categories, and monthly review. This comparison is published by ReceiptNest, not an independent reviewer.`
+      `Both products can serve an individual. Expensify documents a free personal workflow without a paid workspace. ReceiptNest focuses on a receipt-first inbox, categories, and monthly review. This comparison is published by ReceiptNest, not an independent reviewer.`
     ],
     sections: [
       {
@@ -852,7 +852,7 @@ export const blogPosts: readonly BlogPost[] = [
           {
             kind: 'table',
             table: {
-              columns: ['Feature', 'ReceiptNest AI', 'Expensify'],
+              columns: ['Feature', 'ReceiptNest', 'Expensify'],
               rows: [
                 ['Individual use', 'Receipt-first records and monthly review', 'Free personal expenses; paid workspaces for team needs'],
                 ['Free capture', 'Up to 50 receipts on Starter', 'Unlimited personal SmartScans'],
@@ -899,7 +899,7 @@ export const blogPosts: readonly BlogPost[] = [
         blocks: [
           {
             kind: 'paragraph',
-            text: `ReceiptNest AI is better when the job is receipt clarity. Freelancers usually do not need to submit expenses to a manager. They need a place where receipt photos, PDFs, and email receipts become organized records that can be searched, reviewed, and exported.`
+            text: `ReceiptNest is better when the job is receipt clarity. Freelancers usually do not need to submit expenses to a manager. They need a place where receipt photos, PDFs, and email receipts become organized records that can be searched, reviewed, and exported.`
           },
           {
             kind: 'list',
@@ -932,7 +932,7 @@ export const blogPosts: readonly BlogPost[] = [
             kind: 'callout',
             tone: 'tip',
             title: 'Decision rule',
-            text: `If you need approvals and reimbursements, start with Expensify. If you need searchable receipt records and monthly spending clarity, start with ReceiptNest AI.`
+            text: `If you need approvals and reimbursements, start with Expensify. If you need searchable receipt records and monthly spending clarity, start with ReceiptNest.`
           }
         ]
       },
@@ -984,7 +984,7 @@ export const blogPosts: readonly BlogPost[] = [
     dateModified: '2026-09-13',
     readTime: '12 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Forganizing-chaos.png?alt=media&token=a4ddd1e9-0056-4011-bf78-fe1e297f89ef',
-    imageAlt: 'Receipt categories and tax-ready expense records in ReceiptNest AI',
+    imageAlt: 'Receipt categories and tax-ready expense records in ReceiptNest',
     keywords: ['how to organize receipts for taxes self employed', '1099 receipt organizer', 'freelancer tax receipts'],
     intro: [
       `Most freelancers start organizing tax receipts after the year is over, when the records are scattered across email, paper bags, downloads, and bank statements.`,
@@ -1013,7 +1013,7 @@ export const blogPosts: readonly BlogPost[] = [
             kind: 'callout',
             tone: 'warning',
             title: 'Tax note',
-            text: `ReceiptNest AI helps organize records. It does not decide whether an expense is deductible. For deduction decisions, work with a qualified tax professional.`
+            text: `ReceiptNest helps organize records. It does not decide whether an expense is deductible. For deduction decisions, work with a qualified tax professional.`
           }
         ]
       },
@@ -1160,7 +1160,7 @@ export const blogPosts: readonly BlogPost[] = [
     dateModified: '2026-09-13',
     readTime: '10 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Fetsy-more.png?alt=media&token=1ceeee19-d74e-4947-a240-4cb95dac0d4b',
-    imageAlt: 'Receipts from photos, email, and PDFs captured in ReceiptNest AI',
+    imageAlt: 'Receipts from photos, email, and PDFs captured in ReceiptNest',
     keywords: ['receipt tracking for Etsy sellers', 'Etsy seller receipts', 'Etsy tax deductions'],
     intro: [
       `Receipt tracking for Etsy sellers is different from generic expense tracking. Your business can include craft supplies, shipping labels, packaging, marketplace fees, photo equipment, printer ink, storage bins, and small purchases that do not look important until they repeat every month.`,
@@ -1280,7 +1280,7 @@ export const blogPosts: readonly BlogPost[] = [
       {
         question: 'Can ReceiptNest help Etsy sellers?',
         answer:
-          'ReceiptNest AI can capture photos, forwarded emails, and PDFs so Etsy sellers can keep receipts from multiple vendors in one searchable place.'
+          'ReceiptNest can capture photos, forwarded emails, and PDFs so Etsy sellers can keep receipts from multiple vendors in one searchable place.'
       }
     ],
     relatedSlugs: [
@@ -1550,7 +1550,7 @@ export const blogPosts: readonly BlogPost[] = [
           },
           {
             kind: 'paragraph',
-            text: `ReceiptNest AI is built around this philosophy. Capture first. Organize automatically. Review calmly. Decide from the record.`
+            text: `ReceiptNest is built around this philosophy. Capture first. Organize automatically. Review calmly. Decide from the record.`
           }
         ]
       }

@@ -8,7 +8,7 @@ import { RouterStateSnapshot, TitleStrategy } from '@angular/router';
 export class AppTitleStrategy extends TitleStrategy {
   private readonly title = inject(Title);
   private readonly seo = inject(SeoService);
-  private readonly appName = 'ReceiptNest AI';
+  private readonly appName = 'ReceiptNest';
 
   override updateTitle(snapshot: RouterStateSnapshot): void {
     const routeTitle = this.buildTitle(snapshot);
@@ -22,7 +22,7 @@ export class AppTitleStrategy extends TitleStrategy {
     if (!isPublic && leaf.routeConfig?.path !== '**') {
       this.seo.apply({
         title: fullTitle,
-        description: 'Your ReceiptNest AI account.',
+        description: 'Your ReceiptNest account.',
         canonicalPath: null,
         robots: 'noindex, follow'
       });

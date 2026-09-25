@@ -36,8 +36,8 @@ export class LoginComponent {
   resetErrorMessage = '';
 
   constructor() {
-    this.title.setTitle('Sign In - ReceiptNest AI');
-    this.meta.updateTag({ name: 'description', content: 'Sign in to your ReceiptNest AI account.' });
+    this.title.setTitle('Sign In - ReceiptNest');
+    this.meta.updateTag({ name: 'description', content: 'Sign in to your ReceiptNest account.' });
     this.meta.updateTag({ name: 'robots', content: 'noindex, follow' });
     this.meta.updateTag({ name: 'googlebot', content: 'noindex, follow' });
 

@@ -45,10 +45,10 @@ export class FeedbackComponent {
   });
 
   constructor() {
-    this.title.setTitle('Feedback - ReceiptNest AI');
+    this.title.setTitle('Feedback - ReceiptNest');
     this.meta.updateTag({
       name: 'description',
-      content: 'Share feedback, ideas, bug reports, and product suggestions with ReceiptNest AI.'
+      content: 'Share feedback, ideas, bug reports, and product suggestions with ReceiptNest.'
     });
     this.meta.updateTag({ name: 'robots', content: 'noindex, follow' });
     this.meta.updateTag({ name: 'googlebot', content: 'noindex, follow' });
