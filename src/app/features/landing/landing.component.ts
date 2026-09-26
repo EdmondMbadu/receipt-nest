@@ -2,12 +2,10 @@ import {
   Component,
   afterNextRender,
   computed,
-  ElementRef,
   inject,
   OnDestroy,
   PLATFORM_ID,
-  signal,
-  viewChild
+  signal
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -108,6 +106,7 @@ export class LandingComponent implements OnDestroy {
   ] as const;
   readonly isMobileMenuOpen = signal(false);
   readonly isDemoOpen = signal(false);
+  readonly isDemoPortrait = signal(false);
   readonly openFaqIndex = signal<number | null>(null);
   readonly billingInterval = signal<'monthly' | 'annual'>('annual');
   readonly googlePlayUrl = 'https://play.google.com/store/apps/details?id=com.receiptnest.mobile';
@@ -115,7 +114,6 @@ export class LandingComponent implements OnDestroy {
   readonly mobileStorePlatform = signal<MobileStorePlatform>('unknown');
   readonly showAppStoreButton = computed(() => this.mobileStorePlatform() !== 'android');
   readonly showGooglePlayButton = computed(() => this.mobileStorePlatform() !== 'ios');
-  readonly demoVideo = viewChild<ElementRef<HTMLVideoElement>>('demoVideo');
   readonly freePlanReceiptLimit = this.appConfig.freePlanReceiptLimit;
 
   // ---- Live simulation (in-hero interactive dashboard) ----
@@ -243,18 +241,14 @@ export class LandingComponent implements OnDestroy {
   }
 
   openDemo() {
+    // Choose once per opening so resizing does not restart playback.
+    this.isDemoPortrait.set(this.isBrowser && window.matchMedia(
+      '(max-width: 767px), (pointer: coarse) and (max-height: 767px)'
+    ).matches);
     this.isDemoOpen.set(true);
-    requestAnimationFrame(() => {
-      this.demoVideo()?.nativeElement.play().catch(() => undefined);
-    });
   }
 
   closeDemo() {
-    const video = this.demoVideo()?.nativeElement;
-    if (video) {
-      video.pause();
-      video.currentTime = 0;
-    }
     this.isDemoOpen.set(false);
   }
 

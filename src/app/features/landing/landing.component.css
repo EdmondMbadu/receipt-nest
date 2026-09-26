@@ -149,6 +149,24 @@ svg {
 
 /* ---------- Watch demo button ---------- */
 
+.demo-dialog {
+  width: min(100%, 64rem, calc((100vh - 8rem) * 16 / 9));
+  width: min(100%, 64rem, calc((100dvh - 8rem) * 16 / 9));
+}
+
+.demo-player {
+  aspect-ratio: 16 / 9;
+}
+
+.demo-dialog-portrait {
+  width: min(100%, 24rem, calc((100vh - 8rem) * 9 / 16));
+  width: min(100%, 24rem, calc((100dvh - 8rem) * 9 / 16));
+}
+
+.demo-dialog-portrait .demo-player {
+  aspect-ratio: 9 / 16;
+}
+
 @keyframes watchDemoDiscPulse {
   0% {
     transform: scale(1);
