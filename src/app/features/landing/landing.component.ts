@@ -68,6 +68,10 @@ export class LandingComponent implements OnDestroy {
       answer: 'ReceiptNest is a receipt app for freelancers and self-employed people. Forward email receipts, snap photos, or upload PDFs, then review and find your receipts when you need them. Export your records when your accountant asks.'
     },
     {
+      question: 'Can I use ReceiptNest if I\'m not self-employed?',
+      answer: 'Yes. ReceiptNest works for personal receipts too. Add your receipts to keep them organized by month and see your spending totals. You don\'t need to run a business.'
+    },
+    {
       question: 'Does ReceiptNest do my taxes?',
       answer: 'No. ReceiptNest keeps your receipts organized and lets you export them for yourself or your accountant. It does not prepare or file tax returns or give tax advice.'
     },
