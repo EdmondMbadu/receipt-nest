@@ -50,60 +50,148 @@
 <style>
 @font-face{font-family:"Barlow Condensed";src:url(/games/_shared/fonts/barlow-condensed-latin-800-normal.woff2) format("woff2");font-weight:800;font-display:swap}
 @font-face{font-family:"Barlow Condensed";src:url(/games/_shared/fonts/barlow-condensed-latin-700-normal.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Plex Mono";src:url(/games/_shared/fonts/ibm-plex-mono-latin-500-normal.woff2) format("woff2");font-weight:500;font-display:swap}
 @font-face{font-family:Fraunces;src:url(/games/_shared/fonts/fraunces-latin-400-italic.woff2) format("woff2");font-weight:400;font-style:italic;font-display:swap}
-:root{--night:#1b1916;--cream:#f3ead6;--yel:#ffd23f;--red:#e0532f;--line:rgba(243,234,214,.14)}
+/* Layout: dark arcade-night ground; one featured game as a wide "marquee" panel, upcoming games as dashed placeholders, notes below. */
+:root{color-scheme:dark;
+  --night:#1b1916;--panel:#24201b;--cream:#f3ead6;--mute:rgba(243,234,214,.66);--yel:#ffd23f;--red:#e0532f;--line:rgba(243,234,214,.13);
+  --disp:"Barlow Condensed","Arial Narrow",Impact,sans-serif;--mono:"Plex Mono",ui-monospace,Menlo,monospace;--serif:Fraunces,Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(120% 80% at 50% 0%,#3a342b 0%,#26221d 45%,#141210 100%) fixed;color:var(--cream);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:radial-gradient(90% 900px at 50% 0%,#3a342b 0%,#26221d 55%,var(--night) 100%) no-repeat,var(--night);color:var(--cream);font-family:var(--sans);-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column}
 a{color:inherit}
-.top{display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 16px;border-bottom:1px solid var(--line)}
+:focus-visible{outline:3px solid var(--yel);outline-offset:3px;border-radius:6px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;height:56px;padding:0 max(16px,env(safe-area-inset-left));border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:9px;text-decoration:none;font-weight:600;font-size:15px}
 .brand img{width:26px;height:26px;border-radius:7px}
+.top nav{display:flex;gap:4px}
+.top nav a{font-size:14px;text-decoration:none;color:var(--mute);padding:8px 10px;border-radius:8px}
+.top nav a:hover{color:var(--cream)}
 main{flex:1}
-.wrap{max-width:960px;margin:0 auto;padding:56px 20px 64px}
-.kick{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:15px;letter-spacing:.24em;text-transform:uppercase;color:var(--yel)}
-h1{font-family:"Barlow Condensed",Impact,sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(64px,11vw,120px);line-height:.86;margin:12px 0 0}
-.lede{font-family:Fraunces,Georgia,serif;font-style:italic;font-size:22px;line-height:1.4;max-width:560px;color:rgba(243,234,214,.82);margin:18px 0 40px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
-.card{display:block;text-decoration:none;border-radius:20px;overflow:hidden;background:rgba(243,234,214,.05);border:1px solid var(--line);transition:transform .2s,border-color .2s}
-.card:hover{transform:translateY(-3px);border-color:rgba(255,210,63,.5)}
-.card img{display:block;width:100%;aspect-ratio:1200/630;object-fit:cover}
-.card .b{padding:18px 18px 20px}
-.card h2{font-family:"Barlow Condensed",sans-serif;font-weight:800;text-transform:uppercase;font-size:34px;line-height:1;margin:0}
-.card p{margin:8px 0 14px;font-size:15.5px;line-height:1.5;color:rgba(243,234,214,.75)}
-.card .go{font-family:"Barlow Condensed",sans-serif;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--yel);font-size:18px}
-.soon{border-style:dashed;display:flex;align-items:center;justify-content:center;min-height:200px;padding:24px;text-align:center;color:rgba(243,234,214,.5);font-size:15px}
-.about{margin-top:56px;max-width:620px;font-size:16.5px;line-height:1.65;color:rgba(243,234,214,.8)}
-.about a{color:var(--yel)}
-.foot{border-top:1px solid var(--line);font-size:14px;color:rgba(243,234,214,.65)}
-.foot .wrap{padding:24px 20px 32px;display:flex;flex-wrap:wrap;gap:10px 22px}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:20px}
+.hero{padding-block:clamp(40px,7vw,84px) clamp(28px,4vw,44px)}
+.kick{font-family:var(--disp);font-weight:700;font-size:15px;letter-spacing:.24em;text-transform:uppercase;color:var(--yel)}
+h1{font-family:var(--disp);font-weight:800;text-transform:uppercase;font-size:clamp(68px,12vw,140px);line-height:.84;margin:14px 0 0;letter-spacing:-.005em}
+h1 .y{color:var(--yel)}
+.lede{font-family:var(--serif);font-style:italic;font-size:clamp(20px,2.4vw,24px);line-height:1.4;max-width:34ch;color:rgba(243,234,214,.84);margin:20px 0 0;text-wrap:balance}
+
+/* featured game */
+.feature{position:relative;display:grid;grid-template-columns:1fr;border-radius:26px;overflow:hidden;background:linear-gradient(160deg,#2c2721 0%,#1f1c18 100%);border:1px solid var(--line);text-decoration:none;isolation:isolate;transition:border-color .25s}
+.feature:hover{border-color:rgba(255,210,63,.45)}
+.feature .art{position:relative;min-height:280px;display:grid;place-items:center;padding:28px 20px 8px;background:radial-gradient(70% 70% at 50% 45%,#3d362c 0%,transparent 70%)}
+.feature .art img{display:block;width:min(100%,520px);height:auto;transition:transform .5s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 26px 30px rgba(0,0,0,.45))}
+.feature:hover .art img{transform:translateY(-6px) rotate(-1deg)}
+.feature .art .stamp{position:absolute;left:20px;top:20px;font-family:var(--disp);font-weight:800;font-size:15px;letter-spacing:.16em;background:var(--red);color:#fff;padding:6px 11px 4px;border-radius:7px}
+.feature .txt{padding:8px 24px 28px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--disp);font-weight:700;font-size:13.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);border:1px solid var(--line);border-radius:999px;padding:5px 11px 3px}
+.feature h2{font-family:var(--disp);font-weight:800;text-transform:uppercase;font-size:clamp(46px,6vw,72px);line-height:.88;margin:0}
+.feature h2 span{color:var(--yel)}
+.feature p{margin:0;font-size:17px;line-height:1.55;color:rgba(243,234,214,.8);max-width:42ch}
+.rules{list-style:none;padding:0;margin:2px 0 0;display:grid;gap:8px}
+.rules li{display:flex;gap:10px;align-items:baseline;font-size:15.5px;color:rgba(243,234,214,.85)}
+.rules b{font-family:var(--mono);font-weight:500;font-size:13px;color:var(--yel);min-width:2.2em}
+.dare{font-family:var(--disp);font-weight:700;font-size:17px;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.play{display:inline-flex;align-items:center;justify-content:center;gap:10px;align-self:flex-start;height:58px;padding:0 30px;border-radius:16px;background:var(--yel);color:#1d1b17;font-family:var(--disp);font-weight:800;font-size:24px;letter-spacing:.08em;text-transform:uppercase;box-shadow:0 12px 30px rgba(255,210,63,.18);transition:transform .15s}
+.feature:hover .play{transform:translateY(-1px)}
+.play svg{width:20px;height:20px}
+@media (min-width:820px){
+  .feature{grid-template-columns:1.1fr 1fr;align-items:center}
+  .feature .art{min-height:460px;padding:40px 24px}
+  .feature .txt{padding:40px 44px 40px 8px}
+}
+
+/* coming next */
+.next{margin-top:clamp(48px,7vw,80px)}
+.sec{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px;border-bottom:1px solid var(--line);padding-bottom:12px}
+.sec h2{font-family:var(--disp);font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:30px;margin:0}
+.sec span{font-size:14px;color:var(--mute)}
+.soon{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;margin-top:20px}
+.slot{border:1.5px dashed rgba(243,234,214,.2);border-radius:20px;padding:22px 22px 24px;display:grid;gap:10px;align-content:start;min-width:0}
+.slot .lab{font-family:var(--disp);font-weight:700;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+.slot h3{font-family:var(--disp);font-weight:800;text-transform:uppercase;font-size:34px;line-height:.95;margin:0;color:rgba(243,234,214,.9)}
+.slot p{margin:0;font-size:15.5px;line-height:1.5;color:var(--mute)}
+.slot code{font-family:var(--mono);font-size:13.5px;background:rgba(243,234,214,.08);padding:2px 6px;border-radius:5px;color:var(--cream)}
+
+/* notes */
+.notes{margin-top:clamp(48px,7vw,80px);padding-block:0 clamp(56px,8vw,96px);display:grid;gap:28px}
+@media (min-width:820px){.notes{grid-template-columns:1fr 1fr;gap:48px}}
+.notes h2{font-family:var(--serif);font-style:italic;font-weight:400;font-size:28px;line-height:1.15;margin:0 0 10px;text-wrap:balance}
+.notes p{margin:0;font-size:16.5px;line-height:1.65;color:rgba(243,234,214,.78);max-width:62ch}
+.notes p+p{margin-top:12px}
+.notes a{color:var(--yel);text-underline-offset:3px}
+.foot{border-top:1px solid var(--line);font-size:14px;color:var(--mute)}
+.foot .wrap{padding-block:24px 32px;display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center}
 .foot a{text-decoration:none}
-.foot a:hover{text-decoration:underline}
+.foot a:hover{color:var(--cream)}
+.foot .c{margin-left:auto;opacity:.7}
+@media (prefers-reduced-motion:reduce){.feature .art img,.play{transition:none}.feature:hover .art img{transform:none}}
 </style>
 </head>
 <body>
 <header class="top">
   <a class="brand" href="/"><img src="/receipt-nest.png" alt="ReceiptNest logo" width="26" height="26">ReceiptNest</a>
+  <nav aria-label="Games navigation">
+    <a href="/games/fade">Play</a>
+    <a href="/blog">Guides</a>
+  </nav>
 </header>
 <main>
   <div class="wrap">
-    <div class="kick">ReceiptNest Games</div>
-    <h1>Receipt games</h1>
-    <p class="lede">Short, free games about the little strips of paper that hold your money. Play one in under a minute.</p>
-    <div class="grid">
-      <a class="card" href="/games/fade">
-        <img src="/games/fade/og.png" alt="Before It Fades: a crisp receipt next to a faded one" width="1200" height="630" loading="lazy">
-        <div class="b">
-          <h2>Before It Fades</h2>
-          <p>Read the total before the receipt fades. Every round fades faster. Can you get past round 5?</p>
-          <span class="go">Play now →</span>
+    <section class="hero">
+      <div class="kick">ReceiptNest Games</div>
+      <h1>Receipt <span class="y">games</span></h1>
+      <p class="lede">Quick, free games about the little strips of paper that hold your money. One round takes under a minute.</p>
+    </section>
+
+    <a class="feature" href="/games/fade" aria-label="Play Before It Fades">
+      <div class="art">
+        <span class="stamp">NEW</span>
+        <img src="/games/fade/card.webp" alt="A crisp receipt beside the same kind of receipt faded almost blank" width="900" height="753">
+      </div>
+      <div class="txt">
+        <div class="meta"><span class="chip">Reaction</span><span class="chip">About 1 min</span><span class="chip">Free · no signup</span></div>
+        <h2>Before it <span>fades</span></h2>
+        <p>A receipt appears, then fades. Tap the total before it’s gone. Every round fades faster.</p>
+        <ul class="rules">
+          <li><b>01</b>Same receipts for everyone, every day</li>
+          <li><b>05</b>Crumpled paper and subtotal traps kick in</li>
+          <li><b>15</b>Two receipts at once</li>
+        </ul>
+        <div class="dare">Can you get past round 5?</div>
+        <span class="play">Play now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <section class="next" aria-labelledby="next-h">
+      <div class="sec"><h2 id="next-h">In the works</h2><span>New games are added here first</span></div>
+      <div class="soon">
+        <div class="slot">
+          <div class="lab">Coming soon</div>
+          <h3>Guess the charge</h3>
+          <p>Your bank statement says <code>PMT*JRK SVCS 0412</code>. What did you buy? Nobody knows, and that’s the point.</p>
         </div>
-      </a>
-      <div class="card soon">More receipt games are on the way.</div>
-    </div>
-    <div class="about">
-      <p>Every game here is built around a real receipt problem, like thermal paper that fades, bank statements that don’t say what you bought, and shoeboxes nobody wants to open in April. Then each one explains the problem in plain language.</p>
-      <p>ReceiptNest is just your receipts: snap or forward them, see them sorted by month, and export a PDF or CSV when you need it. <a href="/receipt-scanner">See how it works</a>.</p>
-    </div>
+        <div class="slot">
+          <div class="lab">Coming soon</div>
+          <h3>Shoebox sort</h3>
+          <p>It’s April. The shoebox is open. Sort a year of crumpled receipts before your accountant’s deadline.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="notes">
+      <div>
+        <h2>Why games about receipts?</h2>
+        <p>Every game here starts from a real receipt problem: thermal paper that fades, bank statements that don’t say what you bought, a shoebox nobody wants to open in April.</p>
+        <p>Each game page also explains the problem in plain language. Before It Fades, for example, covers <a href="/games/fade#why">why receipts fade and how long to keep them</a>.</p>
+      </div>
+      <div>
+        <h2>Made by ReceiptNest</h2>
+        <p>ReceiptNest is just your receipts. Snap or forward them, see them sorted by month, and export a PDF or CSV for whoever does your taxes. No bank login, no bookkeeping.</p>
+        <p><a href="/receipt-scanner">See how it works</a></p>
+      </div>
+    </section>
   </div>
 </main>
 <footer class="foot">
@@ -114,6 +202,7 @@ h1{font-family:"Barlow Condensed",Impact,sans-serif;font-weight:800;text-transfo
     <a href="/blog">Guides</a>
     <a href="/pricing">Pricing</a>
     <a href="/terms">Terms</a>
+    <span class="c">© 2026 ReceiptNest</span>
   </div>
 </footer>
 </body>
