@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join, matchesGlob } from 'node:path';
 import { parse } from 'parse5';
 import { publicPages, SITE_URL } from '../src/app/content/public-pages.ts';
 import { receiptWorkflows } from '../src/app/content/receipt-workflows.ts';
 import { blogPosts, getBlogPost } from '../src/app/features/blog/blog-posts.ts';
 import { getBlogEditorial } from '../src/app/features/blog/blog-editorial.ts';
+import { gamePages } from '../src/app/content/game-pages.ts';
 
 const root = 'dist/receipt-nest/browser';
 const read = path => readFileSync(path, 'utf8');
@@ -14,7 +15,8 @@ const text = node => node.nodeName === '#text' ? node.value : (node.childNodes |
 const nodes = node => [node, ...(node.childNodes || []).flatMap(nodes)];
 const entries = [
   ...publicPages,
-  ...blogPosts.map(post => ({ ...post, title: post.seoTitle + ' | ReceiptNest' }))
+  ...blogPosts.map(post => ({ ...post, title: post.seoTitle + ' | ReceiptNest' })),
+  ...gamePages
 ];
 const documents = new Map(entries.map(page => {
   const file = join(root, page.path, 'index.html');
@@ -110,4 +112,8 @@ const sample = read(join(root, 'samples/receiptnest-monthly-example.csv')).trim(
 assert.equal(sample[0], 'Merchant,Date,Amount', 'Sample columns match monthly export');
 const rows = sample.slice(1).map(row => row.split(','));
 assert.equal(rows.slice(0, -1).reduce((sum, row) => sum + Math.round(Number(row[2]) * 100), 0), Math.round(Number(rows.at(-1)[2]) * 100), 'Sample total must reconcile');
+for (const page of gamePages) {
+  const size = statSync(join(root, page.path, 'index.html')).size;
+  assert.ok(size < 120000, page.path + ': standalone game page must stay under 120 KB (is ' + size + ' bytes)');
+}
 console.log('SEO checks passed: ' + entries.length + ' public pages, 3 account pages, ' + linksChecked + ' local links; sitemap, schema, images, private-route headers, and sample CSV verified.');

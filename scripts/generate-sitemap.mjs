@@ -1,10 +1,12 @@
 import { writeFileSync } from 'node:fs';
 import { publicPages, SITE_URL } from '../src/app/content/public-pages.ts';
 import { blogPosts } from '../src/app/features/blog/blog-posts.ts';
+import { gamePages } from '../src/app/content/game-pages.ts';
 
 const entries = [
   ...publicPages.map(page => ({ path: page.path, updated: page.updated })),
-  ...blogPosts.map(post => ({ path: post.path, updated: post.dateModified }))
+  ...blogPosts.map(post => ({ path: post.path, updated: post.dateModified })),
+  ...gamePages.map(page => ({ path: page.path, updated: page.updated }))
 ];
 if (new Set(entries.map(page => page.path)).size !== entries.length) {
   throw new Error('Duplicate canonical path in sitemap');
