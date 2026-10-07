@@ -1,0 +1,24 @@
+{
+  "path": "/Users/edmondmbadu/repo/receipt-nest/artifacts/i-have-my-ways/exports/ReceiptNest_I-Have-My-Ways_9x16_CAPTIONED.mp4",
+  "width": 1080,
+  "height": 1920,
+  "fps": 24.0,
+  "frames": 1440,
+  "streams": [
+    {
+      "type": "video",
+      "duration": 60.0,
+      "codec": "h264"
+    },
+    {
+      "type": "audio",
+      "duration": 60.0,
+      "codec": "aac"
+    }
+  ],
+  "audio_hash": "SHA256=460bbc9ce61844604ddc3983ad6051dbc22a27623826ff79f4525a8462e93b9c",
+  "sha256": "cdd826806c9b2c766e91f57feba1dfa6d927188126866d222623158845739468",
+  "bytes": 30617935,
+  "caption_cues": 24,
+  "caption_words_unchanged": true
+}

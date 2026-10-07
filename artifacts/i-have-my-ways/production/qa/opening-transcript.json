@@ -1,0 +1,69 @@
+[
+  {
+    "start": 0.0,
+    "end": 7.38,
+    "text": " Marcus, miscellaneous $86 it made sense in March we are fixing this",
+    "words": [
+      {
+        "start": 0.0,
+        "end": 0.56,
+        "word": " Marcus,"
+      },
+      {
+        "start": 1.06,
+        "end": 1.86,
+        "word": " miscellaneous"
+      },
+      {
+        "start": 1.86,
+        "end": 2.82,
+        "word": " $86"
+      },
+      {
+        "start": 2.82,
+        "end": 4.1,
+        "word": " it"
+      },
+      {
+        "start": 4.1,
+        "end": 4.26,
+        "word": " made"
+      },
+      {
+        "start": 4.26,
+        "end": 4.6,
+        "word": " sense"
+      },
+      {
+        "start": 4.6,
+        "end": 4.82,
+        "word": " in"
+      },
+      {
+        "start": 4.82,
+        "end": 5.08,
+        "word": " March"
+      },
+      {
+        "start": 5.08,
+        "end": 6.44,
+        "word": " we"
+      },
+      {
+        "start": 6.44,
+        "end": 6.6,
+        "word": " are"
+      },
+      {
+        "start": 6.6,
+        "end": 6.9,
+        "word": " fixing"
+      },
+      {
+        "start": 6.9,
+        "end": 7.38,
+        "word": " this"
+      }
+    ]
+  }
+]

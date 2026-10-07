@@ -1,0 +1,76 @@
+{
+  "duration": 60,
+  "fps": 24,
+  "source_policy": "All story scenes use actual animated footage; no still-image fallback.",
+  "events": [
+    {
+      "kind": "footage",
+      "shot": "opening",
+      "start": 0.0,
+      "source": "/Users/edmondmbadu/repo/receipt-nest/artifacts/i-have-my-ways/footage/01-opening-kling-take01.mp4",
+      "native_duration": 8
+    },
+    {
+      "kind": "footage",
+      "shot": "store",
+      "start": 8.0,
+      "source": "/Users/edmondmbadu/repo/receipt-nest/artifacts/i-have-my-ways/footage/02-store-kling-take01.mp4",
+      "native_duration": 6
+    },
+    {
+      "kind": "footage",
+      "shot": "habit",
+      "start": 14.0,
+      "source": "/Users/edmondmbadu/repo/receipt-nest/artifacts/i-have-my-ways/footage/02-habit-montage-COMPOSITED.mp4",
+      "native_duration": 4
+    },
+    {
+      "kind": "footage",
+      "shot": "monthly",
+      "start": 18.0,
+      "source": "/Users/edmondmbadu/repo/receipt-nest/artifacts/i-have-my-ways/footage/03-living-room-kling-take01.mp4",
+      "native_duration": 8
+    },
+    {
+      "kind": "monthly",
+      "start": 23.208333333333332,
+      "duration": 2
+    },
+    {
+      "kind": "footage",
+      "shot": "garage",
+      "start": 28.0,
+      "source": "/Users/edmondmbadu/repo/receipt-nest/artifacts/i-have-my-ways/footage/04-garage-kling-take01.mp4",
+      "native_duration": 6
+    },
+    {
+      "kind": "receipt",
+      "start": 32.25,
+      "duration": 3
+    },
+    {
+      "kind": "footage",
+      "shot": "coffee",
+      "start": 37.0,
+      "source": "/Users/edmondmbadu/repo/receipt-nest/artifacts/i-have-my-ways/footage/05-coffee-veo-take01.mp4",
+      "native_duration": 8
+    },
+    {
+      "kind": "footage",
+      "shot": "dinner",
+      "start": 45.0,
+      "source": "/Users/edmondmbadu/repo/receipt-nest/artifacts/i-have-my-ways/footage/06-dinner-kling-take01.mp4",
+      "native_duration": 8
+    },
+    {
+      "kind": "email",
+      "start": 49.0,
+      "duration": 3
+    },
+    {
+      "kind": "endcard",
+      "start": 56.0,
+      "duration": 4
+    }
+  ]
+}

@@ -1,0 +1,186 @@
+{
+  "status": "visual workprint; still artwork with camera motion, score, guide effects and dialogue captions; not final character animation or final voices",
+  "duration": 60,
+  "fps": 24,
+  "scenes": [
+    {
+      "start": 0,
+      "end": 8,
+      "asset": "01-kitchen-night-start.png",
+      "label": "TAX SEASON. LATE.",
+      "beat": "The dinner they missed"
+    },
+    {
+      "start": 8,
+      "end": 14,
+      "asset": "02-store-start.png",
+      "label": "NEXT MORNING",
+      "beat": "A small change"
+    },
+    {
+      "start": 14,
+      "end": 15.333333,
+      "asset": "02a-gas.png",
+      "label": "ONE SMALL HABIT",
+      "beat": "Gas"
+    },
+    {
+      "start": 15.333333,
+      "end": 16.666667,
+      "asset": "02b-lumber.png",
+      "label": "ONE SMALL HABIT",
+      "beat": "Supplies"
+    },
+    {
+      "start": 16.666667,
+      "end": 18,
+      "asset": "02c-client-coffee.png",
+      "label": "ONE SMALL HABIT",
+      "beat": "Client coffee"
+    },
+    {
+      "start": 18,
+      "end": 28,
+      "asset": "03-living-room-start.png",
+      "label": "MONTH END",
+      "beat": "The first ways"
+    },
+    {
+      "start": 28,
+      "end": 38,
+      "asset": "04-garage-start.png",
+      "label": "SATURDAY",
+      "beat": "The receipt that mattered"
+    },
+    {
+      "start": 38,
+      "end": 46,
+      "asset": "05-coffee-start.png",
+      "label": "A WEEK LATER",
+      "beat": "The shared joke"
+    },
+    {
+      "start": 46,
+      "end": 56,
+      "asset": "06-dinner-start.png",
+      "label": "NEXT TAX SEASON",
+      "beat": "Their evening, back"
+    }
+  ],
+  "dialogue": [
+    {
+      "start": 0.5,
+      "end": 3.4,
+      "speaker": "NIA",
+      "text": "Marcus. What is \u201cmiscellaneous \u2014 eighty-six dollars\u201d?"
+    },
+    {
+      "start": 3.7,
+      "end": 5.9,
+      "speaker": "MARCUS",
+      "text": "It made sense in March."
+    },
+    {
+      "start": 6.2,
+      "end": 7.6,
+      "speaker": "NIA",
+      "text": "We\u2019re fixing this."
+    },
+    {
+      "start": 9.3,
+      "end": 11.8,
+      "speaker": "NIA",
+      "text": "You\u2019re photographing receipts now?"
+    },
+    {
+      "start": 12,
+      "end": 13.5,
+      "speaker": "MARCUS",
+      "text": "Trying something."
+    },
+    {
+      "start": 18.5,
+      "end": 20.2,
+      "speaker": "NIA",
+      "text": "This month\u2019s damage?"
+    },
+    {
+      "start": 20.4,
+      "end": 24.0,
+      "speaker": "MARCUS",
+      "text": "Two thousand, nine hundred sixty-one dollars. Forty cents."
+    },
+    {
+      "start": 24.5,
+      "end": 25.3,
+      "speaker": "NIA",
+      "text": "\u2026How?"
+    },
+    {
+      "start": 25.8,
+      "end": 27.4,
+      "speaker": "MARCUS",
+      "text": "I have my ways."
+    },
+    {
+      "start": 29.4,
+      "end": 31.2,
+      "speaker": "NIA",
+      "text": "Where\u2019s the receipt?"
+    },
+    {
+      "start": 32.1,
+      "end": 33.2,
+      "speaker": "MARCUS",
+      "text": "This one?"
+    },
+    {
+      "start": 38.3,
+      "end": 39.8,
+      "speaker": "MARCUS",
+      "text": "Coffee this month?"
+    },
+    {
+      "start": 40.1,
+      "end": 41.4,
+      "speaker": "NIA",
+      "text": "Forty-six twenty."
+    },
+    {
+      "start": 41.8,
+      "end": 42.5,
+      "speaker": "MARCUS",
+      "text": "How?"
+    },
+    {
+      "start": 43.0,
+      "end": 44.5,
+      "speaker": "NIA",
+      "text": "I have my ways."
+    },
+    {
+      "start": 46.7,
+      "end": 47.8,
+      "speaker": "MARCUS",
+      "text": "Receipts?"
+    },
+    {
+      "start": 48.2,
+      "end": 50.1,
+      "speaker": "NIA",
+      "text": "Already with our accountant."
+    },
+    {
+      "start": 51.5,
+      "end": 53.2,
+      "speaker": "MARCUS",
+      "text": "When did we even do them?"
+    },
+    {
+      "start": 53.7,
+      "end": 55,
+      "speaker": "NIA",
+      "text": "Every day."
+    }
+  ]
+}

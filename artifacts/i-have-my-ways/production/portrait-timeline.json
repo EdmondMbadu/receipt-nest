@@ -1,0 +1,263 @@
+{
+  "size": [
+    1080,
+    1920
+  ],
+  "fps": 24,
+  "duration": 60,
+  "shots": [
+    {
+      "start": 0,
+      "end": 84,
+      "source": "opening",
+      "source_in": 0,
+      "x0": 155,
+      "x1": 165,
+      "mode": "close"
+    },
+    {
+      "start": 84,
+      "end": 138,
+      "source": "opening",
+      "source_in": 84,
+      "x0": 630,
+      "x1": 640,
+      "mode": "close"
+    },
+    {
+      "start": 138,
+      "end": 192,
+      "source": "opening",
+      "source_in": 138,
+      "x0": 155,
+      "x1": 160,
+      "mode": "close"
+    },
+    {
+      "start": 192,
+      "end": 222,
+      "source": "pickup",
+      "source_in": 0,
+      "x0": 355,
+      "x1": 355,
+      "mode": "detail"
+    },
+    {
+      "start": 222,
+      "end": 283,
+      "source": "store",
+      "source_in": 30,
+      "x0": 183,
+      "x1": 193,
+      "mode": "close"
+    },
+    {
+      "start": 283,
+      "end": 336,
+      "source": "store",
+      "source_in": 91,
+      "x0": 520,
+      "x1": 525,
+      "mode": "close"
+    },
+    {
+      "start": 336,
+      "end": 368,
+      "source": "habit",
+      "source_in": 0,
+      "x0": 405,
+      "x1": 405,
+      "mode": "detail"
+    },
+    {
+      "start": 368,
+      "end": 400,
+      "source": "habit",
+      "source_in": 32,
+      "x0": 355,
+      "x1": 355,
+      "mode": "detail"
+    },
+    {
+      "start": 400,
+      "end": 432,
+      "source": "habit",
+      "source_in": 64,
+      "x0": 380,
+      "x1": 380,
+      "mode": "detail"
+    },
+    {
+      "start": 432,
+      "end": 468,
+      "source": "monthly",
+      "source_in": 0,
+      "x0": 160,
+      "x1": 165,
+      "mode": "close"
+    },
+    {
+      "start": 468,
+      "end": 557,
+      "source": "monthly",
+      "source_in": 36,
+      "x0": 672,
+      "x1": 680,
+      "mode": "close"
+    },
+    {
+      "start": 557,
+      "end": 605,
+      "source": "monthly",
+      "source_in": 0,
+      "x0": 0,
+      "x1": 0,
+      "mode": "graphic"
+    },
+    {
+      "start": 605,
+      "end": 632,
+      "source": "monthly",
+      "source_in": 125,
+      "x0": 170,
+      "x1": 170,
+      "mode": "close"
+    },
+    {
+      "start": 632,
+      "end": 672,
+      "source": "monthly",
+      "source_in": 152,
+      "x0": 676,
+      "x1": 679,
+      "mode": "close"
+    },
+    {
+      "start": 672,
+      "end": 754,
+      "source": "garage",
+      "source_in": 0,
+      "x0": 175,
+      "x1": 177,
+      "mode": "close"
+    },
+    {
+      "start": 754,
+      "end": 774,
+      "source": "garage",
+      "source_in": 82,
+      "x0": 526,
+      "x1": 530,
+      "mode": "close"
+    },
+    {
+      "start": 774,
+      "end": 846,
+      "source": "receipt",
+      "source_in": 0,
+      "x0": 0,
+      "x1": 0,
+      "mode": "graphic"
+    },
+    {
+      "start": 846,
+      "end": 888,
+      "source": "garage",
+      "source_in": 102,
+      "x0": 175,
+      "x1": 175,
+      "mode": "close"
+    },
+    {
+      "start": 888,
+      "end": 909,
+      "source": "coffee",
+      "source_in": 0,
+      "x0": 607,
+      "x1": 610,
+      "mode": "close"
+    },
+    {
+      "start": 909,
+      "end": 969,
+      "source": "coffee",
+      "source_in": 21,
+      "x0": 180,
+      "x1": 185,
+      "mode": "close"
+    },
+    {
+      "start": 969,
+      "end": 992,
+      "source": "coffee",
+      "source_in": 81,
+      "x0": 610,
+      "x1": 610,
+      "mode": "close"
+    },
+    {
+      "start": 992,
+      "end": 1080,
+      "source": "coffee",
+      "source_in": 104,
+      "x0": 180,
+      "x1": 185,
+      "mode": "close"
+    },
+    {
+      "start": 1080,
+      "end": 1135,
+      "source": "dinner",
+      "source_in": 0,
+      "x0": 635,
+      "x1": 635,
+      "mode": "close"
+    },
+    {
+      "start": 1135,
+      "end": 1176,
+      "source": "dinner",
+      "source_in": 55,
+      "x0": 190,
+      "x1": 195,
+      "mode": "close"
+    },
+    {
+      "start": 1176,
+      "end": 1248,
+      "source": "email",
+      "source_in": 0,
+      "x0": 0,
+      "x1": 0,
+      "mode": "graphic"
+    },
+    {
+      "start": 1248,
+      "end": 1303,
+      "source": "dinner",
+      "source_in": 96,
+      "x0": 637,
+      "x1": 637,
+      "mode": "close"
+    },
+    {
+      "start": 1303,
+      "end": 1344,
+      "source": "dinner",
+      "source_in": 151,
+      "x0": 170,
+      "x1": 170,
+      "mode": "close"
+    },
+    {
+      "start": 1344,
+      "end": 1440,
+      "source": "endcard",
+      "source_in": 0,
+      "x0": 0,
+      "x1": 0,
+      "mode": "graphic"
+    }
+  ],
+  "policy": "Actual animated source footage, native portrait product graphics, unchanged final audio."
+}

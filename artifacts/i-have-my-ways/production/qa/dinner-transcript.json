@@ -1,0 +1,87 @@
+[
+  {
+    "start": 1.2399999999999967,
+    "end": 7.18,
+    "text": " receipts already with our accountant when did we even do them every day",
+    "words": [
+      {
+        "start": 1.2399999999999967,
+        "end": 1.9999999999999982,
+        "word": " receipts",
+        "probability": 0.04212881624698639
+      },
+      {
+        "start": 1.9999999999999982,
+        "end": 2.76,
+        "word": " already",
+        "probability": 0.5287696719169617
+      },
+      {
+        "start": 2.76,
+        "end": 3.06,
+        "word": " with",
+        "probability": 0.9954919815063477
+      },
+      {
+        "start": 3.06,
+        "end": 3.24,
+        "word": " our",
+        "probability": 0.995429277420044
+      },
+      {
+        "start": 3.24,
+        "end": 3.66,
+        "word": " accountant",
+        "probability": 0.9588407278060913
+      },
+      {
+        "start": 3.66,
+        "end": 4.78,
+        "word": " when",
+        "probability": 0.7390795350074768
+      },
+      {
+        "start": 4.78,
+        "end": 4.98,
+        "word": " did",
+        "probability": 0.9980180263519287
+      },
+      {
+        "start": 4.98,
+        "end": 5.14,
+        "word": " we",
+        "probability": 0.9983136653900146
+      },
+      {
+        "start": 5.14,
+        "end": 5.36,
+        "word": " even",
+        "probability": 0.9988732933998108
+      },
+      {
+        "start": 5.36,
+        "end": 5.6,
+        "word": " do",
+        "probability": 0.9967392086982727
+      },
+      {
+        "start": 5.6,
+        "end": 5.98,
+        "word": " them",
+        "probability": 0.9960455298423767
+      },
+      {
+        "start": 5.98,
+        "end": 6.62,
+        "word": " every",
+        "probability": 0.8320668339729309
+      },
+      {
+        "start": 6.62,
+        "end": 7.18,
+        "word": " day",
+        "probability": 0.9967617988586426
+      }
+    ]
+  }
+]

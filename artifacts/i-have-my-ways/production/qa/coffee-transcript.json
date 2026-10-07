@@ -1,0 +1,90 @@
+[
+  {
+    "start": 0.0,
+    "end": 0.54,
+    "text": " Coffee this month.",
+    "words": [
+      {
+        "start": 0.0,
+        "end": 0.22,
+        "word": " Coffee",
+        "probability": 0.21152745187282562
+      },
+      {
+        "start": 0.22,
+        "end": 0.38,
+        "word": " this",
+        "probability": 0.96530681848526
+      },
+      {
+        "start": 0.38,
+        "end": 0.54,
+        "word": " month.",
+        "probability": 0.9919113516807556
+      }
+    ]
+  },
+  {
+    "start": 2.1799999999999984,
+    "end": 3.1,
+    "text": " 46-20.",
+    "words": [
+      {
+        "start": 2.1799999999999984,
+        "end": 2.6399999999999992,
+        "word": " 46",
+        "probability": 0.14318211376667023
+      },
+      {
+        "start": 2.6399999999999992,
+        "end": 3.1,
+        "word": "-20.",
+        "probability": 0.6388083547353745
+      }
+    ]
+  },
+  {
+    "start": 3.84,
+    "end": 3.9,
+    "text": " How?",
+    "words": [
+      {
+        "start": 3.84,
+        "end": 3.9,
+        "word": " How?",
+        "probability": 0.8544692397117615
+      }
+    ]
+  },
+  {
+    "start": 4.64,
+    "end": 5.48,
+    "text": " I have my ways.",
+    "words": [
+      {
+        "start": 4.64,
+        "end": 4.86,
+        "word": " I",
+        "probability": 0.9896877408027649
+      },
+      {
+        "start": 4.86,
+        "end": 5.06,
+        "word": " have",
+        "probability": 0.9986125230789185
+      },
+      {
+        "start": 5.06,
+        "end": 5.24,
+        "word": " my",
+        "probability": 0.9979816675186157
+      },
+      {
+        "start": 5.24,
+        "end": 5.48,
+        "word": " ways.",
+        "probability": 0.9548495411872864
+      }
+    ]
+  }
+]

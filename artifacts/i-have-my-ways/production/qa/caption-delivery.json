@@ -1,0 +1,78 @@
+{
+  "film": [
+    {
+      "path": "/Users/edmondmbadu/repo/receipt-nest/artifacts/i-have-my-ways/exports/ReceiptNest_I-Have-My-Ways_ANIMATED-CUT.mp4",
+      "duration": 60.0,
+      "streams": [
+        {
+          "type": "video",
+          "duration": 60.0,
+          "codec": "h264"
+        },
+        {
+          "type": "audio",
+          "duration": 60.0,
+          "codec": "aac"
+        }
+      ],
+      "audio_hash": "SHA256=460bbc9ce61844604ddc3983ad6051dbc22a27623826ff79f4525a8462e93b9c",
+      "bytes": 26045376
+    },
+    {
+      "path": "/Users/edmondmbadu/repo/receipt-nest/artifacts/i-have-my-ways/exports/ReceiptNest_I-Have-My-Ways_CAPTIONED.mp4",
+      "duration": 60.0,
+      "streams": [
+        {
+          "type": "video",
+          "duration": 60.0,
+          "codec": "h264"
+        },
+        {
+          "type": "audio",
+          "duration": 60.0,
+          "codec": "aac"
+        }
+      ],
+      "audio_hash": "SHA256=460bbc9ce61844604ddc3983ad6051dbc22a27623826ff79f4525a8462e93b9c",
+      "bytes": 14348539
+    }
+  ],
+  "coffee": [
+    {
+      "path": "/Users/edmondmbadu/repo/receipt-nest/artifacts/i-have-my-ways/exports/ReceiptNest_Coffee_ANIMATED-SCENE.mp4",
+      "duration": 8.0,
+      "streams": [
+        {
+          "type": "video",
+          "duration": 8.0,
+          "codec": "h264"
+        },
+        {
+          "type": "audio",
+          "duration": 8.0,
+          "codec": "aac"
+        }
+      ],
+      "audio_hash": "SHA256=15d61cf2bf99667bb829ea54b68b36ce449b6d36737914b160f675a36944f4cb",
+      "bytes": 3632503
+    },
+    {
+      "path": "/Users/edmondmbadu/repo/receipt-nest/artifacts/i-have-my-ways/exports/ReceiptNest_Coffee_CAPTIONED.mp4",
+      "duration": 8.0,
+      "streams": [
+        {
+          "type": "video",
+          "duration": 8.0,
+          "codec": "h264"
+        },
+        {
+          "type": "audio",
+          "duration": 8.0,
+          "codec": "aac"
+        }
+      ],
+      "audio_hash": "SHA256=15d61cf2bf99667bb829ea54b68b36ce449b6d36737914b160f675a36944f4cb",
+      "bytes": 1980001
+    }
+  ]
+}

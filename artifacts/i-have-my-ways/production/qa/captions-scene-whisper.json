@@ -1,0 +1,538 @@
+[
+  {
+    "scene": "opening",
+    "start": 0.0,
+    "end": 3.16,
+    "text": " Marcus, miscellaneous eighty six dollars?",
+    "words": [
+      {
+        "word": "Marcus,",
+        "start": 0.0,
+        "end": 0.56,
+        "probability": 0.7369460463523865
+      },
+      {
+        "word": "miscellaneous",
+        "start": 1.24,
+        "end": 1.88,
+        "probability": 0.8449513614177704
+      },
+      {
+        "word": "eighty",
+        "start": 1.88,
+        "end": 2.44,
+        "probability": 0.1443752646446228
+      },
+      {
+        "word": "six",
+        "start": 2.44,
+        "end": 2.8,
+        "probability": 0.5932084918022156
+      },
+      {
+        "word": "dollars?",
+        "start": 2.8,
+        "end": 3.16,
+        "probability": 0.9938619136810303
+      }
+    ]
+  },
+  {
+    "scene": "opening",
+    "start": 3.9,
+    "end": 5.08,
+    "text": " It made sense in March.",
+    "words": [
+      {
+        "word": "It",
+        "start": 3.9,
+        "end": 4.12,
+        "probability": 0.9558150172233582
+      },
+      {
+        "word": "made",
+        "start": 4.12,
+        "end": 4.26,
+        "probability": 0.9832791090011597
+      },
+      {
+        "word": "sense",
+        "start": 4.26,
+        "end": 4.58,
+        "probability": 0.9960761666297913
+      },
+      {
+        "word": "in",
+        "start": 4.58,
+        "end": 4.82,
+        "probability": 0.9875532388687134
+      },
+      {
+        "word": "March.",
+        "start": 4.82,
+        "end": 5.08,
+        "probability": 0.9780881404876709
+      }
+    ]
+  },
+  {
+    "scene": "opening",
+    "start": 5.94,
+    "end": 7.32,
+    "text": " We are fixing this.",
+    "words": [
+      {
+        "word": "We",
+        "start": 5.94,
+        "end": 6.46,
+        "probability": 0.9870677590370178
+      },
+      {
+        "word": "are",
+        "start": 6.46,
+        "end": 6.62,
+        "probability": 0.993650496006012
+      },
+      {
+        "word": "fixing",
+        "start": 6.62,
+        "end": 6.92,
+        "probability": 0.9941864013671875
+      },
+      {
+        "word": "this.",
+        "start": 6.92,
+        "end": 7.32,
+        "probability": 0.998848557472229
+      }
+    ]
+  },
+  {
+    "scene": "store",
+    "start": 9.55,
+    "end": 12.629999999999999,
+    "text": " You are photographing receipts now tryin' something",
+    "words": [
+      {
+        "word": "You",
+        "start": 9.55,
+        "end": 10.05,
+        "probability": 0.8593369126319885
+      },
+      {
+        "word": "are",
+        "start": 10.05,
+        "end": 10.19,
+        "probability": 0.98188316822052
+      },
+      {
+        "word": "photographing",
+        "start": 10.19,
+        "end": 10.85,
+        "probability": 0.991309404373169
+      },
+      {
+        "word": "receipts",
+        "start": 10.85,
+        "end": 11.11,
+        "probability": 0.9631145000457764
+      },
+      {
+        "word": "now",
+        "start": 11.11,
+        "end": 11.55,
+        "probability": 0.9730686545372009
+      },
+      {
+        "word": "tryin'",
+        "start": 11.55,
+        "end": 12.309999999999999,
+        "probability": 0.38628145307302475
+      },
+      {
+        "word": "something",
+        "start": 12.39,
+        "end": 12.629999999999999,
+        "probability": 0.7819471955299377
+      }
+    ]
+  },
+  {
+    "scene": "monthly",
+    "start": 18.0,
+    "end": 19.02,
+    "text": " This month's damage?",
+    "words": [
+      {
+        "word": "This",
+        "start": 18.0,
+        "end": 18.34,
+        "probability": 0.73850017786026
+      },
+      {
+        "word": "month's",
+        "start": 18.34,
+        "end": 18.7,
+        "probability": 0.9758017957210541
+      },
+      {
+        "word": "damage?",
+        "start": 18.7,
+        "end": 19.02,
+        "probability": 0.9484509825706482
+      }
+    ]
+  },
+  {
+    "scene": "monthly",
+    "start": 20.0,
+    "end": 23.08,
+    "text": " Two thousand nine hundred sixty one dollars, forty cents.",
+    "words": [
+      {
+        "word": "Two",
+        "start": 20.0,
+        "end": 20.18,
+        "probability": 0.14524084329605103
+      },
+      {
+        "word": "thousand",
+        "start": 20.18,
+        "end": 20.52,
+        "probability": 0.969260573387146
+      },
+      {
+        "word": "nine",
+        "start": 20.52,
+        "end": 20.9,
+        "probability": 0.9746593236923218
+      },
+      {
+        "word": "hundred",
+        "start": 20.9,
+        "end": 21.22,
+        "probability": 0.9911211729049683
+      },
+      {
+        "word": "sixty",
+        "start": 21.22,
+        "end": 21.46,
+        "probability": 0.9666347503662109
+      },
+      {
+        "word": "one",
+        "start": 21.46,
+        "end": 21.86,
+        "probability": 0.8049262166023254
+      },
+      {
+        "word": "dollars,",
+        "start": 21.86,
+        "end": 22.259999999999998,
+        "probability": 0.9899340271949768
+      },
+      {
+        "word": "forty",
+        "start": 22.6,
+        "end": 22.740000000000002,
+        "probability": 0.9666599035263062
+      },
+      {
+        "word": "cents.",
+        "start": 22.740000000000002,
+        "end": 23.08,
+        "probability": 0.9129960536956787
+      }
+    ]
+  },
+  {
+    "scene": "monthly",
+    "start": 25.45,
+    "end": 25.95,
+    "text": " How?",
+    "words": [
+      {
+        "word": "How?",
+        "start": 25.45,
+        "end": 25.95,
+        "probability": 0.931268036365509
+      }
+    ]
+  },
+  {
+    "scene": "monthly",
+    "start": 26.61,
+    "end": 27.55,
+    "text": " I have my ways.",
+    "words": [
+      {
+        "word": "I",
+        "start": 26.61,
+        "end": 26.83,
+        "probability": 0.9904566407203674
+      },
+      {
+        "word": "have",
+        "start": 26.83,
+        "end": 27.03,
+        "probability": 0.9849734306335449
+      },
+      {
+        "word": "my",
+        "start": 27.03,
+        "end": 27.23,
+        "probability": 0.9960970282554626
+      },
+      {
+        "word": "ways.",
+        "start": 27.23,
+        "end": 27.55,
+        "probability": 0.9563872218132019
+      }
+    ]
+  },
+  {
+    "scene": "garage",
+    "start": 29.65,
+    "end": 31.17,
+    "text": " Where is the receipt?",
+    "words": [
+      {
+        "word": "Where",
+        "start": 29.65,
+        "end": 30.27,
+        "probability": 0.6945605278015137
+      },
+      {
+        "word": "is",
+        "start": 30.27,
+        "end": 30.63,
+        "probability": 0.9831759929656982
+      },
+      {
+        "word": "the",
+        "start": 30.63,
+        "end": 30.83,
+        "probability": 0.9928374886512756
+      },
+      {
+        "word": "receipt?",
+        "start": 30.83,
+        "end": 31.17,
+        "probability": 0.9965121150016785
+      }
+    ]
+  },
+  {
+    "scene": "garage",
+    "start": 31.79,
+    "end": 32.13,
+    "text": " This one.",
+    "words": [
+      {
+        "word": "This",
+        "start": 31.79,
+        "end": 31.87,
+        "probability": 0.8777541518211365
+      },
+      {
+        "word": "one.",
+        "start": 31.87,
+        "end": 32.13,
+        "probability": 0.9978123903274536
+      }
+    ]
+  },
+  {
+    "scene": "coffee",
+    "start": 37.0,
+    "end": 37.54,
+    "text": " Coffee this month.",
+    "words": [
+      {
+        "word": "Coffee",
+        "start": 37.0,
+        "end": 37.22,
+        "probability": 0.3568156063556671
+      },
+      {
+        "word": "this",
+        "start": 37.22,
+        "end": 37.38,
+        "probability": 0.9623470306396484
+      },
+      {
+        "word": "month.",
+        "start": 37.38,
+        "end": 37.54,
+        "probability": 0.9858075380325317
+      }
+    ]
+  },
+  {
+    "scene": "coffee",
+    "start": 38.1,
+    "end": 38.48,
+    "text": " Mmm.",
+    "words": [
+      {
+        "word": "Mmm.",
+        "start": 38.1,
+        "end": 38.48,
+        "probability": 0.32791366428136826
+      }
+    ]
+  },
+  {
+    "scene": "coffee",
+    "start": 39.52,
+    "end": 40.12,
+    "text": " 46-20.",
+    "words": [
+      {
+        "word": "46",
+        "start": 39.52,
+        "end": 39.52,
+        "probability": 0.9140463471412659
+      },
+      {
+        "word": "-20.",
+        "start": 39.52,
+        "end": 40.12,
+        "probability": 0.6547738313674927
+      }
+    ]
+  },
+  {
+    "scene": "coffee",
+    "start": 40.62,
+    "end": 40.88,
+    "text": " How?",
+    "words": [
+      {
+        "word": "How?",
+        "start": 40.62,
+        "end": 40.88,
+        "probability": 0.9651743173599243
+      }
+    ]
+  },
+  {
+    "scene": "coffee",
+    "start": 41.6,
+    "end": 42.5,
+    "text": " I have my ways.",
+    "words": [
+      {
+        "word": "I",
+        "start": 41.6,
+        "end": 41.86,
+        "probability": 0.9917910099029541
+      },
+      {
+        "word": "have",
+        "start": 41.86,
+        "end": 42.06,
+        "probability": 0.9937230944633484
+      },
+      {
+        "word": "my",
+        "start": 42.06,
+        "end": 42.24,
+        "probability": 0.997442364692688
+      },
+      {
+        "word": "ways.",
+        "start": 42.24,
+        "end": 42.5,
+        "probability": 0.9585492014884949
+      }
+    ]
+  },
+  {
+    "scene": "dinner",
+    "start": 46.14,
+    "end": 55.17,
+    "text": " Receipts already with our accountant when did we even do them every day",
+    "words": [
+      {
+        "word": "Receipts",
+        "start": 46.14,
+        "end": 47.12,
+        "probability": 0.6850445866584778
+      },
+      {
+        "word": "already",
+        "start": 47.12,
+        "end": 47.76,
+        "probability": 0.055883072316646576
+      },
+      {
+        "word": "with",
+        "start": 47.76,
+        "end": 48.06,
+        "probability": 0.9911695718765259
+      },
+      {
+        "word": "our",
+        "start": 48.06,
+        "end": 48.24,
+        "probability": 0.9932865500450134
+      },
+      {
+        "word": "accountant",
+        "start": 48.24,
+        "end": 48.64,
+        "probability": 0.9749618768692017
+      },
+      {
+        "word": "when",
+        "start": 48.64,
+        "end": 49.72,
+        "probability": 0.2588561475276947
+      },
+      {
+        "word": "did",
+        "start": 52.79,
+        "end": 52.97,
+        "probability": 0.9986242055892944
+      },
+      {
+        "word": "we",
+        "start": 52.97,
+        "end": 53.13,
+        "probability": 0.9971900582313538
+      },
+      {
+        "word": "even",
+        "start": 53.13,
+        "end": 53.37,
+        "probability": 0.9988502264022827
+      },
+      {
+        "word": "do",
+        "start": 53.37,
+        "end": 53.61,
+        "probability": 0.9969843029975891
+      },
+      {
+        "word": "them",
+        "start": 53.61,
+        "end": 53.95,
+        "probability": 0.9956502318382263
+      },
+      {
+        "word": "every",
+        "start": 53.95,
+        "end": 54.63,
+        "probability": 0.7878355979919434
+      },
+      {
+        "word": "day",
+        "start": 54.63,
+        "end": 55.17,
+        "probability": 0.9954190254211426
+      }
+    ]
+  }
+]

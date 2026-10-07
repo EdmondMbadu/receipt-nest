@@ -1,0 +1,14 @@
+{
+  "file": "/Users/edmondmbadu/repo/receipt-nest/artifacts/i-have-my-ways/exports/ReceiptNest_I-Have-My-Ways_ANIMATED-CUT.mp4",
+  "bytes": 26045376,
+  "sha256": "929ae503f4c340c05e71d9f81db384374453fede081b214951a8844bf872d00f",
+  "duration_seconds": 60,
+  "frames": 1440,
+  "resolution": [
+    1280,
+    720
+  ],
+  "fps": 24,
+  "audio": "AAC stereo 48 kHz",
+  "review": "Visual sampling, transcript and technical checks; no listening review"
+}

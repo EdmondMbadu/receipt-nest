@@ -1,0 +1,52 @@
+[
+  {
+    "start": 1.6399999999999992,
+    "end": 3.2,
+    "text": " Where is the receipt?",
+    "words": [
+      {
+        "start": 1.6399999999999992,
+        "end": 2.32,
+        "word": " Where",
+        "probability": 0.6263736486434937
+      },
+      {
+        "start": 2.32,
+        "end": 2.64,
+        "word": " is",
+        "probability": 0.9927495718002319
+      },
+      {
+        "start": 2.64,
+        "end": 2.84,
+        "word": " the",
+        "probability": 0.9957068562507629
+      },
+      {
+        "start": 2.84,
+        "end": 3.2,
+        "word": " receipt?",
+        "probability": 0.999049961566925
+      }
+    ]
+  },
+  {
+    "start": 3.6,
+    "end": 4.16,
+    "text": " This one?",
+    "words": [
+      {
+        "start": 3.6,
+        "end": 3.88,
+        "word": " This",
+        "probability": 0.9433908462524414
+      },
+      {
+        "start": 3.88,
+        "end": 4.16,
+        "word": " one?",
+        "probability": 0.998525083065033
+      }
+    ]
+  }
+]

@@ -1,0 +1,262 @@
+[
+  {
+    "start": 0.0,
+    "speech_end": 0.56,
+    "end": 0.78,
+    "text": "Marcus.",
+    "clock": [
+      "scene",
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "start": 1.24,
+    "speech_end": 3.16,
+    "end": 3.38,
+    "text": "Miscellaneous, $86?",
+    "clock": [
+      "scene",
+      0,
+      1,
+      4
+    ]
+  },
+  {
+    "start": 3.58,
+    "speech_end": 5.06,
+    "end": 5.28,
+    "text": "It made sense in March.",
+    "clock": [
+      "final",
+      1
+    ]
+  },
+  {
+    "start": 6.08,
+    "speech_end": 7.3,
+    "end": 7.52,
+    "text": "We are fixing this.",
+    "clock": [
+      "final",
+      2
+    ]
+  },
+  {
+    "start": 9.63,
+    "speech_end": 10.84,
+    "end": 10.84,
+    "text": "You are photographing",
+    "clock": [
+      "final",
+      3,
+      0,
+      2
+    ]
+  },
+  {
+    "start": 10.84,
+    "speech_end": 11.54,
+    "end": 11.76,
+    "text": "receipts now?",
+    "clock": [
+      "final",
+      3,
+      3,
+      4
+    ]
+  },
+  {
+    "start": 11.84,
+    "speech_end": 12.58,
+    "end": 12.8,
+    "text": "Trying something.",
+    "clock": [
+      "final",
+      4
+    ]
+  },
+  {
+    "start": 18.0,
+    "speech_end": 19.02,
+    "end": 19.24,
+    "text": "This month's damage?",
+    "clock": [
+      "scene",
+      4
+    ]
+  },
+  {
+    "start": 20.0,
+    "speech_end": 22.26,
+    "end": 22.48,
+    "text": "$2,961.",
+    "clock": [
+      "scene",
+      5,
+      0,
+      6
+    ]
+  },
+  {
+    "start": 22.6,
+    "speech_end": 23.08,
+    "end": 23.3,
+    "text": "Forty cents.",
+    "clock": [
+      "scene",
+      5,
+      7,
+      8
+    ]
+  },
+  {
+    "start": 25.45,
+    "speech_end": 25.95,
+    "end": 26.17,
+    "text": "How?",
+    "clock": [
+      "scene",
+      6
+    ]
+  },
+  {
+    "start": 26.6,
+    "speech_end": 27.54,
+    "end": 27.76,
+    "text": "I have my ways.",
+    "clock": [
+      "final",
+      9
+    ]
+  },
+  {
+    "start": 30.0,
+    "speech_end": 31.16,
+    "end": 31.38,
+    "text": "Where is the receipt?",
+    "clock": [
+      "final",
+      10
+    ]
+  },
+  {
+    "start": 31.62,
+    "speech_end": 32.12,
+    "end": 32.25,
+    "text": "This one?",
+    "clock": [
+      "final",
+      11
+    ]
+  },
+  {
+    "start": 37.0,
+    "speech_end": 37.54,
+    "end": 37.76,
+    "text": "Coffee this month?",
+    "clock": [
+      "scene",
+      10
+    ]
+  },
+  {
+    "start": 38.06,
+    "speech_end": 38.5,
+    "end": 38.72,
+    "text": "Mmm.",
+    "clock": [
+      "final",
+      13,
+      0,
+      0
+    ]
+  },
+  {
+    "start": 39.18,
+    "speech_end": 40.12,
+    "end": 40.34,
+    "text": "$46.20.",
+    "clock": [
+      "final",
+      13,
+      1,
+      2
+    ]
+  },
+  {
+    "start": 40.54,
+    "speech_end": 40.9,
+    "end": 41.12,
+    "text": "How?",
+    "clock": [
+      "final",
+      14
+    ]
+  },
+  {
+    "start": 41.6,
+    "speech_end": 42.48,
+    "end": 42.7,
+    "text": "I have my ways.",
+    "clock": [
+      "final",
+      15
+    ]
+  },
+  {
+    "start": 46.48,
+    "speech_end": 47.16,
+    "end": 47.36,
+    "text": "Receipts?",
+    "clock": [
+      "final",
+      16
+    ]
+  },
+  {
+    "start": 47.36,
+    "speech_end": 48.6,
+    "end": 48.82,
+    "text": "Already with our accountant.",
+    "clock": [
+      "final",
+      17
+    ]
+  },
+  {
+    "start": 52.12,
+    "speech_end": 53.34,
+    "end": 53.34,
+    "text": "When did we even",
+    "clock": [
+      "final",
+      18,
+      0,
+      3
+    ]
+  },
+  {
+    "start": 53.34,
+    "speech_end": 53.96,
+    "end": 54.18,
+    "text": "do them?",
+    "clock": [
+      "final",
+      18,
+      4,
+      5
+    ]
+  },
+  {
+    "start": 54.48,
+    "speech_end": 55.12,
+    "end": 55.34,
+    "text": "Every day.",
+    "clock": [
+      "final",
+      19
+    ]
+  }
+]

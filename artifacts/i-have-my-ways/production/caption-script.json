@@ -1,0 +1,78 @@
+{
+  "beats": [
+    {
+      "phrase": "Marcus."
+    },
+    {
+      "phrase": "Miscellaneous, $86?"
+    },
+    {
+      "phrase": "It made sense in March."
+    },
+    {
+      "phrase": "We are fixing this."
+    },
+    {
+      "phrase": "You are photographing"
+    },
+    {
+      "phrase": "receipts now?"
+    },
+    {
+      "phrase": "Trying something."
+    },
+    {
+      "phrase": "This month's damage?"
+    },
+    {
+      "phrase": "$2,961."
+    },
+    {
+      "phrase": "Forty cents."
+    },
+    {
+      "phrase": "How?"
+    },
+    {
+      "phrase": "I have my ways."
+    },
+    {
+      "phrase": "Where is the receipt?"
+    },
+    {
+      "phrase": "This one?"
+    },
+    {
+      "phrase": "Coffee this month?"
+    },
+    {
+      "phrase": "Mmm."
+    },
+    {
+      "phrase": "$46.20."
+    },
+    {
+      "phrase": "How?"
+    },
+    {
+      "phrase": "I have my ways."
+    },
+    {
+      "phrase": "Receipts?"
+    },
+    {
+      "phrase": "Already with our accountant."
+    },
+    {
+      "phrase": "When did we even"
+    },
+    {
+      "phrase": "do them?"
+    },
+    {
+      "phrase": "Every day."
+    }
+  ],
+  "currency_policy": "Spoken currency is displayed in numeric notation.",
+  "timing_source": "Whisper on final master, full and scene-isolated passes."
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "start": 1.1600000000000001,
+    "end": 3.54,
+    "text": " You are photographing receipts now?",
+    "words": [
+      {
+        "start": 1.1600000000000001,
+        "end": 2.04,
+        "word": " You",
+        "probability": 0.5762680768966675
+      },
+      {
+        "start": 2.04,
+        "end": 2.18,
+        "word": " are",
+        "probability": 0.9584724307060242
+      },
+      {
+        "start": 2.18,
+        "end": 2.84,
+        "word": " photographing",
+        "probability": 0.9925464689731598
+      },
+      {
+        "start": 2.84,
+        "end": 3.1,
+        "word": " receipts",
+        "probability": 0.9751087427139282
+      },
+      {
+        "start": 3.1,
+        "end": 3.54,
+        "word": " now?",
+        "probability": 0.9427348971366882
+      }
+    ]
+  },
+  {
+    "start": 3.82,
+    "end": 5.06,
+    "text": " Tryin' somethin'.",
+    "words": [
+      {
+        "start": 3.82,
+        "end": 4.32,
+        "word": " Tryin'",
+        "probability": 0.6341713964939117
+      },
+      {
+        "start": 4.4,
+        "end": 5.06,
+        "word": " somethin'.",
+        "probability": 0.7111344138781229
+      }
+    ]
+  }
+]
