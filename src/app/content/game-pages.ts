@@ -14,9 +14,14 @@ export interface GamePage {
 
 export const gamePages: readonly GamePage[] = [
   {
-    path: '/games', kind: 'game', label: 'Games', updated: '2026-10-07',
+    path: '/games', kind: 'game', label: 'Games', updated: '2026-10-08',
     title: 'Receipt Games: Free Browser Games About Receipts | ReceiptNest',
     description: 'Quick, free browser games about receipts and record-keeping from ReceiptNest. Start with Before It Fades: read the total before the receipt disappears.'
+  },
+  {
+    path: '/games/shoebox', kind: 'game', label: 'Shoebox Sort', updated: '2026-10-08',
+    title: 'Shoebox Sort: The Receipt Sorting Game | ReceiptNest',
+    description: 'Receipts are raining. File each one in the right month before the shoebox fills up. Then learn a simple system for sorting receipts by month for taxes.'
   },
   {
     path: '/games/fade', kind: 'game', label: 'Before It Fades', updated: '2026-10-07',
