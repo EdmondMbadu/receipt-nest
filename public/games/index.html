@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Receipt Games: Free Browser Games About Receipts | ReceiptNest</title>
-<meta name="description" content="Quick, free browser games about receipts and record-keeping from ReceiptNest. Start with Before It Fades: read the total before the receipt disappears.">
+<meta name="description" content="Quick, free browser games about receipts from ReceiptNest. Decode cryptic bank charges, file a shoebox of receipts by month, or read a total before it fades.">
 <meta name="author" content="ReceiptNest">
 <meta name="robots" content="index, follow">
 <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -12,9 +12,9 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://receipt-nest.com/games">
 <meta property="og:title" content="Receipt Games by ReceiptNest">
-<meta property="og:description" content="Quick, free browser games about receipts. Start with Before It Fades: read the total before the receipt disappears.">
-<meta property="og:image" content="https://receipt-nest.com/games/fade/og.png">
-<meta property="og:image:alt" content="Before It Fades, a receipt-reading game by ReceiptNest">
+<meta property="og:description" content="Quick, free browser games about receipts. Decode bank charges, sort a shoebox, beat the fade.">
+<meta property="og:image" content="https://receipt-nest.com/games/charge/og.png">
+<meta property="og:image:alt" content="Guess the Charge, a bank statement decoding game by ReceiptNest">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:type" content="image/png">
@@ -24,9 +24,9 @@
 <meta name="twitter:site" content="@ReceiptNestAI">
 <meta name="twitter:url" content="https://receipt-nest.com/games">
 <meta name="twitter:title" content="Receipt Games by ReceiptNest">
-<meta name="twitter:description" content="Quick, free browser games about receipts. Start with Before It Fades: read the total before the receipt disappears.">
-<meta name="twitter:image" content="https://receipt-nest.com/games/fade/og.png">
-<meta name="twitter:image:alt" content="Before It Fades, a receipt-reading game by ReceiptNest">
+<meta name="twitter:description" content="Quick, free browser games about receipts. Decode bank charges, sort a shoebox, beat the fade.">
+<meta name="twitter:image" content="https://receipt-nest.com/games/charge/og.png">
+<meta name="twitter:image:alt" content="Guess the Charge, a bank statement decoding game by ReceiptNest">
 <meta name="theme-color" content="#1b1916">
 <link rel="icon" href="/favicon.ico?v=2" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=2">
@@ -36,7 +36,7 @@
 {"@type":"Organization","@id":"https://receipt-nest.com/#organization","name":"ReceiptNest","url":"https://receipt-nest.com/","logo":{"@type":"ImageObject","url":"https://receipt-nest.com/receipt-nest.png"}},
 {"@type":"WebSite","@id":"https://receipt-nest.com/#website","url":"https://receipt-nest.com/","name":"ReceiptNest","publisher":{"@id":"https://receipt-nest.com/#organization"}},
 {"@type":"CollectionPage","@id":"https://receipt-nest.com/games#webpage","url":"https://receipt-nest.com/games","name":"Receipt Games: Free Browser Games About Receipts | ReceiptNest","isPartOf":{"@id":"https://receipt-nest.com/#website"},
- "mainEntity":{"@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"url":"https://receipt-nest.com/games/shoebox","name":"Shoebox Sort"},{"@type":"ListItem","position":2,"url":"https://receipt-nest.com/games/fade","name":"Before It Fades"}]}},
+ "mainEntity":{"@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"url":"https://receipt-nest.com/games/charge","name":"Guess the Charge"},{"@type":"ListItem","position":2,"url":"https://receipt-nest.com/games/shoebox","name":"Shoebox Sort"},{"@type":"ListItem","position":3,"url":"https://receipt-nest.com/games/fade","name":"Before It Fades"}]}},
 {"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ReceiptNest","item":"https://receipt-nest.com/"},{"@type":"ListItem","position":2,"name":"Games","item":"https://receipt-nest.com/games"}]}
 ]}
 </script>
@@ -138,7 +138,7 @@ h1 .y{color:var(--yel)}
 <header class="top">
   <a class="brand" href="/"><img src="/receipt-nest.png" alt="ReceiptNest logo" width="26" height="26">ReceiptNest</a>
   <nav aria-label="Games navigation">
-    <a href="/games/shoebox">Play</a>
+    <a href="/games/charge">Play</a>
     <a href="/blog">Guides</a>
   </nav>
 </header>
@@ -150,10 +150,28 @@ h1 .y{color:var(--yel)}
       <p class="lede">Quick, free games about the little strips of paper that hold your money. Pick one and try to beat your best.</p>
     </section>
 
-    <a class="feature" href="/games/shoebox" aria-label="Play Shoebox Sort">
+    <a class="feature" href="/games/charge" aria-label="Play Guess the Charge">
       <div class="art">
         <span class="stamp">NEW</span>
-        <img class="phone" src="/games/shoebox/card.webp" alt="Shoebox Sort gameplay: receipts falling toward month folders" width="420" height="782">
+        <img class="phone" src="/games/charge/card.webp" alt="Guess the Charge gameplay: a highlighted bank statement line and four guesses" width="420" height="782" fetchpriority="high">
+      </div>
+      <div class="txt">
+        <div class="meta"><span class="chip">Puzzle</span><span class="chip">Daily + endless</span><span class="chip">Free · no signup</span></div>
+        <h2>Guess the <span>charge</span></h2>
+        <p>Your statement says <code style="font-family:var(--mono);font-size:.85em">SQ *GRNLINE PLMB SUP</code>. What did you buy? Read the line before the highlighter runs out.</p>
+        <ul class="rules">
+          <li><b>10</b>Same ten charges for everyone, every day</li>
+          <li><b>SQ*</b>Real payment codes, decoded as you play</li>
+          <li><b>3</b>Misses allowed in endless, and it keeps speeding up</li>
+        </ul>
+        <div class="dare">Can you go 10 for 10?</div>
+        <span class="play">Play now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <a class="feature" href="/games/shoebox" aria-label="Play Shoebox Sort">
+      <div class="art">
+        <img class="phone" src="/games/shoebox/card.webp" alt="Shoebox Sort gameplay: receipts falling toward month folders" width="420" height="782" loading="lazy">
       </div>
       <div class="txt">
         <div class="meta"><span class="chip">Arcade</span><span class="chip">Endless</span><span class="chip">Free · no signup</span></div>
@@ -171,7 +189,7 @@ h1 .y{color:var(--yel)}
 
     <a class="feature" href="/games/fade" aria-label="Play Before It Fades">
       <div class="art">
-        <img src="/games/fade/card.webp" alt="A crisp receipt beside the same kind of receipt faded almost blank" width="900" height="753">
+        <img src="/games/fade/card.webp" alt="A crisp receipt beside the same kind of receipt faded almost blank" width="900" height="753" loading="lazy">
       </div>
       <div class="txt">
         <div class="meta"><span class="chip">Reaction</span><span class="chip">About 1 min</span><span class="chip">Free · no signup</span></div>
@@ -192,8 +210,8 @@ h1 .y{color:var(--yel)}
       <div class="soon">
         <div class="slot">
           <div class="lab">Coming soon</div>
-          <h3>Guess the charge</h3>
-          <p>Your bank statement says <code>PMT*JRK SVCS 0412</code>. What did you buy? Nobody knows, and that’s the point.</p>
+          <h3>A year in receipts</h3>
+          <p>Twelve months, one small business, a pile of receipts. Decide fast which ones matter before the year closes.</p>
         </div>
         <div class="slot">
           <div class="lab">Coming soon</div>
@@ -207,7 +225,7 @@ h1 .y{color:var(--yel)}
       <div>
         <h2>Why games about receipts?</h2>
         <p>Every game here starts from a real receipt problem: thermal paper that fades, bank statements that don’t say what you bought, a shoebox nobody wants to open in April.</p>
-        <p>Each game page also explains the problem in plain language. Before It Fades, for example, covers <a href="/games/fade#why">why receipts fade and how long to keep them</a>.</p>
+        <p>Each game page also explains the problem in plain language. Before It Fades covers <a href="/games/fade#why">why receipts fade and how long to keep them</a>, and Guess the Charge explains <a href="/games/charge#decoder">how to identify a charge on your bank statement</a>.</p>
       </div>
       <div>
         <h2>Made by ReceiptNest</h2>
@@ -220,6 +238,7 @@ h1 .y{color:var(--yel)}
 <footer class="foot">
   <div class="wrap">
     <a href="/">ReceiptNest</a>
+    <a href="/games/charge">Guess the Charge</a>
     <a href="/games/shoebox">Shoebox Sort</a>
     <a href="/games/fade">Before It Fades</a>
     <a href="/receipt-scanner">Receipt scanner</a>
