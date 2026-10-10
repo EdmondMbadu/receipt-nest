@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Bank Statement Decoder: Find Missing Receipts | ReceiptNest</title>
-<meta name="description" content="Coming soon from ReceiptNest: upload a bank statement, see who charged you and the likely category, and get a list of missing receipts for your bookkeeper.">
+<meta name="description" content="Coming soon from ReceiptNest: upload a bank statement, see who charged you and the likely category, and which charges have no receipt saved yet.">
 <meta name="author" content="ReceiptNest">
 <meta name="robots" content="index, follow">
 <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -12,7 +12,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://receipt-nest.com/statement-decoder">
 <meta property="og:title" content="Your bank statement, decoded.">
-<meta property="og:description" content="Who charged you, what it likely was, and which receipts you’re missing. One list for your bookkeeper. Join the early-access list.">
+<meta property="og:description" content="Who charged you, what it likely was, and which charges still need a receipt. One list for your bookkeeper. Join the early-access list.">
 <meta property="og:image" content="https://receipt-nest.com/statement-decoder/og.png">
 <meta property="og:image:alt" content="The ReceiptNest Statement Decoder turning cryptic bank statement lines into merchants, categories and receipt status">
 <meta property="og:image:width" content="1200">
@@ -24,7 +24,7 @@
 <meta name="twitter:site" content="@ReceiptNestAI">
 <meta name="twitter:url" content="https://receipt-nest.com/statement-decoder">
 <meta name="twitter:title" content="Your bank statement, decoded.">
-<meta name="twitter:description" content="Who charged you, what it likely was, and which receipts you’re missing. One list for your bookkeeper. Join the early-access list.">
+<meta name="twitter:description" content="Who charged you, what it likely was, and which charges still need a receipt. One list for your bookkeeper. Join the early-access list.">
 <meta name="twitter:image" content="https://receipt-nest.com/statement-decoder/og.png">
 <meta name="twitter:image:alt" content="The ReceiptNest Statement Decoder turning cryptic bank statement lines into merchants, categories and receipt status">
 <meta name="theme-color" content="#f5eedf">
@@ -38,7 +38,7 @@
 {"@context":"https://schema.org","@graph":[
 {"@type":"Organization","@id":"https://receipt-nest.com/#organization","name":"ReceiptNest","url":"https://receipt-nest.com/","logo":{"@type":"ImageObject","url":"https://receipt-nest.com/receipt-nest.png"},"sameAs":["https://apps.apple.com/us/app/receiptnest-ai/id6762539388","https://play.google.com/store/apps/details?id=com.receiptnest.mobile","https://www.youtube.com/@ReceiptNestAI","https://x.com/ReceiptNestAI","https://www.instagram.com/receiptnest","https://www.tiktok.com/@receiptnest"]},
 {"@type":"WebSite","@id":"https://receipt-nest.com/#website","url":"https://receipt-nest.com/","name":"ReceiptNest","publisher":{"@id":"https://receipt-nest.com/#organization"}},
-{"@type":"WebPage","@id":"https://receipt-nest.com/statement-decoder#webpage","url":"https://receipt-nest.com/statement-decoder","name":"Bank Statement Decoder: Find Missing Receipts | ReceiptNest","description":"Coming soon from ReceiptNest: upload a bank statement, see who charged you and the likely category, and get a list of missing receipts for your bookkeeper.","isPartOf":{"@id":"https://receipt-nest.com/#website"},"primaryImageOfPage":{"@type":"ImageObject","url":"https://receipt-nest.com/statement-decoder/og.png"},"breadcrumb":{"@id":"https://receipt-nest.com/statement-decoder#breadcrumb"}},
+{"@type":"WebPage","@id":"https://receipt-nest.com/statement-decoder#webpage","url":"https://receipt-nest.com/statement-decoder","name":"Bank Statement Decoder: Find Missing Receipts | ReceiptNest","description":"Coming soon from ReceiptNest: upload a bank statement, see who charged you and the likely category, and which charges have no receipt saved yet.","isPartOf":{"@id":"https://receipt-nest.com/#website"},"primaryImageOfPage":{"@type":"ImageObject","url":"https://receipt-nest.com/statement-decoder/og.png"},"breadcrumb":{"@id":"https://receipt-nest.com/statement-decoder#breadcrumb"}},
 {"@type":"BreadcrumbList","@id":"https://receipt-nest.com/statement-decoder#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"ReceiptNest","item":"https://receipt-nest.com/"},{"@type":"ListItem","position":2,"name":"Statement Decoder","item":"https://receipt-nest.com/statement-decoder"}]}
 ]}
 </script>
@@ -330,7 +330,7 @@ details a{color:#9a3412;text-underline-offset:3px}
       <div>
         <div class="k">Coming soon · Statement Decoder</div>
         <h1 id="h1">Your bank statement, <span class="hl">decoded</span>.</h1>
-        <p class="lede">Upload a statement. See <b>who charged you</b>, <b>what each charge likely was</b>, and <b>which receipts you’re missing</b>, in one list your bookkeeper can actually use.</p>
+        <p class="lede">Upload a statement. See <b>who charged you</b>, <b>what each charge likely was</b>, and <b>which charges still need a receipt</b>, in one list your bookkeeper can actually use.</p>
         <div class="join" id="join" data-src="decoder_hero">
           <form class="form" novalidate>
             <div class="row">
@@ -357,12 +357,12 @@ details a{color:#9a3412;text-underline-offset:3px}
         <div class="sheet" id="demo">
           <div class="sh-h"><b>CHECKING ••••4417</b><span>STATEMENT · OCT 2026</span></div>
           <div class="sh-c"><span>DESCRIPTION</span><span>AMOUNT</span></div>
-          <div class="ln" data-s="ok"><svg class="mk" viewBox="0 0 22 22"><path d="M4 12 L9 17 L18 5" stroke="#1f7a4d"/></svg><span class="code">SQ *GRNLINE PLMB SUP</span><span class="amt">-86.40</span><span class="dec">Greenline Plumbing Supply <em>· Hardware</em></span><span class="st ok">✓ Receipt</span></div>
-          <div class="ln" data-s="ok"><svg class="mk" viewBox="0 0 22 22"><path d="M4 12 L9 17 L18 5" stroke="#1f7a4d"/></svg><span class="code">TST* EL CAMINO TAQ</span><span class="amt">-24.18</span><span class="dec">El Camino Taqueria <em>· Meals</em></span><span class="st ok">✓ Receipt</span></div>
-          <div class="ln" data-s="miss"><svg class="mk" viewBox="0 0 22 22"><ellipse cx="11" cy="11" rx="9" ry="7.6" stroke="#c8321f" transform="rotate(-12 11 11)"/></svg><span class="code">SHOPIFY* 104729381</span><span class="amt">-39.00</span><span class="dec">Shopify, your store plan <em>· Software</em></span><span class="st miss">✗ Missing</span></div>
+          <div class="ln" data-s="ok"><svg class="mk" viewBox="0 0 22 22"><path d="M4 12 L9 17 L18 5" stroke="#1f7a4d"/></svg><span class="code">SQ *GRNLINE PLMB SUP</span><span class="amt">-86.40</span><span class="dec">Greenline Plumbing Supply <em>· Hardware</em></span><span class="st ok">✓ On file</span></div>
+          <div class="ln" data-s="ok"><svg class="mk" viewBox="0 0 22 22"><path d="M4 12 L9 17 L18 5" stroke="#1f7a4d"/></svg><span class="code">TST* EL CAMINO TAQ</span><span class="amt">-24.18</span><span class="dec">El Camino Taqueria <em>· Meals</em></span><span class="st ok">✓ On file</span></div>
+          <div class="ln" data-s="miss"><svg class="mk" viewBox="0 0 22 22"><ellipse cx="11" cy="11" rx="9" ry="7.6" stroke="#c8321f" transform="rotate(-12 11 11)"/></svg><span class="code">SHOPIFY* 104729381</span><span class="amt">-39.00</span><span class="dec">Shopify, your store plan <em>· Software</em></span><span class="st miss">✗ No receipt</span></div>
           <div class="ln" data-s="chk"><svg class="mk" viewBox="0 0 22 22"><path d="M11 4v9M11 17.5v.5" stroke="#a15c07"/></svg><span class="code">PAYPAL *JRKPHOTO</span><span class="amt">-150.00</span><span class="dec">JRK Photo, paid via PayPal <em>· Contractor?</em></span><span class="st chk">? Check this</span></div>
-          <div class="ln" data-s="ok"><svg class="mk" viewBox="0 0 22 22"><path d="M4 12 L9 17 L18 5" stroke="#1f7a4d"/></svg><span class="code">QUIKFUEL 2214 LAS VEGAS NV</span><span class="amt">-61.09</span><span class="dec">QuikFuel gas station <em>· Fuel</em></span><span class="st ok">✓ Receipt</span></div>
-          <div class="sum" id="sum"><b>5 charges decoded</b><i class="g">3 receipts</i><i class="r">1 missing</i><i class="a">1 to check</i></div>
+          <div class="ln" data-s="ok"><svg class="mk" viewBox="0 0 22 22"><path d="M4 12 L9 17 L18 5" stroke="#1f7a4d"/></svg><span class="code">QUIKFUEL 2214 LAS VEGAS NV</span><span class="amt">-61.09</span><span class="dec">QuikFuel gas station <em>· Fuel</em></span><span class="st ok">✓ On file</span></div>
+          <div class="sum" id="sum"><b>5 charges decoded</b><i class="g">3 on file</i><i class="r">1 no receipt</i><i class="a">1 to check</i></div>
         </div>
         <p class="cap">Illustration. Businesses, amounts and results are examples.</p>
       </div>
@@ -388,25 +388,25 @@ details a{color:#9a3412;text-underline-offset:3px}
         <div class="steps">
           <div class="step"><svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6h14l8 8v24H12z"/><path d="M26 6v8h8M22 32V20M17 25l5-5 5 5"/></svg><div class="n">01</div><h3>Upload a statement</h3><p>Drop in the PDF or CSV your bank gives you. No bank login, no linked accounts.</p></div>
           <div class="step"><svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 12h20M6 20h14M6 28h18M6 36h10"/><path d="M30 26l4 4 8-9" stroke="#1f7a4d"/></svg><div class="n">02</div><h3>We decode every line</h3><p>Who charged you and the likely category, read from the codes. Anything uncertain is marked “check this”, never guessed in silence.</p></div>
-          <div class="step"><svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6h24v32l-4-3-4 3-4-3-4 3-4-3-4 3z"/><path d="M16 15h12M16 21h12"/><circle cx="22" cy="29" r="0.5"/></svg><div class="n">03</div><h3>See what’s missing</h3><p>We match charges to the receipts already in your ReceiptNest, then list the ones you still need to find, ready to hand off.</p></div>
+          <div class="step"><svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6h24v32l-4-3-4 3-4-3-4 3-4-3-4 3z"/><path d="M16 15h12M16 21h12"/><circle cx="22" cy="29" r="0.5"/></svg><div class="n">03</div><h3>See what needs a receipt</h3><p>We match each charge to the receipts you’ve saved in ReceiptNest by amount, date and merchant. Charges with no match are listed, ready to hand off.</p></div>
         </div>
       </div>
 
       <div class="sec">
         <div class="k">What your bookkeeper gets</div>
         <h2 class="h2">Every line explained. Every gap flagged.</h2>
-        <p class="sub">One clean list per statement: the original line, who it was, a likely category, and whether you have the receipt. Export it as a CSV or PDF and send it on.</p>
+        <p class="sub">One clean list per statement: the original line, who it was, a likely category, and whether a matching receipt is saved in your ReceiptNest. Export it as a CSV or PDF and send it on.</p>
         <div class="exp" role="region" aria-label="Example export">
-          <div class="exp-h"><div><b>October 2026 · Checking ••••4417</b><br><span>Example export</span></div><div class="chips"><span class="chip">42 charges</span><span class="chip g">38 receipts</span><span class="chip r">3 missing</span><span class="chip a">1 to check</span></div></div>
+          <div class="exp-h"><div><b>October 2026 · Checking ••••4417</b><br><span>Example export</span></div><div class="chips"><span class="chip">42 charges</span><span class="chip g">38 matched</span><span class="chip r">3 need a receipt</span><span class="chip a">1 to check</span></div></div>
           <div class="tw"><table class="tbl">
-            <thead><tr><th>Date</th><th>On your statement</th><th>Who</th><th>Likely category</th><th class="n">Amount</th><th>Receipt</th></tr></thead>
+            <thead><tr><th>Date</th><th>On your statement</th><th>Who</th><th>Likely category</th><th class="n">Amount</th><th>Receipt on file</th></tr></thead>
             <tbody>
               <tr><td>Oct 03</td><td class="m">SQ *GRNLINE PLMB SUP</td><td>Greenline Plumbing Supply</td><td>Hardware &amp; supplies</td><td class="n">86.40</td><td><span class="s g">✓ Attached</span></td></tr>
               <tr><td>Oct 04</td><td class="m">TST* EL CAMINO TAQ</td><td>El Camino Taqueria</td><td>Meals</td><td class="n">24.18</td><td><span class="s g">✓ Attached</span></td></tr>
               <tr><td>Oct 07</td><td class="m">GOOGLE *Workspace</td><td>Google Workspace</td><td>Software</td><td class="n">14.00</td><td><span class="s g">✓ Attached</span></td></tr>
-              <tr><td>Oct 11</td><td class="m">SHOPIFY* 104729381</td><td>Shopify (store plan)</td><td>Software</td><td class="n">39.00</td><td><span class="s r">✗ Missing</span></td></tr>
+              <tr><td>Oct 11</td><td class="m">SHOPIFY* 104729381</td><td>Shopify (store plan)</td><td>Software</td><td class="n">39.00</td><td><span class="s r">✗ No receipt</span></td></tr>
               <tr><td>Oct 14</td><td class="m">PAYPAL *JRKPHOTO</td><td>JRK Photo via PayPal</td><td>Contractor?</td><td class="n">150.00</td><td><span class="s a">? Check this</span></td></tr>
-              <tr><td>Oct 18</td><td class="m">BAYVIEW OFFC SUP #12</td><td>Bayview Office Supply</td><td>Office supplies</td><td class="n">47.85</td><td><span class="s r">✗ Missing</span></td></tr>
+              <tr><td>Oct 18</td><td class="m">BAYVIEW OFFC SUP #12</td><td>Bayview Office Supply</td><td>Office supplies</td><td class="n">47.85</td><td><span class="s r">✗ No receipt</span></td></tr>
             </tbody>
           </table></div>
           <div class="exp-f"><span>Illustration of the planned export. Categories are suggestions for you and your bookkeeper to confirm.</span><div class="fmt"><i>CSV</i><i>PDF</i></div></div>
@@ -421,7 +421,7 @@ details a{color:#9a3412;text-underline-offset:3px}
             <ul class="ticks">
               <li><svg viewBox="0 0 24 24" fill="none" stroke="#1f7a4d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span><b>A statement never lists items.</b> The decoder tells you who charged you and the likely category. It won’t invent what you bought.</span></li>
               <li><svg viewBox="0 0 24 24" fill="none" stroke="#1f7a4d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span><b>Uncertain lines are flagged.</b> If a code is ambiguous, you’ll see “check this” instead of a confident wrong answer.</span></li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="#1f7a4d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span><b>Receipts stay the proof.</b> The decoder shows you exactly which ones to find. The receipt is what turns a guess into a record.</span></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="#1f7a4d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span><b>“No receipt” means none saved in ReceiptNest.</b> It can’t see the paper in your drawer. It shows you which charges to look for, and the receipt is what turns a guess into a record.</span></li>
               <li><svg viewBox="0 0 24 24" fill="none" stroke="#1f7a4d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span><b>Not tax advice.</b> Categories are suggestions. You and your bookkeeper make the call.</span></li>
             </ul>
           </div>
@@ -458,7 +458,8 @@ details a{color:#9a3412;text-underline-offset:3px}
         <h2 class="h2">The short answers.</h2>
         <div class="faq">
           <details><summary>Does it connect to my bank?</summary><p>No. You upload a statement file you already have, a PDF or CSV. ReceiptNest never asks for your bank login.</p></details>
-          <details><summary>Can it tell me exactly what I bought?</summary><p>No tool can, from a statement alone. It tells you who charged you and the likely category, and marks lines it isn’t sure about. Your receipts are what show the items, and the decoder tells you which ones you’re missing.</p></details>
+          <details><summary>Can it tell me exactly what I bought?</summary><p>No tool can, from a statement alone. It tells you who charged you and the likely category, and marks lines it isn’t sure about. Your receipts are what show the items, and the decoder shows which charges don’t have one saved yet.</p></details>
+          <details><summary>How does it know which charges need a receipt?</summary><p>It only knows about receipts you’ve saved in ReceiptNest, whether you snapped them or forwarded them. Each statement charge is matched to those receipts by amount, date and merchant, with room for things like a tip added after you signed, or a charge that posts a few days late. If nothing matches, the charge is listed as needing a receipt. If a charge could match more than one receipt, it’s marked “check this” so you can confirm.</p></details>
           <details><summary>Which banks will it work with?</summary><p>The goal is any bank that lets you download a statement as a PDF or CSV. CSV statements come first because every bank lays out its PDFs differently.</p></details>
           <details><summary>When will it be ready?</summary><p>We’re building it now. Join the list and you’ll get one email the day it opens, with your first statement free.</p></details>
           <details><summary>Is this tax or accounting advice?</summary><p>No. Categories are suggestions to save you and your bookkeeper time. Your bookkeeper or tax professional makes the final call.</p></details>

@@ -73,49 +73,28 @@ export interface WaitlistEmail {
 }
 
 const SITE = "https://receipt-nest.com";
+const ICON_URL = `${SITE}/apple-touch-icon.png?v=2`;
 const REGISTER_URL = `${SITE}/register?utm_source=email&utm_medium=waitlist&utm_campaign=statement_decoder`;
-const GAME_URL = `${SITE}/games/charge?utm_source=email&utm_medium=waitlist&utm_campaign=statement_decoder`;
-
-const SAMPLE = [
-  { line: "SQ *GRNLINE PLMB SUP", amount: "86.40", who: "Greenline Plumbing Supply", cat: "Hardware", receipt: true },
-  { line: "TST* EL CAMINO TAQ", amount: "24.18", who: "El Camino Taqueria", cat: "Meals", receipt: true },
-  { line: "SHOPIFY* 104729381", amount: "39.00", who: "Shopify, your store plan", cat: "Software", receipt: false },
-];
+const DECODER_URL = `${SITE}/statement-decoder?utm_source=email&utm_medium=waitlist&utm_campaign=statement_decoder`;
 
 /**
- * Confirmation email. Layout: night header with the logo, a serif headline, a three-line "decoded statement"
- * preview with a highlighter on each code, three steps, one primary button. Colours on white/#f8fafc/#0f172a
- * are picked so the shared dark-mode mapper (email-theme.ts) recolours them correctly.
+ * Confirmation email, in the plain style of a major product's waitlist email: the app icon and name on top,
+ * a short headline, a few sentences, one button, a sign-off and a quiet footer. Colours are limited to the ones the
+ * shared dark-mode mapper (email-theme.ts) knows, so the email also reads well in dark mode.
  */
 export const buildWaitlistEmail = (rawName: string): WaitlistEmail => {
-  const name = displayName(cleanName(rawName)) || "there";
-  const safeName = esc(name);
-  const subject = name === "there" ? "You’re on the list for the Statement Decoder" : `You’re on the list, ${name}`;
-  const preheader = "We’ll email you the day the Statement Decoder opens. Your first statement is on us.";
+  const name = displayName(cleanName(rawName));
+  const greeting = name ? `Hi ${esc(name)},` : "Hi there,";
+  const subject = "You’re on the Statement Decoder waitlist";
+  const preheader = "We’ll email you as soon as it’s ready. Your first statement will be free.";
 
-  const rows = SAMPLE.map(
-    (r) => `
-                <tr>
-                  <td style="padding:12px 0; border-bottom:1px solid #e2e8f0; font-family:'Courier New',Courier,monospace; font-size:13px; line-height:18px; color:#0f172a;">
-                    <span style="background-color:#ffe27a; color:#1d1b17; padding:2px 4px; border-radius:3px;">${esc(r.line)}</span>
-                    <div style="margin-top:6px; font-family:Arial,Helvetica,sans-serif; font-size:13px; line-height:18px; color:#475569;">${esc(r.who)} · ${esc(r.cat)}</div>
-                  </td>
-                  <td align="right" valign="top" style="padding:12px 0 12px 12px; border-bottom:1px solid #e2e8f0; font-family:'Courier New',Courier,monospace; font-size:13px; line-height:18px; color:#0f172a; white-space:nowrap;">
-                    -${r.amount}
-                    <div style="margin-top:6px; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:18px; font-weight:700; color:${r.receipt ? "#047857" : "#9f1239"};">${r.receipt ? "&#10003; Receipt" : "&#10007; Missing"}</div>
-                  </td>
-                </tr>`
-  ).join("");
-
-  const step = (n: string, title: string, body: string) => `
-                <tr>
-                  <td width="34" valign="top" style="padding:0 0 14px;">
-                    <div style="width:26px; height:26px; border-radius:13px; background-color:#0f172a; color:#ffffff; text-align:center; font-family:Arial,Helvetica,sans-serif; font-size:13px; font-weight:700; line-height:26px;">${n}</div>
-                  </td>
-                  <td valign="top" style="padding:2px 0 14px; font-family:Arial,Helvetica,sans-serif; font-size:15px; line-height:22px; color:#0f172a;">
-                    <strong>${title}</strong> <span style="color:#475569;">${body}</span>
-                  </td>
-                </tr>`;
+  const p = (html: string, extra = "") =>
+    `<p style="margin:0 0 16px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:26px; color:#243244;${extra}">${html}</p>`;
+  const li = (html: string) => `
+                    <tr>
+                      <td width="22" valign="top" style="padding:0 0 10px; font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:26px; color:#059669;">&#8226;</td>
+                      <td valign="top" style="padding:0 0 10px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:26px; color:#243244;">${html}</td>
+                    </tr>`;
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -128,77 +107,45 @@ export const buildWaitlistEmail = (rawName: string): WaitlistEmail => {
     <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent; mso-hide:all;">${esc(preheader)}</div>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f8fafc;">
       <tr>
-        <td align="center" style="padding:24px 12px;">
-          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px; background-color:#ffffff; border:1px solid #e2e8f0; border-radius:18px; overflow:hidden;">
+        <td align="center" style="padding:40px 16px 24px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:560px;">
             <tr>
-              <td style="padding:22px 28px; background-color:#1b1916;">
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td valign="middle">
-                      <img src="${SITE}/receipt-nest.png" width="28" height="28" alt="ReceiptNest" style="display:inline-block; vertical-align:middle; width:28px; height:28px; border-radius:7px; border:0;" />
-                      <span style="display:inline-block; vertical-align:middle; margin-left:8px; font-family:Arial,Helvetica,sans-serif; font-size:15px; font-weight:700; color:#f3ead6;">ReceiptNest</span>
-                    </td>
-                    <td align="right" valign="middle" style="font-family:Arial,Helvetica,sans-serif; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#ffd23f;">Early access</td>
-                  </tr>
+              <td align="left" style="padding:0 4px 24px;">
+                <a href="${SITE}" style="text-decoration:none;">
+                  <img src="${ICON_URL}" width="40" height="40" alt="ReceiptNest" style="display:inline-block; vertical-align:middle; width:40px; height:40px; border:0; border-radius:10px;" />
+                  <span style="display:inline-block; vertical-align:middle; margin-left:10px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:18px; font-weight:700; color:#0f172a;">ReceiptNest</span>
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td style="background-color:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:36px 36px 30px;">
+                <h1 style="margin:0 0 20px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:24px; line-height:32px; font-weight:700; color:#0f172a;">You’re on the waitlist</h1>
+                ${p(greeting)}
+                ${p("Thanks for signing up for early access to the <strong style=\"color:#0f172a;\">Statement Decoder</strong>. We’ll email you as soon as it’s ready, and your first statement will be free.")}
+                ${p("Here’s what it will do:", " margin-bottom:10px;")}
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 8px;">${li("Read each line of your bank statement and show who charged you, with a likely category.")}${li("Match each charge to the receipts you’ve saved in ReceiptNest.")}${li("List the charges that don’t have a receipt yet, ready to send to your bookkeeper.")}
                 </table>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:34px 28px 8px;">
-                <p style="margin:0 0 10px; font-family:Arial,Helvetica,sans-serif; font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#9a3412;">Statement Decoder</p>
-                <h1 style="margin:0; font-family:Georgia,'Times New Roman',serif; font-size:32px; line-height:38px; font-weight:400; color:#0f172a;">You’re on the list, ${safeName}.</h1>
-                <p style="margin:16px 0 0; font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:25px; color:#475569;">Thanks for raising your hand. The Statement Decoder turns a cryptic bank statement into a list your bookkeeper can actually use, and shows you exactly which receipts are missing.</p>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:22px 28px 6px;">
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f8fafc; border:1px solid #e2e8f0; border-radius:12px;">
+                ${p("Until then, you can start saving receipts in ReceiptNest. Every receipt you save now is one the decoder can match later.")}
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 28px;">
                   <tr>
-                    <td style="padding:14px 18px 4px;">
-                      <p style="margin:0; font-family:Arial,Helvetica,sans-serif; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#64748b;">A preview of what you’ll get</p>
-                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${rows}
-                      </table>
-                      <p style="margin:10px 0 12px; font-family:Arial,Helvetica,sans-serif; font-size:13px; line-height:19px; color:#64748b;">1 receipt missing. That’s the one your bookkeeper will ask about.</p>
+                    <td align="center" bgcolor="#059669" style="border-radius:8px; background-color:#059669;">
+                      <a href="${REGISTER_URL}" style="display:inline-block; padding:13px 24px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; font-weight:600; line-height:20px; color:#ffffff; text-decoration:none; border-radius:8px;">Get started with ReceiptNest</a>
                     </td>
                   </tr>
                 </table>
+                ${p("If you have a question, just reply to this email.")}
+                ${p("Gervais<br /><span style=\"color:#64748b;\">ReceiptNest</span>", " margin-bottom:0;")}
               </td>
             </tr>
             <tr>
-              <td style="padding:26px 28px 4px;">
-                <p style="margin:0 0 14px; font-family:Georgia,'Times New Roman',serif; font-size:21px; line-height:28px; color:#0f172a;">How it will work</p>
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${step("1", "Upload a statement.", "A PDF or CSV from your bank. No bank login, ever.")}${step("2", "We decode every line.", "Who charged you and a likely category, with anything uncertain clearly marked.")}${step("3", "See what’s missing.", "Every charge without a receipt, in one list you can hand to your bookkeeper.")}
-                </table>
-                <p style="margin:6px 0 0; font-family:Arial,Helvetica,sans-serif; font-size:15px; line-height:23px; color:#0f172a;">We’ll email you once, the day it opens. <strong>Your first statement is on us.</strong></p>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:26px 28px 6px;">
-                <p style="margin:0 0 12px; font-family:Arial,Helvetica,sans-serif; font-size:15px; line-height:23px; color:#475569;">While you wait, start keeping the receipts. When the decoder opens, it will match them for you.</p>
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-                  <tr>
-                    <td align="center" bgcolor="#ffd23f" style="border-radius:12px; background-color:#ffd23f;">
-                      <a href="${REGISTER_URL}" style="display:inline-block; padding:14px 24px; font-family:Arial,Helvetica,sans-serif; font-size:15px; font-weight:700; color:#1d1b17; text-decoration:none; border-radius:12px;">Start keeping receipts, free</a>
-                    </td>
-                  </tr>
-                </table>
-                <p style="margin:14px 0 0; font-family:Arial,Helvetica,sans-serif; font-size:14px; line-height:21px; color:#475569;">Or keep your eye sharp with <a href="${GAME_URL}" style="color:#9a3412; text-decoration:underline;">today’s Guess the Charge</a>.</p>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:24px 28px 30px;">
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-top:1px solid #e2e8f0;">
-                  <tr>
-                    <td style="padding-top:18px; font-family:Arial,Helvetica,sans-serif; font-size:14px; line-height:22px; color:#475569;">
-                      One question: what’s the most confusing charge on your statement right now? Just hit reply. I read every answer.
-                      <br /><br />Edmond<br /><span style="color:#64748b;">Founder, ReceiptNest</span>
-                    </td>
-                  </tr>
-                </table>
+              <td align="center" style="padding:24px 16px 0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:13px; line-height:20px; color:#64748b;">
+                You’re receiving this because you joined the Statement Decoder waitlist at <span style="white-space:nowrap;">receipt-nest.com</span>.<br />
+                <a href="${DECODER_URL}" style="color:#64748b; text-decoration:underline;">About the Statement Decoder</a>
+                &nbsp;·&nbsp;
+                <a href="${SITE}" style="color:#64748b; text-decoration:underline;">receipt-nest.com</a>
               </td>
             </tr>
           </table>
-          <p style="margin:16px 0 0; max-width:560px; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:18px; color:#94a3b8;">You’re receiving this because you joined the Statement Decoder early-access list at receipt-nest.com. ReceiptNest never asks for your bank login.</p>
         </td>
       </tr>
     </table>
@@ -206,27 +153,27 @@ export const buildWaitlistEmail = (rawName: string): WaitlistEmail => {
 </html>`;
 
   const text = [
-    `You’re on the list, ${name}.`,
+    "You’re on the waitlist",
     "",
-    "Thanks for raising your hand. The Statement Decoder turns a cryptic bank statement into a list your bookkeeper can actually use, and shows you exactly which receipts are missing.",
+    name ? `Hi ${name},` : "Hi there,",
     "",
-    "A preview of what you’ll get:",
-    ...SAMPLE.map((r) => `  ${r.line}  -${r.amount}  →  ${r.who} · ${r.cat} · ${r.receipt ? "receipt ✓" : "MISSING"}`),
+    "Thanks for signing up for early access to the Statement Decoder. We’ll email you as soon as it’s ready, and your first statement will be free.",
     "",
-    "How it will work:",
-    "  1. Upload a statement. A PDF or CSV from your bank. No bank login, ever.",
-    "  2. We decode every line. Who charged you and a likely category, with anything uncertain clearly marked.",
-    "  3. See what’s missing. Every charge without a receipt, in one list you can hand to your bookkeeper.",
+    "Here’s what it will do:",
+    "- Read each line of your bank statement and show who charged you, with a likely category.",
+    "- Match each charge to the receipts you’ve saved in ReceiptNest.",
+    "- List the charges that don’t have a receipt yet, ready to send to your bookkeeper.",
     "",
-    "We’ll email you once, the day it opens. Your first statement is on us.",
+    "Until then, you can start saving receipts in ReceiptNest. Every receipt you save now is one the decoder can match later.",
+    `Get started: ${REGISTER_URL}`,
     "",
-    `While you wait, start keeping the receipts: ${REGISTER_URL}`,
-    `Or play today’s Guess the Charge: ${GAME_URL}`,
+    "If you have a question, just reply to this email.",
     "",
-    "One question: what’s the most confusing charge on your statement right now? Just hit reply. I read every answer.",
+    "Gervais",
+    "ReceiptNest",
     "",
-    "Edmond",
-    "Founder, ReceiptNest",
+    "You’re receiving this because you joined the Statement Decoder waitlist at receipt-nest.com.",
+    `About the Statement Decoder: ${DECODER_URL}`,
   ].join("\n");
 
   return { subject, preheader, html, text };

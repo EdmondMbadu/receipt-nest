@@ -37,6 +37,6 @@ export const gamePages: readonly GamePage[] = [
   {
     path: '/statement-decoder', kind: 'standalone', label: 'Statement Decoder', updated: '2026-10-10',
     title: 'Bank Statement Decoder: Find Missing Receipts | ReceiptNest',
-    description: 'Coming soon from ReceiptNest: upload a bank statement, see who charged you and the likely category, and get a list of missing receipts for your bookkeeper.'
+    description: 'Coming soon from ReceiptNest: upload a bank statement, see who charged you and the likely category, and which charges have no receipt saved yet.'
   }
 ];

@@ -31,16 +31,20 @@ test("names are stripped of markup and capitalized gently", () => {
   assert.equal(displayName("DeShawn"), "DeShawn");
 });
 
-test("email is personal, escaped, and has text + html parts", () => {
+test("email is a clean, personal, escaped confirmation signed by Gervais", () => {
   const m = buildWaitlistEmail("ana");
-  assert.equal(m.subject, "You’re on the list, Ana");
-  assert.match(m.html, /You’re on the list, Ana\./);
-  assert.match(m.html, /SHOPIFY\* 104729381/);
+  assert.equal(m.subject, "You’re on the Statement Decoder waitlist");
+  assert.match(m.html, /Hi Ana,/);
+  assert.match(m.html, /apple-touch-icon\.png/);
+  assert.match(m.html, /You’re on the waitlist/);
+  assert.match(m.html, /Gervais/);
+  assert.doesNotMatch(m.html, /Edmond/);
   assert.match(m.html, /utm_campaign=statement_decoder/);
-  assert.match(m.text, /Your first statement is on us\./);
+  assert.match(m.text, /Hi Ana,/);
+  assert.match(m.text, /receipts you’ve saved in ReceiptNest/);
   const hostile = buildWaitlistEmail('"><img src=x onerror=1>');
   assert.doesNotMatch(hostile.html, /<img src=x/);
-  assert.equal(buildWaitlistEmail("").subject, "You’re on the list for the Statement Decoder");
+  assert.match(buildWaitlistEmail("").html, /Hi there,/);
 });
 
 test("clients cannot claim server-only waitlist joins", () => {
