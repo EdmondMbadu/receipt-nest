@@ -63,7 +63,8 @@ var T=window.rnT={
   finish:function(mode,score,extra){send({e:'finish'});var p={mode:mode||'',score:Number(score)||0};if(extra)for(var k in extra)p[k]=extra[k];ga('game_finish',p)},
   shareClick:function(mode,score){send({e:'share_click'});ga('game_share_click',{mode:mode||'',score:Number(score)||0})},
   shareDone:function(method){send({e:'share_done',m:method});ga('share',{method:method,content_type:'game_score',item_id:G})},
-  url:function(base){return base+'?utm_source=share&utm_campaign='+G}
+  url:function(base){return base+'?utm_source=share&utm_campaign='+G},
+  waitlistOpen:function(place){send({e:'waitlist_open'});ga('waitlist_open',{place:place||''})}
 };
 send({e:'view'});
 if(/[?&]utm_source=share(&|$)/.test(location.search)&&!ss('rn_arr_'+G)){ss('rn_arr_'+G,'1');send({e:'arrival'});ga('share_arrival',{})}
@@ -267,6 +268,7 @@ h1 .y{color:var(--yel)}
     <a href="/games/charge">Guess the Charge</a>
     <a href="/games/shoebox">Shoebox Sort</a>
     <a href="/games/fade">Before It Fades</a>
+    <a href="/statement-decoder">Statement Decoder</a>
     <a href="/receipt-scanner">Receipt scanner</a>
     <a href="/blog">Guides</a>
     <a href="/pricing">Pricing</a>

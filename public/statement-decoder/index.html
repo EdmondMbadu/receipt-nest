@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en" data-game="decoder">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bank Statement Decoder: Find Missing Receipts | ReceiptNest</title>
+<meta name="description" content="Coming soon from ReceiptNest: upload a bank statement, see who charged you and the likely category, and get a list of missing receipts for your bookkeeper.">
+<meta name="author" content="ReceiptNest">
+<meta name="robots" content="index, follow">
+<meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<link rel="canonical" href="https://receipt-nest.com/statement-decoder">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://receipt-nest.com/statement-decoder">
+<meta property="og:title" content="Your bank statement, decoded.">
+<meta property="og:description" content="Who charged you, what it likely was, and which receipts you’re missing. One list for your bookkeeper. Join the early-access list.">
+<meta property="og:image" content="https://receipt-nest.com/statement-decoder/og.png">
+<meta property="og:image:alt" content="The ReceiptNest Statement Decoder turning cryptic bank statement lines into merchants, categories and receipt status">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
+<meta property="og:site_name" content="ReceiptNest">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@ReceiptNestAI">
+<meta name="twitter:url" content="https://receipt-nest.com/statement-decoder">
+<meta name="twitter:title" content="Your bank statement, decoded.">
+<meta name="twitter:description" content="Who charged you, what it likely was, and which receipts you’re missing. One list for your bookkeeper. Join the early-access list.">
+<meta name="twitter:image" content="https://receipt-nest.com/statement-decoder/og.png">
+<meta name="twitter:image:alt" content="The ReceiptNest Statement Decoder turning cryptic bank statement lines into merchants, categories and receipt status">
+<meta name="theme-color" content="#f5eedf">
+<meta name="application-name" content="ReceiptNest">
+<link rel="icon" href="/favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=2">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
+<link rel="preload" href="/games/_shared/fonts/fraunces-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/games/_shared/fonts/ibm-plex-mono-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"Organization","@id":"https://receipt-nest.com/#organization","name":"ReceiptNest","url":"https://receipt-nest.com/","logo":{"@type":"ImageObject","url":"https://receipt-nest.com/receipt-nest.png"},"sameAs":["https://apps.apple.com/us/app/receiptnest-ai/id6762539388","https://play.google.com/store/apps/details?id=com.receiptnest.mobile","https://www.youtube.com/@ReceiptNestAI","https://x.com/ReceiptNestAI","https://www.instagram.com/receiptnest","https://www.tiktok.com/@receiptnest"]},
+{"@type":"WebSite","@id":"https://receipt-nest.com/#website","url":"https://receipt-nest.com/","name":"ReceiptNest","publisher":{"@id":"https://receipt-nest.com/#organization"}},
+{"@type":"WebPage","@id":"https://receipt-nest.com/statement-decoder#webpage","url":"https://receipt-nest.com/statement-decoder","name":"Bank Statement Decoder: Find Missing Receipts | ReceiptNest","description":"Coming soon from ReceiptNest: upload a bank statement, see who charged you and the likely category, and get a list of missing receipts for your bookkeeper.","isPartOf":{"@id":"https://receipt-nest.com/#website"},"primaryImageOfPage":{"@type":"ImageObject","url":"https://receipt-nest.com/statement-decoder/og.png"},"breadcrumb":{"@id":"https://receipt-nest.com/statement-decoder#breadcrumb"}},
+{"@type":"BreadcrumbList","@id":"https://receipt-nest.com/statement-decoder#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"ReceiptNest","item":"https://receipt-nest.com/"},{"@type":"ListItem","position":2,"name":"Statement Decoder","item":"https://receipt-nest.com/statement-decoder"}]}
+]}
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HYKD5Z04JE"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'G-HYKD5Z04JE', { send_page_view: true });
+  gtag('config', 'AW-18204265252');
+</script>
+<script>
+/* ReceiptNest game analytics: GA4 events + first-party daily counters at /api/game-event. No IDs, no cookies, no personal data. */
+(function(){
+var G=document.documentElement.getAttribute('data-game')||'hub',EP='/api/game-event',KEY='rn_gt_'+G;
+function ls(k,v){try{if(v===undefined){var r=localStorage.getItem(k);return r==null?null:JSON.parse(r)}localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);sessionStorage.setItem(k,v)}catch(e){return null}}
+function day(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+function send(o){o.g=G;try{var b=JSON.stringify(o);if(navigator.sendBeacon&&navigator.sendBeacon(EP,new Blob([b],{type:'text/plain'})))return;if(window.fetch)fetch(EP,{method:'POST',body:b,keepalive:true,credentials:'omit',headers:{'Content-Type':'text/plain'}}).catch(function(){})}catch(e){}}
+function ga(n,p){try{if(window.gtag){p=p||{};p.game=G;gtag('event',n,p)}}catch(e){}}
+var T=window.rnT={
+  start:function(mode){var s=ls(KEY)||{},t=day(),np=!s.first,rt=!!s.last&&s.last!==t,ft=s.last!==t;s.first=s.first||t;s.last=t;s.n=(s.n||0)+1;ls(KEY,s);
+    send({e:'start',np:np?1:0,ft:ft?1:0,rt:rt?1:0});ga('game_start',{mode:mode||'',play_number:s.n,new_player:np?'yes':'no',returning_player:rt?'yes':'no'})},
+  finish:function(mode,score,extra){send({e:'finish'});var p={mode:mode||'',score:Number(score)||0};if(extra)for(var k in extra)p[k]=extra[k];ga('game_finish',p)},
+  shareClick:function(mode,score){send({e:'share_click'});ga('game_share_click',{mode:mode||'',score:Number(score)||0})},
+  shareDone:function(method){send({e:'share_done',m:method});ga('share',{method:method,content_type:'game_score',item_id:G})},
+  url:function(base){return base+'?utm_source=share&utm_campaign='+G},
+  waitlistOpen:function(place){send({e:'waitlist_open'});ga('waitlist_open',{place:place||''})}
+};
+send({e:'view'});
+if(/[?&]utm_source=share(&|$)/.test(location.search)&&!ss('rn_arr_'+G)){ss('rn_arr_'+G,'1');send({e:'arrival'});ga('share_arrival',{})}
+document.addEventListener('click',function(ev){var a=ev.target&&ev.target.closest&&ev.target.closest('a[href*="/register"]');if(!a||G==='hub')return;
+  ls('rn_game_ref',{g:G,t:Date.now()});send({e:'cta'});ga('game_cta',{place:a.closest('.doc')?'article':'game_over'})},true);
+function watchRead(){var doc=document.querySelector('section.doc');if(!doc||G==='hub'||!window.IntersectionObserver)return;var h=doc.querySelectorAll('h2');var el=h[Math.min(2,h.length-1)];if(!el)return;
+  var io=new IntersectionObserver(function(es){for(var i=0;i<es.length;i++)if(es[i].isIntersecting||es[i].boundingClientRect.top<0){io.disconnect();send({e:'read'});ga('article_read',{});return}});io.observe(el)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',watchRead);else watchRead();
+})();
+</script>
+<style>
+@font-face{font-family:Fraunces;src:url(/games/_shared/fonts/fraunces-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:Fraunces;src:url(/games/_shared/fonts/fraunces-latin-400-italic.woff2) format("woff2");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Plex Mono";src:url(/games/_shared/fonts/ibm-plex-mono-latin-500-normal.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Barlow Condensed";src:url(/games/_shared/fonts/barlow-condensed-latin-700-normal.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Barlow Condensed";src:url(/games/_shared/fonts/barlow-condensed-latin-800-normal.woff2) format("woff2");font-weight:800;font-display:swap}
+/* Layout: cream paper editorial page. Hero = headline + form beside a statement that decodes itself; then problem, steps,
+   bookkeeper export, honesty + privacy, pricing, questions, and a dark closing band with a second form. */
+:root{
+  --paper:#f5eedf;--paper2:#efe6d2;--sheet:#fffdf8;--ink:#1d1b17;--ink2:#3a352d;--muted:#6f675a;--rule:rgba(29,27,23,.12);--rule2:rgba(29,27,23,.2);
+  --yel:#ffd23f;--hl:rgba(255,210,63,.9);--pen:#c8321f;--tick:#1f7a4d;--amber:#a15c07;--night:#1b1916;--cream:#f3ead6;
+  --serif:Fraunces,Georgia,"Times New Roman",serif;--mono:"Plex Mono",ui-monospace,Menlo,Consolas,monospace;--disp:"Barlow Condensed","Arial Narrow",sans-serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --w:1120px;--gut:clamp(18px,4vw,40px)}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:20px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:var(--grain);opacity:.55;z-index:0}
+a{color:inherit}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px;border-radius:6px}
+.wrap{position:relative;z-index:1;max-width:var(--w);margin:0 auto;padding-inline:var(--gut)}
+.k{font-family:var(--disp);font-weight:800;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:#a8411b}
+.hl{background:linear-gradient(transparent 14%,var(--hl) 14% 86%,transparent 86%);padding:0 .08em;border-radius:3px 12px 4px 14px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* top */
+.top{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:650;font-size:15.5px}
+.brand img{width:28px;height:28px;border-radius:8px}
+.brand small{font-weight:500;color:var(--muted);padding-left:10px;margin-left:2px;border-left:1px solid var(--rule2)}
+.top nav{display:flex;align-items:center;gap:6px}
+.top nav a{font-size:14px;text-decoration:none;color:var(--ink2);padding:8px 10px;border-radius:9px}
+.top nav a:hover{background:rgba(29,27,23,.06)}
+.top nav a.cta{background:var(--ink);color:var(--paper);font-weight:600;padding:9px 14px}
+.top nav a.cta:hover{background:#000}
+@media (max-width:640px){.brand small,.top nav a.hide-s{display:none}}
+
+/* hero */
+.hero{display:grid;gap:clamp(32px,5vw,64px);align-items:center;padding:clamp(18px,4vw,44px) 0 clamp(56px,8vw,96px)}
+@media (min-width:960px){.hero{grid-template-columns:minmax(0,1.02fr) minmax(0,1fr)}}
+.hero h1{margin:14px 0 0;font-family:var(--serif);font-weight:400;font-size:clamp(46px,7.2vw,86px);line-height:.98;letter-spacing:-.02em;text-wrap:balance}
+.hero h1 .hl{background-size:0% 100%;background-repeat:no-repeat;background-image:linear-gradient(transparent 14%,var(--hl) 14% 86%,transparent 86%);background-color:transparent;animation:sweep 1s .45s cubic-bezier(.6,.1,.2,1) forwards}
+@keyframes sweep{to{background-size:100% 100%}}
+.lede{margin:22px 0 0;max-width:34ch;font-size:clamp(18px,1.9vw,21px);line-height:1.5;color:var(--ink2)}
+.lede b{font-weight:650;color:var(--ink)}
+
+/* form */
+.join{margin-top:28px;max-width:520px}
+.join .row{display:grid;gap:10px}
+@media (min-width:560px){.join .row{grid-template-columns:1fr 1.35fr}}
+.fld{position:relative}
+.fld label{display:block;font-size:12.5px;font-weight:650;letter-spacing:.01em;color:var(--ink2);margin:0 0 6px 2px}
+.fld input{width:100%;height:54px;border-radius:14px;border:1.5px solid var(--rule2);background:var(--sheet);padding:0 16px;font-size:16.5px;font-weight:500;-webkit-appearance:none;appearance:none;transition:border-color .15s,box-shadow .15s}
+.fld input::placeholder{color:#a39a8b;font-weight:400}
+.fld input:hover{border-color:rgba(29,27,23,.32)}
+.fld input:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 4px rgba(255,210,63,.55)}
+.fld input[aria-invalid=true]{border-color:var(--pen);box-shadow:0 0 0 4px rgba(200,50,31,.12)}
+.hp{position:absolute!important;left:-9999px;width:1px;height:1px;overflow:hidden}
+.go{margin-top:12px;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:58px;border:0;border-radius:15px;background:var(--ink);color:var(--paper);font-weight:650;font-size:17px;letter-spacing:.005em;cursor:pointer;transition:transform .12s,background .15s,box-shadow .2s;box-shadow:0 10px 26px rgba(29,27,23,.16)}
+.go:hover{background:#000;box-shadow:0 14px 30px rgba(29,27,23,.22)}
+.go:active{transform:scale(.985)}
+.go svg{width:18px;height:18px;transition:transform .2s}
+.go:hover svg{transform:translateX(3px)}
+.go[disabled]{opacity:.75;cursor:progress}
+.err{min-height:20px;margin:10px 2px 0;font-size:14px;font-weight:600;color:var(--pen)}
+.fine{display:flex;flex-wrap:wrap;gap:6px 16px;margin:6px 2px 0;font-size:13.5px;color:var(--muted)}
+.fine span{display:inline-flex;align-items:center;gap:6px}
+.fine svg{width:15px;height:15px;color:var(--tick)}
+.done{display:none;margin-top:28px;max-width:520px;background:var(--sheet);border:1.5px solid var(--rule);border-radius:20px;padding:24px 24px 22px;box-shadow:0 18px 40px rgba(29,27,23,.08)}
+.join.ok .form{display:none}
+.join.ok .done{display:block}
+.done .tk{width:52px;height:52px}
+.done .tk circle{fill:rgba(31,122,77,.12)}
+.done .tk path{fill:none;stroke:var(--tick);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.done h3{margin:12px 0 0;font-family:var(--serif);font-weight:400;font-size:30px;line-height:1.1;letter-spacing:-.01em}
+.done p{margin:10px 0 0;font-size:15.5px;line-height:1.55;color:var(--ink2)}
+.done p b{color:var(--ink);overflow-wrap:anywhere}
+.done .acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.done .acts a{display:inline-flex;align-items:center;height:46px;padding:0 18px;border-radius:12px;font-weight:650;font-size:15px;text-decoration:none}
+.done .acts a.p{background:var(--ink);color:var(--paper)}
+.done .acts a.s{border:1.5px solid var(--rule2)}
+.done .again{display:inline-block;margin-top:14px;padding:0;border:0;background:none;font-size:13.5px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* decoding statement */
+.stage{position:relative}
+.sheet{position:relative;background:var(--sheet);border-radius:10px;box-shadow:0 1px 0 rgba(255,255,255,.8) inset,0 30px 60px -20px rgba(29,27,23,.28),0 10px 24px rgba(29,27,23,.08);transform:rotate(.6deg);overflow:hidden}
+.sheet::after{content:"";position:absolute;left:34px;top:0;bottom:0;width:1.5px;background:rgba(200,50,31,.28)}
+.sh-h{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;padding:16px 18px 10px 48px;border-bottom:2px solid var(--ink)}
+.sh-h b{font-family:var(--disp);font-weight:800;font-size:18px;letter-spacing:.06em}
+.sh-h span{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.sh-h b{white-space:nowrap}
+@media (max-width:420px){.sh-h{padding-left:44px}.sh-h b{font-size:15px}.sh-h span{font-size:10px}.ln{padding-left:44px;padding-right:14px}.ln .code,.ln .amt{font-size:13px}.ln .dec{font-size:13px}.sum{padding-left:44px}}
+.sh-c{display:grid;grid-template-columns:1fr auto;padding:8px 18px 7px 48px;border-bottom:1px solid var(--rule);font-family:var(--disp);font-weight:700;font-size:11px;letter-spacing:.16em;color:#5c6b80}
+.ln{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;padding:13px 18px 13px 48px;border-bottom:1px solid var(--rule)}
+.ln:last-of-type{border-bottom:0}
+.ln .mk{position:absolute;left:9px;top:13px;width:22px;height:22px;opacity:0;transition:opacity .2s}
+.ln .mk path,.ln .mk ellipse{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:3}
+.ln .code{position:relative;justify-self:start;font-family:var(--mono);font-size:14px;line-height:1.35;padding:1px 4px;margin-left:-4px;border-radius:3px 9px 4px 10px;background-image:linear-gradient(var(--hl),var(--hl));background-repeat:no-repeat;background-size:0% 100%;transition:background-size .55s cubic-bezier(.6,.1,.2,1)}
+.ln .amt{font-family:var(--mono);font-size:14px;text-align:right;font-variant-numeric:tabular-nums}
+.ln .dec{grid-column:1;font-size:14px;line-height:1.35;color:var(--ink2);opacity:0;transform:translateY(-4px);transition:opacity .35s,transform .35s}
+.ln .dec em{font-style:normal;color:var(--muted)}
+.ln .st{grid-column:2;justify-self:end;align-self:center;font-family:var(--disp);font-weight:800;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px 2px;border-radius:6px;opacity:0;transform:scale(.6) rotate(-6deg);transition:opacity .25s,transform .35s cubic-bezier(.3,1.6,.5,1)}
+.st.ok{color:var(--tick);background:rgba(31,122,77,.1)}
+.st.miss{color:#fff;background:var(--pen)}
+.st.chk{color:var(--amber);background:rgba(161,92,7,.12)}
+.ln.hlit .code{background-size:100% 100%}
+.ln.on .dec{opacity:1;transform:none}
+.ln.on .st{opacity:1;transform:none}
+.ln.on .mk{opacity:1}
+.sum{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:14px 18px 16px 48px;border-top:2px solid var(--ink);font-size:13.5px;color:var(--ink2);opacity:0;transform:translateY(6px);transition:opacity .4s,transform .4s}
+.sum.on{opacity:1;transform:none}
+.sum b{font-family:var(--disp);font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+.sum i{font-style:normal;display:inline-flex;align-items:center;gap:6px}
+.sum i::before{content:"";width:9px;height:9px;border-radius:50%;background:currentColor}
+.sum .g{color:var(--tick)}.sum .r{color:var(--pen)}.sum .a{color:var(--amber)}
+.tag{position:absolute;right:-6px;top:-16px;z-index:2;font-family:var(--disp);font-weight:800;font-size:13px;letter-spacing:.18em;text-transform:uppercase;background:var(--ink);color:var(--yel);padding:7px 11px 5px;border-radius:8px;transform:rotate(3deg);box-shadow:0 8px 18px rgba(29,27,23,.25)}
+.cap{margin:18px 4px 0;font-size:13px;color:var(--muted);text-align:center}
+
+/* sections */
+.doc{position:relative;z-index:1}
+.sec{padding:clamp(64px,9vw,112px) 0}
+.sec+.sec{border-top:1px solid var(--rule)}
+.h2{margin:12px 0 0;font-family:var(--serif);font-weight:400;font-size:clamp(34px,4.6vw,56px);line-height:1.04;letter-spacing:-.015em;text-wrap:balance;max-width:20ch}
+.sub{margin:18px 0 0;max-width:58ch;font-size:clamp(17px,1.6vw,19px);line-height:1.6;color:var(--ink2)}
+
+.quote{font-family:var(--serif);font-weight:400;font-size:clamp(30px,4.4vw,54px);line-height:1.12;letter-spacing:-.015em;max-width:22ch;margin:14px 0 0;text-wrap:balance}
+.quote em{font-style:italic;color:#a8411b}
+.codes{display:grid;gap:14px;margin-top:clamp(36px,5vw,56px)}
+@media (min-width:820px){.codes{grid-template-columns:repeat(3,1fr)}}
+.code-card{background:var(--sheet);border:1px solid var(--rule);border-radius:16px;padding:20px 20px 18px}
+.code-card .c{display:inline-block;font-family:var(--mono);font-size:15px;background:var(--hl);padding:2px 6px;border-radius:3px 10px 4px 12px}
+.code-card .arrow{display:block;margin:12px 0 6px;font-family:var(--disp);font-weight:800;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.code-card p{margin:0;font-size:15.5px;line-height:1.5;color:var(--ink2)}
+.code-card p b{color:var(--ink)}
+.after{margin:30px 0 0;font-family:var(--serif);font-style:italic;font-size:clamp(20px,2.2vw,24px);color:var(--ink2)}
+
+.steps{display:grid;gap:18px;margin-top:clamp(36px,5vw,56px);counter-reset:s}
+@media (min-width:860px){.steps{grid-template-columns:repeat(3,1fr);gap:22px}}
+.step{position:relative;border-top:2px solid var(--ink);padding-top:20px}
+.step .n{font-family:var(--disp);font-weight:800;font-size:15px;letter-spacing:.14em;color:#a8411b}
+.step h3{margin:10px 0 0;font-family:var(--serif);font-weight:400;font-size:28px;line-height:1.1}
+.step p{margin:10px 0 0;font-size:16px;line-height:1.55;color:var(--ink2)}
+.step svg{display:block;width:44px;height:44px;margin:0 0 16px;color:var(--ink)}
+
+.exp{margin-top:clamp(36px,5vw,56px);background:var(--sheet);border:1px solid var(--rule);border-radius:20px;box-shadow:0 30px 60px -30px rgba(29,27,23,.3);overflow:hidden}
+.exp-h{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:18px 22px;border-bottom:1px solid var(--rule)}
+.exp-h b{font-weight:650;font-size:15.5px}
+.exp-h span{font-size:13.5px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--disp);font-weight:800;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;padding:6px 10px 4px;border-radius:999px;border:1px solid var(--rule2)}
+.chip.g{color:var(--tick);border-color:rgba(31,122,77,.35);background:rgba(31,122,77,.06)}
+.chip.r{color:var(--pen);border-color:rgba(200,50,31,.35);background:rgba(200,50,31,.05)}
+.chip.a{color:var(--amber);border-color:rgba(161,92,7,.35);background:rgba(161,92,7,.06)}
+.tw{overflow-x:auto}
+.tbl{width:100%;min-width:720px;border-collapse:collapse;font-size:14.5px}
+.tbl th{text-align:left;font-family:var(--disp);font-weight:700;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:12px 22px;border-bottom:1px solid var(--rule)}
+.tbl td{padding:13px 22px;border-bottom:1px solid var(--rule);vertical-align:middle;white-space:nowrap}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.m{font-family:var(--mono);font-size:13px;color:var(--ink2);white-space:nowrap}
+.tbl td.n{font-family:var(--mono);font-size:13.5px;text-align:right;white-space:nowrap}
+.tbl th.n{text-align:right}
+.tbl .s{display:inline-flex;align-items:center;gap:6px;font-weight:650;font-size:13.5px;white-space:nowrap}
+.tbl .s.g{color:var(--tick)}.tbl .s.r{color:var(--pen)}.tbl .s.a{color:var(--amber)}
+.exp-f{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:14px 22px;border-top:1px solid var(--rule);background:var(--paper2)}
+.exp-f span{font-size:13.5px;color:var(--muted)}
+.fmt{display:flex;gap:8px}
+.fmt i{font-style:normal;font-family:var(--disp);font-weight:800;font-size:12.5px;letter-spacing:.14em;padding:6px 10px 4px;border-radius:8px;background:var(--ink);color:var(--paper)}
+
+.two{display:grid;gap:clamp(28px,4vw,56px)}
+@media (min-width:900px){.two{grid-template-columns:1fr 1fr}}
+.ticks{list-style:none;margin:24px 0 0;padding:0;display:grid;gap:16px}
+.ticks li{display:grid;grid-template-columns:28px 1fr;gap:12px;font-size:16.5px;line-height:1.55;color:var(--ink2)}
+.ticks li b{color:var(--ink);font-weight:650}
+.ticks svg{width:24px;height:24px;margin-top:2px}
+.vault{background:var(--night);color:var(--cream);border-radius:24px;padding:clamp(26px,4vw,40px);position:relative;overflow:hidden}
+.vault::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,210,63,.18),transparent 70%)}
+.vault .k{color:var(--yel)}
+.vault h3{margin:12px 0 0;font-family:var(--serif);font-weight:400;font-size:clamp(30px,3.6vw,42px);line-height:1.05;letter-spacing:-.01em}
+.vault ul{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:14px}
+.vault li{display:grid;grid-template-columns:26px 1fr;gap:12px;font-size:16px;line-height:1.5;color:rgba(243,234,214,.82)}
+.vault li b{color:var(--cream);font-weight:650}
+.vault svg{width:22px;height:22px;color:var(--yel);margin-top:2px}
+
+.price{display:grid;gap:22px;align-items:center;background:var(--sheet);border:1px solid var(--rule);border-radius:24px;padding:clamp(26px,4vw,44px)}
+@media (min-width:860px){.price{grid-template-columns:1.2fr 1fr}}
+.price .big{font-family:var(--serif);font-weight:400;font-size:clamp(36px,4.8vw,58px);line-height:1;letter-spacing:-.02em}
+.price p{margin:12px 0 0;font-size:16.5px;line-height:1.55;color:var(--ink2);max-width:46ch}
+.price .side{display:grid;gap:10px}
+.price .side div{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px dashed var(--rule2);font-size:15.5px}
+.price .side div:last-child{border-bottom:0}
+.price .side span{color:var(--muted)}
+.price .side b{font-weight:650}
+
+.faq{margin-top:30px;max-width:780px}
+details{border-top:1px solid var(--rule2);padding:18px 0}
+details:last-of-type{border-bottom:1px solid var(--rule2)}
+summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;font-weight:650;font-size:17.5px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";flex:none;font-family:var(--disp);font-weight:800;font-size:26px;line-height:1;color:var(--muted);transition:transform .2s}
+details[open] summary::after{transform:rotate(45deg)}
+details p{margin:12px 0 0;font-size:16px;line-height:1.6;color:var(--ink2);max-width:66ch}
+details a{color:#9a3412;text-underline-offset:3px}
+
+.close{position:relative;z-index:1;background:var(--night);color:var(--cream);overflow:hidden}
+.close::before{content:"";position:absolute;inset:0;background-image:var(--grainD);opacity:.5;pointer-events:none}
+.close .wrap{display:grid;gap:clamp(28px,4vw,56px);align-items:center;padding-block:clamp(64px,9vw,112px)}
+@media (min-width:960px){.close .wrap{grid-template-columns:1fr 1fr}}
+.close .k{color:var(--yel)}
+.close h2{margin:12px 0 0;font-family:var(--serif);font-weight:400;font-size:clamp(40px,5.6vw,68px);line-height:1;letter-spacing:-.02em}
+.close h2 .hl{color:var(--ink);background:linear-gradient(transparent 12%,var(--yel) 12% 88%,transparent 88%)}
+.close p.sub{color:rgba(243,234,214,.78)}
+.close .fld label{color:rgba(243,234,214,.8)}
+.close .fld input{background:#2a2621;border-color:rgba(243,234,214,.18);color:var(--cream)}
+.close .fld input::placeholder{color:rgba(243,234,214,.4)}
+.close .fld input:focus{border-color:var(--yel);box-shadow:0 0 0 4px rgba(255,210,63,.25)}
+.close .go{background:var(--yel);color:var(--ink);box-shadow:0 14px 34px rgba(255,210,63,.18)}
+.close .go:hover{background:#ffdc5e}
+.close .err{color:#ff8a6b}
+.close .fine{color:rgba(243,234,214,.6)}
+.close .fine svg{color:#7fd6a3}
+.close .done{background:#25211c;border-color:rgba(243,234,214,.12);box-shadow:none}
+.close .done p{color:rgba(243,234,214,.8)}
+.close .done p b{color:var(--cream)}
+.close .done .acts a.p{background:var(--yel);color:var(--ink)}
+.close .done .acts a.s{border-color:rgba(243,234,214,.25)}
+.close .done .again{color:rgba(243,234,214,.6)}
+.foot{position:relative;z-index:1;background:var(--night);color:rgba(243,234,214,.62);font-size:14px;border-top:1px solid rgba(243,234,214,.1)}
+.foot .wrap{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;padding-block:26px 34px}
+.foot a{text-decoration:none}
+.foot a:hover{color:var(--cream)}
+.foot .c{margin-left:auto}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.hero h1 .hl{animation:none;background-size:100% 100%}.ln .code,.ln .dec,.ln .st,.sum{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><img src="/receipt-nest.png" alt="ReceiptNest logo" width="28" height="28">ReceiptNest<small>Statement Decoder</small></a>
+    <nav aria-label="Page">
+      <a class="hide-s" href="#how">How it works</a>
+      <a class="hide-s" href="/games/charge">Play Guess the Charge</a>
+      <a class="cta" href="#join">Early access</a>
+    </nav>
+  </header>
+</div>
+
+<main>
+  <div class="wrap">
+    <section class="hero" aria-labelledby="h1">
+      <div>
+        <div class="k">Coming soon · Statement Decoder</div>
+        <h1 id="h1">Your bank statement, <span class="hl">decoded</span>.</h1>
+        <p class="lede">Upload a statement. See <b>who charged you</b>, <b>what each charge likely was</b>, and <b>which receipts you’re missing</b>, in one list your bookkeeper can actually use.</p>
+        <div class="join" id="join" data-src="decoder_hero">
+          <form class="form" novalidate>
+            <div class="row">
+              <div class="fld"><label for="n1">First name</label><input id="n1" name="name" type="text" autocomplete="given-name" autocapitalize="words" maxlength="60" placeholder="Ana" required></div>
+              <div class="fld"><label for="e1">Email</label><input id="e1" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" maxlength="254" placeholder="you@example.com" required></div>
+            </div>
+            <div class="hp" aria-hidden="true"><label>Company<input name="company" type="text" tabindex="-1" autocomplete="off"></label></div>
+            <button class="go" type="submit"><span>Get early access</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+            <p class="err" role="alert" aria-live="assertive"></p>
+            <div class="fine"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>First statement free</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>No bank login, ever</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>One email when it opens</span></div>
+          </form>
+          <div class="done" role="status" aria-live="polite">
+            <svg class="tk" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="26"/><path d="M15 27 L23 35 L38 18" pathLength="1" stroke-dasharray="1" stroke-dashoffset="0"/></svg>
+            <h3 class="dh">You’re on the list.</h3>
+            <p class="dp"></p>
+            <div class="acts"><a class="p" href="/register?utm_source=decoder&amp;utm_medium=web&amp;utm_campaign=statement_decoder_waitlist">Start keeping receipts, free</a><a class="s" href="/games/charge">Play Guess the Charge</a></div>
+            <button class="again" type="button">Use a different email</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage" aria-label="Example: a bank statement being decoded">
+        <div class="tag">Preview</div>
+        <div class="sheet" id="demo">
+          <div class="sh-h"><b>CHECKING ••••4417</b><span>STATEMENT · OCT 2026</span></div>
+          <div class="sh-c"><span>DESCRIPTION</span><span>AMOUNT</span></div>
+          <div class="ln" data-s="ok"><svg class="mk" viewBox="0 0 22 22"><path d="M4 12 L9 17 L18 5" stroke="#1f7a4d"/></svg><span class="code">SQ *GRNLINE PLMB SUP</span><span class="amt">-86.40</span><span class="dec">Greenline Plumbing Supply <em>· Hardware</em></span><span class="st ok">✓ Receipt</span></div>
+          <div class="ln" data-s="ok"><svg class="mk" viewBox="0 0 22 22"><path d="M4 12 L9 17 L18 5" stroke="#1f7a4d"/></svg><span class="code">TST* EL CAMINO TAQ</span><span class="amt">-24.18</span><span class="dec">El Camino Taqueria <em>· Meals</em></span><span class="st ok">✓ Receipt</span></div>
+          <div class="ln" data-s="miss"><svg class="mk" viewBox="0 0 22 22"><ellipse cx="11" cy="11" rx="9" ry="7.6" stroke="#c8321f" transform="rotate(-12 11 11)"/></svg><span class="code">SHOPIFY* 104729381</span><span class="amt">-39.00</span><span class="dec">Shopify, your store plan <em>· Software</em></span><span class="st miss">✗ Missing</span></div>
+          <div class="ln" data-s="chk"><svg class="mk" viewBox="0 0 22 22"><path d="M11 4v9M11 17.5v.5" stroke="#a15c07"/></svg><span class="code">PAYPAL *JRKPHOTO</span><span class="amt">-150.00</span><span class="dec">JRK Photo, paid via PayPal <em>· Contractor?</em></span><span class="st chk">? Check this</span></div>
+          <div class="ln" data-s="ok"><svg class="mk" viewBox="0 0 22 22"><path d="M4 12 L9 17 L18 5" stroke="#1f7a4d"/></svg><span class="code">QUIKFUEL 2214 LAS VEGAS NV</span><span class="amt">-61.09</span><span class="dec">QuikFuel gas station <em>· Fuel</em></span><span class="st ok">✓ Receipt</span></div>
+          <div class="sum" id="sum"><b>5 charges decoded</b><i class="g">3 receipts</i><i class="r">1 missing</i><i class="a">1 to check</i></div>
+        </div>
+        <p class="cap">Illustration. Businesses, amounts and results are examples.</p>
+      </div>
+    </section>
+  </div>
+
+  <section class="doc" id="how" aria-label="About the Statement Decoder">
+    <div class="wrap">
+      <div class="sec">
+        <div class="k">The problem</div>
+        <h2 class="quote">A statement says <em>where</em> you paid. It almost never says <em>what for.</em></h2>
+        <div class="codes">
+          <div class="code-card"><span class="c">SQ *GRNLINE PLMB SUP</span><span class="arrow">Why it looks like this</span><p>Small businesses take cards through payment companies, so <b>SQ *</b> (Square) comes first, and names are cut to about <b>22 characters</b>.</p></div>
+          <div class="code-card"><span class="c">SHOPIFY* 104729381</span><span class="arrow">Why it looks like this</span><p>Some charges are <b>bills behind a number</b>. This one is a store’s monthly plan, not a purchase from a shop.</p></div>
+          <div class="code-card"><span class="c">PURCHASE AUTHORIZED ON 10/04</span><span class="arrow">Why it looks like this</span><p>Banks add their own words, so the <b>store name gets pushed off</b> the end of the line.</p></div>
+        </div>
+        <p class="after">At tax time, every one of those turns into the same question: “What was this for?”</p>
+      </div>
+
+      <div class="sec">
+        <div class="k">How it will work</div>
+        <h2 class="h2">Three steps from statement to <span class="hl">answers</span>.</h2>
+        <div class="steps">
+          <div class="step"><svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6h14l8 8v24H12z"/><path d="M26 6v8h8M22 32V20M17 25l5-5 5 5"/></svg><div class="n">01</div><h3>Upload a statement</h3><p>Drop in the PDF or CSV your bank gives you. No bank login, no linked accounts.</p></div>
+          <div class="step"><svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 12h20M6 20h14M6 28h18M6 36h10"/><path d="M30 26l4 4 8-9" stroke="#1f7a4d"/></svg><div class="n">02</div><h3>We decode every line</h3><p>Who charged you and the likely category, read from the codes. Anything uncertain is marked “check this”, never guessed in silence.</p></div>
+          <div class="step"><svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6h24v32l-4-3-4 3-4-3-4 3-4-3-4 3z"/><path d="M16 15h12M16 21h12"/><circle cx="22" cy="29" r="0.5"/></svg><div class="n">03</div><h3>See what’s missing</h3><p>We match charges to the receipts already in your ReceiptNest, then list the ones you still need to find, ready to hand off.</p></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="k">What your bookkeeper gets</div>
+        <h2 class="h2">Every line explained. Every gap flagged.</h2>
+        <p class="sub">One clean list per statement: the original line, who it was, a likely category, and whether you have the receipt. Export it as a CSV or PDF and send it on.</p>
+        <div class="exp" role="region" aria-label="Example export">
+          <div class="exp-h"><div><b>October 2026 · Checking ••••4417</b><br><span>Example export</span></div><div class="chips"><span class="chip">42 charges</span><span class="chip g">38 receipts</span><span class="chip r">3 missing</span><span class="chip a">1 to check</span></div></div>
+          <div class="tw"><table class="tbl">
+            <thead><tr><th>Date</th><th>On your statement</th><th>Who</th><th>Likely category</th><th class="n">Amount</th><th>Receipt</th></tr></thead>
+            <tbody>
+              <tr><td>Oct 03</td><td class="m">SQ *GRNLINE PLMB SUP</td><td>Greenline Plumbing Supply</td><td>Hardware &amp; supplies</td><td class="n">86.40</td><td><span class="s g">✓ Attached</span></td></tr>
+              <tr><td>Oct 04</td><td class="m">TST* EL CAMINO TAQ</td><td>El Camino Taqueria</td><td>Meals</td><td class="n">24.18</td><td><span class="s g">✓ Attached</span></td></tr>
+              <tr><td>Oct 07</td><td class="m">GOOGLE *Workspace</td><td>Google Workspace</td><td>Software</td><td class="n">14.00</td><td><span class="s g">✓ Attached</span></td></tr>
+              <tr><td>Oct 11</td><td class="m">SHOPIFY* 104729381</td><td>Shopify (store plan)</td><td>Software</td><td class="n">39.00</td><td><span class="s r">✗ Missing</span></td></tr>
+              <tr><td>Oct 14</td><td class="m">PAYPAL *JRKPHOTO</td><td>JRK Photo via PayPal</td><td>Contractor?</td><td class="n">150.00</td><td><span class="s a">? Check this</span></td></tr>
+              <tr><td>Oct 18</td><td class="m">BAYVIEW OFFC SUP #12</td><td>Bayview Office Supply</td><td>Office supplies</td><td class="n">47.85</td><td><span class="s r">✗ Missing</span></td></tr>
+            </tbody>
+          </table></div>
+          <div class="exp-f"><span>Illustration of the planned export. Categories are suggestions for you and your bookkeeper to confirm.</span><div class="fmt"><i>CSV</i><i>PDF</i></div></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="two">
+          <div>
+            <div class="k">Honest by design</div>
+            <h2 class="h2">What it won’t pretend to know.</h2>
+            <ul class="ticks">
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="#1f7a4d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span><b>A statement never lists items.</b> The decoder tells you who charged you and the likely category. It won’t invent what you bought.</span></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="#1f7a4d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span><b>Uncertain lines are flagged.</b> If a code is ambiguous, you’ll see “check this” instead of a confident wrong answer.</span></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="#1f7a4d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span><b>Receipts stay the proof.</b> The decoder shows you exactly which ones to find. The receipt is what turns a guess into a record.</span></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="#1f7a4d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span><b>Not tax advice.</b> Categories are suggestions. You and your bookkeeper make the call.</span></li>
+            </ul>
+          </div>
+          <div class="vault">
+            <div class="k">Your statement, handled with care</div>
+            <h3>No bank login. Ever.</h3>
+            <ul>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><span><b>You choose what to upload.</b> One statement at a time, never a connection to your bank.</span></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h3M10 12h3M16 12h4"/><path d="M4 7h16M4 17h16" opacity=".4"/></svg><span><b>Account numbers masked.</b> Only the last four digits are ever shown.</span></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13"/></svg><span><b>The file is deleted after decoding.</b> We keep the decoded lines, not your statement.</span></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span><b>Encrypted and private to you.</b> Shared only when you choose to send it.</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="price">
+          <div>
+            <div class="k">Pricing</div>
+            <div class="big" style="margin-top:12px">Your first statement is <span class="hl">free</span>.</div>
+            <p>Everyone on the early-access list gets their first statement decoded on us. After that, the decoder will be part of ReceiptNest Pro, with up to 10 statements a month.</p>
+          </div>
+          <div class="side">
+            <div><span>First statement</span><b>Free</b></div>
+            <div><span>With ReceiptNest Pro</span><b>Up to 10 a month</b></div>
+            <div><span>Bank login required</span><b>Never</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="k">Questions</div>
+        <h2 class="h2">The short answers.</h2>
+        <div class="faq">
+          <details><summary>Does it connect to my bank?</summary><p>No. You upload a statement file you already have, a PDF or CSV. ReceiptNest never asks for your bank login.</p></details>
+          <details><summary>Can it tell me exactly what I bought?</summary><p>No tool can, from a statement alone. It tells you who charged you and the likely category, and marks lines it isn’t sure about. Your receipts are what show the items, and the decoder tells you which ones you’re missing.</p></details>
+          <details><summary>Which banks will it work with?</summary><p>The goal is any bank that lets you download a statement as a PDF or CSV. CSV statements come first because every bank lays out its PDFs differently.</p></details>
+          <details><summary>When will it be ready?</summary><p>We’re building it now. Join the list and you’ll get one email the day it opens, with your first statement free.</p></details>
+          <details><summary>Is this tax or accounting advice?</summary><p>No. Categories are suggestions to save you and your bookkeeper time. Your bookkeeper or tax professional makes the final call.</p></details>
+          <details><summary>What should I do in the meantime?</summary><p>Start keeping your receipts in ReceiptNest. When the decoder opens, it matches statement lines to the receipts you already have. If a charge leaves you puzzled today, our free <a href="/games/charge#decoder">guide to bank statement codes</a> explains the common ones.</p></details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="close" aria-labelledby="closeH">
+    <div class="wrap">
+      <div>
+        <div class="k">Early access</div>
+        <h2 id="closeH">Be first in line. Your first statement is <span class="hl">on&nbsp;us</span>.</h2>
+        <p class="sub">One email the day it opens. No spam, and you can unsubscribe anytime.</p>
+      </div>
+      <div class="join" data-src="decoder_footer">
+        <form class="form" novalidate>
+          <div class="row">
+            <div class="fld"><label for="n2">First name</label><input id="n2" name="name" type="text" autocomplete="given-name" autocapitalize="words" maxlength="60" placeholder="Ana" required></div>
+            <div class="fld"><label for="e2">Email</label><input id="e2" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" maxlength="254" placeholder="you@example.com" required></div>
+          </div>
+          <div class="hp" aria-hidden="true"><label>Company<input name="company" type="text" tabindex="-1" autocomplete="off"></label></div>
+          <button class="go" type="submit"><span>Get early access</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          <p class="err" role="alert" aria-live="assertive"></p>
+          <div class="fine"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>First statement free</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>No bank login, ever</span></div>
+        </form>
+        <div class="done" role="status" aria-live="polite">
+          <svg class="tk" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="26"/><path d="M15 27 L23 35 L38 18" pathLength="1" stroke-dasharray="1" stroke-dashoffset="0"/></svg>
+          <h3 class="dh">You’re on the list.</h3>
+          <p class="dp"></p>
+          <div class="acts"><a class="p" href="/register?utm_source=decoder&amp;utm_medium=web&amp;utm_campaign=statement_decoder_waitlist">Start keeping receipts, free</a><a class="s" href="/games/charge">Play Guess the Charge</a></div>
+          <button class="again" type="button">Use a different email</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <a href="/">ReceiptNest</a>
+    <a href="/games/charge">Guess the Charge</a>
+    <a href="/games">Games</a>
+    <a href="/receipt-organizer">Receipt organizer</a>
+    <a href="/security">Security</a>
+    <a href="/terms">Terms</a>
+    <span class="c">© 2026 ReceiptNest</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+'use strict';
+var RM=false;try{RM=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+/* paper grain */
+(function(){function grain(dark){try{var c=document.createElement('canvas');c.width=c.height=200;var x=c.getContext('2d'),a=dark?9:3;
+  function r(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}
+  for(var i=0;i<2200;i++){x.fillStyle=dark?'rgba(255,240,215,'+(r()*.05).toFixed(3)+')':'rgba(120,95,60,'+(r()*.07).toFixed(3)+')';x.fillRect(r()*200,r()*200,1+r()*1.3,1+r()*1.3)}
+  return 'url('+c.toDataURL()+')'}catch(e){return 'none'}}
+  var s=document.documentElement.style;s.setProperty('--grain',grain(false));s.setProperty('--grainD',grain(true))})();
+
+/* the statement that decodes itself */
+(function(){var lines=[].slice.call(document.querySelectorAll('#demo .ln')),sum=document.getElementById('sum');if(!lines.length)return;
+  function reset(){lines.forEach(function(l){l.classList.remove('hlit','on')});sum.classList.remove('on')}
+  function finalState(){lines.forEach(function(l){l.classList.add('hlit','on')});sum.classList.add('on')}
+  if(RM){finalState();return}
+  var timers=[],running=false;
+  function at(ms,fn){timers.push(setTimeout(fn,ms))}
+  function run(){running=true;reset();var t=700;
+    lines.forEach(function(l){at(t,function(){l.classList.add('hlit')});at(t+620,function(){l.classList.add('on')});t+=1150});
+    at(t+200,function(){sum.classList.add('on')});
+    at(t+4200,function(){lines.forEach(function(l){l.classList.remove('on')});sum.classList.remove('on')});
+    at(t+4700,function(){lines.forEach(function(l){l.classList.remove('hlit')})});
+    at(t+5600,run)}
+  function stop(){timers.forEach(clearTimeout);timers=[];running=false}
+  if('IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&!running&&!document.hidden)run();else if(!e.isIntersecting&&running){stop();finalState()}})},{threshold:.25}).observe(document.getElementById('demo'))}else run();
+  document.addEventListener('visibilitychange',function(){if(document.hidden&&running){stop();finalState()}});
+})();
+
+/* early-access forms */
+(function(){
+var EMAIL=/^[^\s@<>"'(),;:]+@[^\s@<>"'(),;:]+\.[^\s@<>"'(),;:]{2,}$/;
+function ls(k,v){try{if(v===undefined){var r=localStorage.getItem(k);return r?JSON.parse(r):null}if(v===null){localStorage.removeItem(k);return null}localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+var boxes=[].slice.call(document.querySelectorAll('.join[data-src]'));
+function success(box,name,email,already){
+  if(name&&name===name.toLowerCase())name=name.charAt(0).toUpperCase()+name.slice(1);
+  box.querySelector('.dh').textContent=(already?'You’re already on the list, ':'You’re on the list, ')+name+'.';
+  var p=box.querySelector('.dp');p.textContent='';var b=document.createElement('b');b.textContent=email;
+  if(already){p.appendChild(document.createTextNode('We’ll email '));p.appendChild(b);p.appendChild(document.createTextNode(' the day the Statement Decoder opens. Your first statement is free.'))}
+  else{p.appendChild(document.createTextNode('We just sent a confirmation to '));p.appendChild(b);p.appendChild(document.createTextNode('. If it isn’t there in a minute, check Promotions or Spam.'))}
+  box.classList.add('ok');
+  var tk=box.querySelector('.tk path');if(tk&&tk.animate&&!RM)tk.animate([{strokeDashoffset:1},{strokeDashoffset:0}],{duration:560,delay:120,easing:'ease-out',fill:'backwards'})}
+function allJoined(name,email){boxes.forEach(function(b){success(b,name,email,true)})}
+boxes.forEach(function(box){
+  var form=box.querySelector('form'),err=box.querySelector('.err'),btn=box.querySelector('.go'),label=btn.querySelector('span'),src=box.getAttribute('data-src'),busy=false,opened=false;
+  function setErr(msg,field){err.textContent=msg||'';['name','email'].forEach(function(f){form.elements[f].setAttribute('aria-invalid',field===f?'true':'false')});if(field)form.elements[field].focus()}
+  form.addEventListener('focusin',function(){if(opened)return;opened=true;try{if(window.rnT&&rnT.waitlistOpen)rnT.waitlistOpen(src)}catch(e){}});
+  form.addEventListener('submit',function(e){e.preventDefault();if(busy)return;
+    var name=form.elements.name.value.replace(/\s+/g,' ').trim(),email=form.elements.email.value.trim().toLowerCase();
+    if(!name)return setErr('Please add your first name.','name');
+    if(!EMAIL.test(email))return setErr('Please check your email address.','email');
+    if(!opened){opened=true;try{if(window.rnT&&rnT.waitlistOpen)rnT.waitlistOpen(src)}catch(e){}}
+    setErr('');busy=true;btn.disabled=true;label.textContent='Saving…';
+    var ctrl=window.AbortController?new AbortController():null,tm=setTimeout(function(){if(ctrl)ctrl.abort()},15000);
+    fetch('/api/statement-waitlist',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'omit',signal:ctrl?ctrl.signal:undefined,
+      body:JSON.stringify({name:name,email:email,company:form.elements.company.value,source:src})})
+    .then(function(r){return r.json().catch(function(){return {}}).then(function(j){return {status:r.status,j:j||{}}})})
+    .then(function(res){
+      if(res.status===200&&res.j.ok){ls('rn_ea_joined',{name:name,email:email});try{if(window.gtag)gtag('event','generate_lead',{form:'statement_decoder',source:src,game:'decoder'})}catch(e){}
+        success(box,name,email,!!res.j.already);boxes.forEach(function(o){if(o!==box)success(o,name,email,true)})}
+      else if(res.status===400&&(res.j.field==='name'||res.j.field==='email'))setErr(res.j.message,res.j.field);
+      else if(res.status===429)setErr(res.j.message||'Too many tries. Please wait a few minutes.');
+      else setErr('We couldn’t save that. Please try again in a moment.')})
+    .catch(function(){setErr('We couldn’t reach ReceiptNest. Check your connection and try again.')})
+    .then(function(){clearTimeout(tm);busy=false;btn.disabled=false;label.textContent='Get early access'})});
+  box.querySelector('.again').addEventListener('click',function(){ls('rn_ea_joined',null);boxes.forEach(function(b){b.classList.remove('ok')});form.reset();form.elements.name.focus()});
+});
+var j=ls('rn_ea_joined');if(j&&j.email)allJoined(j.name||'',j.email);
+if(location.hash==='#join'){var f=document.getElementById('n1');if(f&&!(j&&j.email))setTimeout(function(){f.focus({preventScroll:true})},400)}
+})();
+})();
+</script>
+</body>
+</html>

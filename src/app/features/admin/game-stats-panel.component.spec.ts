@@ -8,7 +8,8 @@ const day = (d: string, view: number, players: number, shares: number, cta: numb
     charge: { view, players_day: players, start: players * 2, finish: players, share_done: shares, arrival: shares * 2, cta, signup },
     shoebox: { view: 10, players_day: 5, start: 5, finish: 4 },
     fade: {},
-    hub: { view: 7 }
+    hub: { view: 7 },
+    decoder: { view: 200, waitlist_open: 40, waitlist_join: 10 }
   }
 });
 
@@ -43,6 +44,24 @@ describe('GameStatsPanelComponent', () => {
     expect(panel.ratio(byKey('r_finish'), 'fade')).toBe('–');
     expect(panel.ratio(byKey('r_signup'), 'shoebox')).toBe('–');
     expect(panel.ratio(byKey('r_share'), 'shoebox')).toBe('0%');
+  });
+
+  it('shows the statement decoder waitlist', async () => {
+    const { fixture, panel } = await setup();
+    panel.waitlist.set({ total: 2, entries: [
+      { name: 'Ana', email: 'ana@example.com', source: 'charge_finish', emailStatus: 'sent', createdAt: Date.UTC(2026, 9, 9, 18) },
+      { name: 'Bo', email: 'bo@example.com', source: 'charge_link', emailStatus: 'failed', createdAt: null }
+    ] });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const text = (fixture.nativeElement as HTMLElement).textContent || '';
+    expect(text).toContain('2 on the list');
+    expect(text).toContain('ana@example.com');
+    expect(panel.sourceLabel('charge_finish')).toBe('Game finish screen');
+    expect(panel.sourceLabel('mystery')).toBe('mystery');
+    expect(panel.sourceLabel('decoder_hero')).toBe('Decoder page (top)');
+    expect(panel.pageConversion()).toBe('5.0%');
+    expect(text).toContain('Decoder page views');
   });
 
   it('lists days newest first and filters by game', async () => {

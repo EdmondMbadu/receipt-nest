@@ -23,6 +23,19 @@ const COLLECTION = "gameStats";
 /** Each day is split over a few documents so a traffic spike doesn't hit Firestore's per-document write limit. */
 const SHARDS = 5;
 
+/** Increment daily counters for a game from server code (e.g. the waitlist function). */
+export const incrementGameCounters = async (game: string, keys: string[]): Promise<void> => {
+  const inc = admin.firestore.FieldValue.increment(1);
+  const counters: Record<string, admin.firestore.FieldValue> = {};
+  for (const k of keys) counters[k] = inc;
+  const day = dayKey(new Date());
+  const shard = Math.floor(Math.random() * SHARDS);
+  await admin.firestore().collection(COLLECTION).doc(`${day}_${shard}`).set(
+    { day, [game]: counters, updatedAt: admin.firestore.FieldValue.serverTimestamp() },
+    { merge: true }
+  );
+};
+
 export const gameEvent = onRequest(
   { region: "us-central1", maxInstances: 5, memory: "256MiB", concurrency: 80 },
   async (request, response) => {
@@ -43,20 +56,8 @@ export const gameEvent = onRequest(
       response.status(400).send("");
       return;
     }
-    const inc = admin.firestore.FieldValue.increment(1);
-    const counters: Record<string, admin.firestore.FieldValue> = {};
-    for (const k of counterKeys(ev)) counters[k] = inc;
-    const day = dayKey(new Date());
     try {
-      const shard = Math.floor(Math.random() * SHARDS);
-      await admin.firestore().collection(COLLECTION).doc(`${day}_${shard}`).set(
-        {
-          day,
-          [ev.game]: counters,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        },
-        { merge: true }
-      );
+      await incrementGameCounters(ev.game, counterKeys(ev));
       response.status(204).send("");
     } catch (error) {
       logger.error("gameEvent write failed", { error, game: ev.game, event: ev.event });

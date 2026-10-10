@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app } from '../../../../environments/environments';
 
@@ -33,7 +33,9 @@ const METRICS: Metric[] = [
   { key: 'arrival', label: 'Arrivals from shares', hint: 'Visitors who opened a player’s share link' },
   { key: 'read', label: 'Article reads', hint: 'Scrolled into the guide under the game' },
   { key: 'cta', label: 'Signup clicks', hint: 'Clicked a ReceiptNest signup link on the game page' },
-  { key: 'signup', label: 'Signups', hint: 'Registered after clicking that game’s signup link (30-day window)' }
+  { key: 'signup', label: 'Signups', hint: 'Registered after clicking that game’s signup link (30-day window)' },
+  { key: 'waitlist_open', label: 'Decoder form opens', hint: 'Opened the Statement Decoder early-access form' },
+  { key: 'waitlist_join', label: 'Decoder waitlist joins', hint: 'New people on the Statement Decoder waitlist' }
 ];
 
 const RATIOS: Metric[] = [
@@ -43,13 +45,27 @@ const RATIOS: Metric[] = [
   { key: 'r_share', label: 'Share rate', hint: 'Shares sent ÷ players', kind: 'ratio', of: ['share_done', 'players_day'] },
   { key: 'r_viral', label: 'Arrivals per share', hint: 'Arrivals from shares ÷ shares sent', kind: 'ratio', of: ['arrival', 'share_done'] },
   { key: 'r_cta', label: 'Signup click rate', hint: 'Signup clicks ÷ players', kind: 'ratio', of: ['cta', 'players_day'] },
-  { key: 'r_signup', label: 'Click → signup', hint: 'Signups ÷ signup clicks', kind: 'ratio', of: ['signup', 'cta'] }
+  { key: 'r_signup', label: 'Click → signup', hint: 'Signups ÷ signup clicks', kind: 'ratio', of: ['signup', 'cta'] },
+  { key: 'r_wl_open', label: 'Decoder interest', hint: 'Decoder form opens ÷ players', kind: 'ratio', of: ['waitlist_open', 'players_day'] },
+  { key: 'r_wl_join', label: 'Form → waitlist', hint: 'Waitlist joins ÷ form opens', kind: 'ratio', of: ['waitlist_join', 'waitlist_open'] }
 ];
+
+interface WaitlistEntry { name: string; email: string; source: string; emailStatus: string; createdAt: number | null }
+interface WaitlistResponse { total: number; entries: WaitlistEntry[] }
+
+const SOURCE_LABELS: Record<string, string> = {
+  charge_finish: 'Game finish screen',
+  charge_article: 'Article',
+  charge_link: 'Game direct link',
+  decoder_hero: 'Decoder page (top)',
+  decoder_footer: 'Decoder page (bottom)',
+  hub: 'Games hub'
+};
 
 @Component({
   selector: 'app-game-stats-panel',
   standalone: true,
-  imports: [CommonModule, DecimalPipe],
+  imports: [CommonModule, DecimalPipe, DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
   <details class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900" (toggle)="onToggle($event)">
@@ -68,7 +84,7 @@ const RATIOS: Metric[] = [
     <div class="space-y-6 px-5 py-5">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <p class="max-w-2xl text-sm text-slate-600 dark:text-slate-300">
-          First-party counts from /games (not affected by ad blockers). Days are in {{ timeZone() }}.
+          First-party counts from /games (not affected by ad blockers). Days are in {{ timeZone() }}. Games hub views: {{ hubViews() | number }}.
           No personal data is stored, so “players” are counted per device per day.
         </p>
         <div class="flex flex-wrap items-center gap-2">
@@ -91,8 +107,8 @@ const RATIOS: Metric[] = [
       } @else if (data()) {
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div class="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
-            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Hub views</p>
-            <p class="mt-1 text-2xl font-semibold tabular-nums text-slate-950 dark:text-white">{{ hubViews() | number }}</p>
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Decoder waitlist</p>
+            <p class="mt-1 text-2xl font-semibold tabular-nums text-slate-950 dark:text-white">{{ (waitlist()?.total ?? total('waitlist_join') + sum('decoder', 'waitlist_join')) | number }}</p>
           </div>
           <div class="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
             <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Players</p>
@@ -167,6 +183,61 @@ const RATIOS: Metric[] = [
           </div>
         </div>
       }
+
+      <div class="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Statement Decoder waitlist</h3>
+            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">People who asked to be emailed when the decoder opens. Joins come from Guess the Charge and the /statement-decoder page.</p>
+          </div>
+          @if (waitlist(); as wl) {
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="rounded-lg bg-amber-100 px-2.5 py-1 text-sm font-semibold tabular-nums text-amber-900 dark:bg-amber-900/40 dark:text-amber-200">{{ wl.total | number }} on the list</span>
+              <button type="button" (click)="copyEmails()" [disabled]="!wl.entries.length" class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">{{ copied() ? 'Copied' : 'Copy emails' }}</button>
+              <button type="button" (click)="downloadCsv()" [disabled]="!wl.entries.length" class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Download CSV</button>
+            </div>
+          }
+        </div>
+        @if (data()) {
+          <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div class="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800/60"><p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Decoder page views</p><p class="text-lg font-semibold tabular-nums text-slate-950 dark:text-white">{{ sum('decoder', 'view') | number }}</p></div>
+            <div class="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800/60"><p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Form starts</p><p class="text-lg font-semibold tabular-nums text-slate-950 dark:text-white">{{ sum('decoder', 'waitlist_open') | number }}</p></div>
+            <div class="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800/60"><p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Joins from page</p><p class="text-lg font-semibold tabular-nums text-slate-950 dark:text-white">{{ sum('decoder', 'waitlist_join') | number }}</p></div>
+            <div class="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800/60"><p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Page conversion</p><p class="text-lg font-semibold tabular-nums text-slate-950 dark:text-white">{{ pageConversion() }}</p></div>
+          </div>
+        }
+        @if (waitlistError()) {
+          <p class="mt-3 text-sm text-rose-600 dark:text-rose-400">{{ waitlistError() }}</p>
+        } @else if (waitlist(); as wl) {
+          @if (wl.entries.length) {
+            <div class="mt-3 max-h-80 overflow-auto rounded-lg border border-slate-100 dark:border-slate-800">
+              <table class="min-w-full text-sm">
+                <thead class="sticky top-0 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                  <tr><th class="px-3 py-2">Name</th><th class="px-3 py-2">Email</th><th class="px-3 py-2">From</th><th class="whitespace-nowrap px-3 py-2">Joined</th><th class="px-3 py-2">Email</th></tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                  @for (e of wl.entries; track e.email) {
+                    <tr>
+                      <td class="whitespace-nowrap px-3 py-1.5 text-slate-900 dark:text-white">{{ e.name }}</td>
+                      <td class="px-3 py-1.5 text-slate-700 dark:text-slate-200">{{ e.email }}</td>
+                      <td class="whitespace-nowrap px-3 py-1.5 text-slate-500 dark:text-slate-400">{{ sourceLabel(e.source) }}</td>
+                      <td class="whitespace-nowrap px-3 py-1.5 tabular-nums text-slate-500 dark:text-slate-400">{{ e.createdAt ? (e.createdAt | date: 'MMM d, h:mm a') : '–' }}</td>
+                      <td class="whitespace-nowrap px-3 py-1.5 text-xs font-semibold" [class]="e.emailStatus === 'sent' ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'">{{ e.emailStatus || 'pending' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            @if (wl.total > wl.entries.length) {
+              <p class="mt-2 text-xs text-slate-500">Showing the latest {{ wl.entries.length }}.</p>
+            }
+          } @else {
+            <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">No one yet. Share receipt-nest.com/statement-decoder, or players can join from Guess the Charge.</p>
+          }
+        } @else if (!loading()) {
+          <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">Loading waitlist…</p>
+        }
+      </div>
     </div>
   </details>
   `
@@ -181,14 +252,17 @@ export class GameStatsPanelComponent {
   readonly ratios = RATIOS;
   readonly rangeOptions = [7, 14, 30, 90];
   readonly dayGameOptions = [{ id: 'all', label: 'All' }, ...GAMES.map((g) => ({ id: g.id, label: g.short }))];
-  readonly dayCols = METRICS.filter((m) => ['view', 'players_day', 'start', 'finish', 'share_done', 'arrival', 'read', 'cta', 'signup'].includes(m.key))
-    .map((m) => ({ ...m, label: m.label.replace('Arrivals from shares', 'Arrivals').replace('Games ', '').replace('Page views', 'Views') }));
+  readonly dayCols = METRICS.filter((m) => ['view', 'players_day', 'start', 'finish', 'share_done', 'arrival', 'read', 'cta', 'signup', 'waitlist_join'].includes(m.key))
+    .map((m) => ({ ...m, label: m.label.replace('Arrivals from shares', 'Arrivals').replace('Games ', '').replace('Page views', 'Views').replace('Decoder waitlist joins', 'Waitlist') }));
 
   readonly range = signal(30);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly data = signal<GameStatsResponse | null>(null);
   readonly dayGame = signal('all');
+  readonly waitlist = signal<WaitlistResponse | null>(null);
+  readonly waitlistError = signal<string | null>(null);
+  readonly copied = signal(false);
 
   readonly timeZone = computed(() => this.data()?.timeZone ?? 'America/Los_Angeles');
   readonly hubViews = computed(() => this.sum('hub', 'view'));
@@ -230,6 +304,60 @@ export class GameStatsPanelComponent {
     } finally {
       if (id === this.requestId) this.loading.set(false);
     }
+    void this.loadWaitlist();
+  }
+
+  async loadWaitlist(): Promise<void> {
+    this.waitlistError.set(null);
+    try {
+      const callable = httpsCallable<Record<string, never>, WaitlistResponse>(this.functions, 'getStatementWaitlist');
+      const res = await callable({});
+      this.waitlist.set(res.data);
+    } catch (err) {
+      console.error('Failed to load statement waitlist', err);
+      this.waitlistError.set('Unable to load the waitlist. Is the getStatementWaitlist function deployed?');
+    }
+  }
+
+  pageConversion(): string {
+    const views = this.sum('decoder', 'view');
+    if (!views) return '–';
+    const r = this.sum('decoder', 'waitlist_join') / views;
+    return r === 0 ? '0%' : `${(r * 100).toFixed(r < 0.1 ? 1 : 0)}%`;
+  }
+
+  sourceLabel(source: string): string {
+    return SOURCE_LABELS[source] ?? (source || '–');
+  }
+
+  async copyEmails(): Promise<void> {
+    const emails = (this.waitlist()?.entries ?? []).map((e) => e.email).filter(Boolean).join(', ');
+    if (!emails) return;
+    try {
+      await navigator.clipboard.writeText(emails);
+      this.copied.set(true);
+      setTimeout(() => this.copied.set(false), 1800);
+    } catch {
+      window.prompt('Copy these emails:', emails);
+    }
+  }
+
+  downloadCsv(): void {
+    const rows = this.waitlist()?.entries ?? [];
+    if (!rows.length) return;
+    const cell = (v: string) => `"${v.replace(/"/g, '""')}"`;
+    const csv = [
+      ['name', 'email', 'source', 'joined', 'email_status'].join(','),
+      ...rows.map((e) =>
+        [cell(e.name), cell(e.email), cell(e.source), cell(e.createdAt ? new Date(e.createdAt).toISOString() : ''), cell(e.emailStatus)].join(',')
+      )
+    ].join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `statement-decoder-waitlist-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   sum(game: string, key: string): number {

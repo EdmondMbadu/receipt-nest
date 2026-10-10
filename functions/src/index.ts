@@ -52,6 +52,7 @@ export { generateReceiptForwardingAddress, inboundEmailWebhook } from "./email-i
 export { telegramWebhook, generateTelegramLinkToken, setupTelegramWebhook, onTelegramReceiptProcessed } from "./telegram";
 export { deleteUserAccount } from "./account";
 export { gameEvent, getGameStats } from "./game-stats";
+export { joinStatementWaitlist, getStatementWaitlist } from "./statement-waitlist";
 export {
   getEmailUnsubscribeContext,
   submitEmailUnsubscribe,

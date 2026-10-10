@@ -156,6 +156,13 @@
     ],
     "rewrites": [
       {
+        "source": "/api/statement-waitlist",
+        "function": {
+          "functionId": "joinStatementWaitlist",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "/api/game-event",
         "function": {
           "functionId": "gameEvent",

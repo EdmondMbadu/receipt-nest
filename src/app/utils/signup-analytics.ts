@@ -9,7 +9,7 @@ export type SignupMethod = 'email' | 'google' | 'apple';
 
 const GAME_REF_KEY = 'rn_game_ref';
 const GAME_REF_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
-const KNOWN_GAMES = new Set(['fade', 'shoebox', 'charge']);
+const KNOWN_GAMES = new Set(['fade', 'shoebox', 'charge', 'decoder']);
 
 export function readGameRef(now: number = Date.now()): string | null {
   try {

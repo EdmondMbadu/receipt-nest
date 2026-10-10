@@ -3,7 +3,7 @@
  * Stores only daily aggregate counters. No IDs, IPs, cookies or personal data.
  */
 
-export const GAME_IDS = ["hub", "fade", "shoebox", "charge"] as const;
+export const GAME_IDS = ["hub", "fade", "shoebox", "charge", "decoder"] as const;
 export type GameId = (typeof GAME_IDS)[number];
 
 export const GAME_EVENTS = [
@@ -16,8 +16,13 @@ export const GAME_EVENTS = [
   "cta", // clicked a ReceiptNest signup link on a game page
   "read", // scrolled into the article under the game
   "signup", // registered after clicking a game CTA (credited to that game)
+  "waitlist_open", // opened the Statement Decoder early-access form
+  "waitlist_join", // joined the Statement Decoder waitlist (counted by the server, never by the client)
 ] as const;
 export type GameEvent = (typeof GAME_EVENTS)[number];
+
+/** Events that only server code may count. A beacon claiming one of these is rejected. */
+export const SERVER_ONLY_EVENTS: readonly GameEvent[] = ["waitlist_join"];
 
 export const SHARE_METHODS = ["native", "native_image", "copy"] as const;
 export const STATS_TIME_ZONE = "America/Los_Angeles";
@@ -47,7 +52,10 @@ export const parseGameEvent = (raw: string | undefined | null): ParsedGameEvent 
   if (!data || typeof data !== "object" || Array.isArray(data)) return null;
   const d = data as Record<string, unknown>;
   if (!isOneOf(GAME_IDS, d.g) || !isOneOf(GAME_EVENTS, d.e)) return null;
+  if (SERVER_ONLY_EVENTS.includes(d.e)) return null;
   if (d.g === "hub" && d.e !== "view" && d.e !== "arrival") return null;
+  // The Statement Decoder landing page is not a game: it has no runs or shares.
+  if (d.g === "decoder" && !["view", "arrival", "read", "cta", "signup", "waitlist_open"].includes(d.e)) return null;
   return {
     game: d.g,
     event: d.e,

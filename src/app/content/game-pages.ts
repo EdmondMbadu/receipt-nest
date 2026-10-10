@@ -1,5 +1,6 @@
 /**
- * Standalone game pages served as static files from public/games.
+ * Standalone pages served as static files from public/ (the games, and the
+ * Statement Decoder landing page).
  * They are NOT part of the Angular bundle. This list is read only by the
  * sitemap generator and the SEO check (scripts/), never imported by the app.
  */
@@ -8,7 +9,7 @@ export interface GamePage {
   readonly title: string;
   readonly description: string;
   readonly label: string;
-  readonly kind: 'game';
+  readonly kind: 'game' | 'standalone';
   readonly updated: string;
 }
 
@@ -32,5 +33,10 @@ export const gamePages: readonly GamePage[] = [
     path: '/games/fade', kind: 'game', label: 'Before It Fades', updated: '2026-10-08',
     title: 'Why Do Receipts Fade? Play Before It Fades | ReceiptNest',
     description: 'Read the total before the receipt fades. Every round gets faster. Then learn why thermal receipts fade, how long they last, and how to keep them readable.'
+  },
+  {
+    path: '/statement-decoder', kind: 'standalone', label: 'Statement Decoder', updated: '2026-10-10',
+    title: 'Bank Statement Decoder: Find Missing Receipts | ReceiptNest',
+    description: 'Coming soon from ReceiptNest: upload a bank statement, see who charged you and the likely category, and get a list of missing receipts for your bookkeeper.'
   }
 ];
