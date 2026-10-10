@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-game="charge">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -50,6 +50,32 @@
   gtag('js', new Date());
   gtag('config', 'G-HYKD5Z04JE', { send_page_view: true });
   gtag('config', 'AW-18204265252');
+</script>
+<script>
+/* ReceiptNest game analytics: GA4 events + first-party daily counters at /api/game-event. No IDs, no cookies, no personal data. */
+(function(){
+var G=document.documentElement.getAttribute('data-game')||'hub',EP='/api/game-event',KEY='rn_gt_'+G;
+function ls(k,v){try{if(v===undefined){var r=localStorage.getItem(k);return r==null?null:JSON.parse(r)}localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);sessionStorage.setItem(k,v)}catch(e){return null}}
+function day(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+function send(o){o.g=G;try{var b=JSON.stringify(o);if(navigator.sendBeacon&&navigator.sendBeacon(EP,new Blob([b],{type:'text/plain'})))return;if(window.fetch)fetch(EP,{method:'POST',body:b,keepalive:true,credentials:'omit',headers:{'Content-Type':'text/plain'}}).catch(function(){})}catch(e){}}
+function ga(n,p){try{if(window.gtag){p=p||{};p.game=G;gtag('event',n,p)}}catch(e){}}
+var T=window.rnT={
+  start:function(mode){var s=ls(KEY)||{},t=day(),np=!s.first,rt=!!s.last&&s.last!==t,ft=s.last!==t;s.first=s.first||t;s.last=t;s.n=(s.n||0)+1;ls(KEY,s);
+    send({e:'start',np:np?1:0,ft:ft?1:0,rt:rt?1:0});ga('game_start',{mode:mode||'',play_number:s.n,new_player:np?'yes':'no',returning_player:rt?'yes':'no'})},
+  finish:function(mode,score,extra){send({e:'finish'});var p={mode:mode||'',score:Number(score)||0};if(extra)for(var k in extra)p[k]=extra[k];ga('game_finish',p)},
+  shareClick:function(mode,score){send({e:'share_click'});ga('game_share_click',{mode:mode||'',score:Number(score)||0})},
+  shareDone:function(method){send({e:'share_done',m:method});ga('share',{method:method,content_type:'game_score',item_id:G})},
+  url:function(base){return base+'?utm_source=share&utm_campaign='+G}
+};
+send({e:'view'});
+if(/[?&]utm_source=share(&|$)/.test(location.search)&&!ss('rn_arr_'+G)){ss('rn_arr_'+G,'1');send({e:'arrival'});ga('share_arrival',{})}
+document.addEventListener('click',function(ev){var a=ev.target&&ev.target.closest&&ev.target.closest('a[href*="/register"]');if(!a||G==='hub')return;
+  ls('rn_game_ref',{g:G,t:Date.now()});send({e:'cta'});ga('game_cta',{place:a.closest('.doc')?'article':'game_over'})},true);
+function watchRead(){var doc=document.querySelector('section.doc');if(!doc||G==='hub'||!window.IntersectionObserver)return;var h=doc.querySelectorAll('h2');var el=h[Math.min(2,h.length-1)];if(!el)return;
+  var io=new IntersectionObserver(function(es){for(var i=0;i<es.length;i++)if(es[i].isIntersecting||es[i].boundingClientRect.top<0){io.disconnect();send({e:'read'});ga('article_read',{});return}});io.observe(el)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',watchRead);else watchRead();
+})();
 </script>
 <style>
 @font-face{font-family:"Barlow Condensed";src:url(/games/_shared/fonts/barlow-condensed-latin-700-normal.woff2) format("woff2");font-weight:700;font-display:swap}
@@ -511,7 +537,6 @@ function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a
 function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 var store={get:function(k,d){try{var v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 var RM=false;try{RM=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
-function track(n,p){try{if(window.gtag)gtag('event',n,p||{})}catch(e){}}
 function today(){var d=new Date();return {key:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),label:d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}}
 function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.remove('on')},1800)}
 function live(s){$('live').textContent=s}
@@ -603,7 +628,7 @@ function hideReceipt(){var rc=$('rc');rc.classList.remove('on');rc.style.transfo
 function start(mode){Sound.init();Sound.resume();var d=today();G.mode=mode;G.round=0;G.score=0;G.correct=0;G.streak=0;G.best=0;G.lives=3;G.hist=[];G.used=[];G.dayKey=d.key;
   G.rng=mulberry(mode==='daily'?hash('gc'+d.key):Math.floor(Math.random()*1e9));G.list=mode==='daily'?dailyRounds('gc'+d.key):null;
   $('title').classList.remove('on');$('over').classList.remove('on');$('stage').classList.remove('veil');$('hud').classList.add('on');$('lives').hidden=mode==='daily';[].forEach.call($('lives').children,function(i){i.classList.remove('gone')});
-  $('hLab').textContent=mode==='daily'?'Today’s 10':'Endless';fillSample();$('hScore').textContent='0';updStreak();G.state='play';Sound.play('go');track('charge_start',{mode:mode});setTimeout(nextRound,250)}
+  $('hLab').textContent=mode==='daily'?'Today’s 10':'Endless';fillSample();$('hScore').textContent='0';updStreak();G.state='play';Sound.play('go');rnT.start(mode);setTimeout(nextRound,250)}
 function nextRound(){clearTimeout(G.adv);$('lesson').classList.remove('on');hideReceipt();$('sheet').classList.remove('dim');
   if(G.mode==='daily'&&G.round>=10){finish();return}
   G.round++;var n=G.round,R;
@@ -634,7 +659,6 @@ function finishRound(ok,i){var R=G.cur;R.done=true;var t=now()-G.t0,left=clamp(1
   $('lAns').textContent=R.type==='C'?'It was '+R.e.d+' · $'+m2(R.e.a):R.type==='B'?R.code.q+' = '+R.answer:'It was: '+R.answer;
   $('lTxt').textContent=R.type==='B'?R.code.ls:R.e.ls;
   setTimeout(function(){$('lesson').classList.add('on')},R.type==='A'?650:350);
-  track('charge_answer',{round:G.round,type:R.type,correct:ok});
   var wait=G.mode==='daily'?5.5:4;var nx=$('nxI');nx.style.transition='none';nx.style.transform='scaleX(0)';void nx.offsetWidth;nx.style.transition='transform '+wait+'s linear';setTimeout(function(){nx.style.transform='scaleX(1)'},30);
   clearTimeout(G.adv);G.adv=setTimeout(advance,wait*1000+700);
   live((ok?'Correct. ':'Wrong. ')+$('lAns').textContent+'. '+$('lTxt').textContent)}
@@ -653,17 +677,16 @@ function finish(){G.state='over';clearTimeout(G.adv);$('hud').classList.remove('
   if(daily)store.set('rn_charge_day_'+G.dayKey,{c:G.correct,s:G.score});
   $('overBest').innerHTML=Math.max(best,G.score)<=0?'':'Your best: <b>'+Math.max(best,G.score).toLocaleString('en-US')+'</b> pts'+(isBest&&G.score>0?'<span class="nb">New best</span>':'');
   $('again').textContent=daily?'Play endless':'Play again';$('over').classList.add('on');$('stage').classList.add('veil');$('over').scrollTop=0;
-  live((daily?'Done. You got '+G.correct+' of 10. ':'Out of lives. You decoded '+G.correct+'. ')+G.score+' points.');track('charge_finish',{mode:G.mode,correct:G.correct,score:G.score})}
+  live((daily?'Done. You got '+G.correct+' of 10. ':'Out of lives. You decoded '+G.correct+'. ')+G.score+' points.');rnT.finish(G.mode,G.score,{correct:G.correct,rounds:G.round})}
 function shareText(){var sq=G.hist.map(function(h){return h?'🟩':'🟥'}).join('');return G.mode==='daily'?'Guess the Charge · '+today().label+'\n'+G.correct+'/10 '+sq+'\n'+G.score.toLocaleString('en-US')+' pts':'Guess the Charge · Endless\nI decoded '+G.correct+' bank charges ('+G.score.toLocaleString('en-US')+' pts)\n'+sq}
-var URL_='https://receipt-nest.com/games/charge';
-$('share').addEventListener('click',function(){var text=shareText(),full=text+'\n'+URL_;track('charge_share',{mode:G.mode,correct:G.correct});
-  function manual(){try{var ta=document.createElement('textarea');ta.value=full;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();var ok=document.execCommand('copy');document.body.removeChild(ta);toast(ok?'Score copied. Paste it anywhere.':'Take a screenshot to share your score!')}catch(e){toast('Take a screenshot to share your score!')}}
-  function copy(){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(full).then(function(){toast('Score copied. Paste it anywhere.')},manual)}else manual()}
-  if(navigator.share){try{navigator.share({title:'Guess the Charge',text:text,url:URL_}).catch(function(e){if(!e||e.name!=='AbortError')copy()})}catch(e){copy()}return}copy()});
+var URL_=rnT.url('https://receipt-nest.com/games/charge');
+$('share').addEventListener('click',function(){var text=shareText(),full=text+'\n'+URL_;rnT.shareClick(G.mode,G.score);
+  function manual(){try{var ta=document.createElement('textarea');ta.value=full;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();var ok=document.execCommand('copy');document.body.removeChild(ta);if(ok)rnT.shareDone('copy');toast(ok?'Score copied. Paste it anywhere.':'Take a screenshot to share your score!')}catch(e){toast('Take a screenshot to share your score!')}}
+  function copy(){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(full).then(function(){rnT.shareDone('copy');toast('Score copied. Paste it anywhere.')},manual)}else manual()}
+  if(navigator.share){try{navigator.share({title:'Guess the Charge',text:text,url:URL_}).then(function(){rnT.shareDone('native')},function(e){if(!e||e.name!=='AbortError')copy()})}catch(e){copy()}return}copy()});
 $('again').addEventListener('click',function(){start('endless')});
 $('playDaily').addEventListener('click',function(){start('daily')});
 $('playEndless').addEventListener('click',function(){start('endless')});
-$('ctaReg').addEventListener('click',function(){track('charge_cta',{place:'finish',score:G.score})});
 document.addEventListener('keydown',function(e){if(G.state!=='play')return;if(G.cur&&!G.cur.done&&/^[1-4]$/.test(e.key)){answer(Number(e.key)-1)}else if(G.cur&&G.cur.done&&(e.key==='Enter'||e.key===' ')){e.preventDefault();advance()}});
 document.addEventListener('visibilitychange',function(){if(document.hidden&&G.state==='play'&&G.cur&&!G.cur.done){G.paused=true;G.pausedAt=now()}else if(!document.hidden&&G.paused){G.paused=false;G.t0+=now()-G.pausedAt}});
 function frame(){requestAnimationFrame(frame);if(G.state!=='play'||!G.cur||G.cur.done||G.paused)return;var t=now()-G.t0,left=clamp(1-t/G.T);

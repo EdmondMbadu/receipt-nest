@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-game="fade">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -50,6 +50,32 @@
   gtag('js', new Date());
   gtag('config', 'G-HYKD5Z04JE', { send_page_view: true });
   gtag('config', 'AW-18204265252');
+</script>
+<script>
+/* ReceiptNest game analytics: GA4 events + first-party daily counters at /api/game-event. No IDs, no cookies, no personal data. */
+(function(){
+var G=document.documentElement.getAttribute('data-game')||'hub',EP='/api/game-event',KEY='rn_gt_'+G;
+function ls(k,v){try{if(v===undefined){var r=localStorage.getItem(k);return r==null?null:JSON.parse(r)}localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);sessionStorage.setItem(k,v)}catch(e){return null}}
+function day(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+function send(o){o.g=G;try{var b=JSON.stringify(o);if(navigator.sendBeacon&&navigator.sendBeacon(EP,new Blob([b],{type:'text/plain'})))return;if(window.fetch)fetch(EP,{method:'POST',body:b,keepalive:true,credentials:'omit',headers:{'Content-Type':'text/plain'}}).catch(function(){})}catch(e){}}
+function ga(n,p){try{if(window.gtag){p=p||{};p.game=G;gtag('event',n,p)}}catch(e){}}
+var T=window.rnT={
+  start:function(mode){var s=ls(KEY)||{},t=day(),np=!s.first,rt=!!s.last&&s.last!==t,ft=s.last!==t;s.first=s.first||t;s.last=t;s.n=(s.n||0)+1;ls(KEY,s);
+    send({e:'start',np:np?1:0,ft:ft?1:0,rt:rt?1:0});ga('game_start',{mode:mode||'',play_number:s.n,new_player:np?'yes':'no',returning_player:rt?'yes':'no'})},
+  finish:function(mode,score,extra){send({e:'finish'});var p={mode:mode||'',score:Number(score)||0};if(extra)for(var k in extra)p[k]=extra[k];ga('game_finish',p)},
+  shareClick:function(mode,score){send({e:'share_click'});ga('game_share_click',{mode:mode||'',score:Number(score)||0})},
+  shareDone:function(method){send({e:'share_done',m:method});ga('share',{method:method,content_type:'game_score',item_id:G})},
+  url:function(base){return base+'?utm_source=share&utm_campaign='+G}
+};
+send({e:'view'});
+if(/[?&]utm_source=share(&|$)/.test(location.search)&&!ss('rn_arr_'+G)){ss('rn_arr_'+G,'1');send({e:'arrival'});ga('share_arrival',{})}
+document.addEventListener('click',function(ev){var a=ev.target&&ev.target.closest&&ev.target.closest('a[href*="/register"]');if(!a||G==='hub')return;
+  ls('rn_game_ref',{g:G,t:Date.now()});send({e:'cta'});ga('game_cta',{place:a.closest('.doc')?'article':'game_over'})},true);
+function watchRead(){var doc=document.querySelector('section.doc');if(!doc||G==='hub'||!window.IntersectionObserver)return;var h=doc.querySelectorAll('h2');var el=h[Math.min(2,h.length-1)];if(!el)return;
+  var io=new IntersectionObserver(function(es){for(var i=0;i<es.length;i++)if(es[i].isIntersecting||es[i].boundingClientRect.top<0){io.disconnect();send({e:'read'});ga('article_read',{});return}});io.observe(el)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',watchRead);else watchRead();
+})();
 </script>
 <style>
 @font-face{font-family:"Barlow Condensed";src:url(/games/_shared/fonts/barlow-condensed-latin-700-normal.woff2) format("woff2");font-weight:700;font-display:swap}
@@ -412,7 +438,7 @@ function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a
 function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 var store={get:function(k,d){try{var v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 var RM=false;try{RM=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
-function track(n,p){try{if(window.gtag)gtag('event',n,p||{})}catch(e){}}
+
 function today(){var d=new Date();return {key:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),label:d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}}
 function toast(msg){var t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.remove('on')},1800)}
 
@@ -657,7 +683,7 @@ function answer(i){var c=G.cur;if(!c||c.done||G.state!=='play')return;var btns=o
   for(var k=0;k<btns.length;k++){btns[k].disabled=true;if(c.opts[k]===c.ans)btns[k].classList.add(ok?'ok':'reveal');else if(k===i)btns[k].classList.add('bad');else btns[k].classList.add('dim')}
   if(ok){G.score++;G.hist.push(1);$('hScore').textContent=G.score;bump($('hScore'));Sound.play('snap');Sound.play('ok');flash();popText(c.doneAt<1.0?'SHARP!':pick(Math.random,['READ IT!','GOT IT!','SNAP!']));live('Correct. '+c.ans)}
   else{loseLife();Sound.play('bad');if(navigator.vibrate)try{navigator.vibrate(60)}catch(e){};live('Wrong. The total was '+c.ans)}
-  track('fade_answer',{round:c.n,correct:ok});
+  
   setTimeout(after,ok?520:900)}
 function timeout(){var c=G.cur;if(!c||c.done)return;c.done=true;c.result='miss';c.doneAt=now()-G.t0;c.fadeAt=1;var btns=optsEl.children;
   for(var k=0;k<btns.length;k++){btns[k].disabled=true;if(c.opts[k]===c.ans)btns[k].classList.add('reveal');else btns[k].classList.add('dim')}
@@ -711,7 +737,7 @@ function drawDemo(){if(!demo)return;var t=now();var cyc=(t%5.2)/5.2;var fd=cyc<.
 function start(mode){Sound.init();Sound.resume();ensureViews();var d=today();G.mode=mode;G.seed=mode==='daily'?'d'+d.key:'p'+Math.floor(Math.random()*1e9);G.dayKey=d.key;
   G.round=0;G.score=0;G.lives=3;G.hist=[];G.cur=null;$('hScore').textContent='0';renderLives();
   $('title').classList.remove('on');$('over').classList.remove('on');$('hud').classList.add('on');$('scrollhint').style.opacity=0;
-  G.state='play';Sound.play('go');track('fade_start',{mode:mode});setTimeout(newRound,350)}
+  G.state='play';Sound.play('go');rnT.start(mode);setTimeout(newRound,350)}
 function gameOver(){G.state='over';hideRound();$('hud').classList.remove('on');Sound.play('over');
   var bestKey='rn_fade_best',best=store.get(bestKey,0),isBest=G.score>best;if(isBest)store.set(bestKey,G.score);
   var dk='rn_fade_daily_'+G.dayKey,dbest=store.get(dk,null);if(G.mode==='daily'&&(dbest==null||G.score>dbest))store.set(dk,G.score);
@@ -722,10 +748,10 @@ function gameOver(){G.state='over';hideRound();$('hud').classList.remove('on');S
   var el=$('overN');el.textContent='0';$('over').classList.add('on');$('over').scrollTop=0;
   var t0=performance.now(),dur=Math.min(1200,250+G.score*80);(function cnt(){var k=clamp((performance.now()-t0)/dur);el.textContent=Math.round(eout(k)*G.score);if(k<1)requestAnimationFrame(cnt)})();
   live('Game over. You read '+G.score+' receipts before they faded.');
-  track('fade_game_over',{mode:G.mode,score:G.score,rounds:G.round});$('scrollhint').style.opacity='';}
+  rnT.finish(G.mode,G.score,{rounds:G.round});$('scrollhint').style.opacity='';}
 function shareText(){var lab=G.mode==='daily'?'Today’s run ('+today().label+')':'Practice';var sq=G.hist.map(function(h){return h?'🟨':'⬛'}).join('');
   return 'Before It Fades · '+lab+'\nI read '+G.score+' receipt'+(G.score===1?'':'s')+' before they faded.\n'+sq+'\nCan you beat me?'}
-var URL_='https://receipt-nest.com/games/fade';
+var URL_=rnT.url('https://receipt-nest.com/games/fade');
 function shareCard(cb){try{var c=document.createElement('canvas');c.width=1080;c.height=1350;var x=c.getContext('2d');
   var g=x.createRadialGradient(540,520,80,540,600,900);g.addColorStop(0,'#3a342b');g.addColorStop(.55,'#26221d');g.addColorStop(1,'#141210');x.fillStyle=g;x.fillRect(0,0,1080,1350);
   x.textAlign='center';x.fillStyle='#ffd23f';x.font='700 40px "Barlow Condensed", sans-serif';x.fillText('BEFORE IT FADES · '+(G.mode==='daily'?today().label.toUpperCase():'PRACTICE'),540,170);
@@ -737,18 +763,17 @@ function shareCard(cb){try{var c=document.createElement('canvas');c.width=1080;c
   x.fillStyle='#f3ead6';x.font='700 46px "Barlow Condensed", sans-serif';x.fillText('receipt-nest.com/games/fade',540,1150);
   x.globalAlpha=.6;x.font='400 30px Fraunces, Georgia, serif';x.fillText('ReceiptNest · Just your receipts, clearly seen.',540,1240);
   c.toBlob(function(b){cb(b)},'image/png')}catch(e){cb(null)}}
-$('share').addEventListener('click',function(){var text=shareText();var full=text+'\n'+URL_;track('fade_share',{score:G.score,mode:G.mode});
-  function manual(){try{var ta=document.createElement('textarea');ta.value=full;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();var ok=document.execCommand('copy');document.body.removeChild(ta);toast(ok?'Score copied. Paste it anywhere.':'Take a screenshot to share your score!')}catch(e){toast('Take a screenshot to share your score!')}}
-  function copy(){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(full).then(function(){toast('Score copied. Paste it anywhere.')},manual)}else manual()}
+$('share').addEventListener('click',function(){var text=shareText();var full=text+'\n'+URL_;rnT.shareClick(G.mode,G.score);
+  function manual(){try{var ta=document.createElement('textarea');ta.value=full;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();var ok=document.execCommand('copy');document.body.removeChild(ta);if(ok)rnT.shareDone('copy');toast(ok?'Score copied. Paste it anywhere.':'Take a screenshot to share your score!')}catch(e){toast('Take a screenshot to share your score!')}}
+  function copy(){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(full).then(function(){rnT.shareDone('copy');toast('Score copied. Paste it anywhere.')},manual)}else manual()}
   function fail(e){if(!e||e.name!=='AbortError')copy()}
   shareCard(function(blob){
-    try{if(blob&&navigator.canShare&&navigator.share){var file=new File([blob],'before-it-fades.png',{type:'image/png'});if(navigator.canShare({files:[file]})){navigator.share({files:[file],text:full}).catch(fail);return}}}catch(e){}
-    if(navigator.share){try{navigator.share({title:'Before It Fades',text:text,url:URL_}).catch(fail)}catch(e){copy()}return}
+    try{if(blob&&navigator.canShare&&navigator.share){var file=new File([blob],'before-it-fades.png',{type:'image/png'});if(navigator.canShare({files:[file]})){navigator.share({files:[file],text:full}).then(function(){rnT.shareDone('native_image')},fail);return}}}catch(e){}
+    if(navigator.share){try{navigator.share({title:'Before It Fades',text:text,url:URL_}).then(function(){rnT.shareDone('native')},fail)}catch(e){copy()}return}
     copy()})});
 $('again').addEventListener('click',function(){start(G.mode)});
 $('playDaily').addEventListener('click',function(){start('daily')});
 $('playPractice').addEventListener('click',function(){start('practice')});
-$('ctaReg').addEventListener('click',function(){track('fade_cta',{place:'game_over',score:G.score})});
 document.addEventListener('keydown',function(e){if(G.state==='play'&&G.cur&&!G.cur.done&&/^[1-4]$/.test(e.key)){answer(Number(e.key)-1)}
   else if(G.state==='banner'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();endBanner()}
   else if(G.paused&&(e.key==='Enter'||e.key===' ')){e.preventDefault();resume()}});

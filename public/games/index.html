@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-game="hub">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -47,6 +47,32 @@
   gtag('js', new Date());
   gtag('config', 'G-HYKD5Z04JE', { send_page_view: true });
   gtag('config', 'AW-18204265252');
+</script>
+<script>
+/* ReceiptNest game analytics: GA4 events + first-party daily counters at /api/game-event. No IDs, no cookies, no personal data. */
+(function(){
+var G=document.documentElement.getAttribute('data-game')||'hub',EP='/api/game-event',KEY='rn_gt_'+G;
+function ls(k,v){try{if(v===undefined){var r=localStorage.getItem(k);return r==null?null:JSON.parse(r)}localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);sessionStorage.setItem(k,v)}catch(e){return null}}
+function day(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+function send(o){o.g=G;try{var b=JSON.stringify(o);if(navigator.sendBeacon&&navigator.sendBeacon(EP,new Blob([b],{type:'text/plain'})))return;if(window.fetch)fetch(EP,{method:'POST',body:b,keepalive:true,credentials:'omit',headers:{'Content-Type':'text/plain'}}).catch(function(){})}catch(e){}}
+function ga(n,p){try{if(window.gtag){p=p||{};p.game=G;gtag('event',n,p)}}catch(e){}}
+var T=window.rnT={
+  start:function(mode){var s=ls(KEY)||{},t=day(),np=!s.first,rt=!!s.last&&s.last!==t,ft=s.last!==t;s.first=s.first||t;s.last=t;s.n=(s.n||0)+1;ls(KEY,s);
+    send({e:'start',np:np?1:0,ft:ft?1:0,rt:rt?1:0});ga('game_start',{mode:mode||'',play_number:s.n,new_player:np?'yes':'no',returning_player:rt?'yes':'no'})},
+  finish:function(mode,score,extra){send({e:'finish'});var p={mode:mode||'',score:Number(score)||0};if(extra)for(var k in extra)p[k]=extra[k];ga('game_finish',p)},
+  shareClick:function(mode,score){send({e:'share_click'});ga('game_share_click',{mode:mode||'',score:Number(score)||0})},
+  shareDone:function(method){send({e:'share_done',m:method});ga('share',{method:method,content_type:'game_score',item_id:G})},
+  url:function(base){return base+'?utm_source=share&utm_campaign='+G}
+};
+send({e:'view'});
+if(/[?&]utm_source=share(&|$)/.test(location.search)&&!ss('rn_arr_'+G)){ss('rn_arr_'+G,'1');send({e:'arrival'});ga('share_arrival',{})}
+document.addEventListener('click',function(ev){var a=ev.target&&ev.target.closest&&ev.target.closest('a[href*="/register"]');if(!a||G==='hub')return;
+  ls('rn_game_ref',{g:G,t:Date.now()});send({e:'cta'});ga('game_cta',{place:a.closest('.doc')?'article':'game_over'})},true);
+function watchRead(){var doc=document.querySelector('section.doc');if(!doc||G==='hub'||!window.IntersectionObserver)return;var h=doc.querySelectorAll('h2');var el=h[Math.min(2,h.length-1)];if(!el)return;
+  var io=new IntersectionObserver(function(es){for(var i=0;i<es.length;i++)if(es[i].isIntersecting||es[i].boundingClientRect.top<0){io.disconnect();send({e:'read'});ga('article_read',{});return}});io.observe(el)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',watchRead);else watchRead();
+})();
 </script>
 <style>
 @font-face{font-family:"Barlow Condensed";src:url(/games/_shared/fonts/barlow-condensed-latin-800-normal.woff2) format("woff2");font-weight:800;font-display:swap}

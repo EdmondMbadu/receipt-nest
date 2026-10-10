@@ -37,6 +37,7 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 
 import { app } from '../../../environments/environments';
 import { NotificationSettings, SignupSource, UserProfile } from '../models/user.model';
+import { trackSignup } from '../utils/signup-analytics';
 
 const LAST_SEEN_UPDATE_INTERVAL_MS = 5 * 60 * 1000;
 
@@ -295,6 +296,7 @@ export class AuthService {
     const auth = this.requireAuth();
     const db = this.requireDb();
     const credential = await createUserWithEmailAndPassword(auth, form.email, form.password);
+    trackSignup('email');
 
     const profile: UserProfile = {
       id: credential.user.uid,
@@ -338,6 +340,7 @@ export class AuthService {
     provider.setCustomParameters({ prompt: 'select_account' });
     const credential = await signInWithPopup(auth, provider);
     await this.finishSignIn(credential);
+    if (getAdditionalUserInfo(credential)?.isNewUser) trackSignup('google');
     await this.saveSignupSourceForNewSocialUser(credential, signupSource);
   }
 
@@ -350,6 +353,7 @@ export class AuthService {
     try {
       const credential = await this.withPopupTimeout(signInWithPopup(auth, provider), 'Apple');
       await this.finishSignIn(credential);
+      if (getAdditionalUserInfo(credential)?.isNewUser) trackSignup('apple');
       await this.saveSignupSourceForNewSocialUser(credential, signupSource);
     } catch (error: any) {
       if (error?.code === 'auth/operation-not-allowed') {

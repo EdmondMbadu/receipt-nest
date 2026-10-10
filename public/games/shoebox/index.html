@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-game="shoebox">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -50,6 +50,32 @@
   gtag('js', new Date());
   gtag('config', 'G-HYKD5Z04JE', { send_page_view: true });
   gtag('config', 'AW-18204265252');
+</script>
+<script>
+/* ReceiptNest game analytics: GA4 events + first-party daily counters at /api/game-event. No IDs, no cookies, no personal data. */
+(function(){
+var G=document.documentElement.getAttribute('data-game')||'hub',EP='/api/game-event',KEY='rn_gt_'+G;
+function ls(k,v){try{if(v===undefined){var r=localStorage.getItem(k);return r==null?null:JSON.parse(r)}localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);sessionStorage.setItem(k,v)}catch(e){return null}}
+function day(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+function send(o){o.g=G;try{var b=JSON.stringify(o);if(navigator.sendBeacon&&navigator.sendBeacon(EP,new Blob([b],{type:'text/plain'})))return;if(window.fetch)fetch(EP,{method:'POST',body:b,keepalive:true,credentials:'omit',headers:{'Content-Type':'text/plain'}}).catch(function(){})}catch(e){}}
+function ga(n,p){try{if(window.gtag){p=p||{};p.game=G;gtag('event',n,p)}}catch(e){}}
+var T=window.rnT={
+  start:function(mode){var s=ls(KEY)||{},t=day(),np=!s.first,rt=!!s.last&&s.last!==t,ft=s.last!==t;s.first=s.first||t;s.last=t;s.n=(s.n||0)+1;ls(KEY,s);
+    send({e:'start',np:np?1:0,ft:ft?1:0,rt:rt?1:0});ga('game_start',{mode:mode||'',play_number:s.n,new_player:np?'yes':'no',returning_player:rt?'yes':'no'})},
+  finish:function(mode,score,extra){send({e:'finish'});var p={mode:mode||'',score:Number(score)||0};if(extra)for(var k in extra)p[k]=extra[k];ga('game_finish',p)},
+  shareClick:function(mode,score){send({e:'share_click'});ga('game_share_click',{mode:mode||'',score:Number(score)||0})},
+  shareDone:function(method){send({e:'share_done',m:method});ga('share',{method:method,content_type:'game_score',item_id:G})},
+  url:function(base){return base+'?utm_source=share&utm_campaign='+G}
+};
+send({e:'view'});
+if(/[?&]utm_source=share(&|$)/.test(location.search)&&!ss('rn_arr_'+G)){ss('rn_arr_'+G,'1');send({e:'arrival'});ga('share_arrival',{})}
+document.addEventListener('click',function(ev){var a=ev.target&&ev.target.closest&&ev.target.closest('a[href*="/register"]');if(!a||G==='hub')return;
+  ls('rn_game_ref',{g:G,t:Date.now()});send({e:'cta'});ga('game_cta',{place:a.closest('.doc')?'article':'game_over'})},true);
+function watchRead(){var doc=document.querySelector('section.doc');if(!doc||G==='hub'||!window.IntersectionObserver)return;var h=doc.querySelectorAll('h2');var el=h[Math.min(2,h.length-1)];if(!el)return;
+  var io=new IntersectionObserver(function(es){for(var i=0;i<es.length;i++)if(es[i].isIntersecting||es[i].boundingClientRect.top<0){io.disconnect();send({e:'read'});ga('article_read',{});return}});io.observe(el)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',watchRead);else watchRead();
+})();
 </script>
 <style>
 @font-face{font-family:"Barlow Condensed";src:url(/games/_shared/fonts/barlow-condensed-latin-700-normal.woff2) format("woff2");font-weight:700;font-display:swap}
@@ -388,7 +414,7 @@ function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a
 function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 var store={get:function(k,d){try{var v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 var RM=false;try{RM=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
-function track(n,p){try{if(window.gtag)gtag('event',n,p||{})}catch(e){}}
+
 function today(){var d=new Date();return {key:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),label:d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}}
 function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.remove('on')},1800)}
 function live(s){$('live').textContent=s}
@@ -513,7 +539,7 @@ function fileIt(o,i,auto){var fr=folderRect(i);o.state='fly';o.ta=G.t;o.sx=o.x;o
 function boxIt(o){G.boxed++;G.levelMiss++;G.perfect=false;$('box').classList.remove('shake');void $('box').offsetWidth;$('box').classList.add('shake');if(o.state!=='bad'){Sound.play('box')}
   G.fx.push({k:'boxed',t:G.t,x:clamp(o.x,60,FW-60),y:FH-20});updHud();if(G.boxed>=5&&!G.attract)setTimeout(gameOver,650)}
 function doSnap(){if(G.state!=='play'||G.meter<1)return;G.meter=0;G.snapUntil=G.t+2.6;Sound.play('snap');flash();
-    G.fx.push({k:'combo',t:G.t,s:'SNAP!'});track('shoebox_snap',{level:G.level});updHud()}
+    G.fx.push({k:'combo',t:G.t,s:'SNAP!'});updHud()}
 $('snap').addEventListener('pointerdown',function(e){e.preventDefault();doSnap()});
 function flash(){if(RM)return;var f=$('flash');f.style.transition='none';f.style.opacity=.6;requestAnimationFrame(function(){f.style.transition='opacity .4s';f.style.opacity=0})}
 
@@ -559,7 +585,7 @@ function draw(){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,CW,CH);ctx.s
 function reset(mode,seed){G.mode=mode;G.seed=seed;G.rng=mulberry(hash(seed));G.level=0;G.score=0;G.sorted=0;G.combo=0;G.best=0;G.boxed=0;G.meter=0;G.rc=[];G.fx=[];G.snapUntil=0;G.counts={};G.perfect=true}
 function start(mode){Sound.init();Sound.resume();var d=today();G.attract=false;reset(mode,mode==='daily'?'sd'+d.key:'sp'+Math.floor(Math.random()*1e9));G.dayKey=d.key;
   $('title').classList.remove('on');$('over').classList.remove('on');$('hud').classList.add('on');$('snap').classList.add('on');
-  G.state='play';resize();startLevel(1);updHud();Sound.play('go');Sound.bpm=112;Sound.startMusic();track('shoebox_start',{mode:mode})}
+  G.state='play';resize();startLevel(1);updHud();Sound.play('go');Sound.bpm=112;Sound.startMusic();rnT.start(mode)}
 function attract(){G.attract=true;reset('attract','attract');G.state='title';resize();G.counts={};startLevel(1)}
 function gameOver(){if(G.state==='over')return;G.state='over';Sound.stopMusic();Sound.play('over');$('arena').classList.remove('frenzy');
   var best=store.get('rn_shoebox_best',0),isBest=G.score>best;if(isBest)store.set('rn_shoebox_best',G.score);
@@ -569,9 +595,9 @@ function gameOver(){if(G.state==='over')return;G.state='over';Sound.stopMusic();
   $('hud').classList.remove('on');$('snap').classList.remove('on');$('lvl').classList.remove('on');
   var el=$('overN');el.textContent='0';$('over').classList.add('on');$('over').scrollTop=0;var t0=performance.now(),dur=Math.min(1300,300+G.score/4);
   (function cnt(){var k=clamp((performance.now()-t0)/dur);el.textContent=Math.round(eout(k)*G.score).toLocaleString('en-US');if(k<1)requestAnimationFrame(cnt)})();
-  live('The shoebox is full. You scored '+G.score+' and sorted '+G.sorted+' receipts.');track('shoebox_game_over',{mode:G.mode,score:G.score,sorted:G.sorted,level:G.level,streak:G.best})}
+  live('The shoebox is full. You scored '+G.score+' and sorted '+G.sorted+' receipts.');rnT.finish(G.mode,G.score,{sorted:G.sorted,level:G.level,streak:G.best})}
 function shareText(){var lab=G.mode==='daily'?'Today’s run ('+today().label+')':'Practice';return 'Shoebox Sort · '+lab+'\nI scored '+G.score.toLocaleString('en-US')+' and sorted '+G.sorted+' receipts (best streak '+G.best+', level '+G.level+').\nCan you beat me?'}
-var URL_='https://receipt-nest.com/games/shoebox';
+var URL_=rnT.url('https://receipt-nest.com/games/shoebox');
 function shareCard(cb){try{var c=document.createElement('canvas');c.width=1080;c.height=1350;var x=c.getContext('2d');var g=x.createRadialGradient(540,520,80,540,600,900);g.addColorStop(0,'#3a342b');g.addColorStop(.55,'#26221d');g.addColorStop(1,'#141210');x.fillStyle=g;x.fillRect(0,0,1080,1350);
   x.textAlign='center';x.fillStyle='#ffd23f';x.font='700 40px "Barlow Condensed", sans-serif';x.fillText('SHOEBOX SORT · '+(G.mode==='daily'?today().label.toUpperCase():'PRACTICE'),540,170);
   x.fillStyle='#f3ead6';x.font='400 52px Fraunces, Georgia, serif';x.fillText('I scored',540,320);x.fillStyle='#ffd23f';x.font='800 300px "Barlow Condensed", sans-serif';x.fillText(G.score.toLocaleString('en-US'),540,620);
@@ -579,16 +605,15 @@ function shareCard(cb){try{var c=document.createElement('canvas');c.width=1080;c
   var ms=['JAN','FEB','MAR','APR','MAY','JUN'];ms.forEach(function(m,i){var fx=165+i*150;x.fillStyle='#d6ab5c';x.fillRect(fx,830,60,18);x.fillStyle='#e6c27a';x.fillRect(fx-10,845,130,90);x.fillStyle='#3b2c14';x.font='800 40px "Barlow Condensed", sans-serif';x.fillText(m,fx+55,903)});
   x.fillStyle='#e0532f';x.font='700 54px "Barlow Condensed", sans-serif';x.fillText('CAN YOU BEAT IT?',540,1060);x.fillStyle='#f3ead6';x.font='700 46px "Barlow Condensed", sans-serif';x.fillText('receipt-nest.com/games/shoebox',540,1150);
   x.globalAlpha=.6;x.font='400 30px Fraunces, Georgia, serif';x.fillText('ReceiptNest · Just your receipts, clearly seen.',540,1240);c.toBlob(function(b){cb(b)},'image/png')}catch(e){cb(null)}}
-$('share').addEventListener('click',function(){var text=shareText(),full=text+'\n'+URL_;track('shoebox_share',{score:G.score});
-  function manual(){try{var ta=document.createElement('textarea');ta.value=full;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();var ok=document.execCommand('copy');document.body.removeChild(ta);toast(ok?'Score copied. Paste it anywhere.':'Take a screenshot to share your score!')}catch(e){toast('Take a screenshot to share your score!')}}
-  function copy(){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(full).then(function(){toast('Score copied. Paste it anywhere.')},manual)}else manual()}
+$('share').addEventListener('click',function(){var text=shareText(),full=text+'\n'+URL_;rnT.shareClick(G.mode,G.score);
+  function manual(){try{var ta=document.createElement('textarea');ta.value=full;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();var ok=document.execCommand('copy');document.body.removeChild(ta);if(ok)rnT.shareDone('copy');toast(ok?'Score copied. Paste it anywhere.':'Take a screenshot to share your score!')}catch(e){toast('Take a screenshot to share your score!')}}
+  function copy(){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(full).then(function(){rnT.shareDone('copy');toast('Score copied. Paste it anywhere.')},manual)}else manual()}
   function fail(e){if(!e||e.name!=='AbortError')copy()}
-  shareCard(function(blob){try{if(blob&&navigator.canShare&&navigator.share){var file=new File([blob],'shoebox-sort.png',{type:'image/png'});if(navigator.canShare({files:[file]})){navigator.share({files:[file],text:full}).catch(fail);return}}}catch(e){}
-    if(navigator.share){try{navigator.share({title:'Shoebox Sort',text:text,url:URL_}).catch(fail)}catch(e){copy()}return}copy()})});
+  shareCard(function(blob){try{if(blob&&navigator.canShare&&navigator.share){var file=new File([blob],'shoebox-sort.png',{type:'image/png'});if(navigator.canShare({files:[file]})){navigator.share({files:[file],text:full}).then(function(){rnT.shareDone('native_image')},fail);return}}}catch(e){}
+    if(navigator.share){try{navigator.share({title:'Shoebox Sort',text:text,url:URL_}).then(function(){rnT.shareDone('native')},fail)}catch(e){copy()}return}copy()})});
 $('again').addEventListener('click',function(){start(G.mode)});
 $('playDaily').addEventListener('click',function(){start('daily')});
 $('playPractice').addEventListener('click',function(){start('practice')});
-$('ctaReg').addEventListener('click',function(){track('shoebox_cta',{place:'game_over',score:G.score})});
 document.addEventListener('keydown',function(e){if(G.state==='play'&&!G.paused){if(/^[1-4]$/.test(e.key)){e.preventDefault();tapFolder(Number(e.key)-1)}else if(e.key===' '){e.preventDefault();doSnap()}}else if(G.paused&&(e.key===' '||e.key==='Enter')){e.preventDefault();resume()}});
 function pause(){if(G.state!=='play'||G.paused)return;G.paused=true;Sound.stopMusic();$('pause').classList.add('on')}
 function resume(){if(!G.paused)return;G.paused=false;G.last=now();$('pause').classList.remove('on');Sound.startMusic()}

@@ -156,6 +156,13 @@
     ],
     "rewrites": [
       {
+        "source": "/api/game-event",
+        "function": {
+          "functionId": "gameEvent",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "/api/email/unsubscribe",
         "function": {
           "functionId": "oneClickEmailUnsubscribe",
