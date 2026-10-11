@@ -25,7 +25,7 @@ export class PublicFooterComponent {
     {
       platform: 'youtube',
       label: 'YouTube',
-      href: 'https://www.youtube.com/@ReceiptNestAI'
+      href: 'https://www.youtube.com/@ReceiptNest'
     }
   ];
 }
