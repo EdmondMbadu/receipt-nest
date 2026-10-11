@@ -4,7 +4,12 @@ import { blogPosts } from '../src/app/features/blog/blog-posts.ts';
 import { gamePages } from '../src/app/content/game-pages.ts';
 
 const entries = [
-  ...publicPages.map(page => ({ path: page.path, updated: page.updated })),
+  ...publicPages.map(page => ({
+    path: page.path,
+    updated: page.path === '/blog'
+      ? [page.updated, ...blogPosts.map(post => post.dateModified)].sort().at(-1)
+      : page.updated
+  })),
   ...blogPosts.map(post => ({ path: post.path, updated: post.dateModified })),
   ...gamePages.map(page => ({ path: page.path, updated: page.updated }))
 ];

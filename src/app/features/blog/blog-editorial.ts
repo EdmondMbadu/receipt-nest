@@ -25,6 +25,9 @@ const scanner = { href: '/receipt-scanner', label: 'See the receipt-scanning wor
 const email = { href: '/email-receipt-organizer', label: 'Set up email-receipt forwarding' };
 
 const editorial: Readonly<Record<string, BlogEditorial>> = {
+  'organize-receipts-for-accountant': {
+    note: taxNote, sources: [records], workflows: [csv, tax, email]
+  },
   'the-last-mile': {
     note: productNote + ' This is an opinion essay about mastery and attention. Its 80% and 99% figures are metaphors, not measured performance or financial-awareness scores.',
     sources: [

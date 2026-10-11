@@ -57,6 +57,295 @@ export const blogCategories: readonly BlogCategory[] = [
 
 export const blogPosts: readonly BlogPost[] = [
   {
+    slug: 'organize-receipts-for-accountant',
+    path: '/blog/organize-receipts-for-accountant',
+    category: 'Tax Guides',
+    title: `How to Organize Receipts for Your Accountant: A Freelancer's Handoff Checklist`,
+    seoTitle: 'How to Organize Receipts for Your Accountant',
+    description:
+      `What to send when your accountant asks for receipts: a six-step freelancer handoff checklist, a sample CSV, and a simple way to flag missing records.`,
+    excerpt:
+      `Your accountant asked for receipts. Send four things: the period, readable originals, a reviewed summary, and a short list of what you could not resolve.`,
+    datePublished: '2026-10-12',
+    dateModified: '2026-10-12',
+    readTime: '6 min read',
+    image: '/assets/images/blog/organize-receipts-for-accountant.webp',
+    imageAlt: 'A receipt handoff checklist beside a spreadsheet summary and a small stack of receipts',
+    imageWidth: 1672,
+    imageHeight: 941,
+    keywords: [
+      'organize receipts for accountant',
+      'send receipts to accountant',
+      'accountant receipt checklist'
+    ],
+    intro: [
+      `Your accountant emails: "Can you send me your receipts?" A useful handoff has four parts: a clearly defined period, readable source documents, a summary you have reviewed, and a short list of purchases you could not resolve. Before you export anything, ask how they want to receive it.`,
+      `This checklist is for freelancers and solo business owners who keep their own receipts and hand them to a bookkeeper or tax professional. It covers what to ask, what to gather, what to check, and what to send, with a clearly fictional example you can copy.`
+    ],
+    sections: [
+      {
+        id: 'short-answer',
+        title: 'The short answer: four things your accountant needs from you',
+        blocks: [
+          {
+            kind: 'table',
+            table: {
+              columns: ['Part of the handoff', 'What it means', 'Example'],
+              rows: [
+                ['The period', 'The exact dates the records cover', 'January 1 to December 31, 2026, or one quarter'],
+                ['Source documents', 'Readable receipts, invoices, and order confirmations', 'Photos of paper receipts, emailed receipts, PDF invoices'],
+                ['A reviewed summary', 'Merchant, date, and amount checked against the originals', 'A CSV you opened and checked in a spreadsheet'],
+                ['Open questions', 'Purchases you could not document or explain yet', 'A card charge on March 14 with no receipt found']
+              ]
+            }
+          },
+          {
+            kind: 'callout',
+            tone: 'note',
+            title: 'Accountants have preferences',
+            text: `Some want every original file, some want a spreadsheet first, and many have their own portal. Treat the steps below as a starting point and confirm the details with the person doing the work.`
+          }
+        ]
+      },
+      {
+        id: 'ask-first',
+        title: 'Step 1: Ask what they need before you export',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Two minutes of questions can save you from sending the wrong thing twice. Ask before you start gathering.`
+          },
+          {
+            kind: 'list',
+            items: [
+              `Which dates should the records cover?`,
+              `Which format works best: a spreadsheet summary, a PDF, the original files, or all three?`,
+              `How should I send them: your client portal, a shared folder, or email?`,
+              `Do you want every receipt, or only business purchases?`,
+              `Should I add categories, or will you categorize them?`
+            ]
+          },
+          {
+            kind: 'callout',
+            tone: 'tip',
+            title: 'A message you can copy',
+            text: `Hi [name], before I send my receipts: which dates should I cover, which format works best for you (spreadsheet, PDF, or original files), and how should I send them? I will also include a short list of purchases I could not document.`
+          }
+        ]
+      },
+      {
+        id: 'gather',
+        title: 'Step 2: Gather paper, email, and PDF receipts in one place',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Receipts usually live in three places: a pocket or glovebox, an inbox, and a handful of merchant accounts. Bring them together before you review anything, so you only check each purchase once.`
+          },
+          {
+            kind: 'list',
+            items: [
+              `Paper: photograph each receipt flat, in good light, with the merchant, date, items, and total visible.`,
+              `Email: search your inbox by merchant name and date range, then save or forward the receipt itself, not just the shipping notice.`,
+              `PDFs: download invoices from software subscriptions, online orders, and service providers.`
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `In ReceiptNest, you can snap a photo, upload a PDF, or forward an email to your personal ReceiptNest address. Nothing connects to your bank or reads your inbox; you choose which receipts to send. Each record is grouped by month so the handoff period is easy to find.`
+          }
+        ]
+      },
+      {
+        id: 'review',
+        title: 'Step 3: Review the details before you send them',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Your accountant can work faster with records that are already checked. Compare each summary line with its original document and fix what does not match.`
+          },
+          {
+            kind: 'list',
+            items: [
+              `The date matches the receipt, not the day you photographed it.`,
+              `The amount is the total you paid, including tax and tip.`,
+              `Duplicates are removed, such as a receipt you photographed and also forwarded.`,
+              `Refunds and returns are kept with the original purchase.`,
+              `Purchases that mix personal and business items are clearly marked.`,
+              `Anything that is not obviously business-related has a short note explaining why.`
+            ]
+          },
+          {
+            kind: 'callout',
+            tone: 'tip',
+            title: 'Check what the scanner extracted',
+            text: `ReceiptNest pulls the merchant, date, amount, and category from each receipt for you to review. Extraction can misread a faded total or a handwritten tip, so confirm the details against the original before you export.`
+          }
+        ]
+      },
+      {
+        id: 'export',
+        title: 'Step 4: Export a summary and check it in a spreadsheet',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `A spreadsheet summary lets your accountant see every purchase at a glance. ReceiptNest's monthly CSV export has three columns, Merchant, Date, and Amount, followed by a final Total row. Here is a fictional example in that exact format:`
+          },
+          {
+            kind: 'table',
+            table: {
+              columns: ['Merchant', 'Date', 'Amount'],
+              rows: [
+                ['Example Office Supply', '2026-09-04', '27.48'],
+                ['Example Software', '2026-09-08', '12.00'],
+                ['Example Print Shop', '2026-09-10', '9.74'],
+                ['Total', '', '49.22']
+              ]
+            }
+          },
+          {
+            kind: 'ordered',
+            items: [
+              `Open the CSV in Excel or Google Sheets.`,
+              `Check that dates and decimal amounts were read correctly.`,
+              `Remove or exclude the Total row before you sort, import, or add up the purchases yourself.`,
+              `Save your own working copy, then add any context your accountant asked for.`
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `The export is a summary, not the receipts themselves. It does not include receipt images, item-by-item detail, or a currency column, and it is a CSV rather than a native Excel workbook. Notes you add to a receipt inside ReceiptNest are not part of the CSV, so add business context as new columns in your copy. Keep those added columns clearly separate from the exported fields:`
+          },
+          {
+            kind: 'table',
+            table: {
+              columns: ['Merchant', 'Date', 'Amount', 'Business purpose (you add)', 'Original kept as (you add)'],
+              rows: [
+                ['Example Office Supply', '2026-09-04', '27.48', 'Printer paper for client proposals', 'Photo of paper receipt'],
+                ['Example Software', '2026-09-08', '12.00', 'Monthly design-tool subscription', 'Emailed invoice (PDF)'],
+                ['Example Print Shop', '2026-09-10', '9.74', 'Printed site plans for a client review', 'Photo of paper receipt']
+              ]
+            }
+          },
+          {
+            kind: 'callout',
+            tone: 'note',
+            title: 'Fictional example',
+            text: `These merchants and amounts are invented for illustration. You can download the same sample CSV on the receipt-to-CSV page to see the format before you create an account.`
+          }
+        ]
+      },
+      {
+        id: 'originals',
+        title: 'Step 5: Provide the originals the way they asked',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `A summary shows what you spent; the originals show what you bought. IRS guidance says supporting documents should identify the payee, the amount paid, proof of payment, the date incurred, and a description of the item or service that shows it was a business expense. One document does not always cover all of that, which is why receipts, invoices, and statements often travel together.`
+          },
+          {
+            kind: 'list',
+            items: [
+              `Send originals through the method your accountant chose in Step 1.`,
+              `On ReceiptNest Pro, you can download a month of receipts as one PDF containing the original images and PDF files.`,
+              `Keep your own complete copy. Sending files to someone else does not replace your own records.`
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `Digital copies are fine to work with, as long as they stay readable and organized. The IRS states that the requirements for paper records also apply to electronic records.`
+          }
+        ]
+      },
+      {
+        id: 'open-questions',
+        title: 'Step 6: Send a list of unresolved records instead of guessing',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Almost everyone has a few purchases they cannot document. Do not invent details or recreate a receipt. List what you know and what is missing, and let your accountant decide how to handle each one.`
+          },
+          {
+            kind: 'table',
+            table: {
+              columns: ['Date', 'Amount', 'As shown on the statement', 'What you know', 'What is missing'],
+              rows: [
+                ['2026-03-14', '86.40', 'SQ *COFFEE ROASTERS', 'Probably a client meeting', 'No receipt; card statement only'],
+                ['2026-06-02', '214.99', 'AMZN Mktp US', 'Likely a monitor stand', 'Order history not found yet'],
+                ['2026-08-19', '40.00', 'Cash', 'Parking at a client site', 'No receipt']
+              ]
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: `Before you add a purchase to this list, try once more: search your email for the merchant and amount, check the merchant's website or app for an order history, or ask the store for a duplicate. A bank or card statement can help show that you paid, but it rarely shows what you bought.`
+          },
+          {
+            kind: 'callout',
+            tone: 'warning',
+            title: 'Record organization, not tax advice',
+            text: `ReceiptNest organizes the receipts you have. It does not prepare taxes, decide what is deductible, or replace missing evidence. Ask your tax professional how to treat anything on your open-questions list.`
+          }
+        ]
+      },
+      {
+        id: 'checklist',
+        title: 'The handoff checklist you can copy',
+        blocks: [
+          {
+            kind: 'list',
+            items: [
+              `Period confirmed with my accountant: ______ to ______.`,
+              `Format and delivery method confirmed.`,
+              `Paper receipts photographed, email receipts saved or forwarded, PDF invoices downloaded.`,
+              `Each record's merchant, date, and amount checked against its original.`,
+              `Duplicates removed; refunds kept with their purchases.`,
+              `Business purpose added where it is not obvious.`,
+              `CSV opened, dates and decimals checked, Total row excluded from any calculations.`,
+              `Originals sent the agreed way; my own copy kept.`,
+              `Open-questions list attached.`
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `Running this checklist once a month turns the year-end request into a quick export. The tax guide below covers the full year of record organization; this checklist is the part you send.`
+          }
+        ]
+      }
+    ],
+    faq: [
+      {
+        question: 'Is a CSV enough for my accountant?',
+        answer:
+          'Usually not on its own. A CSV summarizes merchant, date, and amount, but it does not include the receipts themselves or item detail. Ask your accountant whether they also want the original files, and keep them either way.'
+      },
+      {
+        question: 'Should I send every receipt photo?',
+        answer:
+          'Ask first. Some accountants want every original; others want a summary and will ask for specific documents. Whatever you send, keep a complete copy for your own records.'
+      },
+      {
+        question: 'What if some receipts are missing?',
+        answer:
+          'Try to recover them from email, merchant order histories, or the store. For anything you cannot find, send a short list with the date, amount, statement description, and what you know about the purchase. Do not recreate a receipt.'
+      },
+      {
+        question: 'Can a bank statement help?',
+        answer:
+          'A bank or card statement can show that you paid, when, and how much. It often does not show what you bought or why it was for business, so pair it with an invoice, order record, or note where you can.'
+      },
+      {
+        question: 'Does ReceiptNest send my receipts to my accountant?',
+        answer:
+          'No. ReceiptNest organizes your receipts and lets you export a CSV, plus a monthly PDF of originals on Pro. You decide what to send and send it the way your accountant prefers.'
+      }
+    ],
+    relatedSlugs: [
+      'organize-receipts-taxes-freelancer-guide',
+      'can-bank-statements-replace-receipts',
+      'scan-receipts-automatically'
+    ]
+  },
+  {
     slug: 'the-last-mile',
     path: '/blog/the-last-mile',
     category: 'Money Clarity',
@@ -69,7 +358,7 @@ export const blogPosts: readonly BlogPost[] = [
     datePublished: '2026-09-22',
     dateModified: '2026-09-22',
     readTime: '6 min read',
-    image: '/assets/images/blog/the-last-mile.jpg',
+    image: '/assets/images/blog/the-last-mile.webp',
     imageAlt: 'A long mountain staircase narrowing toward one climber at the summit',
     imageWidth: 1672,
     imageHeight: 941,
@@ -245,7 +534,7 @@ export const blogPosts: readonly BlogPost[] = [
     datePublished: '2026-09-19',
     dateModified: '2026-09-19',
     readTime: '5 min read',
-    image: '/assets/images/blog/digitization-clarity-compounds.jpg',
+    image: '/assets/images/blog/digitization-clarity-compounds.webp',
     imageAlt: 'Scattered paper receipts becoming an organized stream of records and a rising data curve',
     imageWidth: 1672,
     imageHeight: 941,
@@ -383,15 +672,17 @@ export const blogPosts: readonly BlogPost[] = [
     path: '/blog/can-bank-statements-replace-receipts',
     category: 'Tax Guides',
     title: 'Can Bank Statements Replace Receipts for Taxes? What Self-Employed People Need to Know',
-    seoTitle: 'Can Bank Statements Replace Receipts for Taxes?',
+    seoTitle: 'Can Bank Statements Replace Receipts? U.S. Tax Guide',
     description:
       'Learn when bank and credit card statements can support a business expense, when an itemized receipt matters, and what to do when a receipt is missing.',
     excerpt:
-      'A bank statement can prove that money moved, but it may not prove what you bought or why it was for business. Here is how to build a stronger record.',
+      'For U.S. business records, a bank statement can support proof of payment. You may still need an itemized receipt or other records showing what you bought and its business purpose.',
     datePublished: '2026-07-16',
-    dateModified: '2026-09-13',
+    dateModified: '2026-10-10',
     readTime: '10 min read',
-    image: '/assets/images/blog/bank-statements-vs-receipts.jpg',
+    image: '/assets/images/blog/bank-statements-vs-receipts.webp',
+    imageWidth: 1897,
+    imageHeight: 829,
     imageAlt: 'An itemized receipt beside a bank statement on an organized desk',
     keywords: [
       'can bank statements replace receipts for taxes',
@@ -399,7 +690,7 @@ export const blogPosts: readonly BlogPost[] = [
       'proof of business expense'
     ],
     intro: [
-      `You are reviewing last year's expenses and find a charge you recognize immediately—but the receipt is gone. Can the bank statement replace it? The honest answer is: sometimes it can help, but a line on a statement is not automatically a complete record of a business expense.`,
+      `A bank statement can support a U.S. business-expense record, but it does not automatically replace an itemized receipt. Keep records that establish the payment, the item or service purchased, and its business purpose; those details may require more than one document.`,
       `The IRS allows businesses to use a recordkeeping system that clearly shows income and expenses. Supporting documents can include receipts, invoices, canceled checks, and bank or credit card statements. The strongest record is the one that shows not only that you paid, but also what you purchased and how it relates to your business.`
     ],
     sections: [
@@ -578,8 +869,8 @@ export const blogPosts: readonly BlogPost[] = [
     ],
     relatedSlugs: [
       'organize-receipts-taxes-freelancer-guide',
-      'scan-receipts-automatically',
-      'receipt-tracking-delivery-drivers'
+      'organize-receipts-for-accountant',
+      'scan-receipts-automatically'
     ]
   },
   {
@@ -595,7 +886,9 @@ export const blogPosts: readonly BlogPost[] = [
     datePublished: '2026-07-16',
     dateModified: '2026-09-13',
     readTime: '11 min read',
-    image: '/assets/images/blog/delivery-driver-receipts.jpg',
+    image: '/assets/images/blog/delivery-driver-receipts.webp',
+    imageWidth: 1672,
+    imageHeight: 941,
     imageAlt: 'Delivery bag, phone map, mileage notebook, keys, and fuel receipt in a car',
     keywords: [
       'receipt tracking for delivery drivers',
@@ -981,13 +1274,13 @@ export const blogPosts: readonly BlogPost[] = [
     excerpt:
       'A practical receipt organization system for 1099 freelancers, with retention rules, Schedule C categories, audit prep, and a month-by-month workflow.',
     datePublished: '2026-06-09',
-    dateModified: '2026-09-13',
+    dateModified: '2026-10-10',
     readTime: '12 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Forganizing-chaos.png?alt=media&token=a4ddd1e9-0056-4011-bf78-fe1e297f89ef',
     imageAlt: 'Receipt categories and tax-ready expense records in ReceiptNest',
     keywords: ['how to organize receipts for taxes self employed', '1099 receipt organizer', 'freelancer tax receipts'],
     intro: [
-      `Most freelancers start organizing tax receipts after the year is over, when the records are scattered across email, paper bags, downloads, and bank statements.`,
+      `Organize freelance tax receipts by collecting photos, PDFs, and email receipts in one place, reviewing their dates and amounts, and grouping them by month and expense type. Keep the supporting documents alongside any spreadsheet summary and confirm what your tax preparer needs.`,
       `The better system is boring in the best way. Capture the receipt when it happens, give it a category, keep the original proof, and review once a month. This guide is organization guidance, not tax advice, but it will help you show up to tax season with cleaner records.`
     ],
     sections: [
@@ -1141,9 +1434,9 @@ export const blogPosts: readonly BlogPost[] = [
       }
     ],
     relatedSlugs: [
+      'organize-receipts-for-accountant',
       'receipt-tracking-etsy-sellers',
-      'scan-receipts-automatically',
-      'receiptnest-vs-expensify'
+      'scan-receipts-automatically'
     ]
   },
   {

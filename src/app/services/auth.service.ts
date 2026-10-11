@@ -296,7 +296,7 @@ export class AuthService {
     const auth = this.requireAuth();
     const db = this.requireDb();
     const credential = await createUserWithEmailAndPassword(auth, form.email, form.password);
-    trackSignup('email');
+    trackSignup('email', credential.user.uid);
 
     const profile: UserProfile = {
       id: credential.user.uid,
@@ -340,7 +340,7 @@ export class AuthService {
     provider.setCustomParameters({ prompt: 'select_account' });
     const credential = await signInWithPopup(auth, provider);
     await this.finishSignIn(credential);
-    if (getAdditionalUserInfo(credential)?.isNewUser) trackSignup('google');
+    if (getAdditionalUserInfo(credential)?.isNewUser) trackSignup('google', credential.user.uid);
     await this.saveSignupSourceForNewSocialUser(credential, signupSource);
   }
 
@@ -353,7 +353,7 @@ export class AuthService {
     try {
       const credential = await this.withPopupTimeout(signInWithPopup(auth, provider), 'Apple');
       await this.finishSignIn(credential);
-      if (getAdditionalUserInfo(credential)?.isNewUser) trackSignup('apple');
+      if (getAdditionalUserInfo(credential)?.isNewUser) trackSignup('apple', credential.user.uid);
       await this.saveSignupSourceForNewSocialUser(credential, signupSource);
     } catch (error: any) {
       if (error?.code === 'auth/operation-not-allowed') {

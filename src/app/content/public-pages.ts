@@ -14,47 +14,47 @@ export interface PublicPage {
 /** Shared by the router, pre-render routes, page metadata, and sitemap tooling. */
 export const publicPages: readonly PublicPage[] = [
   {
-    path: '/', kind: 'home', label: 'ReceiptNest', updated: CONTENT_REVIEW_DATE,
+    path: '/', kind: 'home', label: 'ReceiptNest', updated: '2026-10-10',
     title: 'ReceiptNest — Receipt App for Freelancers. No Accounting Software.',
-    description: 'Forward the email, snap the photo, or upload the PDF. ReceiptNest organizes your receipts and gives your accountant one clean export. No bank login, no bookkeeping.'
+    description: 'Capture receipt photos, PDFs, and forwarded emails. Review purchases, keep originals, and export a CSV for your accountant. No bank connection required.'
   },
   {
-    path: '/receipt-tracker', kind: 'workflow', label: 'Receipt tracker', updated: CONTENT_REVIEW_DATE,
+    path: '/receipt-tracker', kind: 'workflow', label: 'Receipt tracker', updated: '2026-10-10',
     title: 'Receipt Tracker for Freelancers & Everyday Expenses | ReceiptNest',
     description: 'Track receipts by merchant, month, and category. Capture photos, PDFs, and email receipts, then review and export your records. Start free.'
   },
   {
-    path: '/receipt-organizer', kind: 'workflow', label: 'Receipt organizer', updated: CONTENT_REVIEW_DATE,
+    path: '/receipt-organizer', kind: 'workflow', label: 'Receipt organizer', updated: '2026-10-10',
     title: 'Digital Receipt Organizer for Photos, PDFs & Email | ReceiptNest',
     description: 'Bring scattered receipts into one searchable place. Find a purchase, keep its original file, and organize your receipt backlog with ReceiptNest.'
   },
   {
-    path: '/receipt-scanner', kind: 'workflow', label: 'Receipt scanner', updated: CONTENT_REVIEW_DATE,
+    path: '/receipt-scanner', kind: 'workflow', label: 'Receipt scanner', updated: '2026-10-10',
     title: 'AI Receipt Scanner for Photos & PDFs | ReceiptNest',
     description: 'Turn receipt photos and PDFs into merchant, date, amount, and category records. Review the details, keep the original, and export to CSV.'
   },
   {
-    path: '/receipt-management-software', kind: 'workflow', label: 'Receipt management', updated: CONTENT_REVIEW_DATE,
+    path: '/receipt-management-software', kind: 'workflow', label: 'Receipt management', updated: '2026-10-10',
     title: 'Receipt Management Software for Small Businesses | ReceiptNest',
     description: 'Collect, review, and export small-business receipt records. A focused receipt workflow without payroll, bookkeeping, or expense-approval software.'
   },
   {
-    path: '/expense-tracker', kind: 'workflow', label: 'Receipt-based expenses', updated: CONTENT_REVIEW_DATE,
+    path: '/expense-tracker', kind: 'workflow', label: 'Receipt-based expenses', updated: '2026-10-10',
     title: 'Receipt-Based Expense Tracker & Monthly Spending | ReceiptNest',
     description: 'See the spending behind your receipts. Review merchants, categories, and monthly totals, with original documents available when you need them.'
   },
   {
-    path: '/tax-receipt-organizer', kind: 'workflow', label: 'Tax receipt organizer', updated: CONTENT_REVIEW_DATE,
+    path: '/tax-receipt-organizer', kind: 'workflow', label: 'Tax receipt organizer', updated: '2026-10-10',
     title: 'Tax Receipt Organizer for Freelancers | ReceiptNest',
     description: 'Keep freelance receipts organized throughout the year. Review categories, preserve original records, and export receipts for tax-preparation review.'
   },
   {
-    path: '/receipt-to-csv', kind: 'workflow', label: 'Receipt to CSV', updated: CONTENT_REVIEW_DATE,
+    path: '/receipt-to-csv', kind: 'workflow', label: 'Receipt to CSV', updated: '2026-10-10',
     title: 'Receipt to CSV: Export Receipts for Excel | ReceiptNest',
     description: 'See a sample receipt CSV, understand its columns, and export receipt records for Excel or Google Sheets. CSV export is included in the free plan.'
   },
   {
-    path: '/email-receipt-organizer', kind: 'workflow', label: 'Email receipts', updated: CONTENT_REVIEW_DATE,
+    path: '/email-receipt-organizer', kind: 'workflow', label: 'Email receipts', updated: '2026-10-10',
     title: 'Email Receipt Organizer & Receipt Forwarding | ReceiptNest',
     description: 'Forward email receipts to your ReceiptNest address. Keep email purchases, PDF attachments, and photo receipts together in one searchable record.'
   },
@@ -74,7 +74,7 @@ export const publicPages: readonly PublicPage[] = [
     description: 'Meet ReceiptNest at receipt-nest.com. Learn what the product does, where it stops, and how to find its official web, iOS, and Android apps.'
   },
   {
-    path: '/blog', kind: 'blog', label: 'Guides', updated: CONTENT_REVIEW_DATE,
+    path: '/blog', kind: 'blog', label: 'Guides', updated: '2026-10-10',
     title: 'Receipt Tracking & Organization Guides | ReceiptNest',
     description: 'Practical receipt workflows for freelancers: scanning, CSV exports, tax record organization, and clear comparisons of receipt-management approaches.'
   },

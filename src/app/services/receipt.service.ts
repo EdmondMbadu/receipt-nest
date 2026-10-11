@@ -39,6 +39,7 @@ import {
   ReceiptFile,
   createReceiptDocument
 } from '../models/receipt.model';
+import { trackFirstReceiptProcessed } from '../utils/receipt-activation-analytics';
 import { MonthlySummary, getMonthlySummaryId } from '../models/monthly-summary.model';
 
 /**
@@ -261,6 +262,7 @@ export class ReceiptService {
             id: doc.id,
             ...doc.data()
           })) as Receipt[];
+          trackFirstReceiptProcessed(userId, receipts);
           this.receipts.set(receipts);
           this.isLoading.set(false);
         },

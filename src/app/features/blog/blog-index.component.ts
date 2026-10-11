@@ -25,8 +25,15 @@ export class BlogIndexComponent {
   readonly categories = blogCategories;
   readonly selectedCategory = signal<BlogCategory | 'All'>('All');
   readonly posts = blogPosts;
-  readonly featuredPost = blogPosts[0];
-  readonly remainingPosts = blogPosts.slice(1);
+  readonly featuredPost = blogPosts.find(post => post.slug === 'can-bank-statements-replace-receipts') ?? blogPosts[0];
+  readonly remainingPosts = blogPosts.filter(post => post.slug !== this.featuredPost.slug);
+  readonly workflowLinks = [
+    { path: '/receipt-tracker', label: 'Track receipts by month' },
+    { path: '/receipt-organizer', label: 'Organize a receipt backlog' },
+    { path: '/email-receipt-organizer', label: 'Collect forwarded email receipts' },
+    { path: '/receipt-to-csv', label: 'Inspect the CSV export' },
+    { path: '/tax-receipt-organizer', label: 'Prepare records for tax review' }
+  ];
   readonly filteredPosts = computed(() => {
     const selected = this.selectedCategory();
     return selected === 'All' ? this.posts : this.posts.filter(post => post.category === selected);

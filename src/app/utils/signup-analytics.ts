@@ -1,3 +1,5 @@
+import { armReceiptActivation } from './receipt-activation-analytics';
+
 /**
  * Records a completed signup in GA4 (`sign_up`) and, when the visitor clicked a
  * signup link on one of the standalone games (public/games) in the last 30 days,
@@ -26,8 +28,9 @@ export function readGameRef(now: number = Date.now()): string | null {
   }
 }
 
-export function trackSignup(method: SignupMethod): void {
+export function trackSignup(method: SignupMethod, userId?: string): void {
   if (typeof window === 'undefined') return;
+  if (userId) armReceiptActivation(userId);
   const game = readGameRef();
   try {
     const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag;

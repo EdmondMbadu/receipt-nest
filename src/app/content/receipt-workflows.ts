@@ -26,10 +26,10 @@ export interface ReceiptWorkflow {
 
 export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
   "receipt-tracker": {
-    "h1": "A receipt tracker for the purchases you need to find again.",
+    "h1": "A receipt tracker for freelance purchases, from capture to CSV.",
     "intro": "A paper receipt in your wallet. A PDF in Downloads. An email you cannot find. ReceiptNest brings those records together so a simple question—what did I buy, and where is the receipt?—does not turn into an evening of searching.",
     "benefit": "Capture now. Review by month. Export when you need to.",
-    "image": "/assets/monthly-light.png?v=20260924",
+    "image": "/assets/monthly-light.webp",
     "imageWidth": 744,
     "imageHeight": 1507,
     "imageAlt": "ReceiptNest monthly spending screen",
@@ -115,14 +115,22 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       {
         "path": "/receipt-organizer",
         "label": "Organize an older receipt backlog"
+      },
+      {
+        "path": "/blog/receipt-tracking-delivery-drivers",
+        "label": "Keep delivery-work receipts organized"
+      },
+      {
+        "path": "/email-receipt-organizer",
+        "label": "Collect the receipts arriving by email"
       }
     ]
   },
   "receipt-organizer": {
-    "h1": "One receipt organizer for your inbox, camera roll, and paper pile.",
+    "h1": "Organize paper, PDF, and email receipts in one place.",
     "intro": "The hard part is often not saving a receipt. It is finding the right one later. ReceiptNest gives photos, PDFs, and forwarded receipts a shared place, with merchant, date, amount, and category details you can review.",
     "benefit": "Keep the document and the useful details together.",
-    "image": "/assets/auto-light.png?v=20260924",
+    "image": "/assets/auto-light.webp",
     "imageWidth": 772,
     "imageHeight": 1559,
     "imageAlt": "ReceiptNest screen showing receipts organized in categories",
@@ -208,6 +216,10 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       {
         "path": "/receipt-tracker",
         "label": "Keep new receipts organized each month"
+      },
+      {
+        "path": "/blog/organize-receipts-taxes-freelancer-guide",
+        "label": "Follow the freelancer tax-receipt checklist"
       }
     ]
   },
@@ -215,7 +227,7 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
     "h1": "Scan a receipt. Review the details. Keep a usable record.",
     "intro": "A receipt photo is a useful start. ReceiptNest turns it into a record with a merchant, date, total, currency, and suggested category, while keeping the original available for review. Upload a photo or PDF and check the result before you use it.",
     "benefit": "Less retyping, with room to check and correct.",
-    "image": "/assets/capture-light.png?v=20260924",
+    "image": "/assets/capture-light.webp",
     "imageWidth": 770,
     "imageHeight": 1554,
     "imageAlt": "ReceiptNest receipt-upload screen with camera, gallery, and file options",
@@ -313,7 +325,7 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
     "h1": "Receipt management for a small business—not a whole finance department.",
     "intro": "If your immediate problem is collecting receipts and preparing them for review, a full accounting rollout may be more than you need. ReceiptNest focuses on capture, organization, original-document access, and exports.",
     "benefit": "A repeatable handoff from scattered receipts to reviewed records.",
-    "image": "/assets/auto-light.png?v=20260924",
+    "image": "/assets/auto-light.webp",
     "imageWidth": 772,
     "imageHeight": 1559,
     "imageAlt": "ReceiptNest categorized receipt view",
@@ -406,7 +418,7 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
     "h1": "See your receipt-backed expenses, one month at a time.",
     "intro": "What did those small purchases add up to? ReceiptNest connects the amounts in your receipt history to merchants and categories, so you can review spending with the original records close at hand.",
     "benefit": "Understand the purchases you captured—not an assumed picture of every transaction.",
-    "image": "/assets/monthly-light.png?v=20260924",
+    "image": "/assets/monthly-light.webp",
     "imageWidth": 744,
     "imageHeight": 1507,
     "imageAlt": "ReceiptNest monthly spending view with a chart and total",
@@ -492,6 +504,10 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       {
         "path": "/receipt-tracker",
         "label": "Make receipt capture consistent"
+      },
+      {
+        "path": "/blog/can-bank-statements-replace-receipts",
+        "label": "Understand what statements and receipts each show"
       }
     ]
   },
@@ -499,7 +515,7 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
     "h1": "Organize tax receipts before the year-end scramble.",
     "intro": "Give your future self a better starting point. ReceiptNest helps freelancers collect receipt photos, PDFs, and forwarded emails, review the purchase details, and export records for tax-preparation review.",
     "benefit": "Record organization—not tax advice or a guarantee of deductibility.",
-    "image": "/assets/auto-light.png?v=20260924",
+    "image": "/assets/auto-light.webp",
     "imageWidth": 772,
     "imageHeight": 1559,
     "imageAlt": "ReceiptNest receipt categories for reviewing purchase records",
@@ -650,6 +666,10 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
     },
     "sections": [
       {
+        "title": "Open the sample in Excel or Google Sheets",
+        "body": "Download the fictional sample above. In Google Sheets, choose File, Import, Upload and select the CSV. In Excel, use Data, From Text/CSV to review the preview before loading. Check the merchant, date and amount columns, then exclude the final Total row before summing the purchase rows. With the sample, 27.48 + 12.00 + 9.74 = 49.22; including the Total row would incorrectly double that to 98.44."
+      },
+      {
         "title": "Exactly what this CSV includes",
         "body": "Monthly and folder exports contain Merchant, Date, and Amount, followed by a total row. Category exports add Category. This is a summary of receipts, not a line-item table, separate sales-tax breakdown, or collection of original receipt files."
       },
@@ -696,6 +716,20 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       {
         "path": "/pricing",
         "label": "Compare Starter and Pro"
+      },
+      {
+        "path": "/blog/organize-receipts-taxes-freelancer-guide",
+        "label": "Prepare the records behind your tax-review spreadsheet"
+      },
+      {
+        "path": "/email-receipt-organizer",
+        "label": "Capture emailed receipts before export"
+      }
+    ],
+    "sources": [
+      {
+        "href": "https://support.google.com/docs/answer/40608",
+        "label": "Google Sheets: importing spreadsheet data"
       }
     ]
   },
@@ -788,6 +822,14 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       {
         "path": "/security",
         "label": "Read about receipt data handling"
+      },
+      {
+        "path": "/blog/receipt-tracking-etsy-sellers",
+        "label": "Organize supplier and marketplace-related receipts"
+      },
+      {
+        "path": "/blog/scan-receipts-automatically",
+        "label": "Combine email, photo, and PDF capture"
       }
     ]
   }
