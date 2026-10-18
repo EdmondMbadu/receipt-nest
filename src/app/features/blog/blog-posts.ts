@@ -63,6 +63,251 @@ export const blogCategories: readonly BlogCategory[] = [
 
 export const blogPosts: readonly BlogPost[] = [
   {
+    slug: 'why-do-receipts-fade',
+    path: '/blog/why-do-receipts-fade',
+    category: 'How-To',
+    title: 'Why Do Receipts Fade? How to Keep Thermal Receipts Readable (and What to Do When One Is Already Blank)',
+    seoTitle: 'Why Do Receipts Fade? How to Keep Them Readable',
+    description:
+      'Most receipts are thermal paper with no ink. Learn what makes them fade, how long they last, how to store them, and what to do when a receipt is already blank.',
+    excerpt:
+      'Most receipts are printed with heat, not ink, so heat, light, friction and everyday chemicals can erase them. Photograph them the day you get them, store the paper cool, dark and dry, and never laminate.',
+    datePublished: '2026-10-18',
+    dateModified: '2026-10-18',
+    readTime: '9 min read',
+    image: '/assets/images/blog/why-do-receipts-fade.webp',
+    imageWidth: 1672,
+    imageHeight: 941,
+    imageAlt: 'A thermal receipt fading from sharp to blank, with heat, light, friction and chemicals labeled, beside a phone photo that keeps it readable',
+    keywords: [
+      'why do receipts fade',
+      'how to keep receipts from fading',
+      'faded receipt',
+      'thermal paper receipts',
+      'how long do receipts last',
+      'can you restore a faded receipt'
+    ],
+    intro: [
+      `Pull a receipt out of your wallet from a few months ago and you may find a pale gray ghost where the total used to be. That's not bad luck. Most receipts are printed on thermal paper, which has no ink at all: a heat-sensitive coating darkens where the printer heats it. The same chemistry makes the image fragile, so heat, sunlight, friction, humidity, and everyday substances like hand lotion, alcohol and vinyl can fade or darken it.`,
+      `The fix is simple: photograph receipts the day you get them, store any paper you keep cool, dark, dry and away from plastics, and never laminate them. This guide explains how thermal paper works, what erases it, how long it realistically lasts, and what you can do when a receipt you need is already blank.`
+    ],
+    sections: [
+      {
+        id: 'short-answer',
+        title: 'The short answer: receipts are printed with heat, not ink',
+        blocks: [
+          {
+            kind: 'list',
+            items: [
+              'Most receipts are thermal paper. A print head heats a coating of chemicals, and the heated spots turn dark. There is no ink, toner or ribbon.',
+              'Heat, sunlight, friction, humidity, oils, alcohol, solvents, adhesives and plasticizers in vinyl can fade or darken the image.',
+              'Manufacturers rate a printed image at roughly 5 to 10 years, but only in cool, dark, controlled storage. A wallet, pocket or glovebox is not that.',
+              'The reliable fix is a clear photo taken the day you get the receipt, plus cool, dark, dry storage for any paper you keep.',
+              'Never laminate a receipt or leave it somewhere hot. Heat can turn the whole slip black.'
+            ]
+          },
+          {
+            kind: 'callout',
+            tone: 'tip',
+            title: 'The ten-second habit',
+            text: `Snap the receipt before it goes in your pocket. A photo taken while the print is sharp stays sharp; the paper keeps fading either way.`
+          }
+        ]
+      },
+      {
+        id: 'how-thermal-paper-works',
+        title: 'How thermal paper works, and why it is fragile',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `The U.S. Environmental Protection Agency describes direct thermal printing simply: the image appears when chemicals in the paper's coating are heated. In conventional thermal paper that coating holds a dye that is colorless at room temperature, a developer, and sometimes a sensitizer. When the print head pulses heat, those components melt and react, and the dye turns visible. The only thing the printer uses up is paper, which is why stores love it.`
+          },
+          {
+            kind: 'paragraph',
+            text: `The weakness is built in. The image is a chemical reaction sitting on the surface, so anything that delivers heat, light, moisture or a reactive substance can push it further, either fading the print or darkening the background until the text disappears. Some thermal papers get a protective top coat for tougher jobs, but the EPA notes that thermal paper used for receipts typically lacks the top and back coats. In other words, most receipts are the least protected kind.`
+          },
+          {
+            kind: 'callout',
+            tone: 'note',
+            title: 'Not every thermal paper is the same',
+            text: `A few newer papers use different chemistry, and top-coated grades last longer. You can't tell which kind you were handed at the register, so treat every receipt as the fragile kind.`
+          }
+        ]
+      },
+      {
+        id: 'what-fades-receipts',
+        title: 'What makes receipts fade (or turn black)',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Thermal paper manufacturers and archives list the same culprits again and again. Most of them are things a receipt meets every day.`
+          },
+          {
+            kind: 'table',
+            table: {
+              columns: ['Culprit', 'What it does', 'Where receipts meet it'],
+              rows: [
+                ['Heat', 'Darkens the paper, sometimes to solid black', 'A dashboard or glovebox in summer, near a heater, hot lamination'],
+                ['Sunlight and UV light', 'Fades the print over time', 'A car dashboard, a sunny window, a desk under bright lights'],
+                ['Friction', 'Rubs and scuffs the coating', 'Pockets, wallets, folding and refolding'],
+                ['Humidity and water', 'Reduces contrast and damages the image', 'A damp bag, a humid garage, a wet countertop'],
+                ['Oils, lotions and cosmetics', 'React with the coating', 'Hand cream, skin oil, food grease'],
+                ['Alcohol and other solvents', 'Attack the coating', 'Cleaning products and alcohol-based hand sanitizer on your hands'],
+                ['Plasticizers', 'Migrate into the paper and erase the image', 'Soft vinyl (PVC) sleeves and folders, rubber mats, erasers'],
+                ['Adhesives and tape', 'Damage the thermal layer', 'Taping receipts to a sheet of paper or into a notebook']
+              ]
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: `Heat is the one that surprises people. Because heat is what creates the image, extra heat keeps developing the whole sheet. The EPA notes that thermal paper exposed to heat may turn black. A state wildlife agency that prints licenses on heat-sensitive paper warns that hot lamination will turn them black, and that any heat can make them too dark to read.`
+          }
+        ]
+      },
+      {
+        id: 'how-long-receipts-last',
+        title: 'How long does a thermal receipt last?',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Shorter than most people hope, and much shorter than the published numbers if the receipt lives in a wallet. Manufacturer figures assume ideal, dark, temperature-controlled storage, and they say so.`
+          },
+          {
+            kind: 'table',
+            table: {
+              columns: ['Source', 'What it says', 'Conditions'],
+              rows: [
+                ['EPA, citing a thermal paper manufacturer', 'An image typically lasts between five and ten years', 'General estimate'],
+                ['Zebra, standard (uncoated) receipt paper', 'Indoor archive use up to 10 years, expected but not warranted', 'In the dark, under 77°F, 45 to 65% relative humidity'],
+                ['A&D, thermal printer paper', 'Legible for up to 10 years; actual legibility may be shorter', 'Cool, dark place below 25°C (77°F)'],
+                ['National Archives of Australia', 'Can show significant fading in as little as five years', 'Records-management guidance']
+              ]
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: `Compare that with how long you may need a receipt. The IRS generally expects records to be kept for three years after you file, and longer in some cases. A receipt that spends a summer in a car can be unreadable long before that. The paper isn't the record you can count on; a clear copy is.`
+          }
+        ]
+      },
+      {
+        id: 'how-to-store-receipts',
+        title: 'How to keep receipts from fading',
+        blocks: [
+          {
+            kind: 'ordered',
+            items: [
+              'Photograph or scan it the same day, while the print is darkest. Capture the whole receipt, including the store name at the top and the total and date.',
+              'Keep paper receipts flat in a cool, dark, dry place. Archives recommend about 20°C (68°F) and around 50% relative humidity; a drawer or folder indoors beats a car or a bag.',
+              'File thermal receipts separately from other papers, as archives recommend, so they aren’t rubbed or pressed against other materials.',
+              'Keep them out of soft vinyl (PVC) sleeves and plasticized folders. The plasticizers can erase the print.',
+              'Don’t tape them down, and keep them away from lotion, sanitizer and greasy hands.',
+              'Never laminate a receipt. The heat can turn it black.',
+              'If you need a paper copy, photocopy it onto plain paper. Archives have long recommended copying thermal records onto permanent paper.'
+            ]
+          },
+          {
+            kind: 'callout',
+            tone: 'warning',
+            title: 'The two worst places for a receipt',
+            text: `A car in summer and a pocket you keep reaching into. Heat and light attack the image in one; friction and skin oils attack it in the other. Snap it before it goes in either.`
+          }
+        ]
+      },
+      {
+        id: 'already-faded',
+        title: 'Your receipt is already blank. Now what?',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `There is no reliable way to bring back a fully faded thermal print at home. Don't try heating it: extra heat develops the whole sheet, and in one small lab study, ironing a faded receipt turned the background black without recovering the print. Instead, work through these options.`
+          },
+          {
+            kind: 'ordered',
+            items: [
+              'If some print is still visible, photograph it now, in even light without glare. Adjusting contrast on the photo can sometimes make partly faded numbers easier to read, but don’t count on it.',
+              'Ask for a duplicate. Many sellers can look up and resend a receipt. Walmart has an online receipt lookup for card purchases that uses the store location, date, total and the card’s last four digits. Target shows in-store purchases in your account when you paid with a card linked to it or used the Wallet in the Target app. Small shops can often resend a receipt from their point-of-sale system; just ask.',
+              'Search your email for an e-receipt or order confirmation. Online orders almost always send one.',
+              'Pull the card or bank statement for that date. It shows who you paid, when and how much, which supports the payment even if it doesn’t show what you bought.',
+              'Write a short note on what it was and why you bought it, while you still remember, and keep it with the statement line.'
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `For business expenses, IRS guidance says supporting documents should show the payee, the amount, proof of payment, the date and a description of what was bought, and that a combination of documents may be needed. When records are lost, the IRS's own reconstruction guidance suggests asking your card company or bank for past statements and asking suppliers for copies of invoices. A statement plus a duplicate receipt or a clear note is far better than a blank strip of paper.`
+          },
+          {
+            kind: 'callout',
+            tone: 'note',
+            title: 'Record organization, not tax advice',
+            text: `Whether a particular combination of records supports a particular deduction is a question for your tax professional. This guide is about keeping the records readable in the first place.`
+          }
+        ]
+      },
+      {
+        id: 'digital-copies',
+        title: 'Why a photo is the copy that lasts',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `The IRS says that all requirements that apply to hard copy books and records also apply to electronic records. A clear, complete digital copy you can actually find later is held to the same standard as paper, and unlike paper, it doesn't fade in a hot car.`
+          },
+          {
+            kind: 'list',
+            items: [
+              'Lay the receipt flat on a dark, plain surface so the edges are easy to see.',
+              'Fill the frame with the whole receipt, top to bottom. Long receipts can take two photos.',
+              'Check that the store name, date, items and total are sharp before you put the paper away.',
+              'Store photos somewhere organized by month, not lost in a camera roll of 4,000 pictures.',
+              'Whether to also keep the paper original is worth asking your tax professional about. If you keep it, store it as described above.'
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `That's the habit ReceiptNest is built around: snap a receipt the day you get it, add a quick note on what it was for, and find it again by month when you need it. Email receipts can be forwarded in, and you can export a CSV or PDF for your accountant. ReceiptNest never connects to your bank; you choose which receipts to keep.`
+          }
+        ]
+      }
+    ],
+    faq: [
+      {
+        question: 'Why do receipts fade?',
+        answer:
+          'Most receipts are printed on thermal paper, which has no ink. The image is a heat-triggered chemical reaction in the paper’s coating, so heat, sunlight, friction, humidity, oils, alcohol, solvents, adhesives and plasticizers in vinyl can fade it or darken the background until the text disappears.'
+      },
+      {
+        question: 'How long do thermal receipts last?',
+        answer:
+          'Manufacturers generally rate printed thermal paper at about 5 to 10 years, but only in cool, dark, controlled storage. Archives warn that significant fading can appear in as little as five years, and receipts kept in wallets, pockets or cars can fade far sooner.'
+      },
+      {
+        question: 'Can you restore a faded receipt?',
+        answer:
+          'There is no reliable home method. Heating a faded receipt usually darkens the whole slip. If some print remains, photograph it right away and try adjusting the contrast; otherwise ask the seller for a duplicate, search your email for an e-receipt, and keep the matching card statement with a note.'
+      },
+      {
+        question: 'Does laminating a receipt protect it?',
+        answer:
+          'No. Hot lamination heats the paper, and heat is what darkens thermal paper, so a laminated receipt can turn black. Photograph it instead and store the original flat, cool, dark and dry.'
+      },
+      {
+        question: 'Is a photo of a receipt good enough for the IRS?',
+        answer:
+          'The IRS says all requirements that apply to hard copy records also apply to electronic records. A clear, complete photo that shows the payee, date, items and total is held to the same standard as the paper. Ask your tax professional whether you should also keep the original.'
+      },
+      {
+        question: 'Do receipts contain BPA?',
+        answer:
+          'Many do. The EPA reports that bisphenol A (BPA) is a commonly used developer in point-of-sale receipt paper, and it evaluated alternatives, including bisphenol S (BPS). If you prefer to handle fewer paper receipts, asking for an email receipt is an easy option.'
+      }
+    ],
+    relatedSlugs: [
+      'can-bank-statements-replace-receipts',
+      'scan-receipts-automatically',
+      'organize-receipts-taxes-freelancer-guide'
+    ]
+  },
+  {
     slug: 'organize-receipts-for-accountant',
     path: '/blog/organize-receipts-for-accountant',
     category: 'Tax Guides',

@@ -1,6 +1,6 @@
 // Browser-safe: the admin preview and outgoing emails use the same footer.
 export const EMAIL_SOCIAL_LINKS = [
-  { label: "YouTube", key: "youtube", href: "https://www.youtube.com/@ReceiptNestAI" },
+  { label: "YouTube", key: "youtube", href: "https://www.youtube.com/@ReceiptNest" },
   { label: "X", key: "x", href: "https://x.com/ReceiptNestAI" },
   { label: "TikTok", key: "tiktok", href: "https://www.tiktok.com/@receiptnest" },
   { label: "Instagram", key: "instagram", href: "https://www.instagram.com/receiptnest" },

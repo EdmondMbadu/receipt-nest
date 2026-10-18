@@ -25,6 +25,17 @@ const scanner = { href: '/receipt-scanner', label: 'See the receipt-scanning wor
 const email = { href: '/email-receipt-organizer', label: 'Set up email-receipt forwarding' };
 
 const editorial: Readonly<Record<string, BlogEditorial>> = {
+  'why-do-receipts-fade': {
+    note: 'Published by ReceiptNest, the product discussed here. This is general guidance on keeping receipts readable, not tax advice. Image-life figures are manufacturer estimates under controlled storage; real receipts in wallets and cars can fade much sooner.',
+    sources: [
+      { href: 'https://19january2021snapshot.epa.gov/sites/static/files/2015-09/documents/bpa_ch3.pdf', label: 'EPA: how thermal paper works (Bisphenol A Alternatives in Thermal Paper, ch. 3)' },
+      { href: 'https://prodc-www.zebra.com/content/dam/zebra_dam/en/spec-sheets/z-perform-1000d-2-1-receipt-paper-spec-sheet-en-us.pdf', label: 'Zebra: receipt paper image life and what to keep it away from' },
+      { href: 'https://www.naa.gov.au/information-management/store-and-preserve-information/preserving-information/managing-records-thermal-papers', label: 'National Archives of Australia: managing records on thermal paper' },
+      records,
+      { href: 'https://www.irs.gov/newsroom/reconstructing-records-after-a-natural-disaster-or-casualty-loss', label: 'IRS: reconstructing records' }
+    ],
+    workflows: [scanner, email, tax]
+  },
   'organize-receipts-for-accountant': {
     note: taxNote, sources: [records], workflows: [csv, tax, email]
   },
