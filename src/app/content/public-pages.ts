@@ -7,12 +7,17 @@ export interface PublicPage {
   readonly title: string;
   readonly description: string;
   readonly label: string;
-  readonly kind: 'home' | 'workflow' | 'information' | 'blog' | 'support' | 'terms';
+  readonly kind: 'home' | 'workflow' | 'information' | 'blog' | 'support' | 'terms' | 'guide';
   readonly updated: string;
 }
 
 /** Shared by the router, pre-render routes, page metadata, and sitemap tooling. */
 export const publicPages: readonly PublicPage[] = [
+  {
+    path: '/getting-started', kind: 'guide', label: 'Getting started', updated: '2026-10-18',
+    title: 'Getting Started with ReceiptNest — Upload & Download Receipts',
+    description: 'Watch the 85-second ReceiptNest walkthrough. Learn to scan or upload a receipt, let AI organize the details, and find and download your receipts.'
+  },
   {
     path: '/', kind: 'home', label: 'ReceiptNest', updated: '2026-10-10',
     title: 'ReceiptNest — Receipt App for Freelancers. No Accounting Software.',

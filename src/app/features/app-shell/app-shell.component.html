@@ -72,6 +72,11 @@
               <span>Collections</span>
               }
             </a>
+            <a data-onboarding="help" routerLink="/app/help" routerLinkActive="is-active" class="nav-item" aria-label="Help & getting started" title="Help & getting started"
+              [class.justify-center]="!desktopSidebarExpanded()" [class.px-0]="!desktopSidebarExpanded()">
+              <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold" aria-hidden="true">?</span>
+              @if (desktopSidebarExpanded()) { <span>Help & getting started</span> }
+            </a>
           </nav>
 
           <!-- Telegram integration intentionally hidden in the app shell. -->
@@ -326,6 +331,10 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 7.5A2.25 2.25 0 016 5.25h4.086a2.25 2.25 0 011.591.659l1.578 1.578a2.25 2.25 0 001.591.659H18a2.25 2.25 0 012.25 2.25v7.5A2.25 2.25 0 0118 20.25H6a2.25 2.25 0 01-2.25-2.25V7.5z" />
         </svg>
         <span>Collections</span>
+      </a>
+      <a data-onboarding="help" routerLink="/app/help" routerLinkActive="is-active" class="nav-item" (click)="closeSidebar()">
+        <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold" aria-hidden="true">?</span>
+        <span>Help & getting started</span>
       </a>
     </nav>
 

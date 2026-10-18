@@ -16,6 +16,7 @@ import { CommonModule } from '@angular/common';
 
 import { AppConfigService } from '../../services/app-config.service';
 import { ReceiptService, UploadProgress, MAX_FILE_SIZE } from '../../services/receipt.service';
+import { UploadGuideStage } from '../../services/receipt-tour.service';
 import { Receipt } from '../../models/receipt.model';
 
 @Component({
@@ -30,6 +31,8 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
   private readonly receiptService = inject(ReceiptService);
 
   @Input() autoOpenScannerOnTouch = true;
+  @Input() guiding = false;
+  @Output() guideStageChange = new EventEmitter<UploadGuideStage>();
   @Output() uploadComplete = new EventEmitter<Receipt>();
   @Output() uploadError = new EventEmitter<string>();
   @Output() close = new EventEmitter<void>();
@@ -60,6 +63,9 @@ export class UploadComponent implements AfterViewInit, OnDestroy {
   private frameProbeCtx: CanvasRenderingContext2D | null = null;
 
   constructor() {
+    effect(() => {
+      this.guideStageChange.emit(this.showCamera() ? 'camera' : this.isUploading() ? 'uploading' : this.selectedFile() ? 'process' : 'choose');
+    });
     // Watch for camera state changes and initialize camera
     effect(() => {
       if (this.showCamera()) {

@@ -4,6 +4,7 @@ import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
 import { addEmailDarkMode } from "./email-theme";
+import { buildWelcomeEmailContent } from './welcome-email-content';
 import { sendSendgridMail } from "./sendgrid";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
@@ -247,24 +248,9 @@ export const sendWelcomeEmail = onCall(
       return { ok: true };
     }
 
-    const subject = "Welcome to ReceiptNest";
-    const text = appendAppDownloadText(`Welcome to ReceiptNest!\n\nYour account is ready. Capture receipts, keep expenses organized, and stay on top of your spending in one place.\n\nGo to your dashboard: ${appBaseUrl.value()}/app`);
-    const bodyHtml = `
-      <p style="margin:0 0 12px; font-size:15px; line-height:1.6;">Welcome to ReceiptNest,</p>
-      <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">Your account is ready. From here, you can upload receipts, keep expenses organized, and build a cleaner record of every purchase.</p>
-      <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">When you are ready, head to your dashboard and add your first receipt.</p>
-      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:18px 0;">
-        <tr>
-          <td align="center" bgcolor="#10b981" style="border-radius:999px;">
-            <a href="${appBaseUrl.value()}/app" style="display:inline-block; padding:12px 22px; font-size:14px; font-weight:600; color:#ffffff; text-decoration:none; font-family:Arial, sans-serif;">Go to the dashboard</a>
-          </td>
-        </tr>
-      </table>
-      <div style="margin-top:18px; padding:14px 16px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; font-size:13px; color:#475569;">
-        Need a quick start? Upload your first receipt and let ReceiptNest do the organizing.
-      </div>
-    `;
-    const html = buildEmailShell(subject, bodyHtml, "Welcome to ReceiptNest. Your receipts just got organized.");
+    const { subject, preheader, text: welcomeText, bodyHtml } = buildWelcomeEmailContent(appBaseUrl.value());
+    const text = appendAppDownloadText(welcomeText);
+    const html = buildEmailShell(subject, bodyHtml, preheader);
 
     try {
       await sendEmail(email, subject, text, html);

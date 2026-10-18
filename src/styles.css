@@ -95,3 +95,9 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Keep guided controls below navigation when the quick tour brings them into view. */
+[data-onboarding] { scroll-margin-top: 5rem; }
+/* Give short dashboards enough room to scroll controls above the guide. */
+.onboarding-active { padding-bottom: 75vh; }
+.onboarding-preview-active [data-onboarding] { scroll-margin-top: 7.5rem; }

@@ -1,0 +1,36 @@
+@if (tour.preview() && !tour.uploadOpen()) {
+  <aside #previewBar class="preview-bar" aria-label="Admin guide preview">
+    <div><strong>Guide preview · Your real account</strong><small>Uploads and downloads work normally.</small></div>
+    <button role="switch" [attr.aria-checked]="tour.previewEnabled()" (click)="tour.togglePreview()">Guide {{ tour.previewEnabled() ? 'on' : 'off' }}</button>
+    <button (click)="restart()">Restart</button><button (click)="tour.exitPreview()">Exit preview</button>
+  </aside>
+}
+@if (tour.mode() === 'resume' && !tour.preview()) {
+  <div class="resume"><span>Need a hand adding or downloading a receipt?</span><button class="primary" (click)="tour.resume()">Continue quick tour</button><button class="quiet" (click)="close()">Dismiss</button></div>
+}
+@if (tour.active() && !tour.cameraActive()) {
+  @if (rect(); as target) {<div class="spotlight" aria-hidden="true" [style.left.px]="target.left" [style.top.px]="target.top" [style.width.px]="target.width" [style.height.px]="target.height"></div>}
+  <section #panel class="tour-panel" role="region" aria-label="Getting started walkthrough" [class.waiting]="!rect()" [style.left.px]="placement()?.left" [style.top.px]="placement()?.top" [style.max-height.px]="placement()?.maxHeight">
+    @if (placement(); as position) {<span class="arrow" aria-hidden="true" [style.left.px]="position.arrowLeft" [style.top.px]="position.arrowTop"></span>}
+    <div class="panel-content">
+      <div class="topline"><span>{{ tour.mode() === 'done' ? 'You know the essentials' : 'Step ' + tip().number + ' of 7' }}</span><button class="close" aria-label="Close walkthrough" (click)="close()">×</button></div>
+      @if (tour.mode() === 'done') {
+        <h2 #heading tabindex="-1">You’re ready.</h2><p>Add a receipt whenever you need to. Find this guide anytime in Help & getting started.</p>
+        <a class="video-link" routerLink="/getting-started" fragment="walkthrough" target="_blank" rel="noopener" (click)="watch()"><img src="/media/getting-started/receiptnest-quick-start-v1.jpg" width="1920" height="1080" alt=""/><span>▶ Watch the 85-second walkthrough</span></a>
+        <button class="primary" (click)="close()">Done</button>
+      } @else if (!rect()) {
+        <h2 #heading tabindex="-1">{{ unavailable() ? 'This control isn’t available yet.' : 'Finding your next step…' }}</h2>
+        <p>{{ unavailable() ? 'You can return to the dashboard or close the tour and continue from Help later.' : 'We’re waiting for the app to finish loading.' }}</p>
+        @if (unavailable()) {<button class="primary" (click)="tour.returnToSearch()">Back to dashboard</button>}
+      } @else {
+        <div class="progress" aria-hidden="true"><span [style.width.%]="tip().number / 7 * 100"></span></div>
+        <h2 #heading tabindex="-1">{{ tip().title }}</h2><p>{{ copy() }}</p>
+        @if (tour.step() === 'add' && tour.availableReceiptId()) {<button class="text-link" (click)="tour.useExisting()">Use an existing receipt instead</button>}
+        @if (tour.step() === 'original') {<button class="text-link" (click)="tour.returnToSearch()">Continue without downloading</button>}
+        <div class="actions"><button class="quiet" (click)="back()">{{ tour.step() === 'add' ? 'Skip tour' : 'Back' }}</button>
+          @if (tip().action) {<button class="primary" (click)="primary()">{{ tour.step() === 'search' && !tour.availableReceiptId() ? 'Finish tour' : tip().action }} <span aria-hidden="true">→</span></button>}
+        </div>
+      }
+    </div>
+  </section>
+}

@@ -31,6 +31,17 @@ const knownBlogPost: CanMatchFn = async (_route, segments) => {
 
 export const routes: Routes = [
   {
+    path: 'getting-started',
+    title: getPublicPage('/getting-started').title,
+    loadComponent: () => import('./features/getting-started/getting-started.component').then(m => m.GettingStartedComponent)
+  },
+  {
+    path: 'app/admin/onboarding-preview',
+    canActivate: [lazyAdminGuard],
+    title: 'First-time experience preview',
+    loadComponent: () => import('./features/getting-started/onboarding-preview.component').then(m => m.OnboardingPreviewComponent)
+  },
+  {
     path: '',
     title: getPublicPage('/').title,
     loadComponent: () => import('./features/landing/landing.component').then((m) => m.LandingComponent)
@@ -80,6 +91,10 @@ export const routes: Routes = [
     canActivate: [lazyAuthGuard],
     loadComponent: () => import('./features/app-shell/app-shell.component').then((m) => m.AppShellComponent),
     children: [
+      {
+        path: 'help', title: 'Help & getting started', data: { inApp: true },
+        loadComponent: () => import('./features/getting-started/getting-started.component').then(m => m.GettingStartedComponent)
+      },
       {
         path: '',
         title: 'Home',

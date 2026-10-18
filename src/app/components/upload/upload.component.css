@@ -3,3 +3,7 @@
   display: contents;
 }
 
+
+/* During a guided upload, leave room for the tip and keep the actual dialog scrollable. */
+.guided-upload { align-items: flex-start; overflow-y: auto; padding-top: 20px; }
+.guided-upload > div { margin-bottom: 320px; }

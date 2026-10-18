@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, computed, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 
 import { AuthService } from '../../services/auth.service';
@@ -9,6 +9,10 @@ import { ThemeService } from '../../services/theme.service';
 import { ReceiptService } from '../../services/receipt.service';
 import { PdfThumbnailService } from '../../services/pdf-thumbnail.service';
 import { ShareService } from '../../services/share.service';
+import { GettingStartedService } from '../../services/getting-started.service';
+import { ReceiptTourService } from '../../services/receipt-tour.service';
+import { OnboardingComponent } from '../../components/onboarding/onboarding.component';
+import { shouldIntroduceGuide, canResumeGuide, trackReceiptDownload } from '../../utils/getting-started';
 import { UploadComponent } from '../../components/upload/upload.component';
 import { Receipt, ReceiptStatus } from '../../models/receipt.model';
 import { DEFAULT_CATEGORIES, getCategoryById, Category } from '../../models/category.model';
@@ -91,7 +95,7 @@ interface CategoryPieSlice {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, UploadComponent],
+  imports: [CommonModule, FormsModule, RouterLink, UploadComponent, OnboardingComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -105,6 +109,44 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly pdfThumbnailService = inject(PdfThumbnailService);
   private readonly shareService = inject(ShareService);
   private readonly functions = getFunctions(app);
+
+  readonly onboarding = inject(GettingStartedService);
+  readonly tour = inject(ReceiptTourService);
+  private readonly route = inject(ActivatedRoute);
+  private guideInitialized = false;
+  private revealedTourReceipt = '';
+  private readonly initializeGuide = effect(() => {
+    if (!this.onboarding.ready() || this.guideInitialized) return;
+    this.guideInitialized = true;
+    if (this.tour.preview() || this.tour.mode() !== 'hidden') return;
+    const count = this.onboarding.receiptCount();
+    const progress = this.onboarding.progress();
+    if (shouldIntroduceGuide(count, progress)) this.tour.introduce();
+    else if (canResumeGuide(count, progress)) this.tour.mode.set('resume');
+  });
+  private readonly synchronizeGuide = effect(() => {
+    const progress = this.user()?.gettingStarted;
+    if (progress && (!this.onboarding.progress() || progress.updatedAt > this.onboarding.progress()!.updatedAt)) {
+      this.onboarding.progress.set(progress);
+      if (!this.tour.preview() && ['completed', 'dismissed'].includes(progress.status) && ['intro', 'resume'].includes(this.tour.mode())) this.tour.mode.set('hidden');
+    }
+  });
+  private readonly observeTourReceipt = effect(() => {
+    const receipts = this.receipts();
+    this.tour.availableReceiptId.set(receipts[0]?.id ?? null);
+    if (!this.tour.active()) return;
+    const receipt = receipts.find(r => r.id === this.tour.receiptId());
+    if (receipt) {
+      this.tour.updateReceipt(receipt.status);
+      const date = this.resolveReceiptDate(receipt);
+      const key = receipt.id + ':' + date?.toISOString();
+      if (date && key !== this.revealedTourReceipt) {
+        this.revealedTourReceipt = key;
+        this.receiptService.selectedYear.set(date.getFullYear());
+        this.receiptService.selectedMonth.set(date.getMonth());
+      }
+    }
+  });
 
   readonly user = this.authService.user;
   readonly isDarkMode = this.theme.isDarkMode;
@@ -1018,6 +1060,15 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   });
 
   ngOnInit(): void {
+    const tour = this.route.snapshot.queryParamMap.get('tour') === '1';
+    const upload = this.route.snapshot.queryParamMap.get('addReceipt') === '1';
+    this.tour.enterHome();
+    if (tour) { this.guideInitialized = true; this.tour.start(); }
+    void this.onboarding.load();
+    if (tour || upload) {
+      void this.router.navigate([], { relativeTo: this.route, queryParams: { tour: null, addReceipt: null }, queryParamsHandling: 'merge', replaceUrl: true });
+    }
+    if (upload) this.openUploadModal();
     // Subscribe to real-time receipt updates
     this.receiptService.subscribeToReceipts();
     void this.loadReceiptForwardingAddress();
@@ -1163,6 +1214,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   // Navigate to receipt detail
   navigateToReceipt(receiptId: string, event?: Event): void {
     event?.stopPropagation(); // Prevent backdrop click from clearing selection
+    this.tour.receiptOpened(receiptId);
     this.router.navigate(['/app/receipt', receiptId]);
   }
 
@@ -1182,10 +1234,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   toggleDownloadMenu(group: MonthGroup): void {
     const key = this.getMonthGroupKey(group);
     this.downloadMenuOpenKey.update((openKey) => (openKey === key ? null : key));
+    this.tour.menuChanged(this.downloadMenuOpenKey() !== null);
   }
 
   closeDownloadMenu(): void {
     this.downloadMenuOpenKey.set(null);
+    this.tour.menuChanged(false);
   }
 
   downloadMonthCsv(monthGroup: MonthGroup): void {
@@ -1239,6 +1293,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       link.download = `${safeLabel}-receipts.csv`;
       document.body.appendChild(link);
       link.click();
+      trackReceiptDownload(this.user()?.id, 'csv');
+      this.tour.downloaded('export');
       document.body.removeChild(link);
       setTimeout(() => URL.revokeObjectURL(downloadUrl), 250);
     } catch (error: any) {
@@ -1340,6 +1396,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       link.download = `${safeLabel}-receipts.pdf`;
       document.body.appendChild(link);
       link.click();
+      trackReceiptDownload(this.user()?.id, 'pdf');
+      this.tour.downloaded('export');
       document.body.removeChild(link);
       setTimeout(() => URL.revokeObjectURL(downloadUrl), 250);
     } catch (error: any) {
@@ -1480,13 +1538,17 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   openUploadModal() {
     this.showUploadModal.set(true);
+    this.tour.uploadOpened();
   }
 
   closeUploadModal() {
     this.showUploadModal.set(false);
+    this.tour.uploadClosed();
   }
 
   onUploadComplete(receipt: Receipt) {
+    this.tour.uploaded(receipt.id, receipt.status);
+    this.onboarding.receiptCount.update(count => count === null ? null : count + 1);
     this.showUploadModal.set(false);
     // Receipt will appear automatically via real-time subscription
   }

@@ -4,6 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
+import { OnboardingComponent } from '../../components/onboarding/onboarding.component';
+import { ReceiptTourService } from '../../services/receipt-tour.service';
+import { trackReceiptDownload } from '../../utils/getting-started';
 import { ReceiptService } from '../../services/receipt.service';
 import { ThemeService } from '../../services/theme.service';
 import { Receipt, ReceiptStatus } from '../../models/receipt.model';
@@ -12,7 +15,7 @@ import { DEFAULT_CATEGORIES, Category } from '../../models/category.model';
 @Component({
   selector: 'app-receipt-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, OnboardingComponent],
   templateUrl: './receipt-detail.component.html',
   styleUrl: './receipt-detail.component.css'
 })
@@ -23,6 +26,7 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
   private readonly theme = inject(ThemeService);
   private readonly sanitizer = inject(DomSanitizer);
 
+  readonly tour = inject(ReceiptTourService);
   readonly isDarkMode = this.theme.isDarkMode;
   readonly categories = DEFAULT_CATEGORIES;
 
@@ -91,6 +95,7 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
       }
 
       this.receipt.set(receipt);
+      this.tour.receiptLoaded(receipt.id, receipt.status);
       this.initEditForm(receipt);
       this.imageUrl.set(null);
       this.safeImageUrl.set(null);
@@ -247,6 +252,8 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
       link.download = fileName;
       document.body.appendChild(link);
       link.click();
+      trackReceiptDownload(receipt.userId, 'original');
+      this.tour.downloaded('original');
       document.body.removeChild(link);
 
       // Cleanup

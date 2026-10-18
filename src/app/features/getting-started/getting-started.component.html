@@ -1,0 +1,59 @@
+<div class="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-white">
+  @if (!inApp) { <app-public-header /> }
+  <main id="main-content" class="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
+    <div class="mb-10 max-w-3xl">
+      <p class="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-emerald-700 dark:text-emerald-300">{{ inApp ? 'Help & getting started' : 'A little guidance. A lot less paper.' }}</p>
+      <h1 class="text-4xl font-semibold leading-tight tracking-tight sm:text-6xl">Snap. Organize.<br /><span class="text-emerald-700 dark:text-emerald-300">Download.</span></h1>
+      <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">Your first receipt, from start to finish. Watch the 85-second walkthrough, then let ReceiptNest handle the details.</p>
+      <div class="mt-7 flex flex-wrap gap-3">
+        <a routerLink="/app" [queryParams]="{addReceipt: '1'}" class="rounded-full bg-emerald-700 px-6 py-3 font-semibold text-white hover:bg-emerald-800">Add a receipt <span aria-hidden="true">↗</span></a>
+        <a routerLink="/app" [queryParams]="{tour: '1'}" class="rounded-full border border-slate-300 px-6 py-3 font-semibold hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900">{{ inApp ? 'Replay quick tour' : 'Show me around the app' }}</a>
+      </div>
+    </div>
+    <section id="walkthrough" aria-labelledby="video-title">
+      <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 id="video-title" class="text-xl font-semibold">Get started in 85 seconds</h2>
+        <span class="text-sm text-slate-500 dark:text-slate-400">Real app walkthrough · Captions included</span>
+      </div>
+      <div class="overflow-hidden rounded-2xl border border-slate-200 bg-[#102926] shadow-xl shadow-emerald-950/10 dark:border-slate-800">
+        <video controls playsinline preload="metadata" [poster]="media + '.jpg'" class="aspect-video w-full" aria-label="ReceiptNest getting started video" (play)="onPlay()">
+          <source [src]="media + '.mp4'" type="video/mp4" />
+          <track kind="captions" [src]="media + '.vtt'" srclang="en" label="English" />
+          Your browser cannot play this video. <a [href]="media + '.mp4'">Download the walkthrough</a> or read the steps below.
+        </video>
+      </div>
+      <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">Prefer to read? Everything you need is below. <a [href]="media + '.mp4'" class="underline underline-offset-4" download>Download the video</a>.</p>
+    </section>
+    <div class="my-14 grid gap-6 md:grid-cols-3">
+      <section class="rounded-2xl border border-slate-200 p-6 dark:border-slate-800">
+        <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">01 / ADD A RECEIPT</p>
+        <h2 class="mt-4 text-2xl font-semibold">Snap it. Or upload it.</h2>
+        <p class="mt-4 leading-7 text-slate-600 dark:text-slate-300">On your dashboard, choose <strong>Add Receipt</strong>. On a phone, use the <strong>+</strong> button. Scan a paper receipt, or choose <strong>Upload Existing File</strong> for a photo or PDF.</p>
+        <p class="mt-3 leading-7 text-slate-600 dark:text-slate-300">Check the preview, then choose <strong>Process Receipt</strong>.</p>
+      </section>
+      <section class="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-6 dark:border-emerald-900 dark:bg-emerald-950/30">
+        <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">02 / AUTOMATICALLY ORGANIZED</p>
+        <h2 class="mt-4 text-2xl font-semibold">The details, handled.</h2>
+        <p class="mt-4 leading-7 text-slate-600 dark:text-slate-300">ReceiptNest reads the merchant, amount and date, assigns a category, and saves the receipt. For most receipts, that’s it.</p>
+        <p class="mt-3 leading-7 text-slate-600 dark:text-slate-300">Edit details or add a note anytime. If a receipt is marked <strong>Needs Review</strong>, check it and choose <strong>Confirm & Save</strong>.</p>
+      </section>
+      <section class="rounded-2xl border border-slate-200 p-6 dark:border-slate-800">
+        <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">03 / FIND & DOWNLOAD</p>
+        <h2 class="mt-4 text-2xl font-semibold">Ready when you need it.</h2>
+        <p class="mt-4 leading-7 text-slate-600 dark:text-slate-300">Search by merchant, amount or date. Open a receipt, then choose <strong>Download</strong> below <strong>Original Receipt</strong> to save the original file.</p>
+        <p class="mt-3 leading-7 text-slate-600 dark:text-slate-300">For a whole month, use its <strong>Download</strong> menu: <strong>CSV</strong> for merchant, date, amount and a total; <strong>PDF</strong> for receipt documents in one file. PDF export is a Pro feature.</p>
+      </section>
+    </div>
+    <section class="rounded-2xl bg-slate-50 p-7 dark:bg-slate-900 sm:flex sm:items-center sm:justify-between sm:gap-10">
+      <div class="max-w-2xl"><h2 class="text-xl font-semibold">One more shortcut: forward email receipts.</h2>
+        <p class="mt-3 leading-7 text-slate-600 dark:text-slate-300">Copy your personal receipt address from the dashboard and forward emailed receipts there. ReceiptNest processes those automatically too.</p></div>
+      <a routerLink="/app" class="mt-5 inline-block shrink-0 font-semibold text-emerald-700 underline underline-offset-4 dark:text-emerald-300 sm:mt-0">Open my dashboard →</a>
+    </section>
+    <div class="mt-12 flex flex-wrap items-center justify-between gap-5 border-t border-slate-200 pt-8 dark:border-slate-800">
+      <div><h2 class="text-2xl font-semibold">Start with one receipt.</h2><p class="mt-2 text-slate-600 dark:text-slate-300">You already know the essentials.</p></div>
+      <a routerLink="/app" [queryParams]="{addReceipt: '1'}" class="rounded-full bg-emerald-700 px-6 py-3 font-semibold text-white hover:bg-emerald-800">Add a receipt</a>
+    </div>
+    <p class="mt-10 text-sm text-slate-500 dark:text-slate-400">Need a hand? <a routerLink="/support" class="underline underline-offset-4">Contact support</a>.</p>
+  </main>
+  @if (!inApp) { <app-public-footer /> }
+</div>

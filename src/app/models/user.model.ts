@@ -1,3 +1,4 @@
+import { GuideProgress } from '../utils/getting-started';
 import { Timestamp, serverTimestamp } from 'firebase/firestore';
 
 export interface NotificationSettings {
@@ -64,6 +65,7 @@ export interface UserProfile {
   adminSubscriptionOverrideUpdatedByEmail?: string | null;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
+  gettingStarted?: GuideProgress;
   welcomeEmailSent?: boolean;
   welcomeEmailSentAt?: Timestamp | ReturnType<typeof serverTimestamp>;
   authAccountMissing?: boolean;

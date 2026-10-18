@@ -60,3 +60,5 @@ export {
   oneClickEmailUnsubscribe,
   restoreSuppressedEmail,
 } from "./unsubscribe";
+
+export { getGettingStartedState, saveGettingStartedProgress } from './getting-started';
