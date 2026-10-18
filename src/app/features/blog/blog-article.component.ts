@@ -2,6 +2,7 @@ import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { Component, OnDestroy, PLATFORM_ID, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import { getBlogEditorial } from './blog-editorial';
 import { PublicHeaderComponent } from '../../components/public-layout/public-header.component';
@@ -23,12 +24,14 @@ export class BlogArticleComponent implements OnDestroy {
   private readonly theme = inject(ThemeService);
   private readonly document = inject(DOCUMENT);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly sanitizer = inject(DomSanitizer);
 
   readonly isDarkMode = this.theme.isDarkMode;
   readonly currentYear = new Date().getFullYear();
   article: BlogPost = this.requirePost(this.route.snapshot.paramMap.get('slug'));
   editorial = getBlogEditorial(this.article.slug);
   relatedPosts = getRelatedPosts(this.article);
+  videoEmbedUrl: SafeResourceUrl | null = null;
   private readonly routeSubscription: Subscription;
 
   constructor() {
@@ -36,6 +39,10 @@ export class BlogArticleComponent implements OnDestroy {
       this.article = this.requirePost(paramMap.get('slug'));
       this.editorial = getBlogEditorial(this.article.slug);
       this.relatedPosts = getRelatedPosts(this.article);
+      const videoId = this.article.video?.youtubeId;
+      this.videoEmbedUrl = videoId && /^[A-Za-z0-9_-]{11}$/.test(videoId)
+        ? this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube-nocookie.com/embed/${videoId}?rel=0`)
+        : null;
       this.applySeo();
       this.scrollToTop();
     });

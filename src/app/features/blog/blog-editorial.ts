@@ -56,7 +56,9 @@ const editorial: Readonly<Record<string, BlogEditorial>> = {
     ]
   },
   'can-bank-statements-replace-receipts': {
-    note: taxNote, sources: [records, retention], workflows: [tax, csv]
+    note: taxNote + ' The $86.40 purchase is a fictional illustration from our Paper Trail video, not a customer record. Sources checked October 17, 2026.',
+    sources: [records, { href: 'https://www.irs.gov/publications/p583', label: 'IRS Publication 583: payment evidence and electronic records' }, retention],
+    workflows: [scanner, tax, csv]
   },
   'receipt-tracking-delivery-drivers': {
     note: taxNote,

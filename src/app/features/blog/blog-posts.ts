@@ -12,6 +12,7 @@ export interface BlogBlock {
   readonly tone?: 'note' | 'tip' | 'warning';
   readonly title?: string;
   readonly table?: BlogTable;
+  readonly source?: { readonly href: string; readonly label: string };
 }
 
 export interface BlogSection {
@@ -40,6 +41,11 @@ export interface BlogPost {
   readonly imageAlt: string;
   readonly imageWidth?: number;
   readonly imageHeight?: number;
+  readonly video?: {
+    readonly youtubeId: string;
+    readonly title: string;
+    readonly description: string;
+  };
   readonly keywords: readonly string[];
   readonly intro: readonly string[];
   readonly sections: readonly BlogSection[];
@@ -671,205 +677,260 @@ export const blogPosts: readonly BlogPost[] = [
     slug: 'can-bank-statements-replace-receipts',
     path: '/blog/can-bank-statements-replace-receipts',
     category: 'Tax Guides',
-    title: 'Can Bank Statements Replace Receipts for Taxes? What Self-Employed People Need to Know',
+    title: 'Can Bank Statements Replace Receipts for Taxes?',
     seoTitle: 'Can Bank Statements Replace Receipts? U.S. Tax Guide',
     description:
-      'Learn when bank and credit card statements can support a business expense, when an itemized receipt matters, and what to do when a receipt is missing.',
+      'Can bank statements replace receipts for taxes? Compare proof of payment with itemized receipts, recover missing records, and build a simple receipt habit.',
     excerpt:
-      'For U.S. business records, a bank statement can support proof of payment. You may still need an itemized receipt or other records showing what you bought and its business purpose.',
+      'You paid $86.40. Months later, your accountant asks what it was for. Here is what your bank statement can tell you, what your receipt adds, and how to keep both useful.',
     datePublished: '2026-07-16',
-    dateModified: '2026-10-10',
-    readTime: '10 min read',
+    dateModified: '2026-10-17',
+    readTime: '8 min read',
     image: '/assets/images/blog/bank-statements-vs-receipts.webp',
     imageWidth: 1897,
     imageHeight: 829,
-    imageAlt: 'An itemized receipt beside a bank statement on an organized desk',
+    imageAlt: 'An itemized receipt next to a bank statement, green notebook, and pen on a cream desk',
+    video: {
+      youtubeId: 'vH_EjIIeEJY',
+      title: 'What Was That $86.40 Charge? | Paper Trail, Part 1 — ReceiptNest',
+      description: 'A mystery charge, an accountant’s question, and a small habit that preserves the answer. This one-minute Short introduces the example below: keep the receipt and add the context while you still remember the purchase.'
+    },
     keywords: [
       'can bank statements replace receipts for taxes',
-      'missing receipt business expense',
-      'proof of business expense'
+      'bank statements vs receipts',
+      'credit card statement proof of expense',
+      'missing business receipt'
     ],
     intro: [
-      `A bank statement can support a U.S. business-expense record, but it does not automatically replace an itemized receipt. Keep records that establish the payment, the item or service purchased, and its business purpose; those details may require more than one document.`,
-      `The IRS allows businesses to use a recordkeeping system that clearly shows income and expenses. Supporting documents can include receipts, invoices, canceled checks, and bank or credit card statements. The strongest record is the one that shows not only that you paid, but also what you purchased and how it relates to your business.`
+      `A bank statement can help prove that you paid, but it does not automatically replace an itemized receipt for U.S. business taxes. Your records also need to show what you bought and why it was a business expense. That can take a receipt, an invoice, a note, or a combination of documents.`,
+      `Now the practical question: what did you buy for $86.40 on October 3? Plants? A birthday present? A very fancy sandwich? You were there. You paid. Months later, the statement line may be the only thing you remember to look at. This first article in our Paper Trail series explains how to preserve the rest of the story.`
     ],
     sections: [
       {
         id: 'short-answer',
-        title: 'The short answer: a statement is evidence, not always the whole story',
+        title: 'Bank statements vs. receipts: what each record tells you',
         blocks: [
           {
             kind: 'paragraph',
-            text: `A bank or credit card statement usually identifies the merchant, transaction date, and amount. That makes it useful proof of payment. But many statement descriptions are vague, shortened, or routed through a payment processor. They rarely show the individual items purchased, and they do not explain the business purpose.`
-          },
-          {
-            kind: 'callout',
-            tone: 'note',
-            title: 'A practical rule',
-            text: `Think of the statement as one part of the evidence. If it does not establish the item or business purpose, pair it with another document or note that does.`
+            text: `A statement records a payment. An itemized receipt describes a purchase. A business-purpose note explains how that purchase relates to your work. When your accountant asks, “What was this for?”, those are three different questions hiding inside one sentence.`
           },
           {
             kind: 'table',
             table: {
-              columns: ['Record', 'What it usually shows', 'What may be missing'],
+              columns: ['Record', 'What it helps show', 'What may still be missing'],
               rows: [
-                ['Itemized receipt', 'Merchant, date, items, subtotal, tax, and total', 'Business purpose or who used the purchase'],
-                ['Bank statement', 'Merchant description, date, and amount paid', 'Items purchased and business purpose'],
-                ['Credit card statement', 'Merchant description, date, and charged amount', 'Item detail, returns, discounts, and business purpose'],
-                ['Invoice or order confirmation', 'Seller, buyer, items or services, date, and amount', 'Proof that the invoice was actually paid'],
-                ['Expense note', 'Your explanation of the business purpose', 'Independent proof of the purchase and payment']
+                ['Bank or credit card statement', 'Payee or merchant description, date, and amount', 'Individual items and business purpose'],
+                ['Itemized receipt', 'Seller, items, quantities, tax, and total', 'Which job or activity the purchase supported'],
+                ['Invoice or order confirmation', 'Goods or services ordered and the price', 'Evidence that payment was completed'],
+                ['Business-purpose note', 'The client, project, or reason for the purchase', 'Independent evidence of the purchase and payment']
               ]
             }
+          },
+          {
+            kind: 'paragraph',
+            text: `Merchant descriptions can be abbreviated or use a name you do not recognize. The format varies; there is no single character limit that applies to every bank statement. Even a perfectly readable merchant name usually leaves you without the shopping list.`
+          }
+        ]
+      },
+      {
+        id: 'the-86-dollar-example',
+        title: 'The $86.40 example: from mystery charge to useful record',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `In our fictional example, a contractor buys plumbing parts from Greenline Plumbing Supply for the Henderson job. The card statement shows an unfamiliar shortened merchant description and $86.40. A few months later, that could be a business purchase, something for home, or a transaction the contractor cannot place.`
+          },
+          {
+            kind: 'paragraph',
+            text: `The itemized receipt identifies the parts. A note saying “Replacement plumbing parts for the Henderson job, October 3” connects them to the work. Together with the payment record, the purchase is much easier to explain. Whether and how the cost belongs on a tax return is a separate question for the person preparing it.`
+          },
+          {
+            kind: 'callout',
+            tone: 'tip',
+            title: 'A note you can copy',
+            text: `Bought: [item or service]. Used for: [client, project, or work activity]. Personal items included: [none, or identify them]. Receipt saved: [where to find it]. Keep the explanation specific and truthful; a note cannot replace facts you do not know.`
+          },
+          {
+            kind: 'paragraph',
+            text: `The same habit works for a designer buying printing supplies, a seller ordering packaging, or a freelancer renewing software. You are preserving the connection between a payment and the work it supported.`
           }
         ]
       },
       {
         id: 'what-record-needs-to-show',
-        title: 'What a useful business-expense record needs to show',
+        title: 'What the IRS says about proof of a business expense',
         blocks: [
           {
             kind: 'paragraph',
-            text: `IRS recordkeeping guidance says supporting documents for expenses should identify the payee, amount paid, proof of payment, date incurred, and a description of the item or service that shows it was a business expense. One document does not always contain every element, so a combination of records may be needed.`
-          },
-          {
-            kind: 'list',
-            items: [
-              'Who you paid: the merchant, vendor, or service provider.',
-              'How much you paid, including tax and fees when relevant.',
-              'When the expense occurred.',
-              'What product or service you received.',
-              'Why the purchase was ordinary and relevant to your work.',
-              'Evidence that payment was completed.'
-            ]
+            text: `IRS guidance says expense records should identify the payee, amount, proof of payment, date incurred, and a description showing the business nature of the item or service. It explicitly allows a combination of supporting documents.`,
+            source: {
+              href: 'https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep',
+              label: 'See IRS guidance on supporting documents.'
+            }
           },
           {
             kind: 'paragraph',
-            text: `This is why the same statement line can be strong evidence for one purchase and weak evidence for another. A monthly charge from a clearly named software provider may be easy to connect to an invoice and your work. A large charge from a general retailer could include groceries, office supplies, a gift, and a return—all in one transaction.`
+            text: `Publication 583 explains that qualifying financial account statements can establish payment. It also cautions that payment evidence alone does not establish entitlement to a deduction. Keeping the invoice or sales slip helps document the underlying cost.`,
+            source: {
+              href: 'https://www.irs.gov/publications/p583',
+              label: 'Read IRS Publication 583.'
+            }
+          },
+          {
+            kind: 'callout',
+            tone: 'note',
+            title: 'Keep the evidence together',
+            text: `For everyday organization, think in three parts: payment, purchase detail, and purpose. This is a practical filing method, not a promise that a particular expense qualifies for a deduction.`
           }
         ]
       },
       {
         id: 'when-statements-help',
-        title: 'When a bank statement may be enough—and when it probably is not',
+        title: 'When you need more than the statement line',
         blocks: [
           {
             kind: 'paragraph',
-            text: `There is no universal rule that makes every statement line sufficient or insufficient. The question is whether your records, taken together, substantiate the expense. A statement is more useful when the merchant and business purpose are unambiguous and another record confirms what was purchased.`
+            text: `Start with the ambiguity in the purchase. A software subscription with a saved invoice is easier to explain than a single charge at a store selling both office supplies and groceries. Use the table to spot the next document or detail to gather.`
           },
           {
             kind: 'table',
             table: {
-              columns: ['Situation', 'Record strength', 'Helpful next step'],
+              columns: ['Purchase', 'The gap', 'What to keep with the payment'],
               rows: [
-                ['Recurring business software with a matching invoice', 'Relatively clear', 'Save the invoice and statement together'],
-                ['Purchase from a general retailer', 'Ambiguous', 'Find the itemized receipt or order history'],
-                ['Cash purchase', 'Statement provides no support', 'Keep the receipt and add a business-purpose note'],
-                ['Mixed personal and business transaction', 'Incomplete', 'Keep the itemized receipt and identify only the business items'],
-                ['Equipment or another long-lived asset', 'Incomplete', 'Preserve the invoice, purchase date, cost, and usage records'],
-                ['Travel, vehicle, or gift expense', 'Often needs added detail', 'Keep the required dates, destinations, mileage, recipients, or business purpose']
+                ['Recurring software', 'Which product and billing period?', 'The subscription invoice and a short work-purpose note'],
+                ['General retailer', 'What was actually in the basket?', 'The itemized receipt; mark the items used for work'],
+                ['Mixed personal and business purchase', 'Which part relates to the business?', 'Item detail and your explanation of the split'],
+                ['Cash purchase', 'An ATM withdrawal does not identify what you bought', 'The merchant receipt and a note made at the time'],
+                ['Equipment', 'The statement omits details about the asset and its use', 'The invoice and records of acquisition and business use'],
+                ['Refund or return', 'A later credit may be separate from the original charge', 'The purchase receipt and return or credit confirmation']
               ]
             }
           },
           {
-            kind: 'callout',
-            tone: 'warning',
-            title: 'Tax guidance, not tax advice',
-            text: `ReceiptNest organizes your records; it does not decide whether an expense is deductible or whether your evidence is sufficient. Ask a qualified tax professional about your specific facts.`
+            kind: 'paragraph',
+            text: `Travel, gifts, and transportation have additional recordkeeping requirements. If those are part of your work, check the specific IRS guidance rather than assuming an ordinary purchase note covers everything.`,
+            source: {
+              href: 'https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep',
+              label: 'See the IRS record types and linked guidance.'
+            }
           }
         ]
       },
       {
         id: 'missing-receipt',
-        title: 'What to do when a receipt is missing',
+        title: 'What to do if you lost a business receipt',
         blocks: [
           {
             kind: 'paragraph',
-            text: `A missing slip does not mean your first move should be guessing. Reconstruct the record while the purchase is still familiar, and preserve the documents you used to do it.`
+            text: `Use the statement as a search clue. The merchant, amount, and approximate date give you somewhere to start. Work through the steps below before trying to remember a whole year of purchases at once.`
           },
           {
             kind: 'ordered',
             items: [
-              'Search your email for the merchant name, amount, order number, or approximate purchase date.',
-              'Open the merchant account or app and download the invoice, order confirmation, or transaction detail.',
-              'Ask the merchant for a duplicate receipt if the purchase was made in person.',
-              'Match the replacement document to the bank or credit card transaction that proves payment.',
-              'Add a short note explaining what you bought and the specific business purpose.',
-              'If you cannot reconstruct the purchase confidently, flag it for your tax professional instead of inventing detail.'
+              'Search your email for the merchant, amount, order number, and nearby dates. Check for both receipts and invoices.',
+              'Look in the merchant account or shopping app for order history and downloadable purchase details.',
+              'Ask the seller for a duplicate receipt. Give the date and amount through its normal support process.',
+              'Compare the recovered document with the payment. Check for a tip, a refund, or a posting date that differs from the purchase date.',
+              'Add the business context you can honestly establish, and keep the recovered documents together.',
+              'If the record is still incomplete, flag the gap for your accountant. Separate what you know from what you could not verify.'
             ]
           },
           {
-            kind: 'callout',
-            tone: 'tip',
-            title: 'Write useful notes',
-            text: `“Client meeting with Jordan to review the website launch” is more useful than “business meal.” Specific notes preserve the context that disappears months later.`
+            kind: 'paragraph',
+            text: `A useful open question might read: “October 3, $86.40, merchant description unclear; searched email and requested a duplicate, no response yet.” That gives your accountant something concrete to review without inventing a purchase or presenting a guess as a fact.`
           }
         ]
       },
       {
         id: 'monthly-system',
-        title: 'A monthly system that keeps statements and receipts together',
+        title: 'The small receipt habit that prevents the mystery',
         blocks: [
           {
             kind: 'paragraph',
-            text: `The easiest time to resolve a missing receipt is not during tax season. It is during a short monthly review, while the merchant and purchase are still recognizable.`
+            text: `The Short calls it a ten-second habit: capture the receipt when you pay and add a note if the purpose is not obvious. Treat that as a reminder to start immediately, not a measured time guarantee. A long or faded receipt may need more attention.`
           },
           {
             kind: 'ordered',
             items: [
-              'Capture paper receipts when you receive them and forward email receipts as they arrive.',
-              'Review extracted merchant, date, amount, and category details for accuracy.',
-              'Compare your receipt list with business bank and credit card activity once a month.',
-              'Investigate unmatched transactions and attach a replacement invoice or useful note.',
-              'Keep mixed purchases clearly labeled so only the business portion is considered later.',
-              'Export an organized record for your own archive or tax-professional review.'
+              'Capture: photograph the complete receipt in good light, or save the emailed receipt or PDF. Make sure the merchant, date, item detail, and total are readable.',
+              'Explain: add the client, job, or work activity while it is fresh. Identify any personal items in a mixed purchase.',
+              'Review: check the saved image and any extracted merchant, date, and amount against the document.',
+              'Compare monthly: review your receipt list alongside bank and card activity. Investigate unmatched charges, duplicates, and refunds.',
+              'Prepare the handoff: keep readable originals, a checked summary, and a short list of unresolved questions in the format your accountant requests.'
             ]
           },
           {
             kind: 'paragraph',
-            text: `ReceiptNest helps with the receipt side of that workflow: photos, PDFs, and forwarded emails become searchable records instead of loose files. Your bank statement remains a valuable cross-check, not the only place the purchase exists.`
+            text: `In ReceiptNest, you can photograph paper receipts, upload PDFs, and forward emailed receipts to your personal forwarding address. Review the extracted details and add notes to preserve the context. ReceiptNest handles the receipts you send; the monthly comparison with your statement is something you do yourself.`
+          },
+          {
+            kind: 'paragraph',
+            text: `The monthly CSV contains Merchant, Date, and Amount, plus a final Total row. It does not carry your receipt images or notes. Keep those source records accessible, send business-purpose notes separately when needed, and exclude the Total row if you add up the exported purchases in a spreadsheet. Check the export before sharing it.`
+          }
+        ]
+      },
+      {
+        id: 'digital-copies-and-retention',
+        title: 'Digital receipts and how long to keep them',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `IRS guidance applies the same basic recordkeeping requirements to electronic and paper records. A phone photo can be part of your system, but check that the saved record is complete, legible, and retrievable. Cropping out the total or losing access to the file defeats the purpose.`,
+            source: {
+              href: 'https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep',
+              label: 'Read the IRS electronic-recordkeeping guidance.'
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: `There is no single retention period for every business document. The IRS generally lists three years for many income-tax records, with longer periods and exceptions, including records connected to property. Review the rule that applies to your situation and any other obligations before deleting originals or closing a storage account.`,
+            source: {
+              href: 'https://www.irs.gov/businesses/small-businesses-self-employed/how-long-should-i-keep-records',
+              label: 'Check the IRS retention periods and exceptions.'
+            }
           }
         ]
       },
       {
         id: 'bottom-line',
-        title: 'The bottom line',
+        title: 'When someone points at a line, point at the receipt',
         blocks: [
           {
             kind: 'paragraph',
-            text: `Bank and credit card statements are legitimate supporting documents, but they do not automatically replace itemized receipts. They are strongest when combined with an invoice, order detail, or contemporaneous note that shows what the purchase was and why it belonged to the business.`
+            text: `You do not need to memorize every purchase. You need a record you can return to. Save the item detail, preserve the payment evidence, and write down the connection to your work before it becomes a mystery.`
           },
           {
             kind: 'paragraph',
-            text: `Do not aim for a perfect shoebox at the end of the year. Aim for a clear trail: purchase detail, proof of payment, business purpose, and a monthly habit that catches gaps early.`
+            text: `Start with your next receipt. Make it readable, add the one sentence you might forget, and put it somewhere you can find it. The next time your accountant asks about $86.40, the answer will already be there.`
           }
         ]
       }
     ],
     faq: [
       {
-        question: 'Can a credit card statement be used as a receipt for taxes?',
-        answer:
-          'A credit card statement can support the date, merchant, and amount paid, but it may not show what was purchased or the business purpose. A receipt, invoice, order confirmation, or note may be needed to complete the record.'
+        question: 'Can I use a bank statement instead of a receipt for taxes?',
+        answer: 'A statement can help establish payment, but it may leave out the item purchased and its business purpose. Keep the documents that complete the record, such as an itemized receipt, invoice, or order detail. The evidence needed depends on the expense and your circumstances.'
       },
       {
-        question: 'What should I do if I lost a business receipt?',
-        answer:
-          'Look for an emailed receipt or online order history, request a duplicate from the merchant, match it to proof of payment, and add a specific business-purpose note. Ask a tax professional if the expense cannot be reconstructed confidently.'
+        question: 'Is a credit card statement enough to prove a business expense?',
+        answer: 'It can support who was paid, the amount, and the transaction date. It does not automatically establish a deduction. Preserve purchase details and business context as well, and have unclear expenses reviewed by your tax professional.'
       },
       {
-        question: 'Are digital copies of receipts acceptable?',
-        answer:
-          'Electronic records can follow the same basic recordkeeping principles as paper records. Keep digital copies accurate, readable, organized, and available for as long as the underlying record must be retained.'
+        question: 'What if I lost the receipt and only have the statement?',
+        answer: 'Search email and merchant order history, request a duplicate, and match any replacement to the payment. Record the business purpose you can verify. If information is still missing, identify the gap for your accountant instead of guessing.'
       },
       {
-        question: 'Does ReceiptNest decide which expenses are tax deductible?',
-        answer:
-          'No. ReceiptNest captures and organizes receipt records. Deductibility depends on your circumstances and should be confirmed with a qualified tax professional.'
+        question: 'Can I keep a photo of a receipt instead of paper?',
+        answer: 'Electronic records are subject to the same basic IRS recordkeeping requirements. Keep the complete record readable, organized, and accessible. Check the applicable storage and retention requirements before discarding paper originals.'
+      },
+      {
+        question: 'Does ReceiptNest match receipts to my bank statement automatically?',
+        answer: 'No. This workflow uses ReceiptNest to capture and organize the receipts you submit. Compare the receipt records with your bank or card statement yourself, and review extracted details before exporting. ReceiptNest does not determine tax deductibility.'
       }
     ],
     relatedSlugs: [
-      'organize-receipts-taxes-freelancer-guide',
       'organize-receipts-for-accountant',
+      'organize-receipts-taxes-freelancer-guide',
       'scan-receipts-automatically'
     ]
   },
