@@ -10,11 +10,12 @@ import { AiInsightsService } from '../../services/ai-insights.service';
 import { ShareService } from '../../services/share.service';
 import { NotificationSettings } from '../../models/user.model';
 import { getEffectiveSubscriptionPlan } from '../../utils/subscription.utils';
+import { AccountMenuComponent } from '../../components/account-menu/account-menu.component';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, AccountMenuComponent],
   templateUrl: './app-shell.component.html',
   styleUrl: './app-shell.component.css'
 })
@@ -103,6 +104,7 @@ export class AppShellComponent {
     initialValue: this.route.snapshot.queryParamMap
   });
   readonly isInsightsRoute = computed(() => this.currentUrl().startsWith('/app/insights'));
+  readonly isHelpRoute = computed(() => this.currentUrl().split(/[?#]/)[0] === '/app/help');
 
   readonly isFreePlan = computed(() => {
     const profile = this.user();
