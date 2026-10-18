@@ -45,6 +45,12 @@ export interface BlogPost {
     readonly youtubeId: string;
     readonly title: string;
     readonly description: string;
+    /** Small label above the video heading. Defaults to the Part 1 label. */
+    readonly eyebrow?: string;
+    /** Visible heading for the video section. Defaults to the Part 1 heading. */
+    readonly heading?: string;
+    /** Text for the YouTube link. Defaults to the Part 1 link text. */
+    readonly linkLabel?: string;
   };
   readonly keywords: readonly string[];
   readonly intro: readonly string[];
@@ -79,6 +85,15 @@ export const blogPosts: readonly BlogPost[] = [
     imageWidth: 1672,
     imageHeight: 941,
     imageAlt: 'A thermal receipt fading from sharp to blank, with heat, light, friction and chemicals labeled, beside a phone photo that keeps it readable',
+    video: {
+      youtubeId: 'ZMGqpBIWJo8',
+      title: 'Can You Still Read Your Receipt? | Paper Trail, Part 2',
+      description:
+        'Thermal receipts have no ink, so heat, sunlight, rubbing and alcohol-based products like hand sanitizer can erase them. This one-minute Short shows why, and the 10-second habit that keeps the record readable: snap it the day you get it.',
+      eyebrow: 'Paper Trail · Part 2',
+      heading: 'Watch: Can you still read your receipt?',
+      linkLabel: 'Watch Paper Trail, Part 2 on YouTube ↗'
+    },
     keywords: [
       'why do receipts fade',
       'how to keep receipts from fading',
