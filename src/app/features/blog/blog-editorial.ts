@@ -25,6 +25,15 @@ const scanner = { href: '/receipt-scanner', label: 'See the receipt-scanning wor
 const email = { href: '/email-receipt-organizer', label: 'Set up email-receipt forwarding' };
 
 const editorial: Readonly<Record<string, BlogEditorial>> = {
+  'itemized-receipt-vs-credit-card-slip': {
+    note: taxNote,
+    sources: [
+      records,
+      { href: 'https://www.irs.gov/publications/p583', label: 'IRS Publication 583: supporting documents and proof of payment' },
+      { href: 'https://www.irs.gov/publications/p463', label: 'IRS Publication 463, chapter 5: documentary evidence for travel, meals and gifts' }
+    ],
+    workflows: [tax, email, csv]
+  },
   'why-do-receipts-fade': {
     note: 'Published by ReceiptNest, the product discussed here. This is general guidance on keeping receipts readable, not tax advice. Image-life figures are manufacturer estimates under controlled storage; real receipts in wallets and cars can fade much sooner.',
     sources: [

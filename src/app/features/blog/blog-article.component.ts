@@ -98,6 +98,7 @@ export class BlogArticleComponent implements OnDestroy {
           datePublished: this.article.datePublished,
           dateModified: this.article.dateModified,
           articleSection: this.article.category,
+          ...(this.article.video?.uploadDate ? { video: { '@id': this.seo.absoluteUrl(`${this.article.path}#video`) } } : {}),
           keywords: this.article.keywords.join(', '),
           inLanguage: 'en-US',
           isPartOf: {
@@ -117,6 +118,7 @@ export class BlogArticleComponent implements OnDestroy {
             }
           }
         },
+        ...this.videoJsonLd(),
         {
           '@type': 'BreadcrumbList',
           itemListElement: [
@@ -142,6 +144,35 @@ export class BlogArticleComponent implements OnDestroy {
         }
       ]
     });
+  }
+
+  /** VideoObject for an embedded Short, emitted only when its publish date is known. */
+  private videoJsonLd(): Record<string, unknown>[] {
+    const video = this.article.video;
+    if (!video?.uploadDate || !/^[A-Za-z0-9_-]{11}$/.test(video.youtubeId)) {
+      return [];
+    }
+
+    return [{
+      '@type': 'VideoObject',
+      '@id': this.seo.absoluteUrl(`${this.article.path}#video`),
+      name: video.title,
+      description: video.description,
+      thumbnailUrl: [`https://i.ytimg.com/vi/${video.youtubeId}/hqdefault.jpg`],
+      uploadDate: video.uploadDate,
+      ...(video.duration ? { duration: video.duration } : {}),
+      embedUrl: `https://www.youtube.com/embed/${video.youtubeId}`,
+      url: `https://www.youtube.com/shorts/${video.youtubeId}`,
+      inLanguage: 'en-US',
+      publisher: {
+        '@type': 'Organization',
+        name: 'ReceiptNest',
+        logo: {
+          '@type': 'ImageObject',
+          url: this.seo.absoluteUrl('/assets/receipt-nest.png')
+        }
+      }
+    }];
   }
 
   private scrollToTop(): void {

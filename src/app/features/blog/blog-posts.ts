@@ -51,6 +51,10 @@ export interface BlogPost {
     readonly heading?: string;
     /** Text for the YouTube link. Defaults to the Part 1 link text. */
     readonly linkLabel?: string;
+    /** YouTube publish date (YYYY-MM-DD). When set, the page emits VideoObject structured data. */
+    readonly uploadDate?: string;
+    /** ISO 8601 duration, for example PT1M3S. */
+    readonly duration?: string;
   };
   readonly keywords: readonly string[];
   readonly intro: readonly string[];
@@ -68,6 +72,231 @@ export const blogCategories: readonly BlogCategory[] = [
 ];
 
 export const blogPosts: readonly BlogPost[] = [
+  {
+    slug: 'itemized-receipt-vs-credit-card-slip',
+    path: '/blog/itemized-receipt-vs-credit-card-slip',
+    category: 'Tax Guides',
+    title: 'Itemized Receipt vs. Credit Card Slip: Which One Proves a Business Expense?',
+    seoTitle: 'Itemized Receipt vs. Credit Card Slip: What Counts?',
+    description:
+      'A card slip proves you paid; an itemized receipt shows what you bought. See what each one shows, what the IRS expects, and how to get an itemized copy later.',
+    excerpt:
+      'Same store, same $62, two pieces of paper. The card slip proves you paid. Only the itemized receipt shows what you bought, and that is the part a business record usually needs.',
+    datePublished: '2026-10-19',
+    dateModified: '2026-10-19',
+    readTime: '8 min read',
+    image: '/assets/images/blog/itemized-receipt-vs-credit-card-slip.webp',
+    imageWidth: 1672,
+    imageHeight: 941,
+    imageAlt: 'A credit card slip and an itemized receipt from the same $62 purchase, with a checklist showing only the itemized receipt lists what was bought',
+    keywords: [
+      'itemized receipt vs credit card receipt',
+      'what is an itemized receipt',
+      'is a credit card slip enough for taxes',
+      'itemized receipt for business expenses',
+      'do I need an itemized receipt'
+    ],
+    intro: [
+      `Two receipts from the same store, both for $62.00. One is the small credit card slip from the payment terminal. The other is the itemized receipt from the register. Only one of them tells the whole story: the itemized receipt, because it is the only one that says what you bought.`,
+      `A card slip shows who you paid, how much and when, and it proves the card payment went through. IRS guidance says business-expense records should also describe the item or service, and that proof of payment by itself does not establish a deduction. So for business purchases, keep the itemized receipt (or an invoice or order confirmation), keep proof of payment if the receipt doesn’t show it, and add a short note on why you bought it.`
+    ],
+    sections: [
+      {
+        id: 'short-answer',
+        title: 'The short answer: the slip proves payment, the itemized receipt proves the purchase',
+        blocks: [
+          {
+            kind: 'table',
+            table: {
+              columns: ['What the record shows', 'Credit card slip', 'Itemized receipt', 'Card statement'],
+              rows: [
+                ['Who you paid', 'Yes', 'Yes', 'Usually, sometimes in shortened or cryptic form'],
+                ['How much', 'Yes', 'Yes, with subtotal and tax', 'Yes'],
+                ['When', 'Yes', 'Yes', 'Yes, often the posting date'],
+                ['Proof of payment', 'Yes, card and approval', 'Often, if it shows the payment method', 'Yes'],
+                ['What you bought', 'No', 'Yes, item by item', 'No'],
+                ['Why you bought it', 'No', 'No', 'No']
+              ]
+            }
+          },
+          {
+            kind: 'callout',
+            tone: 'tip',
+            title: 'The rule of thumb',
+            text: `Keep the record that says what, plus proof that you paid, plus a note that says why. Often the itemized receipt covers the first two; your note covers the third.`
+          }
+        ]
+      },
+      {
+        id: 'what-is-an-itemized-receipt',
+        title: 'What is an itemized receipt?',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `An itemized receipt lists each product or service you bought, with its price, followed by the subtotal, tax and total. It also shows the seller’s name, the date and usually the payment method. It is the long receipt from the register, the detailed invoice from a supplier, or the order summary from an online store.`
+          },
+          {
+            kind: 'paragraph',
+            text: `A credit card slip is the short receipt printed by the card terminal. It usually shows the merchant’s name, the date and time, the last four digits of the card, an approval code and the total, sometimes with a tip line and a signature. It confirms that a card payment happened. It does not list what the payment was for.`
+          },
+          {
+            kind: 'table',
+            table: {
+              columns: ['Fictional example', 'Card slip', 'Itemized receipt'],
+              rows: [
+                ['Store', 'CORNER HARDWARE, 412 MAIN ST', 'CORNER HARDWARE, 412 MAIN ST'],
+                ['Date', '09/14/26 4:52 PM', '09/14/26 4:52 PM'],
+                ['Items', 'Not listed', 'Deck screws 5 lb $32.97; wood glue $11.03; sandpaper 80 grit $13.48'],
+                ['Tax', 'Not shown separately', '$4.52'],
+                ['Total', '$62.00', '$62.00'],
+                ['Payment', 'Visa ending 4417, approved', 'Paid Visa ending 4417']
+              ]
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: `Both papers agree on the store, the date and the $62. Only one could tell your accountant, or you next April, that the money went to deck screws, glue and sandpaper rather than a gift card or groceries.`
+          }
+        ]
+      },
+      {
+        id: 'what-the-irs-says',
+        title: 'What IRS guidance says about receipts, slips and statements',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `The IRS page on business records says supporting documents for expenses should identify the payee, the amount paid, proof of payment and the date incurred, and should include a description of the item purchased or service received that shows the amount was for a business expense. Its list of acceptable documents includes cash register tape receipts, account statements, credit card receipts and statements, and invoices, with a note that a combination of supporting documents may be needed to cover every element.`
+          },
+          {
+            kind: 'paragraph',
+            text: `Publication 583 adds the key caution. When you don’t have a canceled check, it says certain financial account statements can prove payment; for a credit card, the statement must show the amount charged, the payee’s name and the transaction date. Then it warns that proof of payment of an amount, by itself, does not establish you are entitled to a tax deduction, and that you should also keep other documents, such as credit card sales slips and invoices, to show that you also incurred the cost.`
+          },
+          {
+            kind: 'callout',
+            tone: 'note',
+            title: 'In plain terms',
+            text: `A card slip or statement answers "did you pay?" Your records also need to answer "what was it?" and "was it for the business?" That usually takes an itemized receipt or invoice, plus a note.`
+          },
+          {
+            kind: 'paragraph',
+            text: `Travel, meals, gifts and car expenses have more specific rules in Publication 463. There, documentary evidence is ordinarily adequate if it shows the amount, date, place and essential character of the expense. A hotel receipt should show the hotel’s name and location, the dates of your stay and separate amounts for charges such as lodging, meals and phone calls. A restaurant receipt should show the restaurant’s name and location, the number of people served, and the date and amount; if items other than food and beverages were charged, the receipt must show that. A card slip shows none of those details.`
+          },
+          {
+            kind: 'paragraph',
+            text: `Publication 463 also says a canceled check together with a bill from the payee ordinarily establishes the cost, but a canceled check by itself doesn’t prove a business expense without other evidence of its business purpose. And it says you must generally provide a written statement of the business purpose of an expense, unless the purpose is clear from the circumstances.`
+          },
+          {
+            kind: 'callout',
+            tone: 'warning',
+            title: 'About the $75 rule',
+            text: `Publication 463 says documentary evidence isn’t needed for a travel, gift or transportation expense, other than lodging, that is less than $75. That is a narrow exception for those expense types, and you still need a written record of the expense itself. It is not a general rule that business receipts under $75 don’t matter.`
+          }
+        ]
+      },
+      {
+        id: 'when-itemized-matters',
+        title: 'When an itemized receipt matters most',
+        blocks: [
+          {
+            kind: 'list',
+            items: [
+              'Mixed carts. A big-box store total can include printer paper, groceries and a birthday gift in one charge. Only the itemized receipt separates the business items.',
+              'Business meals. The itemized check shows what was ordered and, together with your note, who was there and why. A slip with a tip line shows only the total.',
+              'Hotels. Ask for the itemized folio at checkout so room, meals, parking and phone charges are listed separately.',
+              'Returns and partial refunds. A refund can show up as a separate credit. The itemized receipt shows which item came back.',
+              'Large or unusual purchases, such as equipment or tools. Detail matters for anything you may need to explain later.',
+              'Cryptic statement names. When the statement says something like "SQ *JMK LLC," the itemized receipt is how you prove what that charge was.'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'how-to-get-itemized',
+        title: 'How to get an itemized receipt (even after the fact)',
+        blocks: [
+          {
+            kind: 'ordered',
+            items: [
+              'Ask at the register: "Can I get the full itemized receipt, not just the card slip?" Some checkouts hand you only the slip unless you ask.',
+              'At restaurants, ask for the itemized check and keep it with the card slip. The check shows what was ordered; the slip shows the tip and final total.',
+              'At hotels, ask for the itemized folio at checkout, or request it by email afterward.',
+              'For online orders, save the order-details page or the confirmation email. It is usually fully itemized.',
+              'Lost it? Many stores can look up a purchase. Walmart offers an online receipt lookup for card purchases, and Target shows in-store purchases in your account when you paid with a card linked to it. Smaller shops can often resend a receipt from their point-of-sale system if you ask.',
+              'For a supplier or contractor, ask for an invoice that lists the work or items, the date and the amount.'
+            ]
+          },
+          {
+            kind: 'callout',
+            tone: 'tip',
+            title: 'Snap both, the same day',
+            text: `If you were handed a slip and an itemized receipt, photograph them together before they go in your pocket. Thermal receipts fade with heat, light and friction, and the itemized one is the one you can’t easily replace.`
+          }
+        ]
+      },
+      {
+        id: 'what-to-keep',
+        title: 'What to keep for every business purchase',
+        blocks: [
+          {
+            kind: 'ordered',
+            items: [
+              'The itemized receipt, invoice or order confirmation: what you bought.',
+              'Proof of payment, if the receipt doesn’t show it: the card slip or the matching statement line.',
+              'A short note on the business purpose, such as "deck screws, Jensen job." For meals, add who was there and what you discussed.',
+              'A clear photo or scan, stored where you can find it by date and store.'
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `ReceiptNest is built around that checklist. Snap the itemized receipt the day you get it, add a quick note on what it was for, and find it later by month. Email receipts and order confirmations can be forwarded in, and you can export a CSV or PDF for your accountant. ReceiptNest never connects to your bank; you choose which receipts to keep.`
+          },
+          {
+            kind: 'callout',
+            tone: 'note',
+            title: 'Record organization, not tax advice',
+            text: `This guide explains what common records show and what IRS guidance says about them. Whether a specific expense is deductible, and what proof your situation needs, is a question for your tax professional.`
+          }
+        ]
+      }
+    ],
+    faq: [
+      {
+        question: 'What is an itemized receipt?',
+        answer:
+          'An itemized receipt lists each item or service you bought with its price, then the subtotal, tax and total, along with the seller’s name, the date and usually the payment method. It is the long register receipt, a detailed invoice, or an online order summary.'
+      },
+      {
+        question: 'Is a credit card slip a receipt?',
+        answer:
+          'It is a record of payment. A card slip shows the merchant, date, card and total, but it doesn’t list what you bought. For a business purchase, keep the itemized receipt or invoice as well.'
+      },
+      {
+        question: 'Is a credit card statement enough for taxes?',
+        answer:
+          'A statement can prove that you paid. IRS Publication 583 says proof of payment by itself does not establish a deduction and recommends also keeping documents such as credit card sales slips and invoices. Records generally need to show what you bought and that it was for the business.'
+      },
+      {
+        question: 'Do I need an itemized receipt for business meals?',
+        answer:
+          'IRS Publication 463 says a restaurant receipt is enough to prove a business meal if it shows the restaurant’s name and location, the number of people served, and the date and amount, and it must show any non-food charges. A card slip usually doesn’t, so keep the itemized check and note the business purpose.'
+      },
+      {
+        question: 'Do I need receipts for expenses under $75?',
+        answer:
+          'Publication 463 has a narrow exception: documentary evidence isn’t needed for a travel, gift or transportation expense, other than lodging, under $75. You still need a written record of the expense. It isn’t a general rule for all business purchases, so keeping the receipt is the safer habit.'
+      },
+      {
+        question: 'How do I get an itemized receipt after the fact?',
+        answer:
+          'Check your email or the store account for an order confirmation, use the retailer’s receipt lookup if it has one, or ask the business to resend the receipt. Hotels can send an itemized folio, and suppliers can issue an itemized invoice.'
+      }
+    ],
+    relatedSlugs: [
+      'can-bank-statements-replace-receipts',
+      'why-do-receipts-fade',
+      'organize-receipts-for-accountant'
+    ]
+  },
   {
     slug: 'why-do-receipts-fade',
     path: '/blog/why-do-receipts-fade',
@@ -92,7 +321,9 @@ export const blogPosts: readonly BlogPost[] = [
         'Thermal receipts have no ink, so heat, sunlight, rubbing and alcohol-based products like hand sanitizer can erase them. This one-minute Short shows why, and the 10-second habit that keeps the record readable: snap it the day you get it.',
       eyebrow: 'Paper Trail · Part 2',
       heading: 'Watch: Can you still read your receipt?',
-      linkLabel: 'Watch Paper Trail, Part 2 on YouTube ↗'
+      linkLabel: 'Watch Paper Trail, Part 2 on YouTube ↗',
+      uploadDate: '2026-10-18',
+      duration: 'PT1M3S'
     },
     keywords: [
       'why do receipts fade',
@@ -953,7 +1184,9 @@ export const blogPosts: readonly BlogPost[] = [
     video: {
       youtubeId: 'vH_EjIIeEJY',
       title: 'What Was That $86.40 Charge? | Paper Trail, Part 1 — ReceiptNest',
-      description: 'A mystery charge, an accountant’s question, and a small habit that preserves the answer. This one-minute Short introduces the example below: keep the receipt and add the context while you still remember the purchase.'
+      description: 'A mystery charge, an accountant’s question, and a small habit that preserves the answer. This one-minute Short introduces the example below: keep the receipt and add the context while you still remember the purchase.',
+      uploadDate: '2026-10-17',
+      duration: 'PT1M'
     },
     keywords: [
       'can bank statements replace receipts for taxes',
