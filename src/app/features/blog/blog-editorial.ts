@@ -25,6 +25,9 @@ const scanner = { href: '/receipt-scanner', label: 'See the receipt-scanning wor
 const email = { href: '/email-receipt-organizer', label: 'Set up email-receipt forwarding' };
 
 const editorial: Readonly<Record<string, BlogEditorial>> = {
+  'how-to-keep-track-of-receipts': {
+    note: taxNote, sources: [records, retention], workflows: [email, csv, tax]
+  },
   'itemized-receipt-vs-credit-card-slip': {
     note: taxNote,
     sources: [
