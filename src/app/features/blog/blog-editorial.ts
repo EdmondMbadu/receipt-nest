@@ -25,6 +25,11 @@ const scanner = { href: '/receipt-scanner', label: 'See the receipt-scanning wor
 const email = { href: '/email-receipt-organizer', label: 'Set up email-receipt forwarding' };
 
 const editorial: Readonly<Record<string, BlogEditorial>> = {
+  'how-to-sort-a-shoebox-of-receipts': {
+    note: taxNote,
+    sources: [records, retention, { href: 'https://www.irs.gov/newsroom/reconstructing-records-after-a-natural-disaster-or-casualty-loss', label: 'IRS: reconstructing records' }],
+    workflows: [scanner, csv, tax]
+  },
   'how-to-keep-track-of-receipts': {
     note: taxNote, sources: [records, retention], workflows: [email, csv, tax]
   },
