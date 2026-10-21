@@ -1,31 +1,102 @@
 <footer class="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50">
-  <div class="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:grid-cols-3 sm:px-6 lg:px-8">
-    <div>
-      <a routerLink="/" class="text-lg font-semibold">ReceiptNest</a>
-      <p class="mt-3 max-w-xs text-sm leading-6 text-slate-600 dark:text-slate-300">Capture the receipt. Find the record. Get on with your day.</p>
-      <p class="mt-4 text-xs text-slate-500">© {{ year }} ReceiptNest</p>
+  <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <!-- Brand row: logo, social channels and app stores (matches the landing page footer) -->
+    <div class="flex flex-col gap-6 border-b border-slate-200 pb-10 dark:border-slate-800 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <a routerLink="/" class="inline-flex items-center gap-2">
+          <img src="/assets/receipt-nest.png" alt="" width="32" height="32" class="h-8 w-8 object-contain" />
+          <span class="text-lg font-semibold">
+            <span class="text-slate-900 dark:text-white">Receipt</span><span class="text-emerald-700 dark:text-emerald-300">Nest</span>
+          </span>
+        </a>
+        <p class="mt-3 max-w-xs text-sm leading-6 text-slate-600 dark:text-slate-300">Capture the receipt. Find the record. Get on with your day.</p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <nav aria-label="ReceiptNest on social media" class="flex items-center gap-3">
+          @for (link of socialLinks; track link.platform) {
+            <a [href]="link.href" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'ReceiptNest on ' + link.label"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-full text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:ring-1 dark:ring-white/20"
+              [style.background]="socialBackgrounds[link.platform]">
+              @switch (link.platform) {
+                @case ('youtube') {
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.12C19.53 3.5 12 3.5 12 3.5s-7.53 0-9.4.58A3 3 0 0 0 .5 6.2 31.7 31.7 0 0 0 0 12a31.7 31.7 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.12c1.87.58 9.4.58 9.4.58s7.53 0 9.4-.58a3 3 0 0 0 2.1-2.12A31.7 31.7 0 0 0 24 12a31.7 31.7 0 0 0-.5-5.8ZM9.6 15.66V8.34L15.87 12 9.6 15.66Z"/></svg>
+                }
+                @case ('x') {
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"/></svg>
+                }
+                @case ('tiktok') {
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06Z"/></svg>
+                }
+                @case ('instagram') {
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069Zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073Zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324ZM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881Z"/></svg>
+                }
+                @case ('facebook') {
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 8H16V4h-2.5C10.47 4 9 5.79 9 8.5V11H6v4h3v7h4v-7h3l.5-4H13V8.5c0-.31.19-.5.5-.5Z"/></svg>
+                }
+              }
+            </a>
+          }
+        </nav>
+
+        <span class="mx-1 hidden h-6 w-px bg-slate-200 dark:bg-slate-700 sm:block" aria-hidden="true"></span>
+
+        <a [href]="appStoreUrl" target="_blank" rel="noopener noreferrer" aria-label="Download ReceiptNest AI on the App Store"
+          class="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-black px-3 py-1.5 text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-900 hover:shadow-md">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.468 2.231-1.213 3.02-.796.832-2.095 1.475-3.23 1.38-.144-1.097.364-2.267 1.11-3.055.82-.88 2.197-1.506 3.333-1.345Zm4.24 16.235c-.57 1.29-.836 1.867-1.57 2.997-1.025 1.57-2.474 3.527-4.272 3.542-1.603.016-2.017-1.045-4.193-1.032-2.178.012-2.632 1.051-4.234 1.035-1.8-.015-3.172-1.777-4.198-3.347C-.732 16.474-.873 11.11 1.52 7.42c1.697-2.62 4.381-4.153 6.902-4.153 1.653 0 3.03 1.14 4.574 1.14 1.497 0 2.408-1.142 4.557-1.142.9 0 3.71.247 5.468 2.815-4.807 2.635-4.024 9.497-2.416 11.585Z"/></svg>
+          <span class="flex flex-col text-left leading-tight">
+            <span class="text-[8px] uppercase tracking-wider text-slate-300">Download on the</span>
+            <span class="-mt-0.5 text-xs font-semibold">App Store</span>
+          </span>
+        </a>
+
+        <a [href]="googlePlayUrl" target="_blank" rel="noopener noreferrer" aria-label="Get ReceiptNest AI on Google Play"
+          class="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-black px-3 py-1.5 text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-900 hover:shadow-md">
+          <svg class="h-5 w-5" viewBox="0 0 512 512" aria-hidden="true">
+            <defs>
+              <linearGradient id="gp-blue-pf" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00A0FF"/><stop offset="100%" stop-color="#00E2FF"/></linearGradient>
+              <linearGradient id="gp-yellow-pf" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#FFBD00"/><stop offset="100%" stop-color="#FFE000"/></linearGradient>
+              <linearGradient id="gp-red-pf" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FF3A44"/><stop offset="100%" stop-color="#C31162"/></linearGradient>
+              <linearGradient id="gp-green-pf" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#00A070"/><stop offset="100%" stop-color="#00F076"/></linearGradient>
+            </defs>
+            <path fill="url(#gp-blue-pf)" d="M64 32 L320 256 L64 480 C56 472 52 462 52 450 V62 C52 50 56 40 64 32 Z"/>
+            <path fill="url(#gp-yellow-pf)" d="M400 208 L320 256 L400 304 L450 274 C470 262 470 250 450 238 Z"/>
+            <path fill="url(#gp-red-pf)" d="M64 480 L320 256 L400 304 L96 478 C84 484 74 484 64 480 Z"/>
+            <path fill="url(#gp-green-pf)" d="M64 32 C74 28 84 28 96 34 L400 208 L320 256 Z"/>
+          </svg>
+          <span class="flex flex-col text-left leading-tight">
+            <span class="text-[8px] uppercase tracking-wider text-slate-300">Get it on</span>
+            <span class="-mt-0.5 text-xs font-semibold">Google Play</span>
+          </span>
+        </a>
+      </div>
     </div>
-    <nav aria-label="Receipt workflows">
-      <h2 class="text-sm font-semibold">Find your workflow</h2>
-      <ul class="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600 dark:text-slate-300">
-        @for (page of workflows; track page.path) {
-          <li><a [routerLink]="page.path" class="hover:underline">{{ page.label }}</a></li>
-        }
-      </ul>
-    </nav>
-    <nav aria-label="Company and support">
-      <h2 class="text-sm font-semibold">Before you get started</h2>
-      <ul class="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600 dark:text-slate-300">
-        <li><a routerLink="/getting-started" class="font-medium text-emerald-700 hover:underline dark:text-emerald-300">Getting started</a></li>
-        <li><a routerLink="/blog" class="font-medium text-emerald-700 hover:underline dark:text-emerald-300">All articles</a></li>
-        <li><a routerLink="/pricing" class="hover:underline">Pricing</a></li>
-        <li><a href="/games" class="hover:underline">Games</a></li>
-        <li><a routerLink="/about" class="hover:underline">About</a></li>
-        <li><a routerLink="/security" class="hover:underline">Data handling</a></li>
-        <li><a routerLink="/support" class="hover:underline">Support</a></li>
-        <li><a routerLink="/terms" class="hover:underline">Terms</a></li>
-        <li><a routerLink="/login" class="hover:underline">Sign in</a></li>
-      </ul>
-    </nav>
+
+    <div class="grid gap-10 pt-10 sm:grid-cols-2">
+      <nav aria-label="Receipt workflows">
+        <h2 class="text-sm font-semibold">Find your workflow</h2>
+        <ul class="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600 dark:text-slate-300">
+          @for (page of workflows; track page.path) {
+            <li><a [routerLink]="page.path" class="hover:underline">{{ page.label }}</a></li>
+          }
+        </ul>
+      </nav>
+      <nav aria-label="Company and support">
+        <h2 class="text-sm font-semibold">Before you get started</h2>
+        <ul class="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600 dark:text-slate-300">
+          <li><a routerLink="/getting-started" class="font-medium text-emerald-700 hover:underline dark:text-emerald-300">Getting started</a></li>
+          <li><a routerLink="/blog" class="font-medium text-emerald-700 hover:underline dark:text-emerald-300">All articles</a></li>
+          <li><a routerLink="/pricing" class="hover:underline">Pricing</a></li>
+          <li><a href="/games" class="hover:underline">Games</a></li>
+          <li><a routerLink="/about" class="hover:underline">About</a></li>
+          <li><a routerLink="/security" class="hover:underline">Data handling</a></li>
+          <li><a routerLink="/support" class="hover:underline">Support</a></li>
+          <li><a routerLink="/terms" class="hover:underline">Terms</a></li>
+          <li><a routerLink="/login" class="hover:underline">Sign in</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <p class="mt-10 border-t border-slate-200 pt-6 text-xs text-slate-500 dark:border-slate-800">© {{ year }} ReceiptNest. All rights reserved.</p>
   </div>
 </footer>
