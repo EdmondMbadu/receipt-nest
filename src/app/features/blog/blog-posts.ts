@@ -379,6 +379,16 @@ export const blogPosts: readonly BlogPost[] = [
     imageWidth: 1672,
     imageHeight: 941,
     imageAlt: 'Twelve monthly receipt folders, each checked off, beside the math: 10 seconds per receipt plus 2 minutes a month is about one hour a year',
+    video: {
+      youtubeId: '67wxzAAJdo8',
+      title: 'What Did You Have for Lunch 3 Tuesdays Ago? | Paper Trail, Part 4',
+      description:
+        'Nobody remembers lunch three Tuesdays ago, and that is the April problem. This one-minute Short shows the fix: 10 seconds the day you buy, 2 minutes once a month, about an hour a year instead of a weekend of receipt archaeology.',
+      eyebrow: 'Paper Trail \u00b7 Part 4',
+      heading: 'Watch: What did you have for lunch three Tuesdays ago?',
+      linkLabel: 'Watch Paper Trail, Part 4 on YouTube \u2197',
+      duration: 'PT1M10S'
+    },
     keywords: [
       'how to keep track of receipts',
       'best way to keep track of receipts',
@@ -682,6 +692,16 @@ export const blogPosts: readonly BlogPost[] = [
     imageWidth: 1672,
     imageHeight: 941,
     imageAlt: 'A credit card slip and an itemized receipt from the same $62 purchase, with a checklist showing only the itemized receipt lists what was bought',
+    video: {
+      youtubeId: 'CAdz9ladNLM',
+      title: 'Two Receipts. Same $62. What\u2019s Missing? | Paper Trail #3',
+      description:
+        'Two receipts from the same $62 purchase, and only one tells the whole story. This one-minute Short runs the five-point check: who you paid, how much, when, what you bought, and proof of payment, plus a note on why.',
+      eyebrow: 'Paper Trail \u00b7 Part 3',
+      heading: 'Watch: Two receipts, same $62. What\u2019s missing?',
+      linkLabel: 'Watch Paper Trail, Part 3 on YouTube \u2197',
+      duration: 'PT1M6S'
+    },
     keywords: [
       'itemized receipt vs credit card receipt',
       'what is an itemized receipt',
@@ -1157,12 +1177,22 @@ export const blogPosts: readonly BlogPost[] = [
     excerpt:
       `Your accountant asked for receipts. Send four things: the period, readable originals, a reviewed summary, and a short list of what you could not resolve.`,
     datePublished: '2026-10-12',
-    dateModified: '2026-10-12',
+    dateModified: '2026-10-21',
     readTime: '6 min read',
     image: '/assets/images/blog/organize-receipts-for-accountant.webp',
     imageAlt: 'A receipt handoff checklist beside a spreadsheet summary and a small stack of receipts',
     imageWidth: 1672,
     imageHeight: 941,
+    video: {
+      youtubeId: '_vJWOZTZLtA',
+      title: 'The Most Expensive Thing You Can Hand Your Bookkeeper | Paper Trail, Part 5',
+      description:
+        'The most expensive thing you can hand your bookkeeper is a shoebox. This one-minute Short covers the four things they actually want: business and personal kept apart, readable receipts, a note on what each was for, and records sorted and sent monthly.',
+      eyebrow: 'Paper Trail \u00b7 Part 5',
+      heading: 'Watch: The most expensive thing you can hand your bookkeeper',
+      linkLabel: 'Watch Paper Trail, Part 5 on YouTube \u2197',
+      duration: 'PT1M5S'
+    },
     keywords: [
       'organize receipts for accountant',
       'send receipts to accountant',
