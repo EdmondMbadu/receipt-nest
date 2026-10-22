@@ -73,6 +73,334 @@ export const blogCategories: readonly BlogCategory[] = [
 
 export const blogPosts: readonly BlogPost[] = [
   {
+    slug: 'how-long-to-keep-receipts',
+    path: '/blog/how-long-to-keep-receipts',
+    category: 'Tax Guides',
+    title: 'How Long to Keep Receipts for Taxes: The 3-Year Rule, the Exceptions, and When You Can Shred',
+    seoTitle: 'How Long to Keep Receipts for Taxes: IRS Rules Explained',
+    description:
+      'How long to keep receipts for taxes: generally 3 years from when you file, not from the purchase. Here are the IRS exceptions (4, 6, 7 years, property, forever) and a pre-shred checklist.',
+    excerpt:
+      'Most receipts need to be kept for three years. But the clock starts when you file the return, not when you buy, and a few situations stretch it to six, seven years or longer.',
+    datePublished: '2026-10-22',
+    dateModified: '2026-10-22',
+    readTime: '10 min read',
+    image: '/assets/images/blog/how-long-to-keep-receipts.webp',
+    imageWidth: 1672,
+    imageHeight: 941,
+    imageAlt: 'A timeline showing a March 2026 receipt, the 2026 return filed in April 2027, and a three-year hold until April 2030, beside the IRS exceptions for 4, 6 and 7 years, property and unfiled returns',
+    keywords: [
+      'how long to keep receipts',
+      'how long to keep receipts for taxes',
+      'how long should I keep receipts',
+      'how long to keep business receipts',
+      'when can I throw away tax receipts'
+    ],
+    intro: [
+      `How long are you supposed to keep a receipt? One year? Three? Forever? Ask five people and you'll get five answers, and a drawer of receipts from 2015 that nobody dares to throw out.`,
+      `Here's the short answer for U.S. taxes: keep receipts that support your tax return for three years from the date you file that return, not from the date you made the purchase. A few situations stretch that to four, six or seven years, records for equipment and other property are kept until the period runs out for the return covering the year you sell it, and if a return was never filed there is no end date at all. This guide explains each rule from IRS guidance, walks through real dates, and ends with a checklist to run before you shred anything.`
+    ],
+    sections: [
+      {
+        id: 'short-answer',
+        title: 'The short answer: how long to keep receipts, by situation',
+        blocks: [
+          {
+            kind: 'table',
+            table: {
+              columns: ['Your situation', 'Keep records for', 'Counted from'],
+              rows: [
+                ['Most people (none of the situations below apply)', '3 years', 'When you filed the return (an early return counts as filed on the due date)'],
+                ['You file a claim for a credit or refund after filing', '3 years or 2 years, whichever is later', '3 years from filing the original return, or 2 years from when you paid the tax'],
+                ['Income you should have reported was left off, and it is more than 25% of the gross income on the return', '6 years', 'When you filed the return'],
+                ['You claim a loss from worthless securities or a bad debt deduction', '7 years', 'The return due date, per IRS Topic 305'],
+                ['You have employees (employment tax records)', 'At least 4 years', 'When the tax became due or was paid, whichever is later'],
+                ['Equipment, vehicles and other property', 'Until the period of limitations runs out for the year you dispose of it', 'The return for the year you sell or dispose of it'],
+                ['You did not file a return, or filed a fraudulent one', 'Indefinitely', 'There is no end date']
+              ]
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: `Every row comes from the IRS page on how long to keep records, which bases each period on the "period of limitations": the window in which you can amend a return to claim a credit or refund, or the IRS can assess additional tax. Once that window closes for a return, the receipts supporting it have done their tax job.`,
+            source: {
+              href: 'https://www.irs.gov/businesses/small-businesses-self-employed/how-long-should-i-keep-records',
+              label: 'Read the IRS retention periods.'
+            }
+          },
+          {
+            kind: 'callout',
+            tone: 'tip',
+            title: 'The one rule most people get wrong',
+            text: `Three years is counted from when you file the return, not from the date on the receipt. Delete by tax year, never by "anything older than three years."`
+          }
+        ]
+      },
+      {
+        id: 'when-the-clock-starts',
+        title: 'The clock starts when you file, not when you buy',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `The IRS says that unless otherwise stated, the years refer to the period after the return was filed, and that returns filed before the due date are treated as filed on the due date. In practice, every receipt from the same tax year shares the same keep-until date, whether you bought the item in January or December.`
+          },
+          {
+            kind: 'table',
+            table: {
+              columns: ['Receipt', 'Supports', 'Return filed', 'Keep until at least'],
+              rows: [
+                ['Printer ink, March 2026', '2026 return', 'February 2027 (early, so treated as the April 15, 2027 due date)', 'April 15, 2030'],
+                ['Client lunch, December 2026', '2026 return', 'April 15, 2027', 'April 15, 2030'],
+                ['Software renewal, June 2026', '2026 return', 'October 2027, on extension', 'October 2030']
+              ]
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: `Two lessons from that table. Filing early doesn't start the clock early, because an early return counts as filed on the due date. And filing late, including on an extension, starts the clock later, because the three years run from the date you actually filed. The receipt date alone can't tell you when it's safe to shred.`
+          },
+          {
+            kind: 'callout',
+            tone: 'note',
+            title: 'Fictional dates, real rule',
+            text: `The examples are illustrations of the IRS rule for a calendar-year individual return. Your own filing dates, any amended returns, and the exceptions below decide your real dates.`
+          }
+        ]
+      },
+      {
+        id: 'longer-periods',
+        title: 'When you need to keep receipts longer than 3 years',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `The three-year rule applies only when none of the IRS's special situations do. Here is each one in plain terms.`
+          },
+          {
+            kind: 'list',
+            items: [
+              'Refund or credit claims: if you file a claim after your original return, the IRS says to keep records for 3 years from the date you filed the original return or 2 years from the date you paid the tax, whichever is later.',
+              'Underreported income (6 years): if income you should have reported was left off the return and it is more than 25% of the gross income shown on that return, the period is 6 years. IRS Topic 305 adds a separate 6-year case for unreported income tied to foreign financial assets of more than $5,000.',
+              'Worthless securities or bad debts (7 years): if you claim a loss from worthless securities or a bad debt deduction, the IRS says to keep records for 7 years.',
+              'Employment taxes (at least 4 years): if you have employees, keep employment tax records for at least 4 years after the tax becomes due or is paid, whichever is later.',
+              'No return or a fraudulent return (indefinitely): the IRS says to keep records indefinitely, because there is no period of limitations to assess tax in those cases.'
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `If you're not sure whether one of these applies to a given year, that's the year to keep. Storing a few extra years of photos costs almost nothing; needing a receipt you shredded costs a lot more.`,
+            source: {
+              href: 'https://www.irs.gov/taxtopics/tc305',
+              label: 'See IRS Topic 305, Recordkeeping.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'property-and-equipment',
+        title: 'Receipts for equipment and property: keep them until after you sell',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Receipts for things you keep using, like a laptop, camera, truck, tools or machinery, follow a different rule. The IRS says to keep records relating to property until the period of limitations expires for the year in which you dispose of it. You need them to figure depreciation while you own it and the gain or loss when you sell it.`
+          },
+          {
+            kind: 'table',
+            table: {
+              columns: ['Fictional example', 'Date'],
+              rows: [
+                ['Buy a camera for your business', 'May 2026'],
+                ['Sell the camera', 'August 2031'],
+                ['File the 2031 return reporting the sale', 'April 15, 2032'],
+                ['Keep the purchase receipt until at least', 'April 15, 2035']
+              ]
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: `That's roughly nine years for one receipt, which is why equipment receipts deserve their own folder. If you trade property in a nontaxable exchange, the IRS says to keep the records for the old property as well as the new one, until the period expires for the year you dispose of the new property.`
+          },
+          {
+            kind: 'callout',
+            tone: 'tip',
+            title: 'Give big purchases their own folder',
+            text: `File equipment, vehicle and improvement receipts separately from everyday expenses, so they don't get swept out with a routine three-year cleanup.`
+          }
+        ]
+      },
+      {
+        id: 'by-receipt-type',
+        title: 'How long to keep each kind of receipt',
+        blocks: [
+          {
+            kind: 'table',
+            table: {
+              columns: ['Receipt or record', 'General guideline'],
+              rows: [
+                ['Everyday business expenses: supplies, software, fuel, meals', '3 years after filing the return for that year, unless an exception applies'],
+                ['Income records: invoices, 1099s, payout reports', 'Same as the return they support, generally 3 years after filing'],
+                ['Equipment, vehicles, computers and other property', 'Until the period of limitations ends for the year you sell or dispose of it'],
+                ['Payroll and employment tax records', 'At least 4 years after the tax is due or paid, whichever is later'],
+                ['Copies of your filed tax returns', 'The IRS recommends keeping copies; they help with future returns and amended returns'],
+                ['Personal purchases that are not on your return', 'No IRS period; keep them as long as you might need them for returns, warranties or insurance']
+              ]
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: `A receipt only needs to be kept for tax purposes if it supports something on a return: income, a deduction or a credit. A grocery receipt that never touches your taxes is a household decision, not an IRS one.`
+          }
+        ]
+      },
+      {
+        id: 'other-reasons',
+        title: 'Reasons to keep records longer than the IRS requires',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `The IRS itself warns not to discard records as soon as they're no longer needed for taxes: check first whether you need them for other purposes, because your insurance company or creditors may require you to keep them longer than the IRS does.`
+          },
+          {
+            kind: 'list',
+            items: [
+              'Insurance: receipts for equipment and valuables help support a claim after theft, fire or damage.',
+              'Lenders: a mortgage or business loan application may ask for past returns and supporting records.',
+              'State taxes: your state can have its own period, so check your state tax agency before shredding.',
+              'Warranties and returns: keep the receipt for as long as the warranty or return window lasts.'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'digital-copies',
+        title: 'Do digital copies count? What the IRS says about photos and scans',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Yes, with conditions. IRS Publication 583 says all requirements that apply to hard copy books and records also apply to electronic storage systems, which must index, store, preserve, retrieve and reproduce the records in legible format. The same retention periods apply to the digital copy as to the paper.`,
+            source: {
+              href: 'https://www.irs.gov/publications/p583',
+              label: 'Read IRS Publication 583.'
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: `Publication 583 also says the original paper may be destroyed once the electronic system has been tested to confirm it reproduces the records in line with IRS requirements, citing Revenue Procedure 97-22 for the details. Whether to keep the paper as well is a good question for your tax professional.`
+          },
+          {
+            kind: 'paragraph',
+            text: `There's a practical reason to go digital anyway: most receipts are printed on thermal paper, and many fade well before three years are up, especially in a wallet or a hot car. A clear photo taken the day you get the receipt is often the only copy that's still readable when you need it.`,
+            source: {
+              href: '/blog/why-do-receipts-fade',
+              label: 'Why receipts fade, and how to keep them readable.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'before-you-shred',
+        title: 'Before you shred: a 5-step checklist',
+        blocks: [
+          {
+            kind: 'ordered',
+            items: [
+              'Find the tax year the receipt supports, not just the date printed on it.',
+              'Check when that year’s return was filed. Early returns count as filed on the due date; late or extended returns count from the day you filed.',
+              'Rule out the exceptions: a refund claim, unreported income, worthless securities or bad debts, employment taxes, or a year with no return filed.',
+              'Pull out anything for equipment, vehicles or property you still own or sold recently. Those follow the property rule.',
+              'Check with your insurer, lender and state, then shred the paper rather than tossing it, since receipts can show your name, where you shop and part of your card number.'
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `An easy routine: once a year, after the filing deadline, review only the tax year that just passed the three-year mark. For example, a 2022 return filed on time in April 2023 reached three years in April 2026. Everything else stays put.`
+          },
+          {
+            kind: 'callout',
+            tone: 'warning',
+            title: 'Catching up on a backlog?',
+            text: `Sort first, shred last. If you're working through a shoebox of old receipts, finish matching them to your statements before deciding what can go.`
+          },
+          {
+            kind: 'paragraph',
+            text: `Our step-by-step plan covers the whole catch-up, from triage to a clean export.`,
+            source: {
+              href: '/blog/how-to-sort-a-shoebox-of-receipts',
+              label: 'How to sort a shoebox of receipts.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'make-three-years-easy',
+        title: 'How to make keeping receipts for years painless',
+        blocks: [
+          {
+            kind: 'list',
+            items: [
+              'Capture each receipt the day you get it, before it fades or gets lost.',
+              'Keep every receipt in one place, organized by month and year, so the keep-until date is easy to find.',
+              'Add a word about why you bought it. A receipt from three years ago rarely explains itself.',
+              'Back up your digital copies somewhere other than your phone.',
+              'Keep equipment and property receipts in their own folder so they survive routine cleanups.'
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `ReceiptNest is built for this: snap a paper receipt or forward an email receipt, add a quick note, and it's filed by month, so a 2026 receipt is still easy to find in 2030. You can export a CSV or PDF of any period for your accountant. It never connects to your bank; you choose which receipts to keep.`
+          },
+          {
+            kind: 'callout',
+            tone: 'note',
+            title: 'Record organization, not tax advice',
+            text: `This guide summarizes general IRS retention guidance for U.S. federal taxes. Your own situation, state rules and other obligations can change the answer, so check with your tax professional before discarding records.`
+          }
+        ]
+      }
+    ],
+    faq: [
+      {
+        question: 'How long should I keep receipts for taxes?',
+        answer:
+          'Generally, keep receipts that support your tax return for 3 years from the date you filed it. The IRS lists longer periods for some situations: 6 years if income over 25% of the gross income on your return was left off, 7 years for worthless securities or bad debt losses, at least 4 years for employment tax records, and indefinitely if no return was filed.'
+      },
+      {
+        question: 'Does the 3-year rule start from the purchase date?',
+        answer:
+          'No. The IRS counts the period from when the return was filed, and a return filed before the due date is treated as filed on the due date. A receipt from March 2026 supports the 2026 return; filed on time in April 2027, it should generally be kept until at least April 2030.'
+      },
+      {
+        question: 'Can I throw away receipts after 3 years?',
+        answer:
+          'Often, but only once the return they support was filed more than three years ago and none of the exceptions apply. Check for equipment or property receipts, refund claims, employment tax records, and whether your insurer, lender or state needs the records longer.'
+      },
+      {
+        question: 'How long should self-employed people keep business receipts?',
+        answer:
+          'The same IRS rules apply: generally 3 years after filing the return the receipts support, longer in the special situations, and until the period ends for the year you sell it for equipment and other property. Self-employed people often have equipment receipts, so those deserve their own folder.'
+      },
+      {
+        question: 'How long should I keep receipts for equipment or a vehicle?',
+        answer:
+          'Keep them until the period of limitations expires for the year you sell or otherwise dispose of the item. A camera bought in 2026 and sold in 2031 would generally need its receipt kept until at least April 2035 if the 2031 return is filed on time.'
+      },
+      {
+        question: 'Do I need to keep paper receipts if I have photos?',
+        answer:
+          'IRS Publication 583 says the requirements for paper records also apply to electronic storage systems, and that originals may be destroyed once the system has been tested to meet IRS requirements. Clear, complete, findable copies are the standard. Ask your tax professional whether to keep the paper as well.'
+      },
+      {
+        question: 'How long should I keep receipts if I never filed a return?',
+        answer:
+          'Indefinitely. The IRS says to keep records indefinitely if you do not file a return, because there is no period of limitations to assess tax in that case.'
+      }
+    ],
+    relatedSlugs: [
+      'organize-receipts-taxes-freelancer-guide',
+      'why-do-receipts-fade',
+      'how-to-sort-a-shoebox-of-receipts'
+    ]
+  },
+  {
     slug: 'how-to-sort-a-shoebox-of-receipts',
     path: '/blog/how-to-sort-a-shoebox-of-receipts',
     category: 'How-To',
@@ -296,7 +624,11 @@ export const blogPosts: readonly BlogPost[] = [
         blocks: [
           {
             kind: 'paragraph',
-            text: `Once everything is photographed and matched, it's tempting to shred the whole box. Slow down. The IRS generally says to keep records for three years after you file, with longer periods in some situations, and your insurer or lender may want certain records kept longer. Whether you also need the paper originals after you have clear digital copies is worth asking your tax professional.`
+            text: `Once everything is photographed and matched, it's tempting to shred the whole box. Slow down. The IRS generally says to keep records for three years after you file, with longer periods in some situations, and your insurer or lender may want certain records kept longer. Whether you also need the paper originals after you have clear digital copies is worth asking your tax professional.`,
+            source: {
+              href: '/blog/how-long-to-keep-receipts',
+              label: 'How long to keep receipts, rule by rule.'
+            }
           },
           {
             kind: 'list',
@@ -2507,7 +2839,11 @@ export const blogPosts: readonly BlogPost[] = [
           },
           {
             kind: 'paragraph',
-            text: `Do not use a purchase date plus three years as an automatic deletion rule. Filing and payment dates, amended returns, property, and exceptions can change the period. Check the IRS retention guidance linked above and confirm your requirements before disposing of anything.`
+            text: `Do not use a purchase date plus three years as an automatic deletion rule. Filing and payment dates, amended returns, property, and exceptions can change the period. Check the IRS retention guidance linked above and confirm your requirements before disposing of anything.`,
+            source: {
+              href: '/blog/how-long-to-keep-receipts',
+              label: 'See worked examples of each retention period.'
+            }
           }
         ]
       },

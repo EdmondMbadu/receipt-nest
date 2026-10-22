@@ -25,6 +25,16 @@ const scanner = { href: '/receipt-scanner', label: 'See the receipt-scanning wor
 const email = { href: '/email-receipt-organizer', label: 'Set up email-receipt forwarding' };
 
 const editorial: Readonly<Record<string, BlogEditorial>> = {
+  'how-long-to-keep-receipts': {
+    note: taxNote,
+    sources: [
+      retention,
+      { href: 'https://www.irs.gov/taxtopics/tc305', label: 'IRS Topic 305: recordkeeping and periods of limitations' },
+      { href: 'https://www.irs.gov/publications/p583', label: 'IRS Publication 583: how long to keep records and electronic records' },
+      records
+    ],
+    workflows: [tax, csv, scanner]
+  },
   'how-to-sort-a-shoebox-of-receipts': {
     note: taxNote,
     sources: [records, retention, { href: 'https://www.irs.gov/newsroom/reconstructing-records-after-a-natural-disaster-or-casualty-loss', label: 'IRS: reconstructing records' }],
