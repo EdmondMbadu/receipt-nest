@@ -51,7 +51,7 @@ export interface BlogPost {
     readonly heading?: string;
     /** Text for the YouTube link. Defaults to the Part 1 link text. */
     readonly linkLabel?: string;
-    /** YouTube publish date (YYYY-MM-DD). When set, the page emits VideoObject structured data. */
+    /** YouTube publication timestamp in ISO 8601, including time and timezone. */
     readonly uploadDate?: string;
     /** ISO 8601 duration, for example PT1M3S. */
     readonly duration?: string;
@@ -1267,7 +1267,7 @@ export const blogPosts: readonly BlogPost[] = [
       eyebrow: 'Paper Trail · Part 2',
       heading: 'Watch: Can you still read your receipt?',
       linkLabel: 'Watch Paper Trail, Part 2 on YouTube ↗',
-      uploadDate: '2026-10-18',
+      uploadDate: '2026-10-18T14:04:43-07:00',
       duration: 'PT1M3S'
     },
     keywords: [
@@ -2140,7 +2140,7 @@ export const blogPosts: readonly BlogPost[] = [
       youtubeId: 'vH_EjIIeEJY',
       title: 'What Was That $86.40 Charge? | Paper Trail, Part 1 — ReceiptNest',
       description: 'A mystery charge, an accountant’s question, and a small habit that preserves the answer. This one-minute Short introduces the example below: keep the receipt and add the context while you still remember the purchase.',
-      uploadDate: '2026-10-17',
+      uploadDate: '2026-10-17T15:48:04-07:00',
       duration: 'PT1M'
     },
     keywords: [
@@ -2640,6 +2640,8 @@ export const blogPosts: readonly BlogPost[] = [
     dateModified: '2026-09-13',
     readTime: '9 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Freceiptnest-expensify.png?alt=media&token=4592bdb9-22e6-438c-8644-9b20ec9810d6',
+    imageWidth: 1672,
+    imageHeight: 941,
     imageAlt: 'ReceiptNest monthly dashboard with receipt totals and categories',
     keywords: ['Expensify alternative', 'ReceiptNest vs Expensify', 'freelancer receipt app'],
     intro: [
@@ -2786,6 +2788,8 @@ export const blogPosts: readonly BlogPost[] = [
     dateModified: '2026-10-10',
     readTime: '12 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Forganizing-chaos.png?alt=media&token=a4ddd1e9-0056-4011-bf78-fe1e297f89ef',
+    imageWidth: 1672,
+    imageHeight: 941,
     imageAlt: 'Receipt categories and tax-ready expense records in ReceiptNest',
     keywords: ['how to organize receipts for taxes self employed', '1099 receipt organizer', 'freelancer tax receipts'],
     intro: [
@@ -2966,6 +2970,8 @@ export const blogPosts: readonly BlogPost[] = [
     dateModified: '2026-09-13',
     readTime: '10 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Fetsy-more.png?alt=media&token=1ceeee19-d74e-4947-a240-4cb95dac0d4b',
+    imageWidth: 1672,
+    imageHeight: 941,
     imageAlt: 'Receipts from photos, email, and PDFs captured in ReceiptNest',
     keywords: ['receipt tracking for Etsy sellers', 'Etsy seller receipts', 'Etsy tax deductions'],
     intro: [
@@ -3109,6 +3115,8 @@ export const blogPosts: readonly BlogPost[] = [
     dateModified: '2026-09-13',
     readTime: '11 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Fdigital.png?alt=media&token=2debc0bf-3d6b-44b0-a804-8f9dcd2d6a41',
+    imageWidth: 1672,
+    imageHeight: 941,
     imageAlt: 'AI extracting merchant, amount, and category data from a receipt',
     keywords: ['how to scan receipts automatically', 'automatic receipt scanning', 'digitize receipts'],
     intro: [
@@ -3269,6 +3277,8 @@ export const blogPosts: readonly BlogPost[] = [
     dateModified: '2026-09-13',
     readTime: '10 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Fnavigating-expenses.png?alt=media&token=6b293452-73ef-419f-a223-3ff660082cd1',
+    imageWidth: 1672,
+    imageHeight: 941,
     imageAlt: 'Spending insight dashboard showing monthly receipt patterns',
     keywords: ['where does my money go every month', 'spending clarity', 'track monthly spending'],
     intro: [

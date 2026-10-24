@@ -45,6 +45,8 @@
           <details class="border-y border-slate-200 py-5 dark:border-slate-800" open>
             <summary class="cursor-pointer text-sm font-semibold text-slate-950 dark:text-white">Table of contents</summary>
             <nav class="mt-5 space-y-1">
+              <a *ngIf="article.video" [routerLink]="article.path" fragment="watch-short"
+                class="block rounded-md px-2 py-2 text-sm font-semibold text-emerald-700 hover:underline dark:text-emerald-300">Watch the short video</a>
               <a *ngFor="let section of article.sections" [routerLink]="article.path" [fragment]="section.id"
                 class="block w-full rounded-md px-2 py-2 text-left text-sm leading-5 text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-white">
                 {{ section.title }}

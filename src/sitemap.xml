@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://receipt-nest.com/getting-started</loc><lastmod>2026-10-18</lastmod></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+  <url><loc>https://receipt-nest.com/getting-started</loc><lastmod>2026-10-18</lastmod>
+    <video:video>
+      <video:thumbnail_loc>https://receipt-nest.com/media/getting-started/receiptnest-quick-start-v1.jpg</video:thumbnail_loc>
+      <video:title>Get started with ReceiptNest in 85 seconds</video:title>
+      <video:description>Watch the 85-second ReceiptNest walkthrough. Learn to scan or upload a receipt, let AI organize the details, and find and download your receipts.</video:description>
+      <video:content_loc>https://receipt-nest.com/media/getting-started/receiptnest-quick-start-v1.mp4</video:content_loc>
+      <video:duration>85</video:duration>
+      <video:publication_date>2026-10-18T00:00:00Z</video:publication_date>
+    </video:video>
+  </url>
   <url><loc>https://receipt-nest.com/</loc><lastmod>2026-10-10</lastmod></url>
-  <url><loc>https://receipt-nest.com/receipt-tracker</loc><lastmod>2026-10-10</lastmod></url>
+  <url><loc>https://receipt-nest.com/receipt-tracker</loc><lastmod>2026-10-24</lastmod></url>
   <url><loc>https://receipt-nest.com/receipt-organizer</loc><lastmod>2026-10-10</lastmod></url>
   <url><loc>https://receipt-nest.com/receipt-scanner</loc><lastmod>2026-10-10</lastmod></url>
-  <url><loc>https://receipt-nest.com/receipt-management-software</loc><lastmod>2026-10-10</lastmod></url>
+  <url><loc>https://receipt-nest.com/receipt-management-software</loc><lastmod>2026-10-24</lastmod></url>
   <url><loc>https://receipt-nest.com/expense-tracker</loc><lastmod>2026-10-10</lastmod></url>
   <url><loc>https://receipt-nest.com/tax-receipt-organizer</loc><lastmod>2026-10-10</lastmod></url>
   <url><loc>https://receipt-nest.com/receipt-to-csv</loc><lastmod>2026-10-10</lastmod></url>

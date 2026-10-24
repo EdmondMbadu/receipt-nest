@@ -46,4 +46,21 @@ describe('Public SEO navigation', () => {
     expect(document.querySelector('link[rel="canonical"]')).toBeNull();
     expect(document.querySelector('#json-ld-blog-article')).toBeNull();
   });
+
+  it('keeps timezone-aware video metadata and the visible player in sync across navigation', async () => {
+    const harness = await RouterTestingHarness.create('/blog/why-do-receipts-fade');
+    const document = TestBed.inject(DOCUMENT);
+    const video = () => JSON.parse(document.querySelector('#json-ld-blog-article')!.textContent!)['@graph']
+      .find((node: Record<string, unknown>) => node['@type'] === 'VideoObject');
+    expect(video().uploadDate).toBe('2026-10-18T14:04:43-07:00');
+    expect(harness.routeNativeElement?.querySelector('iframe')?.getAttribute('src')).toBe(video().embedUrl);
+    await harness.navigateByUrl('/blog/can-bank-statements-replace-receipts');
+    expect(video().uploadDate).toBe('2026-10-17T15:48:04-07:00');
+    expect(harness.routeNativeElement?.querySelector('iframe')?.getAttribute('src')).toBe(video().embedUrl);
+    await harness.navigateByUrl('/getting-started');
+    expect(document.querySelector('#json-ld-blog-article')).toBeNull();
+    const tutorial = JSON.parse(document.querySelector('#json-ld-getting-started-video')!.textContent!);
+    expect(tutorial.uploadDate).toMatch(/T\d{2}:\d{2}:\d{2}Z$/);
+    expect(new URL(harness.routeNativeElement!.querySelector('video source')!.getAttribute('src')!, 'https://receipt-nest.com').href).toBe(tutorial.contentUrl);
+  });
 });

@@ -7,12 +7,20 @@ import { receiptWorkflows } from '../src/app/content/receipt-workflows.ts';
 import { blogPosts, getBlogPost } from '../src/app/features/blog/blog-posts.ts';
 import { getBlogEditorial } from '../src/app/features/blog/blog-editorial.ts';
 import { gamePages } from '../src/app/content/game-pages.ts';
+import { gettingStartedVideo } from '../src/app/content/getting-started-video.ts';
 
 const root = 'dist/receipt-nest/browser';
 const read = path => readFileSync(path, 'utf8');
 const attr = (node, key) => node.attrs?.find(item => item.name === key)?.value;
 const text = node => node.nodeName === '#text' ? node.value : (node.childNodes || []).map(text).join('');
 const nodes = node => [node, ...(node.childNodes || []).flatMap(nodes)];
+const schemaNodes = value => !value || typeof value !== 'object' ? []
+  : [value, ...Object.values(value).flatMap(schemaNodes)];
+const hasType = (node, type) => [node['@type']].flat().includes(type);
+const validVideoDate = value => typeof value === 'string' &&
+  /^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:0\d|1[0-4]):[0-5]\d)$/.test(value) &&
+  Number.isFinite(Date.parse(value)) &&
+  new Date(value.slice(0, 10) + 'T00:00:00Z').toISOString().slice(0, 10) === value.slice(0, 10);
 const entries = [
   ...publicPages,
   ...blogPosts.map(post => ({ ...post, title: post.seoTitle + ' | ReceiptNest' })),
@@ -32,6 +40,7 @@ const titles = new Set();
 const descriptions = new Set();
 const privatePaths = ['/login', '/register', '/email-verified', '/feedback', '/app'];
 let linksChecked = 0;
+let videosChecked = 0;
 for (const page of entries) {
   const all = documents.get(page.path);
   const tags = name => all.filter(node => node.tagName === name);
@@ -56,6 +65,26 @@ for (const page of entries) {
   const graphs = tags('script').filter(node => attr(node, 'type') === 'application/ld+json')
     .flatMap(node => { const json = JSON.parse(text(node)); return json['@graph'] || [json]; });
   const types = graphs.map(node => node['@type']);
+  const videos = graphs.flatMap(schemaNodes).filter(node => hasType(node, 'VideoObject'));
+  for (const video of videos) {
+    assert.ok(validVideoDate(video.uploadDate), page.path + ': VideoObject.uploadDate needs a valid ISO 8601 datetime with timezone (got ' + video.uploadDate + ')');
+    assert.ok(video.name?.trim() && video.description?.trim(), page.path + ': descriptive video metadata');
+    assert.ok(video.contentUrl || video.embedUrl, page.path + ': playable video URL required');
+    assert.ok([video.thumbnailUrl].flat().every(url => typeof url === 'string' && url.startsWith('https://')), page.path + ': HTTPS video thumbnail required');
+    if (video.contentUrl) {
+      assert.ok(tags('source').some(node => new URL(attr(node, 'src'), SITE_URL).href === video.contentUrl), page.path + ': video schema matches the public player');
+      for (const url of [video.contentUrl, ...[video.thumbnailUrl].flat()]) {
+        const asset = new URL(url);
+        if (asset.origin === SITE_URL) assert.ok(existsSync(join(root, asset.pathname)), page.path + ': missing video asset ' + asset.pathname);
+      }
+    } else {
+      assert.ok(tags('iframe').some(node => attr(node, 'src') === video.embedUrl), page.path + ': video schema matches the embedded player');
+    }
+    videosChecked++;
+  }
+  const expectedVideo = page.slug ? getBlogPost(page.slug)?.video : undefined;
+  assert.equal(videos.length, page.path === gettingStartedVideo.path || expectedVideo?.uploadDate ? 1 : 0, page.path + ': video markup must not be silently omitted');
+  if (expectedVideo?.uploadDate) assert.equal(videos[0].uploadDate, expectedVideo.uploadDate, page.path + ': video timestamp matches source');
   assert.ok(types.includes('Organization') && types.includes('WebSite'), page.path + ': brand entities');
   assert.equal(types.filter(type => type === 'SoftwareApplication').length,
     page.kind === 'home' || page.kind === 'workflow' || page.path === '/pricing' ? 1 : 0,
@@ -83,9 +112,22 @@ for (const page of entries) {
   }
   for (const img of tags('img')) {
     assert.ok(attr(img, 'alt') !== undefined, page.path + ': image missing alt');
+    assert.ok(Number(attr(img, 'width')) > 0 && Number(attr(img, 'height')) > 0, page.path + ': image dimensions needed to reserve layout space: ' + attr(img, 'src'));
     const url = new URL(attr(img, 'src'), SITE_URL);
     if (url.origin === SITE_URL) assert.ok(existsSync(join(root, url.pathname)), page.path + ': missing image ' + url.pathname);
   }
+}
+const tutorialVideo = documents.get(gettingStartedVideo.path).filter(node => node.tagName === 'script' && attr(node, 'type') === 'application/ld+json')
+  .flatMap(node => schemaNodes(JSON.parse(text(node)))).find(node => hasType(node, 'VideoObject'));
+assert.equal(tutorialVideo.uploadDate, gettingStartedVideo.uploadDate, 'Tutorial video timestamp matches sitemap source');
+assert.equal((sitemap.match(/<video:video>/g) || []).length, 1, 'Tutorial must be discoverable through the video sitemap');
+for (const [key, value] of [
+  ['publication_date', tutorialVideo.uploadDate], ['title', tutorialVideo.name],
+  ['description', tutorialVideo.description], ['content_loc', tutorialVideo.contentUrl],
+  ['thumbnail_loc', tutorialVideo.thumbnailUrl], ['duration', String(gettingStartedVideo.durationSeconds)]
+]) {
+  const escaped = value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+  assert.ok(sitemap.includes(`<video:${key}>${escaped}</video:${key}>`), 'Video sitemap matches page: ' + key);
 }
 for (const page of publicPages.filter(page => page.kind === 'workflow')) {
   const workflow = receiptWorkflows[page.path.slice(1)];
@@ -116,4 +158,4 @@ for (const page of gamePages) {
   const size = statSync(join(root, page.path, 'index.html')).size;
   assert.ok(size < 120000, page.path + ': standalone game page must stay under 120 KB (is ' + size + ' bytes)');
 }
-console.log('SEO checks passed: ' + entries.length + ' public pages, 3 account pages, ' + linksChecked + ' local links; sitemap, schema, images, private-route headers, and sample CSV verified.');
+console.log('SEO checks passed: ' + entries.length + ' public pages, 3 account pages, ' + linksChecked + ' local links, ' + videosChecked + ' videos; sitemap, timezone-aware video schema, image dimensions, private-route headers, and sample CSV verified.');

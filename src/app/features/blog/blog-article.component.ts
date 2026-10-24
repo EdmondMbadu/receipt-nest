@@ -1,5 +1,5 @@
 import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { Component, OnDestroy, PLATFORM_ID, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, PLATFORM_ID, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -25,6 +25,7 @@ export class BlogArticleComponent implements OnDestroy {
   private readonly document = inject(DOCUMENT);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly changeDetector = inject(ChangeDetectorRef);
 
   readonly isDarkMode = this.theme.isDarkMode;
   readonly currentYear = new Date().getFullYear();
@@ -44,6 +45,8 @@ export class BlogArticleComponent implements OnDestroy {
         ? this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube-nocookie.com/embed/${videoId}?rel=0`)
         : null;
       this.applySeo();
+      // This component is reused for article-to-article navigation in the zoneless app.
+      this.changeDetector.markForCheck();
       this.scrollToTop();
     });
   }
@@ -161,7 +164,7 @@ export class BlogArticleComponent implements OnDestroy {
       thumbnailUrl: [`https://i.ytimg.com/vi/${video.youtubeId}/hqdefault.jpg`],
       uploadDate: video.uploadDate,
       ...(video.duration ? { duration: video.duration } : {}),
-      embedUrl: `https://www.youtube.com/embed/${video.youtubeId}`,
+      embedUrl: `https://www.youtube-nocookie.com/embed/${video.youtubeId}?rel=0`,
       url: `https://www.youtube.com/shorts/${video.youtubeId}`,
       inLanguage: 'en-US',
       publisher: {

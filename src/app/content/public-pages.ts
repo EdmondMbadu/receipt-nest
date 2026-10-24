@@ -24,9 +24,9 @@ export const publicPages: readonly PublicPage[] = [
     description: 'Capture receipt photos, PDFs, and forwarded emails. Review purchases, keep originals, and export a CSV for your accountant. No bank connection required.'
   },
   {
-    path: '/receipt-tracker', kind: 'workflow', label: 'Receipt tracker', updated: '2026-10-10',
-    title: 'Receipt Tracker for Freelancers & Everyday Expenses | ReceiptNest',
-    description: 'Track receipts by merchant, month, and category. Capture photos, PDFs, and email receipts, then review and export your records. Start free.'
+    path: '/receipt-tracker', kind: 'workflow', label: 'Receipt tracker', updated: '2026-10-24',
+    title: 'Receipt Tracker App — Scan, Organize & Export | ReceiptNest',
+    description: 'Track paper, PDF, and email receipts by merchant and month. Start free with up to 50 receipts, AI categorization, and CSV export. No bank connection needed.'
   },
   {
     path: '/receipt-organizer', kind: 'workflow', label: 'Receipt organizer', updated: '2026-10-10',
@@ -39,9 +39,9 @@ export const publicPages: readonly PublicPage[] = [
     description: 'Turn receipt photos and PDFs into merchant, date, amount, and category records. Review the details, keep the original, and export to CSV.'
   },
   {
-    path: '/receipt-management-software', kind: 'workflow', label: 'Receipt management', updated: '2026-10-10',
-    title: 'Receipt Management Software for Small Businesses | ReceiptNest',
-    description: 'Collect, review, and export small-business receipt records. A focused receipt workflow without payroll, bookkeeping, or expense-approval software.'
+    path: '/receipt-management-software', kind: 'workflow', label: 'Receipt management', updated: '2026-10-24',
+    title: 'Receipt Management Software — Scan & Export | ReceiptNest',
+    description: 'Scan, organize, and find small-business receipts in one place. Keep originals, review AI categories, and export monthly CSV records. Start with 50 receipts free.'
   },
   {
     path: '/expense-tracker', kind: 'workflow', label: 'Receipt-based expenses', updated: '2026-10-10',
