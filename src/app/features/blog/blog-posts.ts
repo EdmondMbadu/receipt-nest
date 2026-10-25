@@ -73,6 +73,317 @@ export const blogCategories: readonly BlogCategory[] = [
 
 export const blogPosts: readonly BlogPost[] = [
   {
+    slug: 'do-you-need-receipts-for-taxes',
+    path: '/blog/do-you-need-receipts-for-taxes',
+    category: 'Tax Guides',
+    title: 'Do You Need Receipts for Taxes? 8 Receipt Myths, Busted',
+    seoTitle: 'Do You Need Receipts for Taxes? 8 Myths, Busted',
+    description:
+      'Do you need receipts for taxes? Eight common receipt myths, checked against IRS guidance: bank statements, card slips, photos, the $75 rule, lost receipts and how long to keep them.',
+    excerpt:
+      'Five receipt myths are in our quiz video and three more come up constantly. How many do you believe? Here is what IRS guidance actually says about each one.',
+    datePublished: '2026-10-24',
+    dateModified: '2026-10-24',
+    readTime: '9 min read',
+    image: '/assets/images/blog/do-you-need-receipts-for-taxes.webp',
+    imageWidth: 1672,
+    imageHeight: 941,
+    imageAlt: 'A scorecard of eight receipt myths, each crossed out with a red BUSTED stamp, asking how many you believed',
+    keywords: [
+      'do I need receipts for taxes',
+      'do you need receipts for tax deductions',
+      'receipt myths',
+      'what if I don’t have receipts for taxes',
+      'do I need to keep paper receipts'
+    ],
+    intro: [
+      `Quick quiz: how many of these do you believe? “My bank statement is enough.” “Receipts last forever.” “I'll remember what it was for.” “Photos don't count.” “Toss them after a year.” If you nodded at even one, you're in good company. These are the receipt myths we hear most from self-employed people.`,
+      `So, do you need receipts for taxes? In short: you need records that support the income, deductions and credits on your return, and for a business expense the receipt is usually the best single proof of what you bought, when, from whom and for how much. IRS guidance allows a combination of supporting documents, but a bank statement alone often can't show what was purchased. Below are eight common myths, each checked against IRS guidance, with what to do instead.`
+    ],
+    sections: [
+      {
+        id: 'short-answer',
+        title: 'The short answer: the 8 myths at a glance',
+        blocks: [
+          {
+            kind: 'table',
+            table: {
+              columns: ['Myth', 'Reality', 'What to do'],
+              rows: [
+                ['“My bank statement is enough.”', 'It shows you paid, not what you bought.', 'Keep the receipt too.'],
+                ['“Receipts last forever.”', 'Most are thermal paper that heat, light and friction can erase.', 'Photograph them the day you get them.'],
+                ['“I’ll remember what it was for.”', 'Business purpose is the first detail you forget.', 'Add a one-line note at the time.'],
+                ['“Photos don’t count.”', 'IRS rules for paper records also apply to electronic ones.', 'Keep clear, complete, findable copies.'],
+                ['“Toss them after a year.”', 'Generally 3 years after you file, sometimes longer.', 'Delete by tax year, not receipt date.'],
+                ['“The card slip is my receipt.”', 'A card slip shows the total, not the items.', 'Ask for the itemized receipt.'],
+                ['“Under $75, I don’t need anything.”', 'A narrow exception for some expense types, and you still need a record.', 'Record every business expense.'],
+                ['“No receipt means no deduction.”', 'Other supporting documents can help show the expense.', 'Rebuild the record with what you have.']
+              ]
+            }
+          },
+          {
+            kind: 'callout',
+            tone: 'tip',
+            title: 'Score yourself',
+            text: `Count how many you believed before reading. Zero to two: your records are in good shape. Three or more: the habits at the end of this guide will save you a stressful April.`
+          }
+        ]
+      },
+      {
+        id: 'myth-bank-statement',
+        title: 'Myth 1: “My bank statement is enough”',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `A statement line like “SQ *JMK LLC 86.40” proves that money left your account. It doesn't show what you bought, and that's what an accountant, or the IRS, needs to see. IRS Publication 583 says account statements can establish payment, but cautions that proof of payment alone does not establish that you are entitled to the deduction. The itemized receipt fills that gap.`,
+            source: {
+              href: 'https://www.irs.gov/publications/p583',
+              label: 'Read IRS Publication 583.'
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: `Keep both: the statement for payment, the receipt for the purchase. Our full guide walks through when a statement helps and when it falls short.`,
+            source: {
+              href: '/blog/can-bank-statements-replace-receipts',
+              label: 'Can bank statements replace receipts?'
+            }
+          }
+        ]
+      },
+      {
+        id: 'myth-last-forever',
+        title: 'Myth 2: “Receipts last forever”',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Most store receipts aren't printed with ink. They're thermal paper, where heat darkens a coating to form the text, which is why heat, sunlight, friction and some chemicals can fade or blacken them. A receipt left on a dashboard in summer, or folded in a wallet, can be unreadable long before you're done needing it.`
+          },
+          {
+            kind: 'paragraph',
+            text: `The fix takes ten seconds: photograph the receipt the day you get it, while the print is sharp.`,
+            source: {
+              href: '/blog/why-do-receipts-fade',
+              label: 'Why receipts fade, and what to do if one is already blank.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'myth-remember',
+        title: 'Myth 3: “I’ll remember what it was for”',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Quick: what did you have for lunch three Tuesdays ago? Now imagine explaining every purchase from last year. IRS guidance says supporting documents for business expenses should show a description of the item or service that makes its business nature clear. The receipt shows what you bought. It never shows why.`,
+            source: {
+              href: 'https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep',
+              label: 'See IRS guidance on supporting documents.'
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: `Add a few words when you capture the receipt, such as the client, job or reason. “Lunch with Dana, kitchen remodel” takes five seconds now and saves twenty minutes of guessing later.`,
+            source: {
+              href: '/blog/how-to-keep-track-of-receipts',
+              label: 'The 10-second, 2-minutes-a-month receipt system.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'myth-photos',
+        title: 'Myth 4: “Photos don’t count”',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `They do, when they're good. IRS Publication 583 says all requirements that apply to hard copy books and records also apply to electronic storage systems, which must be able to index, store, preserve, retrieve and reproduce the records in legible format. A clear, complete photo you can find is held to the same standard as the paper.`
+          },
+          {
+            kind: 'list',
+            items: [
+              'Capture the whole receipt, from the store name down to the total and payment line.',
+              'Make sure the date, items and amount are sharp and readable.',
+              'Keep the photos organized, for example by month, so you can retrieve one quickly.',
+              'Back them up somewhere other than your phone.'
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `Publication 583 also describes when original paper may be destroyed after it is reproduced electronically. Whether to keep the paper as well is a good question for your tax professional.`
+          }
+        ]
+      },
+      {
+        id: 'myth-one-year',
+        title: 'Myth 5: “Toss them after a year”',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `The IRS generally says to keep records that support your return for three years from when you file it, not from the date of the purchase, and a return filed early counts as filed on the due date. Some situations run longer: 6 years if more than 25% of your gross income was left off, 7 years for worthless securities or bad debts, at least 4 years for employment tax records, and indefinitely if a return was never filed. Receipts for equipment and other property are kept until the period runs out for the year you sell it.`,
+            source: {
+              href: 'https://www.irs.gov/businesses/small-businesses-self-employed/how-long-should-i-keep-records',
+              label: 'See the IRS retention periods.'
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: `So a receipt from March 2026 that supports a 2026 return filed on time in April 2027 is generally kept until at least April 2030. Our retention guide has worked examples and a checklist to run before shredding.`,
+            source: {
+              href: '/blog/how-long-to-keep-receipts',
+              label: 'How long to keep receipts, rule by rule.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'myth-card-slip',
+        title: 'Myth 6: “The card slip is my receipt”',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `The slip you sign at a restaurant or counter usually shows the merchant, the date and the total. The itemized receipt shows what that total was for. Two $62 purchases can look identical on a card slip and mean very different things, one supplies and one a personal gift.`
+          },
+          {
+            kind: 'paragraph',
+            text: `Ask for the itemized receipt, snap it together with the slip, and you have both proof of payment and proof of purchase.`,
+            source: {
+              href: '/blog/itemized-receipt-vs-credit-card-slip',
+              label: 'Itemized receipt vs. credit card slip.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'myth-under-75',
+        title: 'Myth 7: “Under $75, I don’t need anything”',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `This one starts from a real rule and stretches it. IRS Publication 463 says documentary evidence isn't needed for a travel, gift or transportation expense, other than lodging, that is less than $75. That is a narrow exception for those expense types, and you still need a written record of the expense itself, such as the amount, date, place and business purpose.`,
+            source: {
+              href: 'https://www.irs.gov/publications/p463',
+              label: 'Read IRS Publication 463, chapter 5.'
+            }
+          },
+          {
+            kind: 'callout',
+            tone: 'warning',
+            title: 'Not a general pass for small purchases',
+            text: `The $75 exception is not a rule that business receipts under $75 don't matter. Small purchases add up, and a receipt is still the easiest way to show what each one was.`
+          }
+        ]
+      },
+      {
+        id: 'myth-no-receipt',
+        title: 'Myth 8: “No receipt means no deduction”',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `A receipt is the strongest single proof, but it isn't the only kind of record. IRS guidance says expense records should identify the payee, the amount, proof of payment, the date and a description showing the business nature of the expense, and it allows that information to come from a combination of supporting documents, such as invoices, account statements and canceled checks.`
+          },
+          {
+            kind: 'ordered',
+            items: [
+              'Search your email for the amount or the merchant; many stores send a copy.',
+              'Ask the seller to reprint or resend it. Some stores can look up a purchase by date and card.',
+              'Download the order details from the online account you bought it through.',
+              'Save the statement line and write a note on what it was and why, while you still remember.'
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: `Whether a rebuilt record is enough for a particular deduction is a question for your tax professional. The point is not to give up on an expense just because the paper is gone.`,
+            source: {
+              href: 'https://www.irs.gov/newsroom/reconstructing-records-after-a-natural-disaster-or-casualty-loss',
+              label: 'See IRS guidance on reconstructing records.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'what-a-good-record-shows',
+        title: 'What a good receipt record shows',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Every myth above comes back to the same five details. If your record shows all five, you're in good shape.`
+          },
+          {
+            kind: 'table',
+            table: {
+              columns: ['Detail', 'Where it usually comes from'],
+              rows: [
+                ['Who you paid', 'The store name at the top of the receipt'],
+                ['How much', 'The total on the receipt, matched on your statement'],
+                ['Proof of payment', 'The payment line, card slip or account statement'],
+                ['When', 'The date on the receipt'],
+                ['What it was and why', 'The itemized lines, plus your note on the business purpose']
+              ]
+            }
+          }
+        ]
+      },
+      {
+        id: 'the-fix',
+        title: 'How many did you believe? The fix takes seconds',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Almost every myth is beaten by the same three habits: snap each receipt the day you get it, add a word about why, and keep everything in one place for at least the retention period that applies to you. Our six-part Paper Trail video series covers each habit in about a minute.`
+          },
+          {
+            kind: 'paragraph',
+            text: `ReceiptNest is built around those habits: snap a paper receipt or forward an email receipt, add a quick note, and it's organized by month and searchable later. You can export a CSV or PDF for your accountant at any time. It never connects to your bank; you choose which receipts to keep.`
+          },
+          {
+            kind: 'callout',
+            tone: 'note',
+            title: 'Record organization, not tax advice',
+            text: `This guide summarizes general IRS guidance on keeping records for U.S. federal taxes. What you can deduct, and what records your situation requires, is a question for your tax professional.`
+          }
+        ]
+      }
+    ],
+    faq: [
+      {
+        question: 'Do I need receipts for taxes?',
+        answer:
+          'You need records that support the income, deductions and credits on your return. For a business expense, IRS guidance says the record should show who you paid, the amount, proof of payment, the date and the business purpose. A receipt is usually the best single document for that, and other supporting documents can fill gaps.'
+      },
+      {
+        question: 'Is a bank statement enough without a receipt?',
+        answer:
+          'Often not on its own. IRS Publication 583 says account statements can establish payment but cautions that proof of payment alone does not establish entitlement to a deduction. A statement shows you paid; a receipt shows what you bought.'
+      },
+      {
+        question: 'Do photos of receipts count for the IRS?',
+        answer:
+          'IRS Publication 583 says the requirements that apply to paper records also apply to electronic storage systems, which must reproduce records in legible format. Clear, complete, organized photos meet the same standard as the paper. Ask your tax professional whether to keep the originals too.'
+      },
+      {
+        question: 'Do I need receipts for expenses under $75?',
+        answer:
+          'IRS Publication 463 says documentary evidence isn’t needed for travel, gift or transportation expenses, other than lodging, under $75. You still need a record of the expense, and the exception does not cover every kind of business purchase.'
+      },
+      {
+        question: 'What if I lost a receipt?',
+        answer:
+          'Try to get a copy from your email, the seller or your online order history. If that fails, keep the statement line with a note on what you bought and why, and gather any other supporting documents. Ask your tax professional whether that is enough for the deduction.'
+      },
+      {
+        question: 'How long do I need to keep receipts?',
+        answer:
+          'The IRS generally says three years from when you file the return they support, with longer periods in some situations, such as 6 years for income underreported by more than 25%, 7 years for worthless securities or bad debts, and indefinitely if a return was never filed.'
+      }
+    ],
+    relatedSlugs: [
+      'can-bank-statements-replace-receipts',
+      'how-long-to-keep-receipts',
+      'itemized-receipt-vs-credit-card-slip'
+    ]
+  },
+  {
     slug: 'how-long-to-keep-receipts',
     path: '/blog/how-long-to-keep-receipts',
     category: 'Tax Guides',
@@ -247,7 +558,11 @@ export const blogPosts: readonly BlogPost[] = [
           },
           {
             kind: 'paragraph',
-            text: `A receipt only needs to be kept for tax purposes if it supports something on a return: income, a deduction or a credit. A grocery receipt that never touches your taxes is a household decision, not an IRS one.`
+            text: `A receipt only needs to be kept for tax purposes if it supports something on a return: income, a deduction or a credit. A grocery receipt that never touches your taxes is a household decision, not an IRS one.`,
+            source: {
+              href: '/blog/do-you-need-receipts-for-taxes',
+              label: 'Do you need receipts for taxes? 8 myths, busted.'
+            }
           }
         ]
       },
@@ -2295,7 +2610,11 @@ export const blogPosts: readonly BlogPost[] = [
         blocks: [
           {
             kind: 'paragraph',
-            text: `The Short calls it a ten-second habit: capture the receipt when you pay and add a note if the purpose is not obvious. Treat that as a reminder to start immediately, not a measured time guarantee. A long or faded receipt may need more attention.`
+            text: `The Short calls it a ten-second habit: capture the receipt when you pay and add a note if the purpose is not obvious. Treat that as a reminder to start immediately, not a measured time guarantee. A long or faded receipt may need more attention.`,
+            source: {
+              href: '/blog/do-you-need-receipts-for-taxes',
+              label: 'Eight receipt myths, checked against IRS guidance.'
+            }
           },
           {
             kind: 'ordered',

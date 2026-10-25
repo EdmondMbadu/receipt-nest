@@ -25,6 +25,17 @@ const scanner = { href: '/receipt-scanner', label: 'See the receipt-scanning wor
 const email = { href: '/email-receipt-organizer', label: 'Set up email-receipt forwarding' };
 
 const editorial: Readonly<Record<string, BlogEditorial>> = {
+  'do-you-need-receipts-for-taxes': {
+    note: taxNote,
+    sources: [
+      records,
+      { href: 'https://www.irs.gov/publications/p583', label: 'IRS Publication 583: proof of payment and electronic records' },
+      { href: 'https://www.irs.gov/publications/p463', label: 'IRS Publication 463, chapter 5: documentary evidence and the $75 exception' },
+      retention,
+      { href: 'https://www.irs.gov/newsroom/reconstructing-records-after-a-natural-disaster-or-casualty-loss', label: 'IRS: reconstructing records' }
+    ],
+    workflows: [scanner, email, tax]
+  },
   'how-long-to-keep-receipts': {
     note: taxNote,
     sources: [
