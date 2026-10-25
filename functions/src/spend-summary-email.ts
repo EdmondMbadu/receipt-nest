@@ -4,8 +4,15 @@ import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import { assertAdmin } from "./authz";
-import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
-import { addEmailDarkMode } from "./email-theme";
+import { appendAppDownloadText } from "./email-app-links";
+import {
+  buildSpendSummaryHtml as buildEmailHtml,
+  getSpendSummaryAttachments,
+} from "./spend-summary-template";
+import type {
+  SummaryPeriodType, NormalizedReceipt, BreakdownItem, SummaryActivityItem,
+  SummaryMetrics, SummaryPeriod, SpendSummaryData, SummaryLinks,
+} from "./spend-summary-template";
 import { sendSendgridMail } from "./sendgrid";
 import {
   appendUnsubscribeText,
@@ -26,73 +33,7 @@ const SUMMARY_NOTIFICATION_START_HOUR = 8;
 const SUMMARY_NOTIFICATION_END_HOUR = 10;
 const WEEKDAY_VALUES = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] as const;
 
-type SummaryPeriodType = "week" | "month";
 type WeekdayValue = (typeof WEEKDAY_VALUES)[number];
-
-type NormalizedReceipt = {
-  amount: number;
-  currency: string;
-  categoryName: string;
-  merchantName: string;
-  dateKey: string;
-  dateLabel: string;
-  createdAt: Date | null;
-};
-
-type BreakdownItem = {
-  name: string;
-  total: number;
-  count: number;
-  share: number;
-};
-
-type SummaryActivityItem = {
-  label: string;
-  sublabel: string;
-  amount: number;
-  receiptCount: number;
-};
-
-type SummaryMetrics = {
-  totalSpend: number;
-  receiptCount: number;
-  activeDays: number;
-  averageSpend: number;
-  topCategory: BreakdownItem | null;
-  topMerchant: BreakdownItem | null;
-  largestReceipt: NormalizedReceipt | null;
-};
-
-type SummaryPeriod = {
-  type: SummaryPeriodType;
-  label: string;
-  compactLabel: string;
-  heroEyebrow: string;
-  rangeLabel: string;
-  startKey: string;
-  endKey: string;
-};
-
-type SpendSummaryData = {
-  period: SummaryPeriod;
-  userName: string;
-  userEmail: string;
-  metrics: SummaryMetrics;
-  categories: BreakdownItem[];
-  merchants: BreakdownItem[];
-  recentReceipts: NormalizedReceipt[];
-  activity: SummaryActivityItem[];
-  currency: string;
-  mixedCurrencies: boolean;
-  generatedAtLabel: string;
-};
-
-type SummaryLinks = {
-  dashboardUrl?: string;
-  supportUrl?: string;
-  termsUrl?: string;
-  unsubscribeUrl?: string;
-};
 
 type WeeklyScheduleConfig = {
   enabled: boolean;
@@ -230,14 +171,6 @@ const toScheduleResponse = (config: SpendSummaryScheduleConfig): SpendSummarySch
     lastSentAt: config.lastMonthlySentAt?.toDate().toISOString() ?? null,
   },
 });
-
-const escapeHtml = (value: string) =>
-  value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 
 const formatCurrency = (amount: number, currency: string) => {
   const normalizedCurrency = (currency || FALLBACK_CURRENCY).toUpperCase();
@@ -758,7 +691,7 @@ const buildActivity = (
 
     items.push({
       label: `Week ${chunkIndex}`,
-      sublabel: formatDateRange(toUtcDateKey(chunkStart), toUtcDateKey(boundedEnd), timeZone),
+      sublabel: `${formatDateKey(toUtcDateKey(chunkStart), timeZone, { month: "short", day: "numeric" })}–${boundedEnd.getUTCDate()}`,
       amount,
       receiptCount,
     });
@@ -841,688 +774,6 @@ const buildSummaryData = (
   };
 };
 
-const getBadgeLabel = (value: string, fallback: string) => {
-  const words = value
-    .replace(/[^A-Za-z0-9 ]/g, " ")
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 3);
-
-  if (words.length === 0) {
-    return fallback;
-  }
-
-  const label = words.map((word) => word[0]).join("").toUpperCase();
-  return label.slice(0, 3) || fallback;
-};
-
-const renderMetricCard = (label: string, value: string, tone: "dark" | "green" | "stone") => {
-  const palette = {
-    dark: {
-      background: "#0f172a",
-      text: "#ffffff",
-      subtext: "#cbd5e1",
-    },
-    green: {
-      background: "#ecfdf5",
-      text: "#065f46",
-      subtext: "#047857",
-    },
-    stone: {
-      background: "#f8fafc",
-      text: "#0f172a",
-      subtext: "#475569",
-    },
-  }[tone];
-
-  return `
-    <td class="metric-cell" style="padding:0 6px 12px; width:33.333%;">
-      <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-radius:16px; background:${palette.background};">
-        <tr>
-          <td style="padding:18px 18px 16px; font-family:Inter, Arial, sans-serif;">
-            <p style="margin:0; font-size:12px; line-height:1.4; color:${palette.subtext}; text-transform:uppercase; letter-spacing:0.12em; font-weight:700;">${escapeHtml(label)}</p>
-            <p class="metric-value" style="margin:10px 0 0; font-size:24px; line-height:1.2; color:${palette.text}; font-weight:700;">${escapeHtml(value)}</p>
-          </td>
-        </tr>
-      </table>
-    </td>
-  `;
-};
-
-const renderHighlightCard = (
-  title: string,
-  name: string,
-  amountText: string,
-  caption: string,
-  badgeSymbol: string,
-  accentColor: string,
-  badgeBackground: string,
-) => `
-  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-radius:20px; background:#eef4ff; border:1px solid #d4e4fa;">
-    <tr>
-      <td style="padding:26px 26px 24px; font-family:Inter, Arial, sans-serif;">
-        <table role="presentation" cellpadding="0" cellspacing="0">
-          <tr>
-            <td style="width:48px; height:48px; border-radius:12px; background:${accentColor}; color:#ffffff; text-align:center; font-size:11px; letter-spacing:0.04em; font-weight:900;">
-              ${badgeSymbol}
-            </td>
-          </tr>
-        </table>
-        <p style="margin:20px 0 0; font-size:11px; line-height:1.4; color:#5b6471; text-transform:uppercase; letter-spacing:0.18em; font-weight:800;">${escapeHtml(title)}</p>
-        <p style="margin:6px 0 0; font-size:28px; line-height:1.2; color:#0d1c2d; font-weight:800;">${escapeHtml(name)}</p>
-        <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-top:26px;">
-          <tr>
-            <td style="font-size:30px; line-height:1.1; color:${accentColor}; font-weight:900; font-family:Inter, Arial, sans-serif;">
-              ${escapeHtml(amountText)}
-            </td>
-            <td align="right">
-              <span style="display:inline-block; padding:7px 12px; border-radius:999px; background:${badgeBackground}; color:${accentColor}; font-size:11px; line-height:1.2; font-weight:800; letter-spacing:0.06em;">
-                ${escapeHtml(caption)}
-              </span>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-`;
-
-const renderBreakdownTable = (title: string, items: BreakdownItem[], currency: string, accentColor: string) => {
-  const rows = items.length > 0
-    ? items.map((item) => `
-        <tr>
-          <td style="padding:0 0 14px;">
-            <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-              <tr>
-                <td style="padding:0 12px 4px 0; font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.5; color:#0d1c2d; font-weight:700;">
-                  ${escapeHtml(item.name)}
-                </td>
-                <td align="right" style="padding:0 0 4px; font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.5; color:#0d1c2d; font-weight:800;">
-                  ${escapeHtml(formatCurrency(item.total, currency))}
-                </td>
-              </tr>
-              <tr>
-                <td style="padding:0 12px 8px 0; font-family:Inter, Arial, sans-serif; font-size:12px; line-height:1.4; color:#5b6471;">
-                  ${escapeHtml(formatCountLabel(item.count, "receipt"))}
-                </td>
-                <td align="right" style="padding:0 0 8px; font-family:Inter, Arial, sans-serif; font-size:12px; line-height:1.4; color:#5b6471;">
-                  ${escapeHtml(`${Math.round(item.share * 100)}% of total`)}
-                </td>
-              </tr>
-              <tr>
-                <td colspan="2" style="padding:0;">
-                  <div style="height:8px; border-radius:999px; background:#dbe9ff;">
-                    <div style="height:8px; border-radius:999px; background:${accentColor}; width:${Math.max(8, Math.round(item.share * 100))}%;"></div>
-                  </div>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      `).join("")
-    : `
-      <tr>
-        <td style="padding:0; font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.6; color:#5b6471;">
-          No spending data landed in this period.
-        </td>
-      </tr>
-    `;
-
-  return `
-    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-radius:20px; border:1px solid #d4e4fa; background:#ffffff;">
-      <tr>
-        <td style="padding:22px 22px 18px; font-family:Inter, Arial, sans-serif;">
-          <p style="margin:0 0 16px; font-size:14px; line-height:1.4; color:#0d1c2d; font-weight:800; letter-spacing:0.02em;">${escapeHtml(title)}</p>
-          <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-            ${rows}
-          </table>
-        </td>
-      </tr>
-    </table>
-  `;
-};
-
-const renderSpendChart = (data: SpendSummaryData) => {
-  const maxAmount = Math.max(...data.activity.map((item) => item.amount), 1);
-  const title = data.period.type === "week" ? "Daily Spend Volume" : "Weekly Spend Movement";
-  const subtitle = data.period.type === "week"
-    ? `Activity breakdown for ${data.period.rangeLabel}`
-    : `Grouped weekly movement across ${data.period.label}`;
-  const rows = data.activity.map((item) => {
-    const active = item.amount === maxAmount && maxAmount > 0;
-    const barWidth = item.amount <= 0 ? 0 : Math.max(6, Math.round((item.amount / maxAmount) * 100));
-    const barColor = active ? "#006c49" : "#7ebea7";
-    const trackColor = "#dbe9ff";
-    const valueColor = active ? "#006c49" : "#0d1c2d";
-
-    return `
-      <tr>
-        <td class="activity-label" style="padding:12px 0; border-bottom:1px solid #e2e8f0; width:27%; vertical-align:middle; font-family:Inter, Arial, sans-serif;">
-          <p style="margin:0; font-size:13px; line-height:1.3; color:#0d1c2d; font-weight:900; letter-spacing:0.08em; text-transform:uppercase;">
-            ${escapeHtml(item.label)}
-          </p>
-          <p class="mobile-date" style="margin:4px 0 0; font-size:12px; line-height:1.5; color:#5b6471; font-weight:600;">
-            ${escapeHtml(item.sublabel)}
-          </p>
-        </td>
-        <td class="activity-bar" style="padding:12px 16px; border-bottom:1px solid #e2e8f0; width:45%; vertical-align:middle;">
-          <div style="height:12px; border-radius:999px; background:${trackColor}; overflow:hidden;">
-            <div style="height:12px; border-radius:999px; background:${barColor}; width:${barWidth}%;"></div>
-          </div>
-        </td>
-        <td class="activity-value" align="right" style="padding:12px 0; border-bottom:1px solid #e2e8f0; width:28%; vertical-align:middle; font-family:Inter, Arial, sans-serif;">
-          <p style="margin:0; font-size:14px; line-height:1.3; color:${valueColor}; font-weight:900;">
-            ${escapeHtml(formatCurrency(item.amount, data.currency))}
-          </p>
-          <p style="margin:4px 0 0; font-size:11px; line-height:1.4; color:#5b6471; font-weight:700;">
-            ${escapeHtml(formatCountLabel(item.receiptCount, "receipt"))}
-          </p>
-        </td>
-      </tr>
-    `;
-  }).join("");
-
-  return `
-    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-radius:20px; border:1px solid #d4e4fa; background:#ffffff;">
-      <tr>
-        <td style="padding:24px 24px 22px; font-family:Inter, Arial, sans-serif;">
-          <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-            <tr>
-              <td>
-                <p style="margin:0; font-size:26px; line-height:1.2; color:#0d1c2d; font-weight:900;">${escapeHtml(title)}</p>
-                <p style="margin:6px 0 0; font-size:13px; line-height:1.6; color:#5b6471; font-weight:600;">
-                  ${escapeHtml(subtitle)}
-                </p>
-              </td>
-              <td align="right">
-                <span style="display:inline-block; padding:8px 12px; border-radius:10px; background:#eef4ff; color:#0d1c2d; font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.2; font-weight:800; letter-spacing:0.08em;">
-                  SPEND
-                </span>
-              </td>
-            </tr>
-          </table>
-          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-top:20px;">
-            ${rows}
-          </table>
-        </td>
-      </tr>
-    </table>
-  `;
-};
-
-const renderReceiptsTable = (receipts: NormalizedReceipt[], currency: string) => {
-  const rows = receipts.length > 0
-    ? receipts.map((receipt) => `
-        <tr>
-          <td style="padding:16px 0; border-bottom:1px solid #e2e8f0;">
-            <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-              <tr>
-                <td style="width:54px; vertical-align:middle;">
-                  <div style="width:42px; height:42px; border-radius:999px; background:#dbe9ff; color:#064e3b; text-align:center; line-height:42px; font-family:Inter, Arial, sans-serif; font-size:11px; font-weight:900; letter-spacing:0.08em;">
-                    ${escapeHtml(getBadgeLabel(receipt.categoryName, "RCT"))}
-                  </div>
-                </td>
-                <td style="vertical-align:middle; font-family:Inter, Arial, sans-serif;">
-                  <p style="margin:0; font-size:15px; line-height:1.4; color:#0d1c2d; font-weight:800;">${escapeHtml(receipt.merchantName)}</p>
-                  <p style="margin:4px 0 0; font-size:12px; line-height:1.4; color:#5b6471; font-weight:600; letter-spacing:0.02em;">${escapeHtml(`${receipt.dateLabel} • ${receipt.categoryName}`)}</p>
-                </td>
-              </tr>
-            </table>
-          </td>
-          <td align="right" style="padding:16px 0; border-bottom:1px solid #e2e8f0; font-family:Inter, Arial, sans-serif;">
-            <p style="margin:0; font-size:15px; line-height:1.4; color:#0d1c2d; font-weight:900;">
-              ${escapeHtml(formatCurrency(receipt.amount, currency))}
-            </p>
-            <p style="margin:4px 0 0; font-size:10px; line-height:1.2; color:#006c49; font-weight:900; letter-spacing:0.12em;">
-              VERIFIED
-            </p>
-          </td>
-        </tr>
-      `).join("")
-    : `
-      <tr>
-        <td colspan="2" style="padding:12px 0; font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.6; color:#5b6471;">
-          No receipts were recorded for this period.
-        </td>
-      </tr>
-    `;
-
-  return `
-    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-radius:20px; border:1px solid #d4e4fa; background:#eef4ff;">
-      <tr>
-        <td style="padding:22px 22px 10px; font-family:Inter, Arial, sans-serif;">
-          <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-            <tr>
-              <td>
-                <p style="margin:0; font-size:22px; line-height:1.2; color:#0d1c2d; font-weight:900;">Recent Receipts</p>
-                <p style="margin:6px 0 0; font-size:13px; line-height:1.6; color:#5b6471; font-weight:600;">The latest receipts that shaped this summary.</p>
-              </td>
-              <td align="right" style="font-family:Inter, Arial, sans-serif; font-size:12px; line-height:1.4; color:#006c49; font-weight:800; letter-spacing:0.08em;">
-                ORGANIZED
-              </td>
-            </tr>
-          </table>
-          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-top:10px;">
-            ${rows}
-          </table>
-        </td>
-      </tr>
-    </table>
-  `;
-};
-
-const renderSecuritySection = (links: SummaryLinks) => {
-  const settingsLink = links.dashboardUrl
-    ? `
-      <a href="${escapeHtml(links.dashboardUrl)}" style="display:inline-block; padding:12px 20px; border-radius:10px; background:#006c49; color:#ffffff; text-decoration:none; font-family:Inter, Arial, sans-serif; font-size:12px; line-height:1.2; font-weight:900; letter-spacing:0.12em;">
-        REVIEW SECURITY SETTINGS
-      </a>
-    `
-    : `
-      <span style="display:inline-block; padding:12px 20px; border-radius:10px; background:#006c49; color:#ffffff; font-family:Inter, Arial, sans-serif; font-size:12px; line-height:1.2; font-weight:900; letter-spacing:0.12em;">
-        REVIEW SECURITY SETTINGS
-      </span>
-    `;
-
-  return `
-    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-radius:22px; background:#0d1c2d; overflow:hidden;">
-      <tr>
-        <td style="width:6px; background:#6ffbbe;"></td>
-        <td style="padding:24px 24px 24px 22px;">
-          <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-            <tr>
-              <td style="vertical-align:middle;">
-                <table role="presentation" cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td style="width:54px; height:54px; border-radius:999px; background:#17362f; border:1px solid #3d6b5b; color:#6ffbbe; text-align:center; line-height:54px; font-family:Inter, Arial, sans-serif; font-size:12px; font-weight:900;">
-                      SAFE
-                    </td>
-                    <td style="padding-left:18px; font-family:Inter, Arial, sans-serif;">
-                      <p style="margin:0; font-size:22px; line-height:1.2; color:#ffffff; font-weight:800;">Encrypted &amp; Secure</p>
-                      <p style="margin:6px 0 0; font-size:13px; line-height:1.7; color:#a8b6c8; max-width:430px;">
-                        Your receipt data is protected with strong encryption and stored inside your secure ReceiptNest workspace.
-                      </p>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding-top:18px;">
-                ${settingsLink}
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  `;
-};
-
-const renderFooter = (links: SummaryLinks) => {
-  const dashboardCta = links.dashboardUrl
-    ? `
-      <div style="margin-top:18px;">
-        <a
-          href="${escapeHtml(links.dashboardUrl)}"
-          style="display:inline-block; padding:13px 22px; border-radius:999px; background:#064e3b; color:#ffffff; text-decoration:none; font-family:Inter, Arial, sans-serif; font-size:12px; line-height:1.2; font-weight:900; letter-spacing:0.12em; text-transform:uppercase; box-shadow:0 10px 24px rgba(6, 78, 59, 0.18);"
-        >
-          Open Dashboard
-        </a>
-      </div>
-    `
-    : "";
-  const secondaryLinks = [
-    links.supportUrl
-      ? `<td class="rn-summary-footer-link" style="padding:6px 5px 0 0;"><a href="${escapeHtml(links.supportUrl)}" style="display:inline-block; padding:10px 14px; border-radius:999px; background:#eef4ff; border:1px solid #d4e4fa; color:#243244; text-decoration:none; font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.2; font-weight:800; letter-spacing:0.08em; text-transform:uppercase;">Support</a></td>`
-      : "",
-    links.termsUrl
-      ? `<td class="rn-summary-footer-link" style="padding:6px 5px 0 0;"><a href="${escapeHtml(links.termsUrl)}" style="display:inline-block; padding:10px 14px; border-radius:999px; background:#eef4ff; border:1px solid #d4e4fa; color:#243244; text-decoration:none; font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.2; font-weight:800; letter-spacing:0.08em; text-transform:uppercase;">Terms</a></td>`
-      : "",
-    links.unsubscribeUrl
-      ? `<td class="rn-summary-footer-link" style="padding:6px 0 0;"><a href="${escapeHtml(links.unsubscribeUrl)}" style="display:inline-block; padding:10px 14px; border-radius:999px; background:#fff4f3; border:1px solid #fecaca; color:#9f1239; text-decoration:none; font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.2; font-weight:800; letter-spacing:0.08em; text-transform:uppercase;">Unsubscribe</a></td>`
-      : "",
-  ].filter(Boolean).join("");
-
-  return `
-    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-top:16px;">
-      <tr>
-        <td align="center" style="padding:24px 16px 8px; font-family:Inter, Arial, sans-serif;">
-          <p style="margin:0; font-size:18px; line-height:1.2; color:#064e3b; font-weight:900;">ReceiptNest</p>
-          ${dashboardCta}
-          ${renderAppDownloadHtmlCard()}
-          ${secondaryLinks ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:14px;"><tr>${secondaryLinks}</tr></table>` : ""}
-          <p style="margin:16px 0 0; font-size:11px; line-height:1.6; color:#64748b;">
-            © ${new Date().getFullYear()} ReceiptNest. All rights reserved.
-          </p>
-        </td>
-      </tr>
-    </table>
-  `;
-};
-
-const buildEmailHtml = (data: SpendSummaryData, links: SummaryLinks) => {
-  const metrics = data.metrics;
-  const topCategoryText = metrics.topCategory
-    ? `${metrics.topCategory.name} • ${formatCurrency(metrics.topCategory.total, data.currency)}`
-    : "No category spending recorded";
-  const topMerchantText = metrics.topMerchant
-    ? `${metrics.topMerchant.name} • ${formatCurrency(metrics.topMerchant.total, data.currency)}`
-    : "No merchant spending recorded";
-  const largestReceiptText = metrics.largestReceipt
-    ? `${metrics.largestReceipt.merchantName} • ${formatCurrency(metrics.largestReceipt.amount, data.currency)}`
-    : "No receipt captured";
-  const currencyNote = data.mixedCurrencies
-    ? `
-      <div style="margin-top:16px; padding:12px 14px; border-radius:14px; background:#fff7ed; border:1px solid #fdba74; color:#9a3412; font-size:13px; line-height:1.6; font-family:Arial, sans-serif;">
-        Multiple currencies were found in this period. Totals are displayed using the app's current combined spend view and are not converted.
-      </div>
-    `
-    : "";
-  const introLine = data.period.type === "week"
-    ? "Here is your weekly ReceiptNest spend summary, organized and ready to scan."
-    : "Here is your monthly ReceiptNest spend summary, organized and ready for review.";
-  const greetingName = data.userName.split(" ")[0] || data.userName;
-  const heroPeriodLabel = data.period.compactLabel;
-  const dashboardCta = links.dashboardUrl
-    ? `
-      <a href="${escapeHtml(links.dashboardUrl)}" style="display:inline-block; padding:11px 16px; border-radius:10px; background:#006c49; color:#ffffff; text-decoration:none; font-family:Inter, Arial, sans-serif; font-size:12px; line-height:1.2; font-weight:900; letter-spacing:0.08em;">
-        OPEN DASHBOARD
-      </a>
-    `
-    : "";
-
-  return `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>${escapeHtml(data.period.heroEyebrow)}</title>
-    <style>
-      @media screen and (max-width: 640px) {
-        .container {
-          width: 100% !important;
-        }
-
-        .topbar-brand {
-          font-size: 22px !important;
-          line-height: 1.15 !important;
-        }
-
-        .topbar-link {
-          display: inline-flex !important;
-          align-items: center !important;
-          gap: 10px !important;
-        }
-
-        .topbar-logo {
-          width: 36px !important;
-          height: 25px !important;
-        }
-
-        .mobile-px {
-          padding-left: 16px !important;
-          padding-right: 16px !important;
-        }
-
-        .stack-cell,
-        .stack-cell-right,
-        .metric-cell,
-        .activity-label,
-        .activity-bar,
-        .activity-value {
-          display: block !important;
-          width: 100% !important;
-          box-sizing: border-box !important;
-        }
-
-        .stack-cell {
-          padding-right: 0 !important;
-          padding-left: 0 !important;
-          padding-bottom: 12px !important;
-        }
-
-        .stack-cell-right {
-          padding-right: 0 !important;
-          padding-left: 0 !important;
-          padding-top: 12px !important;
-        }
-
-        .metric-cell {
-          padding: 0 0 12px !important;
-        }
-
-        .metric-value {
-          font-size: 22px !important;
-        }
-
-        .hero-title {
-          font-size: 34px !important;
-          line-height: 1.06 !important;
-        }
-
-        .hero-copy {
-          font-size: 16px !important;
-          line-height: 1.6 !important;
-          max-width: none !important;
-        }
-
-        .hero-card {
-          width: 100% !important;
-          min-width: 0 !important;
-        }
-
-        .activity-label,
-        .activity-bar,
-        .activity-value {
-          padding: 8px 0 !important;
-          border-bottom: 0 !important;
-          text-align: left !important;
-        }
-
-        .activity-row {
-          border-bottom: 1px solid #e2e8f0 !important;
-        }
-
-        .activity-value p {
-          text-align: left !important;
-        }
-
-        .mobile-date {
-          white-space: normal !important;
-        }
-      }
-    </style>
-  </head>
-  <body style="margin:0; padding:0; background:#f8f9ff;">
-    <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;">
-      ${escapeHtml(`${data.period.heroEyebrow} for ${data.period.rangeLabel}`)}
-    </div>
-    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#f8f9ff;">
-      <tr>
-        <td align="center" style="padding:0;">
-          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#064e3b;">
-            <tr>
-              <td align="center" style="padding:20px 20px;">
-                <table class="container" role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:740px;">
-                  <tr>
-                    <td class="topbar-brand" style="font-family:Inter, Arial, sans-serif; font-size:26px; line-height:1.1; color:#ffffff; font-weight:900; letter-spacing:-0.03em;">
-                      <a class="topbar-link" href="${MAIN_SITE_URL}" style="display:inline-flex; align-items:center; gap:12px; color:#ffffff; text-decoration:none;">
-                        <span style="display:inline-block; padding:4px; border-radius:8px; background-color:#f1f5f9; background-image:linear-gradient(#f1f5f9,#f1f5f9); vertical-align:middle;">
-                          <img class="topbar-logo" src="${MAIN_SITE_URL}/receipt-nest.png" alt="ReceiptNest" width="44" height="31" style="display:block; width:44px; height:31px; border:0;" />
-                        </span>
-                        <span style="display:inline-block; vertical-align:middle;">ReceiptNest</span>
-                      </a>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-          <table class="container" role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:740px; background:#f8f9ff;">
-            <tr>
-              <td class="mobile-px" style="padding:24px 16px 16px;">
-                <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-radius:24px; overflow:hidden; box-shadow:0 28px 60px rgba(13, 28, 45, 0.10);">
-                  <tr>
-                    <td style="padding:34px 34px 30px; background:
-                      radial-gradient(circle at top left, rgba(16, 185, 129, 0.28), transparent 34%),
-                      radial-gradient(circle at top right, rgba(191, 219, 254, 0.18), transparent 26%),
-                      linear-gradient(135deg,#08111f 0%, #0f3b2f 48%, #0f766e 100%);">
-                      <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-                        <tr>
-                          <td class="stack-cell">
-                            <div class="mobile-date" style="display:inline-block; padding:7px 12px; border-radius:999px; background:rgba(255,255,255,0.10); color:#d1fae5; font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.4; font-weight:900; letter-spacing:0.16em; text-transform:uppercase;">
-                              ${escapeHtml(heroPeriodLabel)}
-                            </div>
-                            <h1 class="hero-title" style="margin:20px 0 0; font-size:44px; line-height:1.02; color:#ffffff; font-weight:900; letter-spacing:-0.04em; font-family:Inter, Arial, sans-serif;">Hi, ${escapeHtml(greetingName)}.</h1>
-                            <p class="hero-copy" style="margin:16px 0 0; font-size:18px; line-height:1.7; color:#d1fae5; max-width:420px; font-family:Inter, Arial, sans-serif; font-weight:600;">
-                              ${escapeHtml(introLine)}
-                            </p>
-                          </td>
-                          <td class="stack-cell-right" align="right" style="vertical-align:top;">
-                            <table class="hero-card" role="presentation" cellpadding="0" cellspacing="0" style="border-radius:22px; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.12); min-width:230px;">
-                              <tr>
-                                <td style="padding:18px 20px; font-family:Inter, Arial, sans-serif;">
-                                  <p style="margin:0; font-size:10px; line-height:1.2; color:#a7f3d0; text-transform:uppercase; letter-spacing:0.16em; font-weight:700;">Total spend</p>
-                                  <p style="margin:8px 0 0; font-size:38px; line-height:1.05; color:#6ffbbe; font-weight:900; letter-spacing:-0.04em;">${escapeHtml(formatCurrency(metrics.totalSpend, data.currency))}</p>
-                                  <p style="margin:10px 0 0; font-size:13px; line-height:1.5; color:#ffffff; font-weight:700;">
-                                    ${escapeHtml(formatCountLabel(metrics.receiptCount, "receipt"))} synced
-                                  </p>
-                                  ${dashboardCta ? `<div style="margin-top:16px;">${dashboardCta}</div>` : ""}
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                      </table>
-
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td class="mobile-px" style="padding:0 16px 24px;">
-                <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-                  <tr>
-                    <td style="padding:0 0 20px;">
-                      <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-                        <tr>
-                          ${renderMetricCard("Total spend", formatCurrency(metrics.totalSpend, data.currency), "dark")}
-                          ${renderMetricCard("Receipt count", String(metrics.receiptCount), "green")}
-                          ${renderMetricCard("Average receipt", formatCurrency(metrics.averageSpend, data.currency), "stone")}
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding:0 0 20px;">
-                      <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-                        <tr>
-                          <td class="stack-cell" style="padding:0 10px 0 0; width:50%; vertical-align:top;">
-                            ${renderHighlightCard(
-                              "Top Category",
-                              metrics.topCategory ? metrics.topCategory.name : "No category data",
-                              metrics.topCategory ? formatCurrency(metrics.topCategory.total, data.currency) : formatCurrency(0, data.currency),
-                              metrics.topCategory ? `${Math.round(metrics.topCategory.share * 100)}% of total` : "No spend data",
-                              "CAT",
-                              "#064e3b",
-                              "#d6fae8",
-                            )}
-                          </td>
-                          <td class="stack-cell-right" style="padding:0 0 0 10px; width:50%; vertical-align:top;">
-                            ${renderHighlightCard(
-                              "Top Merchant",
-                              metrics.topMerchant ? metrics.topMerchant.name : "No merchant data",
-                              metrics.topMerchant ? formatCurrency(metrics.topMerchant.total, data.currency) : formatCurrency(0, data.currency),
-                              metrics.topMerchant ? formatCountLabel(metrics.topMerchant.count, "transaction") : "No activity",
-                              "SHOP",
-                              "#0d1c2d",
-                              "#dbe9ff",
-                            )}
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding:0 0 20px;">
-                      ${renderSpendChart(data)}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding:0 0 20px;">
-                      <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-radius:20px; background:#ffffff; border:1px solid #d4e4fa;">
-                        <tr>
-                          <td style="padding:22px 22px 18px; font-family:Inter, Arial, sans-serif;">
-                            <p style="margin:0; font-size:14px; line-height:1.4; color:#0d1c2d; font-weight:800;">Highlights</p>
-                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-top:14px;">
-                              <tr>
-                                <td style="padding:0 12px 12px 0; width:33.333%; vertical-align:top;">
-                                  <p style="margin:0; font-size:11px; line-height:1.4; color:#5b6471; text-transform:uppercase; letter-spacing:0.12em; font-weight:800;">Top category</p>
-                                  <p style="margin:8px 0 0; font-size:14px; line-height:1.6; color:#0d1c2d; font-weight:700;">${escapeHtml(topCategoryText)}</p>
-                                </td>
-                                <td style="padding:0 12px 12px 0; width:33.333%; vertical-align:top;">
-                                  <p style="margin:0; font-size:11px; line-height:1.4; color:#5b6471; text-transform:uppercase; letter-spacing:0.12em; font-weight:800;">Top merchant</p>
-                                  <p style="margin:8px 0 0; font-size:14px; line-height:1.6; color:#0d1c2d; font-weight:700;">${escapeHtml(topMerchantText)}</p>
-                                </td>
-                                <td style="padding:0 0 12px; width:33.333%; vertical-align:top;">
-                                  <p style="margin:0; font-size:11px; line-height:1.4; color:#5b6471; text-transform:uppercase; letter-spacing:0.12em; font-weight:800;">Largest receipt</p>
-                                  <p style="margin:8px 0 0; font-size:14px; line-height:1.6; color:#0d1c2d; font-weight:700;">${escapeHtml(largestReceiptText)}</p>
-                                </td>
-                              </tr>
-                              <tr>
-                                <td colspan="3" style="padding:8px 0 0; font-size:13px; line-height:1.7; color:#5b6471; font-family:Inter, Arial, sans-serif;">
-                                  Active on ${escapeHtml(formatCountLabel(metrics.activeDays, "day"))}. Summary prepared on ${escapeHtml(data.generatedAtLabel)}.
-                                </td>
-                              </tr>
-                            </table>
-                            ${currencyNote}
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding:0 0 20px;">
-                      <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-                        <tr>
-                          <td class="stack-cell" style="padding:0 10px 0 0; width:50%; vertical-align:top;">
-                            ${renderBreakdownTable("Category Breakdown", data.categories, data.currency, "#006c49")}
-                          </td>
-                          <td class="stack-cell-right" style="padding:0 0 0 10px; width:50%; vertical-align:top;">
-                            ${renderBreakdownTable("Merchant Breakdown", data.merchants, data.currency, "#0d1c2d")}
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding:0 0 20px;">
-                      ${renderReceiptsTable(data.recentReceipts, data.currency)}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding:0 0 20px;">
-                      ${renderSecuritySection(links)}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding:0;">
-                      ${renderFooter(links)}
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </body>
-</html>`;
-};
-
 const buildSummarySubject = (summary: SpendSummaryData) =>
   `${summary.period.type === "week" ? "Weekly" : "Monthly"} spend summary • ${summary.period.label}`;
 
@@ -1555,20 +806,17 @@ const buildSummaryNotificationBody = (summary: SpendSummaryData) => {
 };
 
 const getSummaryLinks = (): SummaryLinks => {
-  const normalizedBaseUrl = appBaseUrl.value()?.trim().replace(/\/+$/, "");
-  if (!normalizedBaseUrl) {
-    return {};
-  }
+  const normalizedBaseUrl = appBaseUrl.value()?.trim().replace(/\/+$/, "") || MAIN_SITE_URL;
 
   return {
     dashboardUrl: `${normalizedBaseUrl}/app`,
     supportUrl: `${normalizedBaseUrl}/support`,
     termsUrl: `${normalizedBaseUrl}/terms`,
-    unsubscribeUrl: `${normalizedBaseUrl}/app?settings=notifications&summaryEmails=1`,
+    unsubscribeUrl: `${normalizedBaseUrl}/unsubscribe`,
   };
 };
 
-const buildEmailText = (data: SpendSummaryData) => {
+const buildEmailText = (data: SpendSummaryData, links: SummaryLinks) => {
   const lines = [
     `${data.period.heroEyebrow} (${data.period.label})`,
     `Range: ${data.period.rangeLabel}`,
@@ -1601,6 +849,9 @@ const buildEmailText = (data: SpendSummaryData) => {
   }
 
   lines.push("");
+  lines.push(`Open dashboard: ${links.dashboardUrl || `${MAIN_SITE_URL}/app`}`);
+  lines.push(`Support: ${links.supportUrl || `${MAIN_SITE_URL}/support`}`);
+  lines.push(`Terms: ${links.termsUrl || `${MAIN_SITE_URL}/terms`}`);
   lines.push("Generated by ReceiptNest.");
 
   return appendAppDownloadText(lines.join("\n"));
@@ -1612,7 +863,7 @@ const sendSummaryEmailMessage = async (
   links: SummaryLinks,
   includeUnsubscribe = false,
 ) => {
-  const text = buildEmailText(summary);
+  const text = buildEmailText(summary, links);
   const unsubscribeUrls = includeUnsubscribe
     ? buildUnsubscribeUrls(to, appBaseUrl.value(), unsubscribeTokenSecret.value())
     : null;
@@ -1626,15 +877,15 @@ const sendSummaryEmailMessage = async (
     from: { email: fromEmail, name: "ReceiptNest" },
     replyTo: { email: fromEmail, name: "ReceiptNest" },
     subject: buildSummarySubject(summary),
-    text: unsubscribeUrls ? appendUnsubscribeText(text, unsubscribeUrls.pageUrl) : text,
-    html: addEmailDarkMode(html),
+    text: appendUnsubscribeText(text, unsubscribeUrls?.pageUrl || links.unsubscribeUrl || `${MAIN_SITE_URL}/unsubscribe`),
+    html,
     headers: unsubscribeUrls
       ? {
         "List-Unsubscribe": `<${unsubscribeUrls.oneClickUrl}>`,
         "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
       }
       : undefined,
-    attachments: getEmailAppIconAttachments(),
+    attachments: getSpendSummaryAttachments(),
   });
 };
 

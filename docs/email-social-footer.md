@@ -4,6 +4,8 @@ All application emails now include a shared **Follow ReceiptNest** section with 
 
 The browser-safe renderer in `functions/src/email-social-links.ts` is used by both the shared SendGrid transport and the admin's custom-email preview. The delivery layer adds the section once to HTML and plain text, preserving the original subject, sender, attachments, and unsubscribe headers. For custom admin emails, the automatic unsubscribe footer stays last.
 
+Weekly and monthly spend summaries now provide their own compact text-only social row using these same destinations and the shared footer marker. The transport preserves that row without appending a second card. See [the summary design and checks](spend-summary-email-design.md).
+
 The HTML uses presentation tables, inline styles, two centered rows, visible platform names, and 32px PNG icons adapted from the existing website SVGs. The icons are served from `/email/social/`. The layout does not depend on flexbox, grid, or embedded SVG. Dark-mode rules are scoped to the social section. Classic Outlook receives conditional fixed-width wrapper tables. The platform names remain usable when images are blocked.
 
 Narrow-screen checks also found existing overflow in download badges and summary footer links. App-store badges now stack below 480px; summary footer links use tighter horizontal spacing below 400px without reducing the font size.
