@@ -43,6 +43,7 @@ import {
 type AdminUser = UserProfile;
 type AdminFeedback = FeedbackMessage;
 type SummaryEmailPeriod = 'week' | 'month';
+type OnboardingTestTemplate = 'welcome' | 'first-receipt';
 type SummaryNotificationPeriod = 'week' | 'month';
 type WeeklyScheduleDay = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
 type UserSortColumn = 'name' | 'email' | 'role' | 'plan' | 'receipts' | 'lastLogin' | 'lastSeen' | 'created';
@@ -304,6 +305,9 @@ export class AdminComponent implements OnInit, OnDestroy {
   readonly monthlySummarySending = signal(false);
   readonly summaryEmailError = signal<string | null>(null);
   readonly summaryEmailSuccess = signal<string | null>(null);
+  readonly onboardingTestSending = signal<OnboardingTestTemplate | null>(null);
+  readonly onboardingTestError = signal<string | null>(null);
+  readonly onboardingTestSuccess = signal<string | null>(null);
   readonly weeklyNotificationSending = signal(false);
   readonly monthlyNotificationSending = signal(false);
   readonly weeklyNotificationPreviewLoading = signal(false);
@@ -1575,6 +1579,48 @@ export class AdminComponent implements OnInit, OnDestroy {
     if (!saved) {
       targetSignal.set(previousValue);
     }
+  }
+
+  async sendOnboardingTestEmail(template: OnboardingTestTemplate): Promise<void> {
+    if (this.onboardingTestSending()) return;
+    this.onboardingTestError.set(null);
+    this.onboardingTestSuccess.set(null);
+
+    const to = this.summaryEmailTo().trim().toLowerCase();
+    if (!/^[^\s@<>"',;]+@[^\s@<>"',;]+\.[^\s@<>"',;]+$/.test(to)) {
+      this.onboardingTestError.set('Please enter one valid test inbox in To email above.');
+      return;
+    }
+    const userId = this.summaryUserId().trim();
+    if (!userId) {
+      this.onboardingTestError.set('Please choose a source user above for the test email.');
+      return;
+    }
+
+    this.onboardingTestSending.set(template);
+    try {
+      const response = await this.requestOnboardingTestEmail({ to, userId, template });
+      this.onboardingTestSuccess.set(
+        `${template === 'welcome' ? 'Welcome' : 'First-receipt reminder'} test sent to ${response.to}. The source account’s onboarding is unchanged.`
+      );
+    } catch (error) {
+      console.error('Failed to send onboarding test email', error);
+      const code = (error as { code?: string }).code;
+      this.onboardingTestError.set(code === 'functions/permission-denied'
+        ? 'Admin access is required to send onboarding test emails.'
+        : code === 'functions/not-found'
+          ? 'The source account is no longer available. Choose another user and try again.'
+          : 'Unable to send the test email right now. Please try again.');
+    } finally {
+      this.onboardingTestSending.set(null);
+    }
+  }
+
+  private async requestOnboardingTestEmail(request: { to: string; userId: string; template: OnboardingTestTemplate }) {
+    const callable = httpsCallable<typeof request, {
+      ok: boolean; to: string; template: OnboardingTestTemplate; subject: string;
+    }>(this.functions, 'sendOnboardingTestEmail');
+    return (await callable(request)).data;
   }
 
   async sendSpendSummaryEmail(period: SummaryEmailPeriod): Promise<void> {

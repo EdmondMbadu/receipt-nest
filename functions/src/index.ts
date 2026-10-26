@@ -65,3 +65,4 @@ export {
 export { getGettingStartedState, saveGettingStartedProgress } from './getting-started';
 
 export { dispatchOnboardingEmails, recordReceiptEmailActivation } from "./onboarding-emails";
+export { sendOnboardingTestEmail } from "./onboarding-email-preview";

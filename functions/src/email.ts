@@ -4,11 +4,9 @@ import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
 import { addEmailDarkMode } from "./email-theme";
-import { buildWelcomeEmailContent } from './welcome-email-content';
 import { sendSendgridMail } from "./sendgrid";
-import { buildOnboardingEmailHtml, getOnboardingEmailAttachments } from "./onboarding-email-content";
+import { buildOnboardingEmailMessage } from "./onboarding-email-message";
 import { deliverLifecycleEmail } from "./email-lifecycle";
-import { appendUnsubscribeText } from "./email-suppression";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
 const appBaseUrl = defineSecret("APP_BASE_URL");
@@ -251,10 +249,7 @@ export const sendWelcomeEmail = onCall(
       return { ok: true };
     }
 
-    const { subject, preheader, text: welcomeText, bodyHtml } = buildWelcomeEmailContent(appBaseUrl.value());
-    const welcomeBase = normalizeBaseUrl(appBaseUrl.value());
-    const text = appendUnsubscribeText(appendAppDownloadText(`${welcomeText}\n\nSupport: ${welcomeBase}/support\nEmail preferences: ${welcomeBase}/app?settings=notifications`), `${welcomeBase}/unsubscribe`);
-    const html = buildOnboardingEmailHtml({ subject, title: "Welcome to ReceiptNest.", bodyHtml, preheader, baseUrl: appBaseUrl.value() });
+    const content = buildOnboardingEmailMessage("welcome", appBaseUrl.value());
 
     try {
       if (!sendgridApiKey.value() || !appBaseUrl.value()) {
@@ -264,7 +259,7 @@ export const sendWelcomeEmail = onCall(
         userId: request.auth.uid, recipient: email, key: "welcome-v1", kind: "welcome", now: new Date(Date.now()),
         send: () => sendSendgridMail(sendgridApiKey.value(), {
           to: email, from: { email: fromEmail, name: "ReceiptNest" }, replyTo: { email: fromEmail, name: "ReceiptNest" },
-          subject, text, html, attachments: getOnboardingEmailAttachments(),
+          ...content,
         }),
       });
     } catch (error) {

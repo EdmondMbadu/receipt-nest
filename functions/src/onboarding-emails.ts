@@ -5,9 +5,8 @@ import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import { deliverLifecycleEmail, lifecycleStateRef } from "./email-lifecycle";
 import { deliveryTime, hasUsableReceipt, HOUR, isReminderHour, millis, REMINDER_EXPIRY } from "./email-lifecycle-policy";
-import { appendUnsubscribeText, buildUnsubscribeUrls, isEmailSuppressed, normalizeEmailAddress, unsubscribeTokenSecret } from "./email-suppression";
-import { appendAppDownloadText } from "./email-app-links";
-import { buildFirstReceiptReminder, getOnboardingEmailAttachments } from "./onboarding-email-content";
+import { buildUnsubscribeUrls, isEmailSuppressed, normalizeEmailAddress, unsubscribeTokenSecret } from "./email-suppression";
+import { buildOnboardingEmailMessage } from "./onboarding-email-message";
 import { sendSendgridMail } from "./sendgrid";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
@@ -75,7 +74,7 @@ export const dispatchOnboardingEmails = onSchedule(
         if (processedSnap.docs.some(doc => hasUsableReceipt(doc.data()))) { await stop("activated"); continue; }
         if (!processingSnap.empty) { await defer(at + 6 * HOUR); continue; }
         const urls = buildUnsubscribeUrls(recipient, appBaseUrl.value(), unsubscribeTokenSecret.value());
-        const content = buildFirstReceiptReminder(appBaseUrl.value(), String(profile.firstName ?? ""), urls.pageUrl);
+        const content = buildOnboardingEmailMessage("first-receipt", appBaseUrl.value(), String(profile.firstName ?? ""), urls.pageUrl);
         const result = await deliverLifecycleEmail({
           userId, recipient, key: "first-receipt-v1", kind: "first-receipt", now,
           guard: async (transaction, freshState) => {
@@ -85,8 +84,7 @@ export const dispatchOnboardingEmails = onSchedule(
           },
           send: () => sendSendgridMail(sendgridApiKey.value(), {
             to: recipient, from: { email: "info@receipt-nest.com", name: "ReceiptNest" }, replyTo: { email: "info@receipt-nest.com", name: "ReceiptNest" },
-            subject: content.subject, html: content.html, text: appendUnsubscribeText(appendAppDownloadText(content.text), urls.pageUrl),
-            attachments: getOnboardingEmailAttachments(),
+            ...content,
             headers: { "List-Unsubscribe": `<${urls.oneClickUrl}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
           }),
         });

@@ -12,6 +12,14 @@ The welcome, reminder and spend-summary emails share the approved white, charcoa
 
 The new **Getting started emails** setting controls the reminder and summary tips independently of weekly/monthly email and push preferences. Existing profiles without the optional field keep the default enabled. Global email suppressions and recipient-signed unsubscribe URLs apply to reminders and scheduled summaries. Welcome remains the existing one-time account email, with a public unsubscribe/preferences link. Transactional security and account emails do not use the lifecycle sending budget.
 
+Enrollment follows the welcome email, rather than the signup calendar date. Someone who registered before rollout but receives their first welcome through this implementation will be enrolled. Someone who already received a welcome before rollout will not be enrolled automatically, even if they registered on the same day. Preview sends do not change this cutoff or enroll anyone retroactively.
+
+## Admin test emails
+
+Under **Spend summary emails**, use the shared **To email** and **Email source user** controls, then choose **Send welcome test** or **Send reminder test** in **Welcome & getting started**. Both use the exact production message builder and embedded logo; the reminder uses the selected source user's first name. Test subjects start with `[Test]`.
+
+`sendOnboardingTestEmail` requires admin authorization, one valid test inbox, and an existing source user. Tests can be sent for already-active, already-welcomed or opted-out source accounts because the selected account is only preview data: the email goes exclusively to the entered test inbox. These sends do not write Firestore, update welcome/reminder flags, spend cadence limits, or alter any user's preferences. They use the public unsubscribe form instead of creating unsubscribe tokens tied to the source account. No automatic customer mail or retroactive enrollment is triggered.
+
 ## Spacing and duplicate prevention
 
 `email-lifecycle-policy.ts` and `email-lifecycle.ts` coordinate automated mail per user. Welcome is immediate and counts toward subsequent spacing. Other lifecycle emails require at least 48 hours since the last reservation, with a maximum of two reservations in a rolling seven-day window. A legacy profile's welcome timestamp is included even without a new delivery ledger.
@@ -32,12 +40,12 @@ The existing configured database is `receipt-nest/(default)`, Firestore Standard
 
 Each document carries `userId` for account-deletion cleanup. Final cleanup after profile deletion removes work that finished during deletion; deferred writes also check that the owner still exists. Queries use existing automatic single-field indexes (`reminderDueAt`, `dueAt`, `status`, `userId`); no new composite indexes or client permissions are required.
 
-The new exported Functions are `dispatchOnboardingEmails`, `recordReceiptEmailActivation` and `dispatchDeferredSpendSummaryEmails`. Existing `sendWelcomeEmail`, `dispatchScheduledSpendSummaryEmails`, `sendSpendSummaryEmail`, `deleteUserAccount` and the admin directory sync include updated shared code/defaults. Existing `SENDGRID_API_KEY`, `APP_BASE_URL` and `UNSUBSCRIBE_TOKEN_SECRET` configuration is reused. Deploy Functions and Hosting together to expose the new preference and activate the flow. This implementation has not been deployed and has sent no customer mail.
+The new exported Functions are `dispatchOnboardingEmails`, `recordReceiptEmailActivation`, `dispatchDeferredSpendSummaryEmails` and the admin-only `sendOnboardingTestEmail`. Existing `sendWelcomeEmail`, `dispatchScheduledSpendSummaryEmails`, `sendSpendSummaryEmail`, `deleteUserAccount` and the admin directory sync include updated shared code/defaults. Existing `SENDGRID_API_KEY`, `APP_BASE_URL` and `UNSUBSCRIBE_TOKEN_SECRET` configuration is reused; the test endpoint only needs the first two secrets. Deploy Functions and Hosting together to expose the new preference/test controls and activate the flow. This implementation has not been deployed and has sent no customer mail.
 
 ## Verification
 
-- `npm --prefix functions test`: 82 tests passed, covering old email behavior plus welcome enrollment, duplicate/concurrent jobs, exact cadence boundaries, activation/deletion, upload failures, processing deferrals, verification status, opt-outs, signed links, provider failures, delayed jobs, original summary periods, zero/empty data, tip preferences and account cleanup.
-- `CHROME_BIN='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' npm test -- --watch=false --browsers=ChromeHeadless`: all 40 existing browser unit tests passed.
+- `npm --prefix functions test`: 88 tests passed, covering old email behavior plus welcome enrollment, duplicate/concurrent jobs, exact cadence boundaries, activation/deletion, upload failures, processing deferrals, verification status, opt-outs, signed links, provider failures, delayed jobs, original summary periods, zero/empty data, tip preferences, account cleanup and admin preview authorization/isolation.
+- `CHROME_BIN='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' npm test -- --watch=false --browsers=ChromeHeadless`: all 44 browser unit tests passed, including preview button payloads, recipient/source validation, in-flight duplicate-click prevention and error recovery.
 - `node scripts/check-spend-summary-email.mjs`: 29 visual/layout checks passed for welcome, reminder and summary emails at desktop and 390/320px widths, light/dark mode, blocked images, stripped head styles, long names and a summary tip. No missing images, overflowing text or horizontal scrolling.
 - Functions and production website builds passed. Existing style-budget/CommonJS warnings remain. SEO checks passed for 37 public pages, 3 account pages and 1,345 local links.
 - All nine onboarding website/media destinations returned HTTP 200 in read-only checks. Previous app-store and social destinations remain unchanged.
