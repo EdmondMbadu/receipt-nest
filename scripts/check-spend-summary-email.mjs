@@ -7,8 +7,7 @@ import {join, resolve} from 'node:path';
 import {createRequire} from 'node:module';
 const require = createRequire(import.meta.url);
 const {buildSpendSummaryHtml, getSpendSummaryAttachments} = require('../functions/lib/spend-summary-template');
-const {buildWelcomeEmailContent} = require('../functions/lib/welcome-email-content');
-const {buildOnboardingEmailHtml, buildFirstReceiptReminder} = require('../functions/lib/onboarding-email-content');
+const {buildOnboardingEmailMessage} = require('../functions/lib/onboarding-email-message');
 const {fixture, emptyFixture} = require('../functions/test/fixtures/spend-summary.cjs');
 const directory = resolve('output/spend-summary-email');
 mkdirSync(directory, {recursive: true});
@@ -59,13 +58,15 @@ try {
     ['long-names', 'month', 320, 'light', 'long'], ['mixed-currency', 'week', 390, 'light', 'mixed'],
     ['inline-fallback', 'week', 820, 'light', 'inline'],
     ['weekly-with-tip', 'week', 390, 'light', 'tip'],
-    ...['welcome','reminder'].flatMap(type => [
+    ...['welcome','reminder','day10-shortcut','day21-help'].flatMap(type => [
       [type+'-desktop',type,820,'light'], [type+'-mobile',type,390,'light'],
       [type+'-small',type,320,'light'], [type+'-dark',type,820,'dark'],
       [type+'-dark-mobile',type,390,'dark'], [type+'-inline',type,820,'light','inline'],
       [type+'-images-blocked',type,320,'light','blocked'],
     ]),
     ['reminder-long-name','reminder',320,'light','long-name'],
+    ['day10-long-name','day10-shortcut',320,'light','long-name'],
+    ['day21-long-name','day21-help',320,'light','long-name'],
   ]) {
     const data = variant === 'empty' ? emptyFixture(period) : fixture(period);
     if (variant === 'mixed') data.mixedCurrencies = true;
@@ -76,12 +77,11 @@ try {
     }
     if (variant === 'tip') data.tip = {id:'original',body:'Need the original file? Open a receipt, then choose Download under Original Receipt.',url:'https://receipt-nest.com/app/help'};
     let html = buildSpendSummaryHtml(data);
-    if (period === 'welcome') {
-      const content=buildWelcomeEmailContent('https://receipt-nest.com');
-      html=buildOnboardingEmailHtml({...content,title:'Welcome to ReceiptNest.',baseUrl:'https://receipt-nest.com'});
-      html=html.replace('https://receipt-nest.com/media/getting-started/receiptnest-quick-start-v1.jpg','data:image/jpeg;base64,'+readFileSync(resolve('public/media/getting-started/receiptnest-quick-start-v1.jpg')).toString('base64'));
+    const onboardingTemplate={welcome:'welcome',reminder:'first-receipt','day10-shortcut':'receipt-shortcut','day21-help':'receipt-help'}[period];
+    if (onboardingTemplate) {
+      html=buildOnboardingEmailMessage(onboardingTemplate,'https://receipt-nest.com',variant==='long-name'?'EdmondLongName'.repeat(12):'Edmond').html;
+      if (period==='welcome') html=html.replace('https://receipt-nest.com/media/getting-started/receiptnest-quick-start-v1.jpg','data:image/jpeg;base64,'+readFileSync(resolve('public/media/getting-started/receiptnest-quick-start-v1.jpg')).toString('base64'));
     }
-    if (period === 'reminder') html=buildFirstReceiptReminder('https://receipt-nest.com',variant==='long-name'?'EdmondLongName'.repeat(12):'Edmond','https://receipt-nest.com/unsubscribe').html;
     if (variant === 'blocked') html=html.replace(/<img[^>]*>/g,'');
     for (const a of getSpendSummaryAttachments()) html = html.replaceAll('cid:' + a.contentId, 'data:' + a.type + ';base64,' + a.content);
     if (variant === 'inline') html = html.replace(/<style>[\s\S]*?<\/style>/g, '');

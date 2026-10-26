@@ -43,7 +43,7 @@ import {
 type AdminUser = UserProfile;
 type AdminFeedback = FeedbackMessage;
 type SummaryEmailPeriod = 'week' | 'month';
-type OnboardingTestTemplate = 'welcome' | 'first-receipt';
+type OnboardingTestTemplate = 'welcome' | 'first-receipt' | 'receipt-shortcut' | 'receipt-help';
 type SummaryNotificationPeriod = 'week' | 'month';
 type WeeklyScheduleDay = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
 type UserSortColumn = 'name' | 'email' | 'role' | 'plan' | 'receipts' | 'lastLogin' | 'lastSeen' | 'created';
@@ -1600,8 +1600,12 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.onboardingTestSending.set(template);
     try {
       const response = await this.requestOnboardingTestEmail({ to, userId, template });
+      const labels: Record<OnboardingTestTemplate, string> = {
+        welcome: 'Welcome', 'first-receipt': 'Day 3 reminder',
+        'receipt-shortcut': 'Day 10 shortcut', 'receipt-help': 'Day 21 help',
+      };
       this.onboardingTestSuccess.set(
-        `${template === 'welcome' ? 'Welcome' : 'First-receipt reminder'} test sent to ${response.to}. The source account’s onboarding is unchanged.`
+        `${labels[template]} test sent to ${response.to}. The source account’s onboarding is unchanged.`
       );
     } catch (error) {
       console.error('Failed to send onboarding test email', error);

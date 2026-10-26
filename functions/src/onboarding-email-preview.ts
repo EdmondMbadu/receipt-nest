@@ -6,6 +6,7 @@ import { assertAdmin } from "./authz";
 import { isValidEmailAddress, normalizeEmailAddress } from "./email-suppression";
 import { buildOnboardingEmailMessage, OnboardingEmailTemplate } from "./onboarding-email-message";
 import { sendSendgridMail } from "./sendgrid";
+import { isOnboardingReminder } from "./email-lifecycle-policy";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
 const appBaseUrl = defineSecret("APP_BASE_URL");
@@ -21,7 +22,7 @@ export const sendOnboardingTestEmail = onCall(
     const template = request.data?.template as OnboardingEmailTemplate;
     if (!isValidEmailAddress(to) || /[,;]/.test(to)) throw new HttpsError("invalid-argument", "Enter one valid test inbox email address.");
     if (!userId || userId.includes("/")) throw new HttpsError("invalid-argument", "Choose a source user for the test email.");
-    if (template !== "welcome" && template !== "first-receipt") throw new HttpsError("invalid-argument", "Choose a welcome or first-receipt reminder email.");
+    if (template !== "welcome" && !isOnboardingReminder(template)) throw new HttpsError("invalid-argument", "Choose a welcome, Day 3, Day 10, or Day 21 email.");
     if (!sendgridApiKey.value() || !appBaseUrl.value()?.trim()) throw new HttpsError("failed-precondition", "Email configuration is missing.");
 
     const profile = await admin.firestore().doc(`users/${userId}`).get();

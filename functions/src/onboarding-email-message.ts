@@ -1,9 +1,10 @@
 import { appendAppDownloadText } from "./email-app-links";
 import { appendUnsubscribeText } from "./email-suppression";
 import { buildWelcomeEmailContent } from "./welcome-email-content";
-import { buildFirstReceiptReminder, buildOnboardingEmailHtml, getOnboardingEmailAttachments } from "./onboarding-email-content";
+import { buildFirstReceiptReminder, buildOnboardingFollowup, buildOnboardingEmailHtml, getOnboardingEmailAttachments } from "./onboarding-email-content";
+import type { OnboardingReminderTemplate } from "./email-lifecycle-policy";
 
-export type OnboardingEmailTemplate = "welcome" | "first-receipt";
+export type OnboardingEmailTemplate = "welcome" | OnboardingReminderTemplate;
 
 // Production delivery and admin tests share the complete message, including
 // plain text, footer links and embedded logo. This function writes no state.
@@ -27,7 +28,9 @@ export const buildOnboardingEmailMessage = (
       attachments: getOnboardingEmailAttachments(),
     };
   }
-  const content = buildFirstReceiptReminder(base, firstName, unsubscribe);
+  const content = template === "first-receipt"
+    ? buildFirstReceiptReminder(base, firstName, unsubscribe)
+    : buildOnboardingFollowup(template, base, firstName, unsubscribe);
   return {
     subject: content.subject,
     text: appendUnsubscribeText(appendAppDownloadText(content.text), unsubscribe),

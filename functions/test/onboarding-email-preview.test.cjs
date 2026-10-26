@@ -30,7 +30,7 @@ function setup(t){
   return {...fake,requests};
 }
 
-for(const template of ['welcome','first-receipt'])test(`${template} admin test uses the production template and never changes source account state`,async t=>{
+for(const template of ['welcome','first-receipt','receipt-shortcut','receipt-help'])test(`${template} admin test uses the production template and never changes source account state`,async t=>{
   const h=setup(t);
   const before=new Map(h.documents);
   const result=await sendOnboardingTestEmail.run({...request(template),data:{...request(template).data,to:'  Test-Inbox@Example.COM  '}});

@@ -6,7 +6,7 @@ export const escapeEmailText = (value: string) => value.replace(/&/g, "&amp;").r
 const link = (label: string, href: string) => `<a href="${escapeEmailText(href)}" style="color:#626e67; text-decoration:underline;">${escapeEmailText(label)}</a>`;
 export const getOnboardingEmailAttachments = () => getSpendSummaryAttachments().filter(item => item.filename === "receipt-nest.png");
 
-export const renderOnboardingButton = (url: string) => `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0;"><tr><td bgcolor="#32594a" style="background:#32594a; border-radius:6px; mso-padding-alt:14px 24px;"><a class="rn-button" href="${escapeEmailText(url)}" style="display:inline-block; padding:14px 24px; border:1px solid #32594a; border-radius:6px; background:#32594a; color:#ffffff; font-size:14px; line-height:20px; font-weight:600; text-decoration:none;">Add your first receipt &nbsp;→</a></td></tr></table>`;
+export const renderOnboardingButton = (url: string, label = "Add your first receipt") => `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0;"><tr><td bgcolor="#32594a" style="background:#32594a; border-radius:6px; mso-padding-alt:14px 24px;"><a class="rn-button" href="${escapeEmailText(url)}" style="display:inline-block; padding:14px 24px; border:1px solid #32594a; border-radius:6px; background:#32594a; color:#ffffff; font-size:14px; line-height:20px; font-weight:600; text-decoration:none;">${escapeEmailText(label)} &nbsp;→</a></td></tr></table>`;
 
 export const buildOnboardingEmailHtml = (options: {
   subject: string; title: string; preheader: string; bodyHtml: string; baseUrl: string; unsubscribeUrl?: string;
@@ -73,4 +73,41 @@ export const buildFirstReceiptReminder = (baseUrl: string, firstName: string, un
     <p style="margin:22px 0 0; font-size:14px; line-height:1.7; color:#626e67;">Already tried uploading? Your dashboard shows the receipt’s status. If you need a hand, <a href="${escapeEmailText(`${base}/support`)}" style="color:#32594a; text-decoration:underline;">we’re here to help</a>.</p>`;
   const text = `${greeting}\n\nYour ReceiptNest workspace is ready whenever you are.\n\nStart with a receipt you already have. Snap a photo, or upload an image or PDF. We’ll read the key details, organize them, and keep the original easy to find.\n\nAdd your first receipt: ${uploadUrl}\n\nWatch the 85-second walkthrough: ${watchUrl}\n\nAlready tried uploading? Your dashboard shows the receipt’s status. Need a hand? ${base}/support\n\nEmail preferences: ${base}/app?settings=notifications`;
   return { subject, preheader, text, html: buildOnboardingEmailHtml({ subject, title: "A little less paperwork.", preheader, bodyHtml, baseUrl: base, unsubscribeUrl }) };
+};
+
+export const buildOnboardingFollowup = (
+  template: "receipt-shortcut" | "receipt-help", baseUrl: string, firstName: string, unsubscribeUrl: string,
+) => {
+  const base = baseUrl.trim().replace(/\/+$/, "");
+  const greeting = firstName.trim() ? `Hi ${firstName.trim()},` : "Hi there,";
+  const watchUrl = `${base}/getting-started#walkthrough`;
+  const supportUrl = `${base}/support`;
+  const paragraph = (text: string) => `<p style="margin:0 0 16px; font-size:16px; line-height:1.7; color:#17231f; overflow-wrap:anywhere;">${escapeEmailText(text)}</p>`;
+  let subject: string, title: string, preheader: string, bodyHtml: string, text: string;
+  if (template === "receipt-shortcut") {
+    subject = "An easier way to add your first receipt";
+    title = "Start with what you already have.";
+    preheader = "An emailed receipt or an existing PDF is enough to get started.";
+    const introduction = "You don’t need a new purchase to try ReceiptNest. A receipt already in your inbox, photos, or files is enough.";
+    const upload = "Have a photo or PDF? Choose Add Receipt, then Upload Existing File. ReceiptNest reads the details and keeps the original easy to find.";
+    const forwarding = "Prefer forwarding email receipts? Copy your personal receipt address from the dashboard, then forward a receipt to it.";
+    bodyHtml = `${paragraph(greeting)}${paragraph(introduction)}${paragraph(upload)}${paragraph(forwarding)}
+      ${renderOnboardingButton(`${base}/app?addReceipt=1`)}
+      <p style="margin:0; font-size:14px; line-height:1.7; color:#626e67;">Want to see the steps? <a href="${escapeEmailText(watchUrl)}" style="color:#32594a; text-decoration:underline;">Watch the 85-second walkthrough</a>.</p>`;
+    text = `${greeting}\n\n${introduction}\n\n${upload}\n\n${forwarding}\n\nAdd your first receipt: ${base}/app?addReceipt=1\n\nWatch the 85-second walkthrough: ${watchUrl}`;
+  } else {
+    subject = "Can we help you get started?";
+    title = "Anything we can help with?";
+    preheader = "A little help, whenever you need it.";
+    const introduction = "If you haven’t found a moment to try ReceiptNest, that’s okay.";
+    const help = "If something got in the way—an upload question, an unclear step, or not knowing where to begin—we’re here to help.";
+    const closing = "This is the last reminder in your getting-started sequence. You can return to your workspace whenever you’re ready.";
+    bodyHtml = `${paragraph(greeting)}${paragraph(introduction)}${paragraph(help)}
+      ${renderOnboardingButton(supportUrl, "Get help")}
+      <p style="margin:0 0 22px; font-size:14px; line-height:1.7; color:#626e67;">Prefer a quick demonstration? <a href="${escapeEmailText(watchUrl)}" style="color:#32594a; text-decoration:underline;">Watch the 85-second walkthrough</a>.</p>
+      ${paragraph(closing)}`;
+    text = `${greeting}\n\n${introduction}\n\n${help}\n\nGet help: ${supportUrl}\n\nWatch the 85-second walkthrough: ${watchUrl}\n\n${closing}`;
+  }
+  text += `\n\nSupport: ${supportUrl}\nEmail preferences: ${base}/app?settings=notifications`;
+  return { subject, text, html: buildOnboardingEmailHtml({subject, title, preheader, bodyHtml, baseUrl: base, unsubscribeUrl}) };
 };

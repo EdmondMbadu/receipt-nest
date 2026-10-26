@@ -3,13 +3,30 @@ export const DAY = 24 * HOUR;
 export const EMAIL_GAP = 48 * HOUR;
 export const EMAIL_WINDOW = 7 * DAY;
 export const REMINDER_DELAY = 3 * DAY;
-export const REMINDER_EXPIRY = 14 * DAY;
+export const REMINDER_EXPIRY = 30 * DAY;
+export const ONBOARDING_SEQUENCE_VERSION = 2;
+export const ONBOARDING_STAGES = [
+  { template: "first-receipt", key: "first-receipt-v1", day: 3, expiresDay: 10 },
+  { template: "receipt-shortcut", key: "receipt-shortcut-v1", day: 10, expiresDay: 21 },
+  { template: "receipt-help", key: "receipt-help-v1", day: 21, expiresDay: 30 },
+] as const;
+export type OnboardingReminderTemplate = (typeof ONBOARDING_STAGES)[number]["template"];
+export const isOnboardingReminder = (kind: string): kind is OnboardingReminderTemplate =>
+  ONBOARDING_STAGES.some(stage => stage.template === kind);
+
+// Missed steps expire when the next step becomes relevant. A delayed job sends
+// one useful email, never a backlog of reminders in quick succession.
+export const nextOnboardingReminder = (enrolledAt: number, handled: Record<string, unknown> | undefined, now: number) => {
+  if (!enrolledAt || now >= enrolledAt + REMINDER_EXPIRY) return null;
+  const stage = ONBOARDING_STAGES.find(item => !handled?.[item.template] && now < enrolledAt + item.expiresDay * DAY);
+  return stage ? { ...stage, dueAt: enrolledAt + stage.day * DAY } : null;
+};
 
 // Scheduler retries retain their original scheduleTime. Cadence and eligibility
 // must use the actual attempt time, even when the reporting period stays fixed.
 export const deliveryTime = (scheduled: Date): Date => new Date(Math.max(scheduled.getTime(), Date.now()));
 
-export type LifecycleKind = "welcome" | "first-receipt" | "week" | "month";
+export type LifecycleKind = "welcome" | OnboardingReminderTemplate | "week" | "month";
 export type SendEvent = { key: string; at: number };
 
 export const millis = (value: unknown): number => {
@@ -47,7 +64,7 @@ export const hasUsableReceipt = (receipt: Record<string, any> | undefined): bool
 
 export const wantsLifecycleEmail = (profile: Record<string, any>, kind: LifecycleKind): boolean => {
   const settings = profile.notificationSettings ?? {};
-  if (kind === "first-receipt") return settings.onboardingEmails !== false;
+  if (isOnboardingReminder(kind)) return settings.onboardingEmails !== false;
   if (kind === "week") return settings.weeklySummaryEmails !== false;
   if (kind === "month") return settings.monthlySummaryEmails !== false;
   return true; // Keep the existing single account welcome behavior.

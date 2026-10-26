@@ -145,7 +145,7 @@ test('Day 3 reminder sends once, preserves signing, and does not send before its
   await dispatchOnboardingEmails.run(eventAt(day3-HOUR));assert.equal(h.requests.length,0);
   await Promise.all([dispatchOnboardingEmails.run(eventAt(day3)),dispatchOnboardingEmails.run(eventAt(day3))]);
   await dispatchOnboardingEmails.run(eventAt(day3+DAY));
-  assert.equal(h.requests.length,1);assert.equal(h.documents.get(statePath).reminderDueAt,null);
+  assert.equal(h.requests.length,1);assert.equal(h.documents.get(statePath).reminderDueAt.toMillis(),start+10*DAY);
   assert.match(h.html(),/A little less paperwork/);
   assert.match(h.html(),/app\?addReceipt=1/);
   assert.match(h.html(),/app\?settings=notifications/);
@@ -196,7 +196,7 @@ test('reminders honor local daytime, expiry, opt-outs, suppressions, and current
     if(scenario==='changed-email')h.setAuth({email:'new@example.com',emailVerified:true});
     if(scenario==='deleted-auth')h.setAuth(Object.assign(new Error('gone'),{code:'auth/user-not-found'}));
     if(scenario==='deleted-profile')h.documents.delete(userPath);
-    await dispatchOnboardingEmails.run(eventAt(scenario==='expired'?start+14*DAY:day3));
+    await dispatchOnboardingEmails.run(eventAt(scenario==='expired'?start+30*DAY:day3));
     assert.equal(h.requests.length,0);
     const due=h.documents.get(statePath).reminderDueAt;
     if(scenario==='night')assert.equal(due.toMillis(),day3+HOUR);else assert.equal(due,null);
@@ -316,4 +316,94 @@ test('account deletion removes pending lifecycle work and preserves its confirma
   assert.deepEqual(removed,[uid]);
   assert.equal([...h.documents.keys()].filter(k=>k===userPath||k.startsWith(userPath+'/')||k.startsWith('emailLifecycle')||k.startsWith('spendSummaryEmailQueue/')).length,0);
   assert.equal(h.requests.length,1);assert.match(h.requests[0].subject,/fully deleted/);
+});
+
+test('the complete no-receipt sequence sends Day 3, Day 10 and Day 21, then stops',async t=>{
+  const h=harness(t,{[statePath]:{...enrollment,onboardingSequenceVersion:2}});
+  await dispatchOnboardingEmails.run(eventAt(day3));
+  assert.equal(h.requests.length,1);assert.equal(h.documents.get(statePath).reminderDueAt.toMillis(),start+10*DAY);
+  await dispatchOnboardingEmails.run(eventAt(start+10*DAY-HOUR));assert.equal(h.requests.length,1);
+  await Promise.all([dispatchOnboardingEmails.run(eventAt(start+10*DAY)),dispatchOnboardingEmails.run(eventAt(start+10*DAY))]);
+  assert.equal(h.requests.length,2);assert.match(h.requests[1].subject,/easier way/);
+  assert.match(h.html(),/Upload Existing File/);assert.match(h.html(),/personal receipt address/);
+  assert.equal(h.documents.get(statePath).reminderDueAt.toMillis(),start+21*DAY);
+  // Los Angeles changes to standard time before Day 21: 15:00 UTC is now
+  // 07:00 local, so the send waits until the next daytime scheduler run.
+  await dispatchOnboardingEmails.run(eventAt(start+21*DAY));assert.equal(h.requests.length,2);
+  await dispatchOnboardingEmails.run(eventAt(start+21*DAY+HOUR));
+  assert.equal(h.requests.length,3);assert.match(h.requests[2].subject,/help you get started/);
+  assert.match(h.html(),/last reminder/);assert.match(h.html(),/href="https:\/\/receipt-nest.com\/support"/);
+  assert.equal(h.documents.get(statePath).reminderDueAt,null);
+  assert.equal(h.documents.get(statePath).reminderStatus,'completed');
+  assert.deepEqual(h.documents.get(statePath).onboardingHandled,{'first-receipt':'sent','receipt-shortcut':'sent','receipt-help':'sent'});
+  for(const message of h.requests){
+    assert.equal(message.headers['List-Unsubscribe-Post'],'List-Unsubscribe=One-Click');
+    const unsubscribe=new URL(message.headers['List-Unsubscribe'].slice(1,-1));
+    assert.equal(verifyUnsubscribeToken(unsubscribe.searchParams.get('token'),'test-signing-secret'),email);
+  }
+  for(const days of [22,30,60])await dispatchOnboardingEmails.run(eventAt(start+days*DAY+HOUR));
+  assert.equal(h.requests.length,3);
+});
+
+test('a usable receipt after either reminder cancels every later step permanently',async t=>{
+  for(const completeAfter of [3,10])await t.test(`activated after Day ${completeAfter}`,async t=>{
+    const h=harness(t,{[statePath]:{...enrollment,onboardingSequenceVersion:2}});
+    await dispatchOnboardingEmails.run(eventAt(day3));
+    if(completeAfter===10)await dispatchOnboardingEmails.run(eventAt(start+10*DAY));
+    const count=h.requests.length;
+    await recordReceiptEmailActivation.run({params:{userId:uid,receiptId:'new'},data:{after:{data:()=>({status:'final',totalAmount:10})},before:{data:()=>({status:'processing'})}}});
+    for(const days of [10,21,31])await dispatchOnboardingEmails.run(eventAt(start+days*DAY+HOUR));
+    assert.equal(h.requests.length,count);assert.equal(h.documents.get(statePath).reminderDueAt,null);
+  });
+});
+
+test('an outage skips expired messages and sends only the relevant final help email',async t=>{
+  const h=harness(t,{[statePath]:{...enrollment,onboardingSequenceVersion:2}});
+  await dispatchOnboardingEmails.run(eventAt(start+25*DAY+HOUR));
+  assert.equal(h.requests.length,1);assert.match(h.requests[0].subject,/help you get started/);
+  assert.equal(h.documents.get(statePath).reminderDueAt,null);
+  await dispatchOnboardingEmails.run(eventAt(start+26*DAY+HOUR));assert.equal(h.requests.length,1);
+});
+
+test('sequence planning has exact Day 3, 10, 21 and 30 boundaries and no backlog',()=>{
+  const {nextOnboardingReminder}=policy;
+  const plan=(day,handled={})=>nextOnboardingReminder(start,handled,start+day*DAY);
+  assert.equal(plan(0).dueAt,day3);assert.equal(plan(3).template,'first-receipt');
+  assert.equal(plan(9.99).template,'first-receipt');assert.equal(plan(10).template,'receipt-shortcut');
+  assert.equal(plan(20.99).template,'receipt-shortcut');assert.equal(plan(21).template,'receipt-help');
+  assert.equal(plan(29.99).template,'receipt-help');assert.equal(plan(30),null);
+  assert.equal(plan(3,{'first-receipt':'sent'}).dueAt,start+10*DAY);
+  assert.equal(plan(10,{'first-receipt':'sent','receipt-shortcut':'claimed'}).dueAt,start+21*DAY);
+  assert.equal(plan(21,{'first-receipt':'sent','receipt-shortcut':'sent','receipt-help':'sent'}),null);
+});
+
+test('recent previously enrolled users continue after an already-sent Day 3 without replaying it',async t=>{
+  const h=harness(t,{[statePath]:{...enrollment,reminderDueAt:null,reminderStatus:'sent'}});
+  await dispatchOnboardingEmails.run(eventAt(start+10*DAY));
+  assert.equal(h.requests.length,1);assert.match(h.requests[0].subject,/easier way/);
+  assert.equal(h.documents.get(statePath).onboardingSequenceVersion,2);
+  assert.equal(h.documents.get(statePath).onboardingHandled['first-receipt'],'sent');
+  await dispatchOnboardingEmails.run(eventAt(start+10*DAY+HOUR));assert.equal(h.requests.length,1);
+  assert.ok(h.documents.get('emailLifecycleRollouts/onboarding-v2').completedAt);
+});
+
+test('the sequence upgrade preserves prior activation and explicit cancellations',async t=>{
+  for(const reason of ['activated','unsubscribed','preference','preference-or-deleted','account-not-eligible'])await t.test(reason,async t=>{
+    const h=harness(t,{[statePath]:{...enrollment,reminderDueAt:null,reminderStatus:reason}});
+    await dispatchOnboardingEmails.run(eventAt(start+10*DAY));
+    assert.equal(h.requests.length,0);assert.equal(h.documents.get(statePath).reminderDueAt,null);
+    assert.equal(h.documents.get(statePath).onboardingSequenceVersion,2);
+  });
+});
+
+test('new follow-ups respect onboarding preferences, signed unsubscribe and shared cadence',async t=>{
+  for(const template of ['receipt-shortcut','receipt-help'])await t.test(template,async t=>{
+    const h=harness(t,{[userPath]:{...profile,notificationSettings:{onboardingEmails:false}}});
+    const kind=template;
+    assert.equal((await deliver(day3,kind,kind+'-v1')).reason,'preference');
+    h.documents.set(userPath,{...profile,welcomeEmailSentAt:null});
+    await deliver(day3,'month','month-2026-09');
+    const blocked=await deliver(day3+DAY,kind,kind+'-v1');
+    assert.equal(blocked.reason,'cadence');assert.equal(blocked.nextAt,day3+2*DAY);
+  });
 });

@@ -4,7 +4,7 @@ import { provideRouter } from '@angular/router';
 import { AdminComponent } from './admin.component';
 import { AuthService } from '../../services/auth.service';
 
-type Request = {to: string; userId: string; template: 'welcome' | 'first-receipt'};
+type Request = {to: string; userId: string; template: 'welcome' | 'first-receipt' | 'receipt-shortcut' | 'receipt-help'};
 type Transport = {requestOnboardingTestEmail(request: Request): Promise<{to: string}>};
 
 describe('Admin onboarding email tests', () => {
@@ -31,19 +31,27 @@ describe('Admin onboarding email tests', () => {
     return {fixture,component,send};
   }
 
-  it('uses the shared recipient and selected account for both email test buttons', async () => {
+  it('uses the shared recipient and selected account for all four email test buttons', async () => {
     const {fixture,component,send} = await setup();
     const section: HTMLElement = fixture.nativeElement.querySelector('section[aria-labelledby="onboarding-email-tests-title"]');
     expect(section.textContent).toContain('Test copies do not change');
     const buttons = section.querySelectorAll('button');
     expect(buttons[0].textContent).toContain('Send welcome test');
     expect(buttons[1].textContent).toContain('Send reminder test');
+    expect(buttons[2].textContent).toContain('Send Day 10 shortcut test');
+    expect(buttons[3].textContent).toContain('Send Day 21 help test');
     component.summaryEmailTo.set(' Test-Inbox@Example.COM ');
     buttons[0].click(); await fixture.whenStable();
     expect(send).toHaveBeenCalledWith({to:'test-inbox@example.com',userId:'source',template:'welcome'});
     expect(component.onboardingTestSuccess()).toContain('onboarding is unchanged');
     buttons[1].click(); await fixture.whenStable();
     expect(send).toHaveBeenCalledWith({to:'test-inbox@example.com',userId:'source',template:'first-receipt'});
+    buttons[2].click(); await fixture.whenStable();
+    expect(send).toHaveBeenCalledWith({to:'test-inbox@example.com',userId:'source',template:'receipt-shortcut'});
+    expect(component.onboardingTestSuccess()).toContain('Day 10 shortcut test sent');
+    buttons[3].click(); await fixture.whenStable();
+    expect(send).toHaveBeenCalledWith({to:'test-inbox@example.com',userId:'source',template:'receipt-help'});
+    expect(component.onboardingTestSuccess()).toContain('Day 21 help test sent');
   });
 
   it('rejects an invalid inbox or missing source before sending', async () => {

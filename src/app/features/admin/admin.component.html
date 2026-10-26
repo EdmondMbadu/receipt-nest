@@ -232,7 +232,7 @@
       <div class="border-t border-slate-100 dark:border-slate-800 px-4 py-4 space-y-5">
         <div>
           <p class="text-sm text-slate-500 dark:text-slate-400">
-            Preview welcome emails, first-receipt reminders, and weekly or monthly summaries using a selected account and test inbox.
+              Preview welcome emails, Day 3, Day 10 and Day 21 follow-ups, and spending summaries using a selected account and test inbox.
           </p>
         </div>
 
@@ -276,6 +276,9 @@
               Sends only to the test inbox above. Test copies do not change the source user’s onboarding, email preferences, or scheduled messages.
             </p>
           </div>
+          <p class="text-sm text-slate-500 dark:text-slate-400">
+            Flow: welcome → Day 3 first receipt → Day 10 shortcut → Day 21 help, then routine onboarding stops. A successfully processed receipt cancels the remaining follow-ups.
+          </p>
           <div class="grid gap-4 xl:grid-cols-2">
             <div class="rounded-2xl border border-slate-200 bg-white p-4 space-y-4 dark:border-slate-800 dark:bg-slate-900">
               <div>
@@ -299,6 +302,30 @@
               <button type="button" (click)="sendOnboardingTestEmail('first-receipt')" [disabled]="onboardingTestSending() !== null"
                 class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
                 {{ onboardingTestSending() === 'first-receipt' ? 'Sending reminder test…' : 'Send reminder test' }}
+              </button>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 space-y-4 dark:border-slate-800 dark:bg-slate-900">
+              <div>
+                <h4 class="text-base font-semibold text-slate-900 dark:text-white">Day 10 · A simpler first step</h4>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  Shows how to start with an existing photo or PDF, or forward an emailed receipt.
+                </p>
+              </div>
+              <button type="button" (click)="sendOnboardingTestEmail('receipt-shortcut')" [disabled]="onboardingTestSending() !== null"
+                class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+                {{ onboardingTestSending() === 'receipt-shortcut' ? 'Sending shortcut test…' : 'Send Day 10 shortcut test' }}
+              </button>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 space-y-4 dark:border-slate-800 dark:bg-slate-900">
+              <div>
+                <h4 class="text-base font-semibold text-slate-900 dark:text-white">Day 21 · A little help</h4>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  Offers support and the walkthrough, then closes the automated getting-started sequence.
+                </p>
+              </div>
+              <button type="button" (click)="sendOnboardingTestEmail('receipt-help')" [disabled]="onboardingTestSending() !== null"
+                class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+                {{ onboardingTestSending() === 'receipt-help' ? 'Sending help test…' : 'Send Day 21 help test' }}
               </button>
             </div>
           </div>

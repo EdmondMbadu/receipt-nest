@@ -1,7 +1,7 @@
 import * as admin from "firebase-admin";
 import { logger } from "firebase-functions";
 import { emailSuppressionDocumentId, normalizeEmailAddress } from "./email-suppression";
-import { LifecycleKind, HOUR, REMINDER_DELAY, millis, nextEmailTime, recentSendEvents, wantsLifecycleEmail } from "./email-lifecycle-policy";
+import { LifecycleKind, HOUR, REMINDER_DELAY, ONBOARDING_SEQUENCE_VERSION, isOnboardingReminder, millis, nextEmailTime, nextOnboardingReminder, recentSendEvents, wantsLifecycleEmail } from "./email-lifecycle-policy";
 
 export const lifecycleStateRef = (userId: string) => admin.firestore().doc(`emailLifecycleState/${userId}`);
 const deliveryRef = (userId: string, key: string) => admin.firestore().doc(`emailLifecycleDeliveries/${userId}_${key}`);
@@ -66,10 +66,20 @@ export const deliverLifecycleEmail = async (options: DeliveryOptions): Promise<L
         transaction.set(profileRef, { welcomeEmailSent: true, welcomeEmailSentAt: admin.firestore.Timestamp.fromMillis(at) }, { merge: true });
         transaction.set(stateRef, {
           userId, enrolledAt: admin.firestore.Timestamp.fromMillis(at),
+          onboardingSequenceVersion: ONBOARDING_SEQUENCE_VERSION,
           reminderDueAt: stateSnap.data()?.activatedAt ? null : admin.firestore.Timestamp.fromMillis(at + REMINDER_DELAY),
         }, { merge: true });
       }
-      if (kind === "first-receipt") transaction.set(stateRef, { userId, reminderDueAt: null, reminderStatus: "sent" }, { merge: true });
+      if (isOnboardingReminder(kind)) {
+        const state = stateSnap.data() ?? {};
+        const handled = { ...state.onboardingHandled, [kind]: "sent" };
+        const next = state.activatedAt ? null : nextOnboardingReminder(millis(state.enrolledAt), handled, at);
+        transaction.set(stateRef, {
+          userId, onboardingSequenceVersion: ONBOARDING_SEQUENCE_VERSION, onboardingHandled: handled,
+          reminderDueAt: next ? admin.firestore.Timestamp.fromMillis(next.dueAt) : null,
+          reminderStatus: next ? "in-progress" : "completed",
+        }, { merge: true });
+      }
       if (options.tipId) transaction.set(stateRef, { userId, tips: { ...stateSnap.data()?.tips, [options.tipId]: true } }, { merge: true });
     });
     return { sent: true, reason: "sent" };
