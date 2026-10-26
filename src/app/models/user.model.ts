@@ -2,6 +2,7 @@ import { GuideProgress } from '../utils/getting-started';
 import { Timestamp, serverTimestamp } from 'firebase/firestore';
 
 export interface NotificationSettings {
+  onboardingEmails?: boolean;
   receiptProcessing: boolean;
   productUpdates: boolean;
   securityAlerts: boolean;

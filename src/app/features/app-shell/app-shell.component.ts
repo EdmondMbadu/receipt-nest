@@ -67,6 +67,7 @@ export class AppShellComponent {
   readonly notificationsProductUpdates = signal(false);
   readonly notificationsSecurityAlerts = signal(true);
   readonly notificationsWeeklySummaryEmails = signal(true);
+  readonly notificationsOnboardingEmails = signal(true);
   readonly notificationsMonthlySummaryEmails = signal(true);
   readonly notificationsWeeklySummaryPush = signal(true);
   readonly notificationsMonthlySummaryPush = signal(true);
@@ -230,6 +231,7 @@ export class AppShellComponent {
     this.notificationsProductUpdates.set(defaults.productUpdates);
     this.notificationsSecurityAlerts.set(defaults.securityAlerts);
     this.notificationsWeeklySummaryEmails.set(defaults.weeklySummaryEmails);
+    this.notificationsOnboardingEmails.set(defaults.onboardingEmails ?? true);
     this.notificationsMonthlySummaryEmails.set(defaults.monthlySummaryEmails);
     this.notificationsWeeklySummaryPush.set(defaults.weeklySummaryPush);
     this.notificationsMonthlySummaryPush.set(defaults.monthlySummaryPush);
@@ -280,6 +282,7 @@ export class AppShellComponent {
     this.notificationsSuccess.set(null);
 
     const settings: NotificationSettings = {
+      onboardingEmails: this.notificationsOnboardingEmails(),
       receiptProcessing: this.notificationsReceiptProcessing(),
       productUpdates: this.notificationsProductUpdates(),
       securityAlerts: this.notificationsSecurityAlerts(),

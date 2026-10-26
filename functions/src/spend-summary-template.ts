@@ -50,6 +50,7 @@ export type SummaryPeriod = {
 };
 
 export type SpendSummaryData = {
+  tip?: { id: string; body: string; url: string };
   period: SummaryPeriod;
   userName: string;
   userEmail: string;
@@ -114,7 +115,7 @@ const paragraph = (text: string, style = "") => `<p style="margin:0; font-size:1
 const textLink = (label: string, url: string, color = muted) => `<a href="${escapeHtml(url)}" style="color:${color}; text-decoration:underline; text-underline-offset:2px;">${escapeHtml(label)}</a>`;
 const section = (content: string, extraClass = "") => `<tr><td class="rn-section ${extraClass}" style="padding:26px 0; border-top:1px solid ${rule};">${content}</td></tr>`;
 
-const renderBrand = (small = false) => {
+export const renderEmailBrand = (small = false) => {
   const width = small ? 36 : 52;
   const height = small ? 25 : 36;
   return `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
@@ -198,7 +199,7 @@ const renderReceipts = (data: SpendSummaryData, dashboardUrl: string) => `
   </table>`;
 
 const renderFooter = (data: SpendSummaryData, links: Required<SummaryLinks>) => `
-  ${renderBrand(true)}
+  ${renderEmailBrand(true)}
   ${paragraph("Your receipts. A clearer picture.", "font-size:12px; margin-top:8px;")}
   <p style="margin:4px 0 0; font-size:12px; line-height:1.8; color:${muted};">Get the app: ${textLink("App Store", APP_STORE_URL)} &nbsp;·&nbsp; ${textLink("Google Play", GOOGLE_PLAY_URL)}</p>
   <p id="receiptnest-social-footer" style="margin:4px 0 0; font-size:12px; line-height:1.8; color:${muted};">${EMAIL_SOCIAL_LINKS.map(link => `<a href="${escapeHtml(link.href)}" aria-label="ReceiptNest on ${escapeHtml(link.label)}" style="display:inline-block; color:${muted}; text-decoration:underline;">${escapeHtml(link.label)}</a>`).join(" &nbsp;·&nbsp; ")}</p>
@@ -267,7 +268,7 @@ export const buildSpendSummaryHtml = (data: SpendSummaryData, links: SummaryLink
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
         <tr><td style="padding-bottom:22px;">
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-            <td>${renderBrand()}</td>
+            <td>${renderEmailBrand()}</td>
             <td class="rn-summary-label" align="right" style="padding-left:12px; font-size:12px; line-height:1.5; color:${muted};">${weekly ? "Weekly" : "Monthly"} summary</td>
           </tr></table>
         </td></tr>
@@ -298,6 +299,7 @@ export const buildSpendSummaryHtml = (data: SpendSummaryData, links: SummaryLink
           <td class="rn-column" width="50%" style="width:50%; padding-left:24px; border-left:1px solid ${rule}; vertical-align:top;">${renderBreakdown("Top merchants", data.merchants, data.currency)}</td>
         </tr></table>`)}
         ${section(renderReceipts(data, resolvedLinks.dashboardUrl))}
+        ${data.tip ? section(`${heading("A small shortcut")}${paragraph(data.tip.body)}<p style="margin:10px 0 0; font-size:13px; line-height:1.6;">${textLink("See how →", data.tip.url, green)}</p>`) : ""}
         ${section(`<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
           <td width="24" style="width:24px; padding-right:12px; vertical-align:top;"><img src="cid:${LOCK_CID}" width="24" height="28" alt="" style="display:block; border:0; width:24px; height:28px;" /></td>
           <td>${paragraph("Your receipts, securely organized.", `color:${ink}; font-size:14px;`)}${paragraph("Protected with encryption in your ReceiptNest workspace.", "font-size:12px; margin-top:2px;")}</td>

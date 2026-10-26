@@ -45,6 +45,7 @@ export {
   getSpendSummaryEmailSchedule,
   updateSpendSummaryEmailSchedule,
   dispatchScheduledSpendSummaryEmails,
+  dispatchDeferredSpendSummaryEmails,
   dispatchScheduledSpendSummaryNotifications,
 } from "./spend-summary-email";
 export { sendPasswordResetEmail, sendVerificationEmail, sendWelcomeEmail } from "./email";
@@ -62,3 +63,5 @@ export {
 } from "./unsubscribe";
 
 export { getGettingStartedState, saveGettingStartedProgress } from './getting-started';
+
+export { dispatchOnboardingEmails, recordReceiptEmailActivation } from "./onboarding-emails";

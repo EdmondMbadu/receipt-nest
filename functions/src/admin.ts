@@ -83,6 +83,7 @@ interface ReceiptProcessingUserCount {
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const defaultNotificationSettings = {
+  onboardingEmails: true,
   receiptProcessing: true,
   productUpdates: false,
   securityAlerts: true,

@@ -57,6 +57,7 @@ export class AuthService {
   private lastSeenWriteAt = 0;
   private lastSeenUpdateInFlight = false;
   private readonly defaultNotificationSettings: NotificationSettings = {
+    onboardingEmails: true,
     receiptProcessing: true,
     productUpdates: false,
     securityAlerts: true,
@@ -475,6 +476,7 @@ export class AuthService {
     const weeklySummaryEmails = settings?.weeklySummaryEmails ?? this.defaultNotificationSettings.weeklySummaryEmails;
     const monthlySummaryEmails = settings?.monthlySummaryEmails ?? this.defaultNotificationSettings.monthlySummaryEmails;
     return {
+      onboardingEmails: settings?.onboardingEmails ?? true,
       receiptProcessing: settings?.receiptProcessing ?? this.defaultNotificationSettings.receiptProcessing,
       productUpdates: settings?.productUpdates ?? this.defaultNotificationSettings.productUpdates,
       securityAlerts: settings?.securityAlerts ?? this.defaultNotificationSettings.securityAlerts,

@@ -264,6 +264,10 @@ export const deleteUserAccount = onCall(
 
     try {
       await db.recursiveDelete(userRef);
+      // Remove any lifecycle work that finished while the account tree was
+      // being deleted. No new claim can pass once the profile is gone.
+      await Promise.all(["emailLifecycleState", "emailLifecycleDeliveries", "spendSummaryEmailQueue"]
+        .map(collection => deleteByUserIdField(collection, userId)));
     } catch (error) {
       logger.error("Failed deleting user document tree", { userId, error });
       throw new HttpsError("internal", "Failed to remove account records.");

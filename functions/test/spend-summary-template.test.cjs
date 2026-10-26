@@ -103,37 +103,24 @@ test('personal text and URL parameters are escaped without breaking destinations
 test('real admin and scheduled sends use the new template, correct periods and delivery metadata', async t => {
   const admin = require('firebase-admin');
   if (!admin.apps.length) admin.initializeApp({projectId: 'demo-summary-email-tests'});
-  const db = admin.firestore();
   const sg = require('@sendgrid/mail');
-  const originals = {doc: db.doc, collection: db.collection, getAll: db.getAll, request: sg.client.request, key: sg.setApiKey};
+  const originalRequest = sg.client.request; const originalKey = sg.setApiKey;
   const savedEnv = Object.fromEntries(['SENDGRID_API_KEY', 'APP_BASE_URL', 'UNSUBSCRIBE_TOKEN_SECRET'].map(k => [k, process.env[k]]));
   process.env.SENDGRID_API_KEY = 'local-only'; process.env.APP_BASE_URL = 'https://receipt-nest.com/'; process.env.UNSUBSCRIBE_TOKEN_SECRET = 'local-test-signing-secret';
   t.after(() => {
-    db.doc = originals.doc; db.collection = originals.collection; db.getAll = originals.getAll; sg.client.request = originals.request; sg.setApiKey = originals.key;
+    sg.client.request = originalRequest; sg.setApiKey = originalKey;
     for (const [key, value] of Object.entries(savedEnv)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; }
   });
-  const requests = []; const scheduleWrites = [];
+  const requests = [];
   const user = {email: 'preview@example.com', firstName: 'Edmond', lastName: 'Mbadu'};
-  let period = 'week';
-  db.doc = path => {
-    if (path === 'users/summary-fixture') return {get: async () => ({exists: true, data: () => user})};
-    if (path === 'systemConfig/spendSummaryEmailSchedule') return {
-      get: async () => ({data: () => ({timeZone: 'America/Los_Angeles', weekly: {enabled: period === 'week', dayOfWeek: 'monday', time: '08:00'}, monthly: {enabled: period === 'month', dayOfMonth: 1, time: '08:00'}})}),
-      set: async data => scheduleWrites.push(data),
-    };
-    throw new Error('Unexpected document: ' + path);
-  };
-  db.collection = path => {
-    if (path === 'users/summary-fixture/receipts') return {get: async () => ({docs: rawReceipts.map(data => ({data: () => data}))})};
-    if (path === 'users') return {get: async () => ({docs: [{id: 'summary-fixture', data: () => user}]})};
-    if (path === 'emailSuppressions') return {doc: id => ({id})};
-    throw new Error('Unexpected collection: ' + path);
-  };
-  db.getAll = async (...refs) => refs.map(() => ({exists: false}));
+  const initial = {'users/summary-fixture': user};
+  rawReceipts.forEach((data, index) => {initial['users/summary-fixture/receipts/' + index] = data;});
+  const fake = require('./fixtures/fake-firestore.cjs').installFakeFirestore(t, initial);
   sg.setApiKey = () => undefined;
   sg.client.request = async request => {requests.push(JSON.parse(JSON.stringify(request.body))); return [{statusCode: 202}, {}];};
   const {sendSpendSummaryEmail, dispatchScheduledSpendSummaryEmails} = require('../lib/spend-summary-email');
-  for (period of ['week', 'month']) {
+  for (const period of ['week', 'month']) {
+    fake.documents.set('systemConfig/spendSummaryEmailSchedule', {timeZone:'America/Los_Angeles', weekly:{enabled:period==='week',dayOfWeek:'monday',time:'08:00'}, monthly:{enabled:period==='month',dayOfMonth:1,time:'08:00'}});
     const result = await sendSpendSummaryEmail.run({auth: {uid: 'admin', token: {admin: true}}, data: {
       to: user.email, userId: 'summary-fixture', periodType: period, week: '2026-W42', month: '2026-10',
     }});
@@ -160,5 +147,6 @@ test('real admin and scheduled sends use the new template, correct periods and d
     assert.ok(scheduledHtml.includes('/unsubscribe?token='));
     assert.match(scheduledHtml, new RegExp(`Your ${period}, at a glance`));
   }
-  assert.equal(requests.length, 4); assert.equal(scheduleWrites.length, 2);
+  assert.equal(requests.length, 4);
+  assert.equal(fake.documents.get('systemConfig/spendSummaryEmailSchedule').lastMonthlyPeriodSent, '2026-10');
 });

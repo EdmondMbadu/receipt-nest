@@ -8,6 +8,8 @@ All visible links are real anchors. The dashboard and receipts links open `/app`
 
 Inline styles and presentation tables provide the email-client fallback. The layout stacks highlight and breakdown columns on phones and supplies a restrained dark palette. Mixed-currency notices remain visible beside the total. Zero bars stay empty, small bars have no inflated minimum width, and refunds/mixed currencies suppress misleading chart insights.
 
+Automated delivery now skips empty periods, coordinates spacing with welcome/onboarding emails, and can include one small introductory tip. Manual previews retain the complete empty layout. See [the onboarding email flow](onboarding-email-flow.md) for cadence, deferred delivery, settings and current verification results.
+
 ## Verification
 
 Run:

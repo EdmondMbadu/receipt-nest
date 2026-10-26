@@ -6,6 +6,9 @@ import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtm
 import { addEmailDarkMode } from "./email-theme";
 import { buildWelcomeEmailContent } from './welcome-email-content';
 import { sendSendgridMail } from "./sendgrid";
+import { buildOnboardingEmailHtml, getOnboardingEmailAttachments } from "./onboarding-email-content";
+import { deliverLifecycleEmail } from "./email-lifecycle";
+import { appendUnsubscribeText } from "./email-suppression";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
 const appBaseUrl = defineSecret("APP_BASE_URL");
@@ -249,15 +252,21 @@ export const sendWelcomeEmail = onCall(
     }
 
     const { subject, preheader, text: welcomeText, bodyHtml } = buildWelcomeEmailContent(appBaseUrl.value());
-    const text = appendAppDownloadText(welcomeText);
-    const html = buildEmailShell(subject, bodyHtml, preheader);
+    const welcomeBase = normalizeBaseUrl(appBaseUrl.value());
+    const text = appendUnsubscribeText(appendAppDownloadText(`${welcomeText}\n\nSupport: ${welcomeBase}/support\nEmail preferences: ${welcomeBase}/app?settings=notifications`), `${welcomeBase}/unsubscribe`);
+    const html = buildOnboardingEmailHtml({ subject, title: "Welcome to ReceiptNest.", bodyHtml, preheader, baseUrl: appBaseUrl.value() });
 
     try {
-      await sendEmail(email, subject, text, html);
-      await userRef.set(
-        { welcomeEmailSent: true, welcomeEmailSentAt: admin.firestore.FieldValue.serverTimestamp() },
-        { merge: true }
-      );
+      if (!sendgridApiKey.value() || !appBaseUrl.value()) {
+        throw new HttpsError("failed-precondition", "Email configuration is missing.");
+      }
+      await deliverLifecycleEmail({
+        userId: request.auth.uid, recipient: email, key: "welcome-v1", kind: "welcome", now: new Date(Date.now()),
+        send: () => sendSendgridMail(sendgridApiKey.value(), {
+          to: email, from: { email: fromEmail, name: "ReceiptNest" }, replyTo: { email: fromEmail, name: "ReceiptNest" },
+          subject, text, html, attachments: getOnboardingEmailAttachments(),
+        }),
+      });
     } catch (error) {
       logger.error("Failed to send welcome email", error);
       throw new HttpsError("internal", "Failed to send welcome email.");

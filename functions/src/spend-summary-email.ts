@@ -14,6 +14,8 @@ import type {
   SummaryMetrics, SummaryPeriod, SpendSummaryData, SummaryLinks,
 } from "./spend-summary-template";
 import { sendSendgridMail } from "./sendgrid";
+import { deliverLifecycleEmail, lifecycleStateRef } from "./email-lifecycle";
+import { DAY, deliveryTime, HOUR, millis } from "./email-lifecycle-policy";
 import {
   appendUnsubscribeText,
   buildUnsubscribeUrls,
@@ -848,6 +850,8 @@ const buildEmailText = (data: SpendSummaryData, links: SummaryLinks) => {
     lines.push("Note: Multiple currencies were detected. Totals are not converted.");
   }
 
+  if (data.tip) lines.push("", `A small shortcut: ${data.tip.body}`, `See how: ${data.tip.url}`);
+
   lines.push("");
   lines.push(`Open dashboard: ${links.dashboardUrl || `${MAIN_SITE_URL}/app`}`);
   lines.push(`Support: ${links.supportUrl || `${MAIN_SITE_URL}/support`}`);
@@ -1097,9 +1101,97 @@ const dispatchSummaryNotificationToUser = async (
   return sendSummaryNotificationMessage(getUserNotificationTokens(userData), summary);
 };
 
+const summaryQueueRef = (userId: string, period: SummaryPeriod) =>
+  admin.firestore().doc(`spendSummaryEmailQueue/${userId}_${period.type}-${getScheduleSummaryPeriodKey(period)}`);
+
+const chooseSummaryTip = (summary: SpendSummaryData, profile: admin.firestore.DocumentData, state: admin.firestore.DocumentData, now: Date) => {
+  const started = millis(state.enrolledAt) || millis(profile.createdAt);
+  if (!started || now.getTime() - started > 30 * DAY || profile.notificationSettings?.onboardingEmails === false) return undefined;
+  const tips = state.tips ?? {};
+  const url = `${appBaseUrl.value().trim().replace(/\/+$/, "")}/app/help`;
+  if (!tips.original) return { id: "original", body: "Need the original file? Open a receipt, then choose Download under Original Receipt.", url };
+  if (!tips.forwarding && !profile.receiptForwardingAddress) return { id: "forwarding", body: "You can forward emailed receipts to your personal ReceiptNest address. Find it on your dashboard.", url };
+  if (summary.period.type === "month" && !tips.csv) return { id: "csv", body: "Need a spreadsheet? Open your month’s Download menu and choose CSV for a list of receipts and a total.", url };
+  return undefined;
+};
+
+const deliverAutomatedSummary = async (
+  userId: string, summary: SpendSummaryData, links: SummaryLinks, now: Date, expiresAt?: number, timeZone = FALLBACK_TIME_ZONE,
+) => {
+  const db = admin.firestore();
+  const queueRef = summaryQueueRef(userId, summary.period);
+  // Count receipts, not the amount: a valid $0 receipt or net-zero refunds still
+  // belong in a meaningful summary. Manual admin previews retain empty layouts.
+  if (summary.metrics.receiptCount === 0) { await queueRef.delete(); return { sent: false, reason: "empty" }; }
+  const [profileSnap, stateSnap] = await Promise.all([db.doc(`users/${userId}`).get(), lifecycleStateRef(userId).get()]);
+  if (!profileSnap.exists) { await queueRef.delete(); return { sent: false, reason: "account-missing" }; }
+  const profile = profileSnap.data() ?? {};
+  const tip = chooseSummaryTip(summary, profile, stateSnap.data() ?? {}, now);
+  const withTip = tip ? { ...summary, tip } : summary;
+  const expiry = expiresAt ?? now.getTime() + (summary.period.type === "week" ? 6 : 14) * DAY;
+  const defer = (nextAt: number) => db.runTransaction(async transaction => {
+    const owner = await transaction.get(db.doc(`users/${userId}`));
+    if (!owner.exists) { transaction.delete(queueRef); return; }
+    transaction.set(queueRef, {
+      userId, type: summary.period.type, periodKey: getScheduleSummaryPeriodKey(summary.period),
+      timeZone,
+      // Keep the exact calendar range selected by the configured schedule.
+      startKey: summary.period.startKey, endKey: summary.period.endKey,
+      dueAt: admin.firestore.Timestamp.fromMillis(nextAt), expiresAt: admin.firestore.Timestamp.fromMillis(expiry),
+    });
+  });
+  try {
+    const result = await deliverLifecycleEmail({
+      userId, recipient: normalizeEmailAddress(profile.email),
+      key: `${summary.period.type}-${getScheduleSummaryPeriodKey(summary.period)}`, kind: summary.period.type, now,
+      tipId: tip?.id,
+      send: () => sendSummaryEmailMessage(normalizeEmailAddress(profile.email), withTip, links, true),
+    });
+    if (result.nextAt && result.nextAt < expiry) await defer(result.nextAt);
+    else await queueRef.delete();
+    return result;
+  } catch (error) {
+    await defer(now.getTime() + 6 * HOUR);
+    throw error;
+  }
+};
+
+// Deferred summaries keep their original period. They re-read receipts and user
+// preferences at delivery, rather than retaining a stale payload or recipient.
+export const dispatchDeferredSpendSummaryEmails = onSchedule(
+  { region: "us-central1", schedule: "every 30 minutes", timeoutSeconds: 300, secrets: [sendgridApiKey, appBaseUrl, unsubscribeTokenSecret] },
+  async event => {
+    if (!sendgridApiKey.value() || !appBaseUrl.value() || !unsubscribeTokenSecret.value()) return;
+    const now = deliveryTime(event.scheduleTime ? new Date(event.scheduleTime) : new Date());
+    const db = admin.firestore();
+    const config = normalizeScheduleConfig((await getScheduleConfigRef().get()).data());
+    const due = await db.collection("spendSummaryEmailQueue").where("dueAt", "<=", admin.firestore.Timestamp.fromMillis(now.getTime())).limit(100).get();
+    // Prefer the monthly overview if weekly and monthly messages become ready together.
+    const items = [...due.docs].sort((a, b) => a.data().type === b.data().type ? 0 : a.data().type === "month" ? -1 : 1);
+    for (const item of items) {
+      const queued = item.data();
+      try {
+        const enabled = queued.type === "week" ? config.weekly.enabled : queued.type === "month" && config.monthly.enabled;
+        if (!enabled || millis(queued.expiresAt) <= now.getTime()) { await item.ref.delete(); continue; }
+        const profileSnap = await db.doc(`users/${queued.userId}`).get();
+        if (!profileSnap.exists) { await item.ref.delete(); continue; }
+        const timeZone = String(queued.timeZone || FALLBACK_TIME_ZONE);
+        const period = queued.type === "week" ? getWeekPeriod(queued.periodKey, timeZone) : getMonthPeriod(queued.periodKey, timeZone);
+        const summary = await loadUserSpendSummary(queued.userId, profileSnap.data() ?? {}, period, timeZone);
+        await deliverAutomatedSummary(queued.userId, summary, getSummaryLinks(), now, millis(queued.expiresAt), timeZone);
+      } catch (error) {
+        try { await item.ref.update({ dueAt: admin.firestore.Timestamp.fromMillis(now.getTime() + 6 * HOUR) }); }
+        catch (updateError) { if ((updateError as { code?: number }).code !== 5) throw updateError; }
+        logger.error("Deferred summary email failed", { userId: queued.userId, error });
+      }
+    }
+  },
+);
+
 const dispatchSummaryPeriodToAllUsers = async (
   period: SummaryPeriod,
   timeZone: string,
+  now: Date,
 ) => {
   const links = getSummaryLinks();
   const db = admin.firestore();
@@ -1139,8 +1231,8 @@ const dispatchSummaryPeriodToAllUsers = async (
 
     try {
       const summary = await loadUserSpendSummary(userDoc.id, userData, period, timeZone);
-      await sendSummaryEmailMessage(email, summary, links, true);
-      sentCount += 1;
+      const result = await deliverAutomatedSummary(userDoc.id, summary, links, deliveryTime(now), undefined, timeZone);
+      if (result.sent) sentCount += 1;
     } catch (error) {
       failedCount += 1;
       logger.error("Failed to send automated spend summary email", {
@@ -1245,33 +1337,13 @@ export const dispatchScheduledSpendSummaryEmails = onSchedule(
       return;
     }
 
-    if (isWeeklyScheduleDue(config, now)) {
-      const weekValue = getPreviousCompletedWeekValue(now, config.timeZone);
-      const period = getWeekPeriod(weekValue, config.timeZone);
-      const periodKey = getScheduleSummaryPeriodKey(period);
-
-      if (config.lastWeeklyPeriodSent !== periodKey) {
-        const result = await dispatchSummaryPeriodToAllUsers(period, config.timeZone);
-        await getScheduleConfigRef().set(
-          {
-            lastWeeklyPeriodSent: periodKey,
-            lastWeeklySentAt: admin.firestore.FieldValue.serverTimestamp(),
-            lastWeeklySentCount: result.sentCount,
-            lastWeeklyFailedCount: result.failedCount,
-          },
-          { merge: true },
-        );
-        logger.info("Weekly spend summaries dispatched", { periodKey, ...result });
-      }
-    }
-
     if (isMonthlyScheduleDue(config, now)) {
       const monthValue = getPreviousCompletedMonthValue(now, config.timeZone);
       const period = getMonthPeriod(monthValue, config.timeZone);
       const periodKey = getScheduleSummaryPeriodKey(period);
 
       if (config.lastMonthlyPeriodSent !== periodKey) {
-        const result = await dispatchSummaryPeriodToAllUsers(period, config.timeZone);
+        const result = await dispatchSummaryPeriodToAllUsers(period, config.timeZone, now);
         await getScheduleConfigRef().set(
           {
             lastMonthlyPeriodSent: periodKey,
@@ -1282,6 +1354,26 @@ export const dispatchScheduledSpendSummaryEmails = onSchedule(
           { merge: true },
         );
         logger.info("Monthly spend summaries dispatched", { periodKey, ...result });
+      }
+    }
+
+    if (isWeeklyScheduleDue(config, now)) {
+      const weekValue = getPreviousCompletedWeekValue(now, config.timeZone);
+      const period = getWeekPeriod(weekValue, config.timeZone);
+      const periodKey = getScheduleSummaryPeriodKey(period);
+
+      if (config.lastWeeklyPeriodSent !== periodKey) {
+        const result = await dispatchSummaryPeriodToAllUsers(period, config.timeZone, now);
+        await getScheduleConfigRef().set(
+          {
+            lastWeeklyPeriodSent: periodKey,
+            lastWeeklySentAt: admin.firestore.FieldValue.serverTimestamp(),
+            lastWeeklySentCount: result.sentCount,
+            lastWeeklyFailedCount: result.failedCount,
+          },
+          { merge: true },
+        );
+        logger.info("Weekly spend summaries dispatched", { periodKey, ...result });
       }
     }
   },
