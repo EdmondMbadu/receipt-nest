@@ -6,6 +6,7 @@ const {rawReceipts} = require('./fixtures/spend-summary.cjs');
 const policy = require('../lib/email-lifecycle-policy');
 const {DAY, HOUR, nextEmailTime, recentSendEvents, hasUsableReceipt} = policy;
 const {deliverLifecycleEmail} = require('../lib/email-lifecycle');
+const {restartZeroReceiptOnboarding} = require('../lib/onboarding-restart');
 const {dispatchOnboardingEmails, recordReceiptEmailActivation} = require('../lib/onboarding-emails');
 const {dispatchScheduledSpendSummaryEmails, dispatchDeferredSpendSummaryEmails, sendSpendSummaryEmail} = require('../lib/spend-summary-email');
 const {sendWelcomeEmail, sendVerificationEmail, sendPasswordResetEmail} = require('../lib/email');
@@ -309,6 +310,7 @@ test('account deletion removes pending lifecycle work and preserves its confirma
     // cleanup must remove it before confirming full account deletion.
     h.documents.set(statePath,{userId:uid,events:[]});
     h.documents.set(`spendSummaryEmailQueue/${uid}_late`,{userId:uid});
+    h.documents.set(`emailLifecycleRestarts/${uid}_late`,{userId:uid});
   };
   t.after(()=>{storage.bucket=originalBucket;auth.deleteUser=originalDelete;db.recursiveDelete=originalRecursive;});
   const {deleteUserAccount}=require('../lib/account');
@@ -406,4 +408,67 @@ test('new follow-ups respect onboarding preferences, signed unsubscribe and shar
     const blocked=await deliver(day3+DAY,kind,kind+'-v1');
     assert.equal(blocked.reason,'cadence');assert.equal(blocked.nextAt,day3+2*DAY);
   });
+});
+
+const restartOptions = {userId:uid,runId:'zero-receipts-2026-10-26',startedAt:new Date(start),dryRun:false};
+test('an explicit zero-receipt restart runs all three stages despite old completed delivery claims',async t=>{
+  const oldClaims=Object.fromEntries(policy.ONBOARDING_STAGES.map(stage=>[`emailLifecycleDeliveries/${uid}_${stage.key}`,{userId:uid,status:'sent'}]));
+  const h=harness(t,{[statePath]:{...enrollment,enrolledAt:T(start-100*DAY),activatedAt:T(start-99*DAY),onboardingHandled:{'first-receipt':'sent','receipt-shortcut':'sent','receipt-help':'sent'}},...oldClaims});
+  assert.equal(await restartZeroReceiptOnboarding(restartOptions),'enrolled');
+  await dispatchOnboardingEmails.run(eventAt(start));assert.equal(h.requests.length,0);
+  await dispatchOnboardingEmails.run(eventAt(day3-HOUR));assert.equal(h.requests.length,0);
+  await Promise.all([dispatchOnboardingEmails.run(eventAt(day3)),dispatchOnboardingEmails.run(eventAt(day3))]);
+  assert.equal(h.requests.length,1);assert.equal(h.documents.get(statePath).reminderDueAt.toMillis(),start+10*DAY);
+  await dispatchOnboardingEmails.run(eventAt(start+10*DAY));
+  await dispatchOnboardingEmails.run(eventAt(start+21*DAY+HOUR));
+  assert.equal(h.requests.length,3);assert.equal(h.documents.get(statePath).reminderDueAt,null);
+  for(const stage of policy.ONBOARDING_STAGES){
+    assert.equal(h.documents.get(`emailLifecycleDeliveries/${uid}_${stage.key}`).status,'sent');
+    assert.equal(h.documents.get(`emailLifecycleDeliveries/${uid}_${restartOptions.runId}-${stage.key}`).status,'sent');
+  }
+  assert.equal(h.documents.get(userPath).welcomeEmailSent,true);
+});
+test('a successful receipt after the restart cancels the fresh sequence',async t=>{
+  const h=harness(t);
+  await restartZeroReceiptOnboarding(restartOptions);
+  h.documents.set(`${userPath}/receipts/new`,{status:'final'});
+  await recordReceiptEmailActivation.run({params:{userId:uid,receiptId:'new'},data:{after:{data:()=>({status:'final'})},before:{data:()=>({status:'processing'})}}});
+  for(const days of [3,10,21])await dispatchOnboardingEmails.run(eventAt(start+days*DAY+HOUR));
+  assert.equal(h.requests.length,0);assert.equal(h.documents.get(statePath).reminderDueAt,null);
+});
+test('an old in-flight acceptance cannot advance a newly restarted sequence',async t=>{
+  const h=harness(t,{[statePath]:{...enrollment,events:[],enrolledAt:T(start-10*DAY),reminderDueAt:T(start)},[userPath]:{...profile,welcomeEmailSentAt:null}});
+  await deliver(start,'first-receipt','first-receipt-v1',()=>restartZeroReceiptOnboarding(restartOptions));
+  assert.deepEqual(h.documents.get(statePath).onboardingHandled,{});
+  assert.equal(h.documents.get(statePath).reminderDueAt.toMillis(),day3);
+  assert.equal(h.documents.get(`emailLifecycleDeliveries/${uid}_first-receipt-v1`).status,'sent');
+});
+test('a delayed activation event for a previously deleted receipt does not cancel the restart',async t=>{
+  const h=harness(t);
+  await restartZeroReceiptOnboarding(restartOptions);
+  await recordReceiptEmailActivation.run({params:{userId:uid,receiptId:'deleted-before-restart'},data:{after:{data:()=>({status:'final'})},before:{data:()=>({status:'processing'})}}});
+  assert.equal(h.documents.get(statePath).activatedAt,null);
+  assert.equal(h.documents.get(statePath).reminderDueAt.toMillis(),day3);
+});
+for(const alreadyClaimed of [false,true])test(`a stale scheduler cannot defer or advance a restarted clock (claimed=${alreadyClaimed})`,async t=>{
+  const h=harness(t,{[statePath]:{...enrollment,onboardingSequenceVersion:2},...(alreadyClaimed?{[`emailLifecycleDeliveries/${uid}_first-receipt-v1`]:{userId:uid,status:'sending'}}:{})},day3);
+  const auth=admin.auth(),original=auth.getUser;
+  let restarted=false;
+  auth.getUser=async id=>{
+    if(!restarted){restarted=true;await restartZeroReceiptOnboarding({...restartOptions,startedAt:new Date(day3)});}
+    return original(id);
+  };
+  await dispatchOnboardingEmails.run(eventAt(day3));
+  assert.equal(h.requests.length,0);
+  assert.deepEqual(h.documents.get(statePath).onboardingHandled,{});
+  assert.equal(h.documents.get(statePath).reminderDueAt.toMillis(),day3+3*DAY);
+});
+test('a delayed first welcome preserves the explicitly restarted clock',async t=>{
+  const h=harness(t,{[userPath]:{...profile,welcomeEmailSent:false,welcomeEmailSentAt:null}},start+DAY);
+  await restartZeroReceiptOnboarding(restartOptions);
+  await sendWelcomeEmail.run({auth:{uid,token:{email,email_verified:true}},data:{}});
+  assert.equal(h.requests.length,1);
+  assert.equal(h.documents.get(statePath).enrolledAt.toMillis(),start);
+  assert.equal(h.documents.get(statePath).reminderDueAt.toMillis(),day3);
+  assert.equal(h.documents.get(userPath).welcomeEmailSent,true);
 });

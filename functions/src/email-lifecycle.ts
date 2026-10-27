@@ -16,6 +16,7 @@ type DeliveryOptions = {
   send: () => Promise<unknown>;
   guard?: (transaction: admin.firestore.Transaction, state: admin.firestore.DocumentData) => Promise<boolean>;
   tipId?: string;
+  onboardingRunId?: string;
 };
 
 // A claim is written BEFORE contacting the provider. Every scheduler and welcome
@@ -64,13 +65,14 @@ export const deliverLifecycleEmail = async (options: DeliveryOptions): Promise<L
       transaction.set(messageRef, { userId, key, kind, status: "sent", acceptedAt: admin.firestore.Timestamp.now() }, { merge: true });
       if (kind === "welcome") {
         transaction.set(profileRef, { welcomeEmailSent: true, welcomeEmailSentAt: admin.firestore.Timestamp.fromMillis(at) }, { merge: true });
-        transaction.set(stateRef, {
+        // A delayed first welcome must not move an explicitly restarted clock.
+        if (!stateSnap.data()?.onboardingRunId) transaction.set(stateRef, {
           userId, enrolledAt: admin.firestore.Timestamp.fromMillis(at),
           onboardingSequenceVersion: ONBOARDING_SEQUENCE_VERSION,
           reminderDueAt: stateSnap.data()?.activatedAt ? null : admin.firestore.Timestamp.fromMillis(at + REMINDER_DELAY),
         }, { merge: true });
       }
-      if (isOnboardingReminder(kind)) {
+      if (isOnboardingReminder(kind) && (stateSnap.data()?.onboardingRunId ?? null) === (options.onboardingRunId ?? null)) {
         const state = stateSnap.data() ?? {};
         const handled = { ...state.onboardingHandled, [kind]: "sent" };
         const next = state.activatedAt ? null : nextOnboardingReminder(millis(state.enrolledAt), handled, at);

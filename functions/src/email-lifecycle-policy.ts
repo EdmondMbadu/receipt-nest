@@ -14,6 +14,14 @@ export type OnboardingReminderTemplate = (typeof ONBOARDING_STAGES)[number]["tem
 export const isOnboardingReminder = (kind: string): kind is OnboardingReminderTemplate =>
   ONBOARDING_STAGES.some(stage => stage.template === kind);
 
+// Signup keeps its original stable keys; an explicit restart has a separate
+// namespace so old delivery claims remain intact without blocking the new run.
+export const onboardingDeliveryKey = (state: Record<string, any>, stageKey: string): string =>
+  state.onboardingRunId ? `${state.onboardingRunId}-${stageKey}` : stageKey;
+
+export const sameOnboardingEnrollment = (left: Record<string, any>, right: Record<string, any>): boolean =>
+  (left.onboardingRunId ?? null) === (right.onboardingRunId ?? null) && millis(left.enrolledAt) === millis(right.enrolledAt);
+
 // Missed steps expire when the next step becomes relevant. A delayed job sends
 // one useful email, never a backlog of reminders in quick succession.
 export const nextOnboardingReminder = (enrolledAt: number, handled: Record<string, unknown> | undefined, now: number) => {

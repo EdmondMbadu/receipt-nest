@@ -4,7 +4,7 @@ import { onDocumentWritten } from "firebase-functions/v2/firestore";
 import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import { deliverLifecycleEmail, lifecycleStateRef } from "./email-lifecycle";
-import { deliveryTime, hasUsableReceipt, HOUR, isReminderHour, millis, nextOnboardingReminder, ONBOARDING_SEQUENCE_VERSION, REMINDER_EXPIRY } from "./email-lifecycle-policy";
+import { deliveryTime, hasUsableReceipt, HOUR, isReminderHour, millis, nextOnboardingReminder, onboardingDeliveryKey, ONBOARDING_SEQUENCE_VERSION, REMINDER_EXPIRY, sameOnboardingEnrollment } from "./email-lifecycle-policy";
 import { buildUnsubscribeUrls, isEmailSuppressed, normalizeEmailAddress, unsubscribeTokenSecret } from "./email-suppression";
 import { buildOnboardingEmailMessage } from "./onboarding-email-message";
 import { sendSendgridMail } from "./sendgrid";
@@ -13,7 +13,7 @@ const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
 const appBaseUrl = defineSecret("APP_BASE_URL");
 
 // Persist activation separately from current receipt count: deleting a receipt
-// must not enroll an experienced user back into first-receipt reminders.
+// must not automatically enroll an experienced user back into reminders.
 export const recordReceiptEmailActivation = onDocumentWritten(
   { region: "us-central1", document: "users/{userId}/receipts/{receiptId}" },
   async event => {
@@ -24,6 +24,12 @@ export const recordReceiptEmailActivation = onDocumentWritten(
     await db.runTransaction(async transaction => {
       const [profile, state] = await Promise.all([transaction.get(db.doc(`users/${userId}`)), transaction.get(ref)]);
       if (!profile.exists || state.data()?.activatedAt) return;
+      if (state.data()?.onboardingRunId) {
+        // A delayed event for a receipt deleted before the explicit restart
+        // must not cancel the fresh sequence. Check the current document.
+        const receipt = await transaction.get(db.doc(`users/${userId}/receipts/${event.params.receiptId}`));
+        if (!hasUsableReceipt(receipt.data())) return;
+      }
       transaction.set(ref, { userId, activatedAt: admin.firestore.Timestamp.now(), reminderDueAt: null, reminderStatus: "activated" }, { merge: true });
     });
   },
@@ -72,13 +78,16 @@ export const dispatchOnboardingEmails = onSchedule(
       const userId = item.id;
       const state = item.data();
       const update = async (fields: admin.firestore.UpdateData<admin.firestore.DocumentData>) => {
-        try { await item.ref.update(fields); } catch (error) { if ((error as { code?: number }).code !== 5) throw error; }
+        await db.runTransaction(async transaction => {
+          const fresh = await transaction.get(item.ref);
+          if (fresh.exists && sameOnboardingEnrollment(state, fresh.data() ?? {})) transaction.update(item.ref, fields);
+        });
       };
       const stop = (reason: string) => update({ reminderDueAt: null, reminderStatus: reason });
       const defer = (nextAt: number) => update({ reminderDueAt: admin.firestore.Timestamp.fromMillis(nextAt) });
       try {
-        // Only a successful welcome in this version enrolls a user. Old profiles
-        // are deliberately never backfilled into this campaign.
+        // Enrollment comes from an accepted welcome or an explicit, audited
+        // zero-receipt restart. Profile age alone never enrolls anyone.
         const enrolledAt = millis(state.enrolledAt);
         if (!enrolledAt || state.activatedAt || at >= enrolledAt + REMINDER_EXPIRY) { await stop("finished"); continue; }
         const step = nextOnboardingReminder(enrolledAt, state.onboardingHandled, at);
@@ -107,10 +116,11 @@ export const dispatchOnboardingEmails = onSchedule(
         const urls = buildUnsubscribeUrls(recipient, appBaseUrl.value(), unsubscribeTokenSecret.value());
         const content = buildOnboardingEmailMessage(step.template, appBaseUrl.value(), String(profile.firstName ?? ""), urls.pageUrl);
         const result = await deliverLifecycleEmail({
-          userId, recipient, key: step.key, kind: step.template, now,
+          userId, recipient, key: onboardingDeliveryKey(state, step.key), kind: step.template, now,
+          onboardingRunId: state.onboardingRunId,
           guard: async (transaction, freshState) => {
             const freshStep = nextOnboardingReminder(millis(freshState.enrolledAt), freshState.onboardingHandled, at);
-            if (freshState.activatedAt || !freshStep || freshStep.template !== step.template || millis(freshState.reminderDueAt) > at) return false;
+            if (!sameOnboardingEnrollment(state, freshState) || freshState.activatedAt || !freshStep || freshStep.template !== step.template || millis(freshState.reminderDueAt) > at) return false;
             const [processed, processing] = await Promise.all([transaction.get(usable), transaction.get(inFlight)]);
             return !processed.docs.some(doc => hasUsableReceipt(doc.data())) && processing.empty;
           },
@@ -129,6 +139,7 @@ export const dispatchOnboardingEmails = onSchedule(
             const [fresh, owner] = await Promise.all([transaction.get(item.ref), transaction.get(userRef)]);
             if (!fresh.exists || !owner.exists) return;
             const latest = fresh.data() ?? {};
+            if (!sameOnboardingEnrollment(state, latest)) return;
             const handled = { ...latest.onboardingHandled, [step.template]: latest.onboardingHandled?.[step.template] || "claimed" };
             const next = latest.activatedAt ? null : nextOnboardingReminder(enrolledAt, handled, at);
             transaction.set(item.ref, {
