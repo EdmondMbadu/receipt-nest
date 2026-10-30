@@ -24,6 +24,9 @@ export interface IssueDetail {
   events: Array<{ id: string; at: string; action: string; actor: string; cause?: string; notes?: string; reason?: string; outcome: string; before?: Record<string, unknown>; after?: Record<string, unknown>; extracted?: Record<string, unknown>; previousExtraction?: Record<string, unknown>; code?: string; stage?: string; model?: string; pipelineVersion?: string }>;
   historyLimited: boolean;
 }
+export interface ReceiptPreview {
+  imageUrl: string; pdfUrl: string; originalUrl: string; error: string;
+}
 export const ISSUE_CAUSE_OPTIONS = [
   { value: 'unknown', label: 'Unknown / investigate' },
   { value: 'service_error', label: 'Service error' },
@@ -68,12 +71,16 @@ export class ReceiptIssuesService {
     const result = await httpsCallable<{ userId: string; receiptId: string }, IssueDetail>(this.functions, 'getAdminReceiptIssue')({ userId, receiptId });
     return result.data;
   }
+  async preview(userId: string, receiptId: string): Promise<ReceiptPreview> {
+    const result = await httpsCallable<{ userId: string; receiptId: string }, ReceiptPreview>(this.functions, 'getAdminReceiptPreview')({ userId, receiptId });
+    return result.data;
+  }
   async act(data: Record<string, unknown>) {
     return httpsCallable(this.functions, 'actOnAdminReceiptIssue')(data);
   }
   message(error: unknown, fallback: string) {
     const value = error as { code?: string; message?: string };
     if (value?.code === 'functions/not-found') return 'The receipt or admin service was not found. Check that the receipt still exists and the latest functions are deployed.';
-    return value?.message && value.message !== 'INTERNAL' ? value.message : fallback;
+    return value?.message && value?.code !== 'functions/internal' && value.message.toLowerCase() !== 'internal' ? value.message : fallback;
   }
 }

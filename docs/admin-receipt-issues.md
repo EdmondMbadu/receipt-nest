@@ -6,7 +6,8 @@ The all-time dashboard statistic is labeled **Total receipts** because it uses a
 
 ## Workflow
 
-- Review the original beside the extracted fields. PDFs use the browser viewer; formats without a supported preview can be opened separately.
+- Review the original beside the extracted fields. The admin-only preview callable checks the selected receipt and file ownership on the server, so viewing another user’s receipt does not depend on client Storage metadata access. Existing download tokens are reused; tokenless uploads are returned inline to the authorized admin. PDFs use the browser viewer and HEIC images are converted for display. A missing source file does not prevent manual entry.
+- **Run again** fills the values extraction can detect and keeps unsaved form edits through polling. **Save to user’s receipt** writes the entered values directly to the customer’s receipt; investigation notes are optional.
 - Retry uses the same receipt. A transaction reserves a unique attempt; a server-only job triggers processing. Duplicate job deliveries and stale worker completions cannot restart or overwrite a newer attempt. Abandoned attempts become eligible for retry after ten minutes.
 - Existing manual values and values edited during an attempt are preserved. A retry replaces values that still match their previous extraction. A retry resolves an issue only when merchant, positive total, currency and date validate; otherwise the issue stays open.
 - Record a cause and note, then save verified corrections or resolve the existing values. Before/after values and extraction evidence stay in `users/{uid}/receipts/{id}/processingHistory`. Detailed history shows the latest 100 events, with older events retained.
@@ -23,7 +24,7 @@ Deploy the index and rules before releasing the UI. Wait for the `receipts.statu
 
 ```sh
 firebase deploy --only firestore:indexes,firestore:rules
-firebase deploy --only functions:processReceipt,functions:processAdminReceiptRetry,functions:getAdminReceiptIssues,functions:getAdminReceiptIssue,functions:actOnAdminReceiptIssue,functions:cleanupReceiptIssue
+firebase deploy --only functions:processReceipt,functions:processAdminReceiptRetry,functions:getAdminReceiptIssues,functions:getAdminReceiptIssue,functions:getAdminReceiptPreview,functions:actOnAdminReceiptIssue,functions:cleanupReceiptIssue
 firebase deploy --only hosting
 ```
 

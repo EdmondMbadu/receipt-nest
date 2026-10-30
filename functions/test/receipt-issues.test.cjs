@@ -87,7 +87,7 @@ test('admin callables and the processing worker enforce authorization, concurren
   const act=async(action,extra={})=>api.actOnAdminReceiptIssue.run({auth,data:{userId:'customer',receiptId:'receipt-1',revision:(await detail()).revision,cause:'unknown',notes:'Verified against original',action,...extra}});
 
   await t.test('unsigned and non-admin callers cannot list, read, or change receipt issues',async()=>{
-    for(const callable of [api.getAdminReceiptIssues, api.getAdminReceiptIssue, api.actOnAdminReceiptIssue]) {
+    for(const callable of [api.getAdminReceiptIssues, api.getAdminReceiptIssue, api.getAdminReceiptPreview, api.actOnAdminReceiptIssue]) {
       await assert.rejects(callable.run({data:{}}),{code:'unauthenticated'});
       await assert.rejects(callable.run({auth:{uid:'customer',token:{}},data:{}}),{code:'permission-denied'});
     }

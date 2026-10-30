@@ -21,6 +21,7 @@ describe('Receipt issues workspace', () => {
       unresolved: computed(() => rows().filter(row => row.state !== 'resolved')), affectedUsers: signal(1), oldest: signal('2026-10-20T12:00:00Z'),
       load: jasmine.createSpy('load').and.resolveTo(), act: jasmine.createSpy('act').and.resolveTo({}),
       detail: jasmine.createSpy('detail'), message: (_error: unknown, fallback: string) => fallback,
+      preview: jasmine.createSpy('preview').and.resolveTo({imageUrl:'',pdfUrl:'',originalUrl:'',error:'File missing. You can still enter values.'}),
     };
   }
   async function queue() {
@@ -59,13 +60,13 @@ describe('Receipt issues workspace', () => {
       issue: {cause:'unknown'},events:[],historyLimited:false };
     service.detail.and.resolveTo(detail);
     await TestBed.configureTestingModule({ imports: [ReceiptIssueDetailComponent], providers: [provideZonelessChangeDetection(), provideRouter([]), {provide:ActivatedRoute,useValue:{paramMap:of(convertToParamMap({userId:'customer',receiptId:'stuck'}))}}, {provide:ReceiptIssuesService,useValue:service}] }).compileComponents();
-    const fixture = TestBed.createComponent(ReceiptIssueDetailComponent); fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges();
+    const fixture = TestBed.createComponent(ReceiptIssueDetailComponent); fixture.detectChanges(); await fixture.whenStable(); await service.preview.calls.mostRecent().returnValue; await fixture.whenStable(); fixture.detectChanges();
     return {fixture, component:fixture.componentInstance, service, detail};
   }
   it('locks actions while a retry of a stuck receipt is running', async () => {
     const {component,fixture,service} = await workspace(true);
     expect(component.active()).toBeTrue();
-    const retry = [...fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>].find(button=>button.textContent?.includes('Retry processing'));
+    const retry = [...fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>].find(button=>button.textContent?.includes('Running…'));
     expect(retry?.disabled).toBeTrue(); await component.act('retry'); expect(service.act).not.toHaveBeenCalled();
   });
   it('records verified corrections with a root cause and requires notes before awaiting-user or flag actions', async () => {
@@ -74,5 +75,42 @@ describe('Receipt issues workspace', () => {
     component.notes.set('Subtotal was mistaken for total'); component.cause.set('extraction_mistake'); component.amount.set(30);
     await component.act('correct');
     expect(service.act).toHaveBeenCalledWith(jasmine.objectContaining({action:'correct',revision:123,cause:'extraction_mistake',values:jasmine.objectContaining({totalAmount:30})}));
+  });
+  it('loads the original through the admin preview endpoint and keeps manual entry available without an image', async () => {
+    const {component,fixture,service} = await workspace();
+    expect(service.preview).toHaveBeenCalledWith('customer','stuck');
+    expect(fixture.nativeElement.textContent).toContain('File missing. You can still enter values.');
+    const save=[...fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>].find(button=>button.textContent?.includes('Save to user’s receipt'));
+    expect(save?.disabled).toBeFalse();
+    component.merchant.set('Manual value'); component.reloadPreview(); await fixture.whenStable();
+    expect(component.merchant()).toBe('Manual value');
+  });
+  it('renders a real image response from the preview loader', async () => {
+    const {component,fixture,service} = await workspace();
+    const image='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/l9sAAAAASUVORK5CYII=';
+    service.preview.and.resolveTo({imageUrl:image,pdfUrl:'',originalUrl:image,error:''});
+    component.reloadPreview(); await fixture.whenStable(); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.preview-surface img')?.getAttribute('src')).toBe(image);
+  });
+  it('run again fills detected values while preserving unsaved admin edits through polling', async () => {
+    const {component,service,detail}=await workspace();
+    component.merchant.set('Verified merchant');
+    service.detail.and.resolveTo({...detail,revision:124,row:{...detail.row!,active:true},receipt:{...detail.receipt,status:'processing'}});
+    await component.act('retry'); expect(component.merchant()).toBe('Verified merchant');expect(component.active()).toBeTrue();
+    service.detail.and.resolveTo({...detail,revision:125,receipt:{...detail.receipt,totalAmount:40,currency:'CAD',merchant:'Detected merchant'}});
+    await component.load(false);
+    expect(component.merchant()).toBe('Verified merchant');expect(component.amount()).toBe(40);expect(component.currency()).toBe('CAD');
+    await component.act('correct');
+    expect(service.act).toHaveBeenCalledWith(jasmine.objectContaining({action:'correct',revision:125,values:jasmine.objectContaining({merchant:'Verified merchant',totalAmount:40})}));
+  });
+  it('a failed rerun keeps the form editable and reports the failure without losing the draft', async () => {
+    const {component,service,detail}=await workspace();
+    component.amount.set(55);
+    service.detail.and.resolveTo({...detail,revision:124,row:{...detail.row!,active:true},receipt:{...detail.receipt,status:'processing'}});
+    await component.act('retry');
+    service.detail.and.resolveTo({...detail,revision:125,row:{...detail.row!,kind:'failed',active:false}});
+    await component.load(false);
+    expect(component.amount()).toBe(55);expect(component.active()).toBeFalse();expect(component.error()).toContain('Run again could not finish');
+    expect(component.canCorrect()).toBeTrue();
   });
 });

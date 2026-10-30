@@ -5,6 +5,7 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { assertAdmin } from "./authz";
 import { diagnoseReceipt, ISSUE_CAUSES, missingReceiptFields, RECEIPT_STUCK_MS, receiptValues } from "./receipt-issue-policy";
 import { issueRefFor } from "./receipt-processing-state";
+import { loadReceiptPreview } from "./receipt-preview";
 
 const options = { region: "us-central1", timeoutSeconds: 60, memory: "512MiB" as const };
 async function authorize(request: any) {
@@ -83,6 +84,15 @@ export const getAdminReceiptIssue = onCall(options, async request => {
     issue: json(issue.data()), events: events.docs.map(doc => json({ id: doc.id, ...doc.data() })),
     historyLimited: events.size === 100,
   };
+});
+
+export const getAdminReceiptPreview = onCall({ ...options, memory: "1GiB" }, async request => {
+  await authorize(request);
+  const ref = target(request.data);
+  const receipt = await ref.get();
+  if (!receipt.exists) throw new HttpsError("not-found", "This receipt no longer exists.");
+  // File paths come from the selected receipt, never from a client-supplied storage path.
+  return loadReceiptPreview(receipt.data(), ref.parent.parent!.id, admin.storage().bucket());
 });
 
 export const actOnAdminReceiptIssue = onCall(options, async request => {

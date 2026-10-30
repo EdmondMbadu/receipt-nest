@@ -68,4 +68,4 @@ export { getGettingStartedState, saveGettingStartedProgress } from './getting-st
 export { dispatchOnboardingEmails, recordReceiptEmailActivation } from "./onboarding-emails";
 export { sendOnboardingTestEmail } from "./onboarding-email-preview";
 
-export { getAdminReceiptIssues, getAdminReceiptIssue, actOnAdminReceiptIssue, cleanupReceiptIssue } from "./receipt-issues";
+export { getAdminReceiptIssues, getAdminReceiptIssue, getAdminReceiptPreview, actOnAdminReceiptIssue, cleanupReceiptIssue } from "./receipt-issues";
