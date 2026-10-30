@@ -1,6 +1,6 @@
 # Admin receipt issues
 
-The admin dashboard links to `/app/admin/receipt-issues`. The queue includes failed extractions, receipts uploaded or processing for at least ten minutes, and incomplete receipts. Awaiting-user issues remain unresolved. Normally processing receipts are excluded unless a retry is already tracked as an open issue.
+The admin dashboard links to `/app/admin/receipt-issues`. Priority sorting keeps failures first and the oldest receipts first within each group. Choose Oldest first or Newest first for global chronological order, or click the Date header to reverse it. Resolved rows use their resolution date. Sorting stays selected through automatic refreshes. The queue includes failed extractions, receipts uploaded or processing for at least ten minutes, and incomplete receipts. Awaiting-user issues remain unresolved. Normally processing receipts are excluded unless a retry is already tracked as an open issue.
 
 The all-time dashboard statistic is labeled **Total receipts** because it uses account receipt counts. **Processing finished today** includes successful and unsuccessful completed attempts; it is not a model accuracy metric.
 

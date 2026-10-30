@@ -52,6 +52,34 @@ describe('Receipt issues workspace', () => {
     service.rows.set([issue('only-one', 'failed')]); expect(component.currentPage()).toBe(1); expect(component.visible().length).toBe(1);
     expect(component.patterns()[0].count).toBe(1);
   });
+  it('reverses the date sort across issue types while keeping the priority order available', async () => {
+    const {component,service,fixture}=await queue();
+    service.rows.set([
+      {...issue('old-failure','failed'),openedAt:'2026-05-01T12:00:00Z'},
+      {...issue('new-incomplete','incomplete'),openedAt:'2026-10-28T12:00:00Z'},
+      {...issue('middle-stuck','stuck'),openedAt:'2026-07-01T12:00:00Z'},
+    ]);
+    expect(component.visible().map(row=>row.receiptId)).toEqual(['old-failure','middle-stuck','new-incomplete']);
+    component.page.set(2);component.toggleDateSort();fixture.detectChanges();
+    expect(component.page()).toBe(1);expect(component.sort()).toBe('newest');
+    expect(component.visible().map(row=>row.receiptId)).toEqual(['new-incomplete','middle-stuck','old-failure']);
+    expect(fixture.nativeElement.querySelector('th[aria-sort]')?.getAttribute('aria-sort')).toBe('descending');
+    component.toggleDateSort();expect(component.visible().map(row=>row.receiptId)).toEqual(['old-failure','middle-stuck','new-incomplete']);
+    component.setSort('priority');expect(component.sortDescription()).toContain('Failures first');
+  });
+  it('sorts resolved history by its displayed resolution date and leaves unknown dates at the end', async () => {
+    const {component,service,fixture}=await queue();
+    service.rows.set([
+      {...issue('recent','failed','resolved'),openedAt:'2025-01-01',resolvedAt:'2026-10-28'},
+      {...issue('earlier','incomplete','resolved'),openedAt:'2026-10-27',resolvedAt:'2026-10-20'},
+      {...issue('unknown','incomplete','resolved'),resolvedAt:'invalid-date'},
+    ]);
+    component.setFilter('resolved');component.setSort('newest');
+    expect(component.visible().map(row=>row.receiptId)).toEqual(['recent','earlier','unknown']);
+    component.setSort('oldest');fixture.detectChanges();
+    expect(component.visible().map(row=>row.receiptId)).toEqual(['earlier','recent','unknown']);
+    expect(fixture.nativeElement.textContent).toContain('Date unknown');
+  });
 
   async function workspace(active = false) {
     const service = mockService();
