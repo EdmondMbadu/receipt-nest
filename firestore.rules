@@ -221,6 +221,14 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Operational records are accessible only through authenticated admin callables.
+    match /receiptIssues/{document=**} {
+      allow read, write: if false;
+    }
+    match /receiptProcessingJobs/{document=**} {
+      allow read, write: if false;
+    }
+
     match /categories/{categoryId} {
       allow read: if isAuthenticated();
       allow write: if false;

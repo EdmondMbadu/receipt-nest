@@ -22,6 +22,7 @@ setGlobalOptions({ maxInstances: 10 });
 // Export all functions
 export {
   processReceipt,
+  processAdminReceiptRetry,
   generateReceiptNote,
   backfillReceiptCategories,
   onReceiptCreatedUpdateUserCount,
@@ -66,3 +67,5 @@ export { getGettingStartedState, saveGettingStartedProgress } from './getting-st
 
 export { dispatchOnboardingEmails, recordReceiptEmailActivation } from "./onboarding-emails";
 export { sendOnboardingTestEmail } from "./onboarding-email-preview";
+
+export { getAdminReceiptIssues, getAdminReceiptIssue, actOnAdminReceiptIssue, cleanupReceiptIssue } from "./receipt-issues";

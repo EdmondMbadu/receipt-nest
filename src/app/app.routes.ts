@@ -81,6 +81,16 @@ export const routes: Routes = [
     loadComponent: () => import('./features/receipt-detail/receipt-detail.component').then((m) => m.ReceiptDetailComponent)
   },
   {
+    path: 'app/admin/receipt-issues/:userId/:receiptId',
+    title: 'Receipt issue · Admin', canActivate: [lazyAdminGuard],
+    loadComponent: () => import('./features/admin/receipt-issue-detail.component').then(m => m.ReceiptIssueDetailComponent)
+  },
+  {
+    path: 'app/admin/receipt-issues',
+    title: 'Receipt issues · Admin', canActivate: [lazyAdminGuard],
+    loadComponent: () => import('./features/admin/receipt-issues.component').then(m => m.ReceiptIssuesComponent)
+  },
+  {
     path: 'app/admin',
     title: 'Admin',
     canActivate: [lazyAdminGuard],

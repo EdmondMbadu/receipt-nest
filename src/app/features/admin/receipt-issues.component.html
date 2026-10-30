@@ -1,0 +1,50 @@
+<main class="issues-page">
+  <div class="issues-wrap">
+    <a routerLink="/app/admin" class="back-link">← Admin dashboard</a>
+    <header class="page-heading">
+      <div><p class="eyebrow"><span class="health-dot"></span> Receipt operations</p><h1>Every receipt, accounted for.</h1><p class="subtitle">Find what needs attention. Fix the receipt. Keep what you learn.</p></div>
+      <button class="button secondary" (click)="issues.load()" [disabled]="issues.loading()"><span aria-hidden="true">↻</span> {{ issues.loading() ? 'Refreshing…' : 'Refresh' }}</button>
+    </header>
+
+    <section class="summary-grid" aria-label="Receipt health">
+      <button class="summary-card primary-summary" (click)="setFilter('all')"><span class="eyebrow">Needs attention</span><strong>{{ issues.loaded() ? (issues.unresolved().length | number) : '—' }}</strong><span>unresolved receipts <span aria-hidden="true">↗</span></span></button>
+      <div class="summary-card"><span class="eyebrow">Customer impact</span><strong>{{ issues.loaded() ? issues.affectedUsers() : '—' }}</strong><span>affected users</span></div>
+      <div class="summary-card"><span class="eyebrow">Oldest unresolved</span><strong class="time-value">{{ issues.loaded() ? (issues.oldest() ? waiting(issues.oldest()) : 'All clear') : '—' }}</strong><span>prioritize the longest wait</span></div>
+      <button class="summary-card" (click)="setFilter('resolved')"><span class="eyebrow">Resolution history</span><strong>{{ issues.loaded() ? count('resolved') : '—' }}</strong><span>resolved with a record <span aria-hidden="true">↗</span></span></button>
+    </section>
+
+    @if (issues.error()) { <div class="notice error" role="alert"><div><strong>Couldn’t refresh receipt issues</strong><p>{{ issues.error() }}</p>@if (issues.loaded()) { <p>The previous results are still shown below.</p> }</div><button class="button secondary" (click)="issues.load()">Try again</button></div> }
+
+    <section class="panel queue-panel" aria-labelledby="queue-title">
+      <div class="panel-heading"><div><h2 id="queue-title">Receipt issues <span class="count-bubble">{{ filtered().length }}</span></h2><p>Failures first, then the oldest receipts in each group.</p></div><label class="search-field"><span aria-hidden="true">⌕</span><input type="search" aria-label="Search receipt issues" placeholder="Search user, receipt, merchant…" [ngModel]="search()" (ngModelChange)="search.set($event); page.set(1)"></label></div>
+      <nav class="filter-tabs" aria-label="Filter receipt issues">@for (tab of filters; track tab) { <button [class.selected]="filter() === tab" [attr.aria-pressed]="filter() === tab" (click)="setFilter(tab)">{{ label(tab) }} <span>{{ count(tab) }}</span></button> }</nav>
+      @if (pattern()) { <div class="pattern-filter">Showing one recurring problem <button (click)="pattern.set('')">Clear filter ×</button></div> }
+      @if (issues.loading() && !issues.loaded()) {
+        <div class="empty-state" role="status"><div class="loading-ring"></div><h3>Checking receipt health</h3><p>Looking for failures, incomplete extractions, and receipts that stopped processing.</p></div>
+      } @else if (!visible().length) {
+        <div class="empty-state"><span class="empty-icon" aria-hidden="true">{{ search() || pattern() ? '⌕' : '✓' }}</span><h3>{{ search() || pattern() ? 'No matching receipts' : filter() === 'all' ? 'Everything is caught up' : 'No receipts in this group' }}</h3><p>{{ search() || pattern() ? 'Try another search or clear your filters.' : 'New issues will appear here when a receipt fails, gets stuck, or needs verification.' }}</p>@if (search() || pattern()) { <button class="button secondary" (click)="search.set(''); pattern.set(''); setFilter('all')">Clear filters</button> }</div>
+      } @else {
+        <div class="table-scroll"><table><thead><tr><th scope="col">Receipt / customer</th><th scope="col">What needs attention</th><th scope="col">{{ filter() === 'resolved' ? 'Resolved' : filter() === 'all_history' ? 'Waiting / resolved' : 'Waiting' }}</th><th scope="col">Next step</th><th scope="col"><span class="sr-only">Review</span></th></tr></thead><tbody>
+          @for (row of visible(); track row.userId + '/' + row.receiptId) {
+            <tr><td><a class="receipt-name" [routerLink]="['/app/admin/receipt-issues', row.userId, row.receiptId]">{{ row.merchant === 'Unknown merchant' ? row.fileName : row.merchant }}</a><span class="cell-secondary">{{ row.email }}</span><span class="receipt-id" [title]="row.receiptId">#{{ row.receiptId }}</span></td>
+              <td><div class="badge-row"><span class="badge" [class]="'badge ' + (row.state === 'resolved' ? 'resolved' : row.active ? 'running' : row.kind)">{{ row.state === 'resolved' ? 'Resolved' : row.active ? 'Processing' : label(row.kind) }}</span>@if (row.state === 'awaiting_user') { <span class="badge waiting">Awaiting user</span> }</div><span class="cell-reason">{{ row.reason }}</span></td>
+              <td class="age-cell" [attr.data-label]="row.state === 'resolved' ? 'Resolved' : 'Waiting'"><strong>{{ waiting(row.state === 'resolved' ? row.resolvedAt : row.openedAt) }}</strong><span class="cell-secondary">{{ (row.state === 'resolved' ? row.resolvedAt : row.openedAt) | date:'MMM d, h:mm a' }}</span></td>
+              <td class="next-step">{{ row.state === 'resolved' ? 'View outcome & history' : row.active ? 'Waiting for processing to finish' : row.state === 'awaiting_user' ? 'Follow up on the requested information' : row.kind === 'stuck' || row.kind === 'failed' ? 'Inspect & retry' : 'Review extracted fields' }}</td>
+              <td><a class="review-link" [routerLink]="['/app/admin/receipt-issues', row.userId, row.receiptId]" [attr.aria-label]="'Review receipt ' + row.receiptId">Review <span aria-hidden="true">→</span></a></td></tr>
+          }
+        </tbody></table></div>
+        <footer class="table-footer"><span>{{ filtered().length }} {{ filtered().length === 1 ? 'receipt' : 'receipts' }} · Updated {{ issues.fetchedAt() | date:'h:mm a' }} · Refreshes every minute</span><div><button class="page-button" aria-label="Previous page" [disabled]="currentPage() <= 1" (click)="page.set(currentPage() - 1)">←</button><span>{{ currentPage() }} / {{ pages() }}</span><button class="page-button" aria-label="Next page" [disabled]="currentPage() >= pages()" (click)="page.set(currentPage() + 1)">→</button></div></footer>
+      }
+    </section>
+
+    <div class="bottom-grid">
+      <section class="panel learning-panel"><div class="panel-heading"><div><p class="eyebrow">Learn from every fix</p><h2>Recurring problems</h2><p>Patterns across open and resolved issues.</p></div><span class="small-icon" aria-hidden="true">↗</span></div>
+        @if (!patterns().length) { <p class="panel-copy">As issues are recorded and resolved, repeated failure reasons will appear here.</p> }
+        @for (group of patterns(); track group.key) { <button class="pattern-row" (click)="selectPattern(group.key)"><span><strong>{{ group.reason }}</strong><small>{{ label(group.cause) }} · {{ group.users.size }} users · {{ group.open }} unresolved</small></span><span class="pattern-count">{{ group.count }} <span aria-hidden="true">→</span></span></button> }
+        <p class="panel-footnote">Corrections stay in the history for future evaluation. They do not automatically train the model.</p>
+      </section>
+      <section class="panel lookup-panel"><div class="panel-heading"><div><p class="eyebrow">Investigate a reported mistake</p><h2>Find another receipt</h2><p>Completed receipts can need attention, too.</p></div></div><form (ngSubmit)="lookup()"><label>User ID<input name="lookupUser" required autocomplete="off" placeholder="Receipt owner’s user ID" [ngModel]="lookupUser()" (ngModelChange)="lookupUser.set($event)"></label><label>Receipt ID<input name="lookupReceipt" required autocomplete="off" placeholder="Full receipt ID" [ngModel]="lookupReceipt()" (ngModelChange)="lookupReceipt.set($event)"></label><button class="button secondary" type="submit" [disabled]="!lookupUser().trim() || !lookupReceipt().trim()">Open receipt <span aria-hidden="true">→</span></button></form><p class="panel-footnote">Review the original, flag a problem, and keep the verified correction.</p></section>
+    </div>
+    <p class="page-footnote">Normally processing receipts stay out of this queue. Receipts become stuck after 10 minutes. Awaiting-user issues remain unresolved.</p>
+  </div>
+</main>

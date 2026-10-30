@@ -32,6 +32,7 @@ import {
 import { FeedbackMessage } from '../../models/feedback.model';
 import { SIGNUP_SOURCE_OPTIONS, UserProfile } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
+import { ReceiptIssuesCardComponent } from './receipt-issues-card.component';
 import { GameStatsPanelComponent } from './game-stats-panel.component';
 import {
   EffectiveSubscriptionSource,
@@ -265,7 +266,7 @@ const MONTH_LABELS = [
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, GameStatsPanelComponent],
+  imports: [CommonModule, FormsModule, RouterLink, GameStatsPanelComponent, ReceiptIssuesCardComponent],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.css'
 })

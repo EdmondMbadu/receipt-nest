@@ -13,6 +13,8 @@ import { VertexAI } from "@google-cloud/vertexai";
 import sharp from "sharp";
 import heicDecode from "heic-decode";
 import { assertAdmin } from "./authz";
+import { claimReceiptAttempt, finishReceiptAttempt } from "./receipt-processing-state";
+import { processingFailure, RECEIPT_MODEL_ID } from "./receipt-issue-policy";
 
 // Types
 interface ExtractedField<T> {
@@ -170,7 +172,7 @@ async function extractWithGemini(
   // Use stable model ID - gemini-2.5-flash is recommended
   // Fallback order: gemini-2.5-flash -> gemini-2.0-flash
   const model = vertexAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
+    model: RECEIPT_MODEL_ID,
     generationConfig: {
       temperature: 0.1,
       maxOutputTokens: 1024,
@@ -210,7 +212,7 @@ Instructions:
 Return ONLY the JSON object, no other text.`;
 
   logger.info("Starting Gemini extraction", {
-    model: "gemini-2.5-flash",
+    model: RECEIPT_MODEL_ID,
     mimeType: geminiMimeType,
     bufferSize: fileBuffer.length
   });
@@ -382,27 +384,28 @@ export const processReceipt = onDocumentCreated(
       return;
     }
 
-    const receiptData = snapshot.data();
     const { userId, receiptId } = event.params;
+    await runReceiptProcessing(userId, receiptId, event.id, false);
+  }
+);
 
-    logger.info(`Processing receipt: ${receiptId} for user: ${userId}`);
+export const processAdminReceiptRetry = onDocumentCreated(
+  { document: "receiptProcessingJobs/{jobId}", region: "us-central1", memory: "1GiB", timeoutSeconds: 300 },
+  async event => {
+    const job = event.data?.data();
+    if (!job) return;
+    await runReceiptProcessing(job.userId, job.receiptId, event.params.jobId, true);
+    await event.data!.ref.delete();
+  }
+);
 
-    if (receiptData.skipProcessing === true) {
-      logger.info(`Skipping processing for receipt ${receiptId} (skipProcessing=true).`);
-      return;
-    }
-
-    // Get Firestore reference
-    const db = admin.firestore();
-    const receiptRef = db.doc(`users/${userId}/receipts/${receiptId}`);
-
+async function runReceiptProcessing(userId: string, receiptId: string, attemptId: string, retry: boolean) {
+    const receiptRef = admin.firestore().doc(`users/${userId}/receipts/${receiptId}`);
+    const receiptData = await claimReceiptAttempt(receiptRef, attemptId, retry);
+    if (!receiptData) return;
+    let stage = "file";
+    let extractedForHistory: ExtractionResult | undefined;
     try {
-      // Update status to processing
-      await receiptRef.update({
-        status: "processing",
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
-
       // Get the file from Storage
       const storagePath = receiptData.file?.storagePath;
       if (!storagePath) {
@@ -422,6 +425,7 @@ export const processReceipt = onDocumentCreated(
 
       logger.info(`Downloaded file: ${storagePath}, size: ${fileBuffer.length} bytes, mimeType: ${mimeType}`);
 
+      stage = "conversion";
       // Convert HEIC/HEIF to JPEG for processing
       let processBuffer = fileBuffer;
       let processMimeType = mimeType;
@@ -478,47 +482,17 @@ export const processReceipt = onDocumentCreated(
           }
         }
 
-        // If still not converted, we'll try Gemini with the original file anyway
+        // Keep conversion failures visible instead of mislabeling the original as a JPEG.
         if (!converted) {
-          logger.warn("All HEIC conversion methods failed. Attempting Gemini with raw file...");
-          processMimeType = "image/jpeg"; // Tell Gemini it's JPEG anyway
+          throw new Error("Image conversion failed");
         }
       }
 
-      // Step 1: Gemini extraction for accurate receipt parsing
-      let extraction: ExtractionResult | null = null;
-
-      try {
-        extraction = await extractWithGemini(processBuffer, processMimeType);
-        if (extraction) {
-          logger.info("Gemini extraction complete", {
-            confidence: extraction.overallConfidence,
-            total: extraction.totalAmount?.value,
-            merchant: extraction.supplierName?.value
-          });
-        }
-      } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        const errorStack = error instanceof Error ? error.stack : undefined;
-        logger.error("Two-pass Gemini extraction failed", {
-          message: errorMessage,
-          stack: errorStack,
-          mimeType: processMimeType,
-          bufferSize: processBuffer.length
-        });
-      }
-
-      // If we still have no extraction, mark for review
-      if (!extraction) {
-        await receiptRef.update({
-          status: "needs_review",
-          processedAt: admin.firestore.FieldValue.serverTimestamp(),
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
-        logger.warn("No extraction successful, marked for review");
-        return;
-      }
-
+      stage = "extraction";
+      const extraction = await extractWithGemini(processBuffer, processMimeType);
+      if (!extraction) throw new Error("The model returned an empty response");
+      extractedForHistory = extraction;
+      stage = "classification";
       // Step 3: Normalize merchant name
       const merchant = await normalizeMerchant(
         userId,
@@ -532,94 +506,17 @@ export const processReceipt = onDocumentCreated(
         extraction
       );
 
-      // Step 5: Determine final status
-      // Be lenient - if we have a total amount, approve it
-      const hasTotalAmount = extraction.totalAmount?.value !== undefined && extraction.totalAmount.value > 0;
-      const hasMerchant = extraction.supplierName?.value !== undefined;
-
-      // Auto-approve if we have a total amount - this is the most important field
-      // Users can always edit merchant/date later, but having SOME data is better than needs_review
-      let status: string;
-      if (hasTotalAmount) {
-        status = "final";
-        logger.info("Auto-approving receipt with total amount", {
-          totalAmount: extraction.totalAmount?.value,
-          merchant: extraction.supplierName?.value,
-          hasMerchant,
-          confidence: extraction.overallConfidence
-        });
-      } else {
-        status = "needs_review";
-        logger.warn("No total amount extracted, marking for review", {
-          merchant: extraction.supplierName?.value,
-          confidence: extraction.overallConfidence
-        });
-      }
-
-      // Step 6: Update receipt with extraction results
-      const updateData: Record<string, unknown> = {
-        status,
-        processedAt: admin.firestore.FieldValue.serverTimestamp(),
-        extraction,
-        merchant,
-        category,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      };
-
-      // ALWAYS set final values if they exist (not just for high confidence)
-      logger.info(`Setting final values for ${receiptId}`, {
-        hasTotal: extraction.totalAmount?.value !== undefined,
-        totalValue: extraction.totalAmount?.value,
-        totalType: typeof extraction.totalAmount?.value,
-        hasCurrency: !!extraction.currency?.value,
-        hasDate: !!extraction.date?.value,
+      await finishReceiptAttempt(receiptRef, attemptId, receiptData, retry, {
+        extraction, merchant, category,
+        totalAmount: extraction.totalAmount?.value,
+        currency: extraction.currency?.value,
+        date: extraction.date?.value,
       });
-
-      if (extraction.totalAmount?.value !== undefined) {
-        updateData.totalAmount = extraction.totalAmount.value;
-        logger.info(`Adding totalAmount to update: ${extraction.totalAmount.value}`);
-      } else {
-        logger.warn(`No totalAmount to add for receipt ${receiptId}`);
-      }
-
-      if (extraction.currency?.value) {
-        updateData.currency = extraction.currency.value;
-      }
-      if (extraction.date?.value) {
-        updateData.date = extraction.date.value;
-      }
-
-      // Log the full update data (excluding extraction for brevity)
-      logger.info(`Updating receipt ${receiptId}`, {
-        status: updateData.status,
-        totalAmount: updateData.totalAmount,
-        currency: updateData.currency,
-        date: updateData.date,
-        merchantName: merchant.canonicalName,
-      });
-
-      await receiptRef.update(updateData);
-
-      logger.info(`Receipt processed successfully: ${receiptId}`, {
-        status,
-        merchant: merchant.canonicalName,
-        category: category.name,
-        amount: extraction.totalAmount?.value,
-        savedTotalAmount: updateData.totalAmount,
-      });
-
     } catch (error) {
-      logger.error("Error processing receipt", error);
-
-      // Update status to needs_review on error
-      await receiptRef.update({
-        status: "needs_review",
-        processedAt: admin.firestore.FieldValue.serverTimestamp(),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
+      logger.error("Error processing receipt", { userId, receiptId, attemptId, stage, error });
+      await finishReceiptAttempt(receiptRef, attemptId, receiptData, retry, { extraction: extractedForHistory }, { ...processingFailure(error, stage), stage });
     }
-  }
-);
+}
 
 /**
  * Background note generation.
