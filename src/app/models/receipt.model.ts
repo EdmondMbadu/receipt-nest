@@ -50,6 +50,18 @@ export interface ReceiptFile {
   uploadedAt: Timestamp | ReturnType<typeof serverTimestamp>;
 }
 
+/** Provenance for one receipt recovered from a larger upload. */
+export interface ReceiptSourceBundle {
+  recoveryId: string;
+  sourceReceiptId: string;
+  storagePath: string;
+  originalName: string;
+  page: number;
+  pageCount: number;
+  sha256: string;
+  receiptSha256: string;
+}
+
 /**
  * Extraction results from Document AI or Gemini
  */
@@ -116,6 +128,7 @@ export interface Receipt {
 
   // File storage
   file: ReceiptFile;
+  sourceBundle?: ReceiptSourceBundle;
 
   // Extraction results (populated after processing)
   extraction?: ExtractionResult;

@@ -1,6 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app } from '../../../../environments/environments';
+import { ReceiptSourceBundle } from '../../models/receipt.model';
 
 export type IssueFilter = 'all' | 'failed' | 'stuck' | 'incomplete' | 'awaiting_user' | 'resolved' | 'all_history';
 export interface ReceiptIssueRow {
@@ -14,6 +15,7 @@ export interface IssueDetail {
   row: ReceiptIssueRow | null; revision: number;
   receipt: {
     id: string; userId: string; status: string; totalAmount: number | null; currency: string;
+    sourceBundle?: ReceiptSourceBundle;
     date: string; merchant: string; category: string; createdAt: string; updatedAt: string;
     file?: { storagePath: string; mimeType: string; originalName: string; sizeBytes: number };
     email?: { previewStoragePath?: string; pdfStoragePath?: string };
@@ -36,6 +38,7 @@ export const ISSUE_CAUSE_OPTIONS = [
   { value: 'classification_mistake', label: 'Category or merchant mistake' },
 ];
 export function issueLabel(value: string): string {
+  if (value === 'bundle_split') return 'Recovered from combined PDF';
   return ({ all: 'All unresolved', all_history: 'All history', failed: 'Failed', stuck: 'Stuck', incomplete: 'Incomplete', awaiting_user: 'Awaiting user', resolved: 'Resolved', open: 'Open', processing: 'Initial processing', retry_requested: 'Retry requested', retry: 'Processing retry', correct: 'Fields corrected', resolve: 'Verified & resolved', reopen: 'Reopened', flag: 'Flagged for review', succeeded: 'Validated', verified: 'Verified', service_error: 'Service error', file_problem: 'File problem', unreadable_image: 'Unreadable image', extraction_mistake: 'Extraction mistake', classification_mistake: 'Category or merchant mistake', unknown: 'Unknown / investigate' } as Record<string, string>)[value] || value.replace(/_/g, ' ');
 }
 export function waitingSince(value: string | null | undefined, now = Date.now()): string {
@@ -80,6 +83,11 @@ export class ReceiptIssuesService {
   async preview(userId: string, receiptId: string): Promise<ReceiptPreview> {
     const result = await httpsCallable<{ userId: string; receiptId: string }, ReceiptPreview>(this.functions, 'getAdminReceiptPreview')({ userId, receiptId });
     return result.data;
+  }
+  async sourceBundleUrl(userId: string, receiptId: string): Promise<string> {
+    const result = await httpsCallable<{ userId: string; receiptId: string; sourceBundle: boolean }, ReceiptPreview>(this.functions, 'getAdminReceiptPreview')({ userId, receiptId, sourceBundle: true });
+    if (!result.data.originalUrl) throw new Error(result.data.error || 'The original upload could not be loaded.');
+    return result.data.originalUrl;
   }
   async act(data: Record<string, unknown>) {
     return httpsCallable(this.functions, 'actOnAdminReceiptIssue')(data);

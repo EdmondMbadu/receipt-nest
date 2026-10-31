@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 import { ReceiptIssuesComponent } from './receipt-issues.component';
 import { ReceiptIssueDetailComponent } from './receipt-issue-detail.component';
 import { IssueDetail, ReceiptIssueRow, ReceiptIssuesService } from './receipt-issues.service';
+import { PdfThumbnailService } from '../../services/pdf-thumbnail.service';
 
 const issue = (id: string, kind: ReceiptIssueRow['kind'], state: ReceiptIssueRow['state'] = 'open'): ReceiptIssueRow => ({
   userId: 'customer', receiptId: id, email: 'customer@example.com', fileName: 'receipt.jpg', merchant: 'Market',
@@ -22,6 +23,7 @@ describe('Receipt issues workspace', () => {
       load: jasmine.createSpy('load').and.resolveTo(), act: jasmine.createSpy('act').and.resolveTo({}),
       detail: jasmine.createSpy('detail'), message: (_error: unknown, fallback: string) => fallback,
       preview: jasmine.createSpy('preview').and.resolveTo({imageUrl:'',pdfUrl:'',originalUrl:'',error:'File missing. You can still enter values.'}),
+      sourceBundleUrl: jasmine.createSpy('sourceBundleUrl').and.resolveTo('https://example.test/original-bundle.pdf'),
     };
   }
   async function queue() {
@@ -103,7 +105,7 @@ describe('Receipt issues workspace', () => {
       issue: {cause:'unknown'},events:[],historyLimited:false };
     service.detail.and.resolveTo(detail);
     configure?.(service);
-    await TestBed.configureTestingModule({ imports: [ReceiptIssueDetailComponent], providers: [provideZonelessChangeDetection(), provideRouter([]), {provide:ActivatedRoute,useValue:{paramMap:of(convertToParamMap({userId:'customer',receiptId:'stuck'}))}}, {provide:ReceiptIssuesService,useValue:service}] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [ReceiptIssueDetailComponent], providers: [provideZonelessChangeDetection(), provideRouter([]), {provide:ActivatedRoute,useValue:{paramMap:of(convertToParamMap({userId:'customer',receiptId:'stuck'}))}}, {provide:ReceiptIssuesService,useValue:service}, {provide:PdfThumbnailService,useValue:{generateThumbnail:jasmine.createSpy().and.resolveTo('data:image/png;base64,receipt-preview')}}] }).compileComponents();
     const fixture = TestBed.createComponent(ReceiptIssueDetailComponent); fixture.detectChanges(); await fixture.whenStable(); await service.preview.calls.mostRecent().returnValue; await fixture.whenStable(); fixture.detectChanges();
     return {fixture, component:fixture.componentInstance, service, detail};
   }
@@ -126,6 +128,20 @@ describe('Receipt issues workspace', () => {
     await component.load(false);
     expect(service.detail).toHaveBeenCalledTimes(2);
     expect(service.preview).toHaveBeenCalledTimes(1);
+  });
+  it('keeps a recovered receipt preview separate from its original bundle link', async () => {
+    const { component, service, detail, fixture } = await workspace();
+    service.detail.and.resolveTo({ ...detail, receipt: { ...detail.receipt,
+      sourceBundle: { recoveryId:'recovery', sourceReceiptId:'original', storagePath:'users/customer/receipts/original.pdf', originalName:'Original.pdf', page:3, pageCount:17, sha256:'source-hash', receiptSha256:'page-hash' },
+    } });
+    service.preview.and.resolveTo({ imageUrl:'', pdfUrl:'https://example.test/page-03.pdf', originalUrl:'https://example.test/page-03.pdf', error:'' });
+    await component.load(true); await fixture.whenStable(); fixture.detectChanges();
+    expect(service.sourceBundleUrl).toHaveBeenCalledWith('customer', 'stuck');
+    expect(fixture.nativeElement.textContent).toContain('Recovered from page 3 of 17');
+    const link = [...fixture.nativeElement.querySelectorAll('a') as NodeListOf<HTMLAnchorElement>].find(a => a.textContent?.includes('Open original 17-page PDF'));
+    expect(link?.href).toBe('https://example.test/original-bundle.pdf');
+    expect(component.originalUrl()).toBe('https://example.test/page-03.pdf');
+    expect(fixture.nativeElement.querySelector('app-receipt-page-preview img')).not.toBeNull();
   });
   it('locks actions while a retry of a stuck receipt is running', async () => {
     const {component,fixture,service} = await workspace(true);

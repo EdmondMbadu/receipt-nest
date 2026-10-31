@@ -108,7 +108,8 @@
 
               <!-- PDF preview with embedded viewer -->
               <div *ngIf="imageUrl() && !hasHtmlPreview() && isPdf()" class="receipt-preview-scroll h-[62svh] max-h-[480px] min-h-[320px] w-full overflow-auto">
-                <iframe *ngIf="safeImageUrl()" [src]="safeImageUrl()!" class="h-full w-full min-w-[520px] rounded sm:min-w-0"
+                <app-receipt-page-preview *ngIf="receipt()!.sourceBundle" [src]="imageUrl()!" />
+                <iframe *ngIf="safeImageUrl() && !receipt()!.sourceBundle" [src]="safeImageUrl()!" class="h-full w-full min-w-[520px] rounded sm:min-w-0"
                   title="PDF Preview"></iframe>
               </div>
 
@@ -154,6 +155,16 @@
                   Download
                 </button>
               </div>
+              @if (receipt()!.sourceBundle; as bundle) {
+                <div class="mt-3 border-t border-slate-200 pt-3 text-xs text-slate-600 dark:border-slate-700 dark:text-slate-400">
+                  <p>This receipt was recovered from page {{ bundle.page }} of {{ bundle.pageCount }} of your original upload.</p>
+                  @if (sourceBundleUrl()) {
+                    <a class="mt-1 inline-block font-medium text-emerald-700 underline dark:text-emerald-400" [href]="sourceBundleUrl()" target="_blank" rel="noopener noreferrer">Open original {{ bundle.pageCount }}-page PDF ↗</a>
+                  } @else if (sourceBundleError()) {
+                    <button class="mt-1 font-medium text-emerald-700 underline dark:text-emerald-400" type="button" (click)="loadSourceBundle()">Reload original upload link</button>
+                  }
+                </div>
+              }
             </div>
           </div>
 
@@ -308,7 +319,8 @@
     <img *ngIf="!hasHtmlPreview() && !isPdf() && !isHeic()" [src]="imageUrl()" alt="Receipt"
       class="max-h-[88svh] w-full object-contain rounded-lg" />
 
-    <iframe *ngIf="!hasHtmlPreview() && isPdf() && safeImageUrl()" [src]="safeImageUrl()!" class="h-[88svh] w-[800px] max-w-none rounded-lg bg-white sm:w-full"
+    <app-receipt-page-preview *ngIf="!hasHtmlPreview() && isPdf() && receipt()!.sourceBundle && imageUrl()" [src]="imageUrl()!" />
+    <iframe *ngIf="!hasHtmlPreview() && isPdf() && safeImageUrl() && !receipt()!.sourceBundle" [src]="safeImageUrl()!" class="h-[88svh] w-[800px] max-w-none rounded-lg bg-white sm:w-full"
       title="PDF Document"></iframe>
 
     <!-- HEIC in modal - show converted preview -->

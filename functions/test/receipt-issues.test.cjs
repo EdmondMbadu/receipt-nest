@@ -99,6 +99,13 @@ test('admin callables and the processing worker enforce authorization, concurren
     assert.equal(result.rows[0].uploadedAt, snapshot(path).get('createdAt').toDate().toISOString());
     assert.equal((await detail()).events.length,0);
   });
+  await t.test('receipt detail preserves source provenance separately from the individual file',async()=>{
+    const sourceBundle={storagePath:'users/customer/receipts/original.pdf',originalName:'Original.pdf',page:1,pageCount:17};
+    seed(path,{...snapshot(path).data(),sourceBundle});
+    const result=await detail();
+    assert.deepEqual(result.receipt.sourceBundle,sourceBundle);
+    assert.equal(result.receipt.file.originalName,'receipt.jpg');
+  });
   await t.test('awaiting-user state persists, missing fields cannot be resolved, malformed corrections are rejected',async()=>{
     await act('awaiting_user');assert.equal((await detail()).row.state,'awaiting_user');
     await assert.rejects(act('resolve'),{code:'failed-precondition'});

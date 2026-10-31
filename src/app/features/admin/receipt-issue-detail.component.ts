@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ReceiptPagePreviewComponent } from '../../components/receipt-page-preview/receipt-page-preview.component';
 import { DEFAULT_CATEGORIES } from '../../models/category.model';
 import { ISSUE_CAUSE_OPTIONS, IssueDetail, ReceiptIssuesService, issueLabel, waitingSince } from './receipt-issues.service';
 
@@ -12,7 +13,7 @@ interface ReceiptFormValues {
 }
 
 @Component({
-  selector: 'app-receipt-issue-detail', standalone: true, imports: [CommonModule, FormsModule, RouterLink],
+  selector: 'app-receipt-issue-detail', standalone: true, imports: [CommonModule, FormsModule, RouterLink, ReceiptPagePreviewComponent],
   templateUrl: './receipt-issue-detail.component.html', styleUrls: ['./receipt-issues-layout.css', './receipt-issues-base.css', './receipt-issues.css', './receipt-issues-support.css', './receipt-issue-detail.css', './receipt-issues-responsive.css'],
 })
 export class ReceiptIssueDetailComponent implements OnInit, OnDestroy {
@@ -30,6 +31,8 @@ export class ReceiptIssueDetailComponent implements OnInit, OnDestroy {
   readonly safePdf = signal<SafeResourceUrl | null>(null);
   readonly previewError = signal('');
   readonly previewLoading = signal(false);
+  readonly sourceBundleUrl = signal('');
+  readonly sourceBundleError = signal(false);
   readonly cause = signal('unknown');
   readonly notes = signal('');
   readonly merchant = signal('');
@@ -65,6 +68,7 @@ export class ReceiptIssueDetailComponent implements OnInit, OnDestroy {
       this.userId = params.get('userId') || ''; this.receiptId = params.get('receiptId') || '';
       this.retryDraft = null; this.formSeed = null; this.previewRequestId++;
       this.detail.set(null); this.success.set(''); this.previewUrl.set(''); this.originalUrl.set(''); this.safePdf.set(null);
+      this.sourceBundleUrl.set(''); this.sourceBundleError.set(false);
       void this.load(true);
     });
     this.timer = setInterval(() => { if (this.active() && !this.busy() && document.visibilityState === 'visible') void this.load(false); }, 5000);
@@ -81,6 +85,7 @@ export class ReceiptIssueDetailComponent implements OnInit, OnDestroy {
       const detail = await this.issues.detail(this.userId, this.receiptId);
       if (id !== this.requestId || this.destroyed) return;
       this.detail.set(detail);
+      if (reset) void this.loadSourceBundle(detail);
       if (reset || previousActive && !this.active()) {
         const receipt = detail.receipt;
         const seed: ReceiptFormValues = {
@@ -109,6 +114,16 @@ export class ReceiptIssueDetailComponent implements OnInit, OnDestroy {
     } catch (error) {
       if (id === this.requestId) this.error.set(this.issues.message(error, 'This receipt could not be loaded. Please try again.'));
     } finally { if (id === this.requestId) this.loading.set(false); }
+  }
+  async loadSourceBundle(detail = this.detail()) {
+    if (!detail?.receipt.sourceBundle) return;
+    this.sourceBundleError.set(false);
+    try {
+      const url = await this.issues.sourceBundleUrl(detail.receipt.userId, detail.receipt.id);
+      if (!this.destroyed && this.detail() === detail) this.sourceBundleUrl.set(url);
+    } catch {
+      if (!this.destroyed && this.detail() === detail) this.sourceBundleError.set(true);
+    }
   }
   private async loadPreview(userId: string, receiptId: string, id: number) {
     this.previewLoading.set(true); this.previewError.set(''); this.previewUrl.set(''); this.originalUrl.set(''); this.safePdf.set(null);

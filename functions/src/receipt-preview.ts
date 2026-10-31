@@ -10,6 +10,11 @@ export interface ReceiptPreview {
   error: string;
 }
 
+/** Resolve provenance stored on an authorized receipt, never a client-supplied path. */
+export async function loadReceiptSourceBundlePreview(data: any, userId: string, bucket: ReturnType<admin.storage.Storage["bucket"]>): Promise<ReceiptPreview> {
+  return loadReceiptPreview({ file: { storagePath: data.sourceBundle?.storagePath, mimeType: "application/pdf" } }, userId, bucket);
+}
+
 function ownedPath(userId: string, path: unknown): path is string {
   if (typeof path !== "string") return false;
   const prefix = `users/${userId}/receipts/`;

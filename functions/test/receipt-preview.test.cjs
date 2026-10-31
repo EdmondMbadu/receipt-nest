@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { loadReceiptPreview } = require('../lib/receipt-preview');
+const { loadReceiptPreview, loadReceiptSourceBundlePreview } = require('../lib/receipt-preview');
 
 function bucket(files) {
   const reads = [];
@@ -16,6 +16,21 @@ function bucket(files) {
   }};
 }
 const path = 'users/owner/receipts/photo.png';
+
+test('source bundle previews use the stored original while keeping the individual receipt separate', async () => {
+  const original='users/owner/receipts/original.pdf';
+  const storage=bucket({[original]:{metadata:{contentType:'application/pdf',metadata:{firebaseStorageDownloadTokens:'original-token'}}}});
+  const result=await loadReceiptSourceBundlePreview({file:{storagePath:path},sourceBundle:{storagePath:original}},'owner',storage);
+  assert.match(result.originalUrl,/original\.pdf\?alt=media&token=original-token$/);
+  assert.equal(result.pdfUrl,result.originalUrl);assert.deepEqual(storage.reads,[original]);
+});
+test('a source bundle cannot expose another owner’s file or an arbitrary external URL', async () => {
+  for(const unsafe of ['users/other/receipts/original.pdf','https://example.com/original.pdf','users/owner/receipts/../secret']) {
+    const storage=bucket({});
+    const result=await loadReceiptSourceBundlePreview({sourceBundle:{storagePath:unsafe}},'owner',storage);
+    assert.deepEqual(storage.reads,[]);assert.equal(result.originalUrl,'');
+  }
+});
 
 test('authorized admin previews use an existing token without client storage metadata access', async () => {
   const storage=bucket({[path]:{metadata:{contentType:'image/png',metadata:{firebaseStorageDownloadTokens:'existing-token,old-token'}}}});

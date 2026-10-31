@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import { OnboardingComponent } from '../../components/onboarding/onboarding.component';
+import { ReceiptPagePreviewComponent } from '../../components/receipt-page-preview/receipt-page-preview.component';
 import { ReceiptTourService } from '../../services/receipt-tour.service';
 import { trackReceiptDownload } from '../../utils/getting-started';
 import { ReceiptService } from '../../services/receipt.service';
@@ -15,7 +16,7 @@ import { DEFAULT_CATEGORIES, Category } from '../../models/category.model';
 @Component({
   selector: 'app-receipt-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, OnboardingComponent],
+  imports: [CommonModule, FormsModule, RouterLink, OnboardingComponent, ReceiptPagePreviewComponent],
   templateUrl: './receipt-detail.component.html',
   styleUrl: './receipt-detail.component.css'
 })
@@ -41,6 +42,8 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
   readonly safeHtmlPreviewUrl = signal<SafeResourceUrl | null>(null);
   readonly showImageModal = signal(false);
   readonly heicPreviewUrl = signal<string | null>(null); // Converted HEIC preview
+  readonly sourceBundleUrl = signal<string | null>(null);
+  readonly sourceBundleError = signal(false);
 
   // Edit form values
   readonly editMerchant = signal('');
@@ -95,6 +98,9 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
       }
 
       this.receipt.set(receipt);
+      this.sourceBundleUrl.set(null);
+      this.sourceBundleError.set(false);
+      void this.loadSourceBundle(receipt);
       this.tour.receiptLoaded(receipt.id, receipt.status);
       this.initEditForm(receipt);
       this.imageUrl.set(null);
@@ -133,6 +139,17 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
       this.error.set(e.message || 'Failed to load receipt');
     } finally {
       this.isLoading.set(false);
+    }
+  }
+
+  async loadSourceBundle(receipt = this.receipt()): Promise<void> {
+    if (!receipt?.sourceBundle) return;
+    this.sourceBundleError.set(false);
+    try {
+      const url = await this.receiptService.getReceiptFileUrl(receipt.sourceBundle.storagePath);
+      if (this.receipt()?.id === receipt.id) this.sourceBundleUrl.set(url);
+    } catch {
+      if (this.receipt()?.id === receipt.id) this.sourceBundleError.set(true);
     }
   }
 
