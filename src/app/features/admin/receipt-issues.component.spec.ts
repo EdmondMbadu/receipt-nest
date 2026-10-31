@@ -33,7 +33,8 @@ describe('Receipt issues workspace', () => {
   it('keeps awaiting-user receipts unresolved, separates resolved history, and filters search results', async () => {
     const { fixture, component } = await queue();
     expect(component.count('all')).toBe(3); expect(component.count('awaiting_user')).toBe(1);
-    expect(component.visible().map(row => row.receiptId)).toEqual(['failed', 'stuck', 'partial']);
+    expect(component.visible().map(row => row.receiptId)).toEqual(['failed', 'partial', 'stuck']);
+    expect(component.sort()).toBe('newest');
     component.selectPattern('unknown|failed reason'); expect(component.filter()).toBe('all_history');
     expect(component.visible().length).toBe(2); component.pattern.set('');
     component.setFilter('resolved'); expect(component.visible().map(row => row.receiptId)).toEqual(['fixed']);
@@ -59,13 +60,27 @@ describe('Receipt issues workspace', () => {
       {...issue('new-incomplete','incomplete'),openedAt:'2026-10-28T12:00:00Z'},
       {...issue('middle-stuck','stuck'),openedAt:'2026-07-01T12:00:00Z'},
     ]);
-    expect(component.visible().map(row=>row.receiptId)).toEqual(['old-failure','middle-stuck','new-incomplete']);
+    expect(component.visible().map(row=>row.receiptId)).toEqual(['new-incomplete','middle-stuck','old-failure']);
+    expect(fixture.nativeElement.querySelector('th[aria-sort]')?.getAttribute('aria-sort')).toBe('descending');
     component.page.set(2);component.toggleDateSort();fixture.detectChanges();
+    expect(component.page()).toBe(1);expect(component.sort()).toBe('oldest');
+    expect(component.visible().map(row=>row.receiptId)).toEqual(['old-failure','middle-stuck','new-incomplete']);
+    component.toggleDateSort();fixture.detectChanges();
     expect(component.page()).toBe(1);expect(component.sort()).toBe('newest');
     expect(component.visible().map(row=>row.receiptId)).toEqual(['new-incomplete','middle-stuck','old-failure']);
     expect(fixture.nativeElement.querySelector('th[aria-sort]')?.getAttribute('aria-sort')).toBe('descending');
     component.toggleDateSort();expect(component.visible().map(row=>row.receiptId)).toEqual(['old-failure','middle-stuck','new-incomplete']);
     component.setSort('priority');expect(component.sortDescription()).toContain('Failures first');
+  });
+  it('uses upload dates so retrying an older receipt does not move it ahead of new uploads', async () => {
+    const { component, service } = await queue();
+    service.rows.set([
+      { ...issue('old-retried', 'failed'), uploadedAt: '2026-05-01', openedAt: '2026-10-30' },
+      { ...issue('new-upload', 'incomplete'), uploadedAt: '2026-10-28', openedAt: '2026-10-28' },
+    ]);
+    expect(component.visible().map(row => row.receiptId)).toEqual(['new-upload', 'old-retried']);
+    expect(component.dateFor(service.rows()[0])).toBe('2026-05-01');
+    expect(service.load).toHaveBeenCalledWith(false);
   });
   it('sorts resolved history by its displayed resolution date and leaves unknown dates at the end', async () => {
     const {component,service,fixture}=await queue();
@@ -81,16 +96,37 @@ describe('Receipt issues workspace', () => {
     expect(fixture.nativeElement.textContent).toContain('Date unknown');
   });
 
-  async function workspace(active = false) {
+  async function workspace(active = false, configure?: (service: ReturnType<typeof mockService>) => void) {
     const service = mockService();
     const detail: IssueDetail = { revision: 123, row: {...issue('stuck','stuck'), active},
       receipt: {id:'stuck',userId:'customer',status:active?'processing':'needs_review',totalAmount:25,currency:'USD',date:'2026-10-20',merchant:'Market',category:'Groceries',createdAt:'2026-10-20',updatedAt:'2026-10-20'},
       issue: {cause:'unknown'},events:[],historyLimited:false };
     service.detail.and.resolveTo(detail);
+    configure?.(service);
     await TestBed.configureTestingModule({ imports: [ReceiptIssueDetailComponent], providers: [provideZonelessChangeDetection(), provideRouter([]), {provide:ActivatedRoute,useValue:{paramMap:of(convertToParamMap({userId:'customer',receiptId:'stuck'}))}}, {provide:ReceiptIssuesService,useValue:service}] }).compileComponents();
     const fixture = TestBed.createComponent(ReceiptIssueDetailComponent); fixture.detectChanges(); await fixture.whenStable(); await service.preview.calls.mostRecent().returnValue; await fixture.whenStable(); fixture.detectChanges();
     return {fixture, component:fixture.componentInstance, service, detail};
   }
+  it('starts the original preview while receipt details are still pending', async () => {
+    let finishDetail!: (detail: IssueDetail) => void;
+    const pending = new Promise<IssueDetail>(resolve => finishDetail = resolve);
+    const { component, service, detail, fixture } = await workspace(false, service => {
+      service.detail.and.returnValue(pending);
+    });
+    expect(component.detail()).toBeNull();
+    expect(component.loading()).toBeTrue();
+    expect(service.preview).toHaveBeenCalledWith('customer', 'stuck');
+    finishDetail(detail);
+    await pending; await fixture.whenStable(); fixture.detectChanges();
+    expect(component.detail()).toBe(detail);
+    expect(component.loading()).toBeFalse();
+  });
+  it('does not fetch the original again during status polling', async () => {
+    const { component, service } = await workspace(true);
+    await component.load(false);
+    expect(service.detail).toHaveBeenCalledTimes(2);
+    expect(service.preview).toHaveBeenCalledTimes(1);
+  });
   it('locks actions while a retry of a stuck receipt is running', async () => {
     const {component,fixture,service} = await workspace(true);
     expect(component.active()).toBeTrue();

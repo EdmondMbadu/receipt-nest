@@ -74,6 +74,8 @@ export class ReceiptIssueDetailComponent implements OnInit, OnDestroy {
     const id = ++this.requestId;
     if (!this.detail()) this.loading.set(true);
     this.error.set('');
+    // Both admin endpoints authorize the selected receipt independently.
+    if (reset) void this.loadPreview(this.userId, this.receiptId, ++this.previewRequestId);
     try {
       const previousActive = this.active();
       const detail = await this.issues.detail(this.userId, this.receiptId);
@@ -104,15 +106,14 @@ export class ReceiptIssueDetailComponent implements OnInit, OnDestroy {
           }
         }
       }
-      if (reset) void this.loadPreview(detail, ++this.previewRequestId);
     } catch (error) {
       if (id === this.requestId) this.error.set(this.issues.message(error, 'This receipt could not be loaded. Please try again.'));
     } finally { if (id === this.requestId) this.loading.set(false); }
   }
-  private async loadPreview(detail: IssueDetail, id: number) {
+  private async loadPreview(userId: string, receiptId: string, id: number) {
     this.previewLoading.set(true); this.previewError.set(''); this.previewUrl.set(''); this.originalUrl.set(''); this.safePdf.set(null);
     try {
-      const preview = await this.issues.preview(detail.receipt.userId, detail.receipt.id);
+      const preview = await this.issues.preview(userId, receiptId);
       if (id !== this.previewRequestId || this.destroyed) return;
       this.originalUrl.set(preview.originalUrl);
       this.previewUrl.set(preview.imageUrl);
@@ -124,7 +125,7 @@ export class ReceiptIssueDetailComponent implements OnInit, OnDestroy {
   }
   reloadPreview() {
     const detail = this.detail();
-    if (detail && !this.previewLoading()) void this.loadPreview(detail, ++this.previewRequestId);
+    if (detail && !this.previewLoading()) void this.loadPreview(detail.receipt.userId, detail.receipt.id, ++this.previewRequestId);
   }
   previewFailed() { this.previewUrl.set(''); this.previewError.set('This image could not be displayed. Open the original file to inspect it.'); }
   async act(action: string) {

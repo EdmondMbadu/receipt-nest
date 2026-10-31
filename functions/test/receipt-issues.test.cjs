@@ -96,6 +96,7 @@ test('admin callables and the processing worker enforce authorization, concurren
   await t.test('older review receipts appear without a migration or invented error',async()=>{
     const result=await api.getAdminReceiptIssues.run({auth,data:{}});
     assert.equal(result.rows.length,1);assert.equal(result.rows[0].cause,'unknown');assert.equal(result.rows[0].email,'customer@example.com');
+    assert.equal(result.rows[0].uploadedAt, snapshot(path).get('createdAt').toDate().toISOString());
     assert.equal((await detail()).events.length,0);
   });
   await t.test('awaiting-user state persists, missing fields cannot be resolved, malformed corrections are rejected',async()=>{

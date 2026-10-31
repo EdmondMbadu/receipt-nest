@@ -39,6 +39,7 @@ function row(snap: admin.firestore.DocumentSnapshot, issue?: any, email?: string
     state: issue?.state || "open", reason: issue?.reason || diagnosis?.reason,
     recommendation: diagnosis?.recommendation || issue?.recommendation || "Compare the receipt with the original and verify its values.",
     cause: issue?.cause || diagnosis?.cause || "unknown", notes: issue?.notes || "",
+    uploadedAt: data.createdAt || null,
     openedAt: issue?.openedAt || data.processingAttempt?.startedAt || data.createdAt || data.updatedAt,
     updatedAt: issue?.updatedAt || data.updatedAt, resolvedAt: issue?.resolvedAt || null,
     attempts: data.processingAttempt ? 1 : 0,

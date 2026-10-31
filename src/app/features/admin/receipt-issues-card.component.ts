@@ -34,5 +34,5 @@ export class ReceiptIssuesCardComponent implements OnInit {
   readonly issues = inject(ReceiptIssuesService);
   readonly waiting = waitingSince;
   count(kind: string) { return this.issues.unresolved().filter(row => row.kind === kind).length; }
-  ngOnInit() { void this.issues.load(); }
+  ngOnInit() { void this.issues.load(false); }
 }

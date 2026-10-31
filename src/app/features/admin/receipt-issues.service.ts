@@ -7,7 +7,7 @@ export interface ReceiptIssueRow {
   userId: string; receiptId: string; email: string; fileName: string; merchant: string;
   kind: 'failed' | 'stuck' | 'incomplete'; state: 'open' | 'awaiting_user' | 'resolved';
   reason: string; recommendation: string; cause: string; notes: string;
-  openedAt: string | null; updatedAt: string | null; resolvedAt: string | null; active: boolean;
+  uploadedAt?: string | null; openedAt: string | null; updatedAt: string | null; resolvedAt: string | null; active: boolean;
   model: string; pipelineVersion: string;
 }
 export interface IssueDetail {
@@ -55,17 +55,23 @@ export class ReceiptIssuesService {
   readonly loaded = signal(false);
   readonly error = signal('');
   readonly fetchedAt = signal<string | null>(null);
+  private loadedAt = 0;
   readonly unresolved = computed(() => this.rows().filter(row => row.state !== 'resolved'));
   readonly affectedUsers = computed(() => new Set(this.unresolved().map(row => row.userId)).size);
   readonly oldest = computed(() => this.unresolved().map(row => row.openedAt).filter((v): v is string => !!v).sort()[0]);
-  async load() {
+  async load(force = true) {
     if (this.loading()) return;
+    if (!force && this.loaded() && !this.error() && Date.now() - this.loadedAt < 60000) return;
     this.loading.set(true); this.error.set('');
     try {
-      const response = await httpsCallable<void, { rows: ReceiptIssueRow[]; fetchedAt: string }>(this.functions, 'getAdminReceiptIssues')();
-      this.rows.set(response.data.rows); this.fetchedAt.set(response.data.fetchedAt); this.loaded.set(true);
+      const data = await this.fetchRows();
+      this.rows.set(data.rows); this.fetchedAt.set(data.fetchedAt); this.loaded.set(true); this.loadedAt = Date.now();
     } catch (error) { this.error.set(this.message(error, 'Receipt issues could not be loaded. Please try again.')); }
     finally { this.loading.set(false); }
+  }
+  protected async fetchRows(): Promise<{ rows: ReceiptIssueRow[]; fetchedAt: string }> {
+    const response = await httpsCallable<void, { rows: ReceiptIssueRow[]; fetchedAt: string }>(this.functions, 'getAdminReceiptIssues')();
+    return response.data;
   }
   async detail(userId: string, receiptId: string): Promise<IssueDetail> {
     const result = await httpsCallable<{ userId: string; receiptId: string }, IssueDetail>(this.functions, 'getAdminReceiptIssue')({ userId, receiptId });
