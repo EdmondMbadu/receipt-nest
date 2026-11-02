@@ -40,6 +40,17 @@ PYTHONPATH=/private/tmp/receiptnest-ad-runtime python3 artifacts/tax-time-ad-20s
 
 `--stills` renders the editable storyboard without creating a new video. `demo/` holds the sample data and build configuration if app screenshots need to be recaptured. It imports the repository's actual components and mocks services locally. Do not deploy the demo as the product.
 
+To rebuild and serve the UI demo from the repository root after `npm ci`:
+
+```sh
+cd artifacts/tax-time-ad-20s/demo
+../../../node_modules/.bin/ng build --delete-output-path=false
+cd ../../..
+python3 artifacts/tax-time-ad-20s/production/serve_demo.py
+```
+
+Open `http://127.0.0.1:8767/`. The demo build replaces the app's Firebase configuration with `demo/environments.demo.ts`, which contains only dummy values. It still requires the local `environments/environments.ts` file to exist for Angular's file replacement. Generated bundles, compiler caches and build logs are ignored; the authored video preview and its media are retained. `--delete-output-path=false` preserves those preview files during a rebuild. Never commit production credentials or copy the production build into this demo.
+
 ## Review
 
 Full MP4 decode passed. Export: 1080×1920, 24 fps, 480 frames, 20.00 seconds, H.264/AAC. Audio measured about -16.2 LUFS integrated with -1.5 dBTP peak. Encoded frames and phone-sized playback were checked; the player reached 20/20 seconds without errors. Main text was checked for clipping and contrast. The PDF Pro label was added during final review.

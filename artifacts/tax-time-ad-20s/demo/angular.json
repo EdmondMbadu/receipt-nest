@@ -1,1 +1,51 @@
-{"version": 1, "projects": {"ad-demo": {"projectType": "application", "root": "", "sourceRoot": ".", "architect": {"build": {"builder": "@angular/build:application", "options": {"browser": "main.ts", "tsConfig": "tsconfig.json", "index": "index.html", "outputPath": "dist", "styles": ["styles.css"], "assets": [{"glob": "**/*", "input": "public", "output": "assets"}], "optimization": false, "sourceMap": false, "allowedCommonJsDependencies": ["heic2any"]}}, "serve": {"builder": "@angular/build:dev-server", "options": {"buildTarget": "ad-demo:build"}}}}}, "cli": {"analytics": false}}
+{
+  "version": 1,
+  "projects": {
+    "ad-demo": {
+      "projectType": "application",
+      "root": "",
+      "sourceRoot": ".",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "main.ts",
+            "tsConfig": "tsconfig.json",
+            "index": "index.html",
+            "outputPath": "dist",
+            "styles": [
+              "styles.css"
+            ],
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public",
+                "output": "assets"
+              }
+            ],
+            "optimization": false,
+            "sourceMap": false,
+            "allowedCommonJsDependencies": [
+              "heic2any"
+            ],
+            "fileReplacements": [
+              {
+                "replace": "../../../environments/environments.ts",
+                "with": "environments.demo.ts"
+              }
+            ]
+          }
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "buildTarget": "ad-demo:build"
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": false
+  }
+}
