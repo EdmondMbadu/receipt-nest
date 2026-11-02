@@ -1,0 +1,35 @@
+1
+00:00:00,390 --> 00:00:02,150
+Receipts everywhere?
+
+2
+00:00:02,770 --> 00:00:04,050
+Snap them.
+
+3
+00:00:04,410 --> 00:00:05,840
+ReceiptNest organizes them
+
+4
+00:00:05,850 --> 00:00:07,160
+automatically.
+
+5
+00:00:07,730 --> 00:00:10,000
+How much did I spend on food this month?
+
+6
+00:00:12,310 --> 00:00:13,480
+Export a month.
+
+7
+00:00:13,570 --> 00:00:15,250
+Or the whole year.
+
+8
+00:00:16,270 --> 00:00:17,730
+Your business receipts.
+
+9
+00:00:17,790 --> 00:00:19,900
+Ready for tax time.

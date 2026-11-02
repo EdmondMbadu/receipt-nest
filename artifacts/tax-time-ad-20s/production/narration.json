@@ -1,0 +1,173 @@
+{
+  "audio_url": "https://resource2.heygen.ai/text_to_speech/d084b82518304484ae919a72aa4daea9/b43af4ad8d3c4a6b8dbdf429a9f3dad1/id=49c7ce55-cd17-4866-9b48-8926346ccda4.wav",
+  "duration": 13.035102040816327,
+  "request_id": null,
+  "word_timestamps": [
+    {
+      "word": "<start>",
+      "start": 0,
+      "end": 0
+    },
+    {
+      "word": "Receipts",
+      "start": 0.24,
+      "end": 0.64
+    },
+    {
+      "word": "everywhere?",
+      "start": 0.7,
+      "end": 1.14
+    },
+    {
+      "word": "Snap",
+      "start": 1.82,
+      "end": 2.1
+    },
+    {
+      "word": "them.",
+      "start": 2.14,
+      "end": 2.36
+    },
+    {
+      "word": "ReceiptNest",
+      "start": 2.86,
+      "end": 3.5
+    },
+    {
+      "word": "organizes",
+      "start": 3.56,
+      "end": 4.059
+    },
+    {
+      "word": "them",
+      "start": 4.1,
+      "end": 4.24
+    },
+    {
+      "word": "automatically.",
+      "start": 4.3,
+      "end": 4.94
+    },
+    {
+      "word": "How",
+      "start": 5.48,
+      "end": 5.56
+    },
+    {
+      "word": "much",
+      "start": 5.6,
+      "end": 5.76
+    },
+    {
+      "word": "did",
+      "start": 5.78,
+      "end": 5.86
+    },
+    {
+      "word": "I",
+      "start": 5.94,
+      "end": 6
+    },
+    {
+      "word": "spend",
+      "start": 6.08,
+      "end": 6.26
+    },
+    {
+      "word": "on",
+      "start": 6.3,
+      "end": 6.42
+    },
+    {
+      "word": "food",
+      "start": 6.48,
+      "end": 6.66
+    },
+    {
+      "word": "this",
+      "start": 6.7,
+      "end": 6.86
+    },
+    {
+      "word": "month?",
+      "start": 6.9,
+      "end": 7.14
+    },
+    {
+      "word": "Export",
+      "start": 7.66,
+      "end": 7.98
+    },
+    {
+      "word": "a",
+      "start": 8.02,
+      "end": 8.06
+    },
+    {
+      "word": "month.",
+      "start": 8.1,
+      "end": 8.4
+    },
+    {
+      "word": "Or",
+      "start": 8.92,
+      "end": 9
+    },
+    {
+      "word": "the",
+      "start": 9.04,
+      "end": 9.1
+    },
+    {
+      "word": "whole",
+      "start": 9.16,
+      "end": 9.34
+    },
+    {
+      "word": "year.",
+      "start": 9.4,
+      "end": 9.68
+    },
+    {
+      "word": "Your",
+      "start": 10.22,
+      "end": 10.32
+    },
+    {
+      "word": "business",
+      "start": 10.38,
+      "end": 10.7
+    },
+    {
+      "word": "receipts.",
+      "start": 10.74,
+      "end": 11.22
+    },
+    {
+      "word": "Ready",
+      "start": 11.74,
+      "end": 11.94
+    },
+    {
+      "word": "for",
+      "start": 11.96,
+      "end": 12.08
+    },
+    {
+      "word": "tax",
+      "start": 12.14,
+      "end": 12.38
+    },
+    {
+      "word": "time.",
+      "start": 12.44,
+      "end": 12.7
+    },
+    {
+      "word": "<end>",
+      "start": 13.035102040816327,
+      "end": 13.035102040816327
+    }
+  ],
+  "engine": "starfish"
+}

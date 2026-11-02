@@ -15,9 +15,14 @@ export interface GamePage {
 
 export const gamePages: readonly GamePage[] = [
   {
-    path: '/games', kind: 'game', label: 'Games', updated: '2026-10-08',
+    path: '/games', kind: 'game', label: 'Games', updated: '2026-11-02',
     title: 'Receipt Games: Free Browser Games About Receipts | ReceiptNest',
     description: 'Quick, free browser games about receipts from ReceiptNest. Decode cryptic bank charges, file a shoebox of receipts by month, or read a total before it fades.'
+  },
+  {
+    path: '/games/escape', kind: 'game', label: 'Escape the Year', updated: '2026-11-02',
+    title: 'Escape the Year: Can the Receipt Beat Tax Day? | ReceiptNest',
+    description: '365 rings, one for every day of the year. Watch a receipt bounce through them before the tax-day clock runs out, or help it escape. Then learn how to keep a year of receipts.'
   },
   {
     path: '/games/charge', kind: 'game', label: 'Guess the Charge', updated: '2026-10-08',
