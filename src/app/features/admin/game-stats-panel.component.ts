@@ -18,7 +18,8 @@ type Metric = { key: string; label: string; hint: string; kind?: 'ratio'; of?: [
 const GAMES = [
   { id: 'charge', label: 'Guess the Charge', short: 'Charge' },
   { id: 'shoebox', label: 'Shoebox Sort', short: 'Shoebox' },
-  { id: 'fade', label: 'Before It Fades', short: 'Fade' }
+  { id: 'fade', label: 'Before It Fades', short: 'Fade' },
+  { id: 'escape', label: 'Escape the Year', short: 'Escape' }
 ];
 
 const METRICS: Metric[] = [
