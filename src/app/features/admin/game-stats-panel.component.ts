@@ -19,7 +19,8 @@ const GAMES = [
   { id: 'charge', label: 'Guess the Charge', short: 'Charge' },
   { id: 'shoebox', label: 'Shoebox Sort', short: 'Shoebox' },
   { id: 'fade', label: 'Before It Fades', short: 'Fade' },
-  { id: 'escape', label: 'Escape the Year', short: 'Escape' }
+  { id: 'escape', label: 'Escape the Year', short: 'Escape' },
+  { id: 'pile', label: 'The Pile', short: 'Pile' }
 ];
 
 const METRICS: Metric[] = [

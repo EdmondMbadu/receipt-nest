@@ -36,7 +36,7 @@
 {"@type":"Organization","@id":"https://receipt-nest.com/#organization","name":"ReceiptNest","url":"https://receipt-nest.com/","logo":{"@type":"ImageObject","url":"https://receipt-nest.com/receipt-nest.png"}},
 {"@type":"WebSite","@id":"https://receipt-nest.com/#website","url":"https://receipt-nest.com/","name":"ReceiptNest","publisher":{"@id":"https://receipt-nest.com/#organization"}},
 {"@type":"CollectionPage","@id":"https://receipt-nest.com/games#webpage","url":"https://receipt-nest.com/games","name":"Receipt Games: Free Browser Games About Receipts | ReceiptNest","isPartOf":{"@id":"https://receipt-nest.com/#website"},
- "mainEntity":{"@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"url":"https://receipt-nest.com/games/escape","name":"Escape the Year"},{"@type":"ListItem","position":2,"url":"https://receipt-nest.com/games/charge","name":"Guess the Charge"},{"@type":"ListItem","position":3,"url":"https://receipt-nest.com/games/shoebox","name":"Shoebox Sort"},{"@type":"ListItem","position":4,"url":"https://receipt-nest.com/games/fade","name":"Before It Fades"}]}},
+ "mainEntity":{"@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"url":"https://receipt-nest.com/games/pile","name":"The Pile"},{"@type":"ListItem","position":2,"url":"https://receipt-nest.com/games/escape","name":"Escape the Year"},{"@type":"ListItem","position":3,"url":"https://receipt-nest.com/games/charge","name":"Guess the Charge"},{"@type":"ListItem","position":4,"url":"https://receipt-nest.com/games/shoebox","name":"Shoebox Sort"},{"@type":"ListItem","position":5,"url":"https://receipt-nest.com/games/fade","name":"Before It Fades"}]}},
 {"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ReceiptNest","item":"https://receipt-nest.com/"},{"@type":"ListItem","position":2,"name":"Games","item":"https://receipt-nest.com/games"}]}
 ]}
 </script>
@@ -165,7 +165,7 @@ h1 .y{color:var(--yel)}
 <header class="top">
   <a class="brand" href="/"><img src="/receipt-nest.png" alt="ReceiptNest logo" width="26" height="26">ReceiptNest</a>
   <nav aria-label="Games navigation">
-    <a href="/games/charge">Play</a>
+    <a href="/games/pile">Play</a>
     <a href="/blog">Guides</a>
   </nav>
 </header>
@@ -177,10 +177,28 @@ h1 .y{color:var(--yel)}
       <p class="lede">Quick, free games about the little strips of paper that hold your money. Pick one and try to beat your best.</p>
     </section>
 
-    <a class="feature" href="/games/escape" aria-label="Play Escape the Year">
+    <a class="feature" href="/games/pile" aria-label="Play The Pile">
       <div class="art">
         <span class="stamp">NEW</span>
-        <img class="phone" src="/games/escape/card.webp" alt="Escape the Year: a receipt bouncing inside glowing rings, with a days-left counter and a tax-day clock" width="420" height="782" fetchpriority="high">
+        <img class="phone" src="/games/pile/card.webp" alt="The Pile: a ball of receipts filling a glowing ring, with a receipt counter and the dollars in the pile" width="420" height="782" fetchpriority="high">
+      </div>
+      <div class="txt">
+        <div class="meta"><span class="chip">Rhythm</span><span class="chip">About 45 seconds</span><span class="chip">Free · no signup</span></div>
+        <h2>The <span>pile</span></h2>
+        <p>Every bounce lands one more receipt and the pile grows. Tap the moment it hits the ring to snap that receipt before the box gives out. Every landing plays the next note of the Can-Can.</p>
+        <ul class="rules">
+          <li><b>100</b>Receipts to get through before the box bursts</li>
+          <li><b>1</b>Tap per receipt. Mashing fumbles and grows the pile</li>
+          <li><b>♪</b>One note of the Can-Can per landing, up a key each time round</li>
+        </ul>
+        <div class="dare">Can you snap all 100?</div>
+        <span class="play">Play now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <a class="feature" href="/games/escape" aria-label="Play Escape the Year">
+      <div class="art">
+        <img class="phone" src="/games/escape/card.webp" alt="Escape the Year: a receipt bouncing inside glowing rings, with a days-left counter and a tax-day clock" width="420" height="782" loading="lazy">
       </div>
       <div class="txt">
         <div class="meta"><span class="chip">Watch or play</span><span class="chip">50 seconds</span><span class="chip">Free · no signup</span></div>
@@ -283,6 +301,7 @@ h1 .y{color:var(--yel)}
 <footer class="foot">
   <div class="wrap">
     <a href="/">ReceiptNest</a>
+    <a href="/games/pile">The Pile</a>
     <a href="/games/escape">Escape the Year</a>
     <a href="/games/charge">Guess the Charge</a>
     <a href="/games/shoebox">Shoebox Sort</a>

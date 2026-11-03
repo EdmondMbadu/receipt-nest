@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en" data-game="pile">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Pile: How Many Receipts Before the Box Bursts? | ReceiptNest</title>
+<meta name="description" content="Every bounce adds a receipt to the pile. Tap to snap each one before the box gives out, all set to the Can-Can. Then learn how to stop receipts piling up.">
+<meta name="author" content="ReceiptNest">
+<meta name="robots" content="index, follow">
+<meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<link rel="canonical" href="https://receipt-nest.com/games/pile">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://receipt-nest.com/games/pile">
+<meta property="og:title" content="The Pile: how many receipts before the box bursts?">
+<meta property="og:description" content="Every bounce lands one more receipt. Tap to snap them before the box gives out. Every landing plays the next note of the Can-Can.">
+<meta property="og:image" content="https://receipt-nest.com/games/pile/og.png">
+<meta property="og:image:alt" content="The Pile, a game by ReceiptNest: a ball of receipts inside a glowing ring with a receipt counter">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
+<meta property="og:site_name" content="ReceiptNest">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@ReceiptNestAI">
+<meta name="twitter:url" content="https://receipt-nest.com/games/pile">
+<meta name="twitter:title" content="The Pile: how many receipts before the box bursts?">
+<meta name="twitter:description" content="Every bounce lands one more receipt. Tap to snap them before the box gives out. Every landing plays the next note of the Can-Can.">
+<meta name="twitter:image" content="https://receipt-nest.com/games/pile/og.png">
+<meta name="twitter:image:alt" content="The Pile, a game by ReceiptNest: a ball of receipts inside a glowing ring with a receipt counter">
+<meta name="theme-color" content="#0f0d0b">
+<meta name="application-name" content="ReceiptNest">
+<link rel="icon" href="/favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=2">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
+<link rel="preload" href="/games/_shared/fonts/barlow-condensed-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"Organization","@id":"https://receipt-nest.com/#organization","name":"ReceiptNest","url":"https://receipt-nest.com/","logo":{"@type":"ImageObject","url":"https://receipt-nest.com/receipt-nest.png"},"sameAs":["https://apps.apple.com/us/app/receiptnest-ai/id6762539388","https://play.google.com/store/apps/details?id=com.receiptnest.mobile","https://www.youtube.com/@ReceiptNest","https://x.com/ReceiptNestAI","https://www.instagram.com/receiptnest","https://www.tiktok.com/@receiptnest"]},
+{"@type":"WebSite","@id":"https://receipt-nest.com/#website","url":"https://receipt-nest.com/","name":"ReceiptNest","publisher":{"@id":"https://receipt-nest.com/#organization"}},
+{"@type":"WebPage","@id":"https://receipt-nest.com/games/pile#webpage","url":"https://receipt-nest.com/games/pile","name":"The Pile: How Many Receipts Before the Box Bursts? | ReceiptNest","description":"Every bounce adds a receipt to the pile. Tap to snap each one before the box gives out, all set to the Can-Can. Then learn how to stop receipts piling up.","isPartOf":{"@id":"https://receipt-nest.com/#website"},"primaryImageOfPage":{"@type":"ImageObject","url":"https://receipt-nest.com/games/pile/og.png"},"breadcrumb":{"@id":"https://receipt-nest.com/games/pile#breadcrumb"},"mainEntity":{"@id":"https://receipt-nest.com/games/pile#game"}},
+{"@type":"VideoGame","@id":"https://receipt-nest.com/games/pile#game","name":"The Pile","url":"https://receipt-nest.com/games/pile","description":"A free browser game: a ball of receipts bounces inside a ring and every bounce adds one more receipt. Tap at the moment it lands to snap each receipt and keep the pile from bursting the box, set to the Can-Can.","genre":["Arcade","Rhythm"],"gamePlatform":"Web browser","applicationCategory":"Game","operatingSystem":"Any","playMode":"SinglePlayer","isAccessibleForFree":true,"inLanguage":"en","image":"https://receipt-nest.com/games/pile/og.png","publisher":{"@id":"https://receipt-nest.com/#organization"}},
+{"@type":"BreadcrumbList","@id":"https://receipt-nest.com/games/pile#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"ReceiptNest","item":"https://receipt-nest.com/"},{"@type":"ListItem","position":2,"name":"Games","item":"https://receipt-nest.com/games"},{"@type":"ListItem","position":3,"name":"The Pile","item":"https://receipt-nest.com/games/pile"}]}
+]}
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HYKD5Z04JE"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'G-HYKD5Z04JE', { send_page_view: true });
+  gtag('config', 'AW-18204265252');
+</script>
+<script>
+/* ReceiptNest game analytics: GA4 events + first-party daily counters at /api/game-event. No IDs, no cookies, no personal data. */
+(function(){
+var G=document.documentElement.getAttribute('data-game')||'hub',EP='/api/game-event',KEY='rn_gt_'+G;
+function ls(k,v){try{if(v===undefined){var r=localStorage.getItem(k);return r==null?null:JSON.parse(r)}localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);sessionStorage.setItem(k,v)}catch(e){return null}}
+function day(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+function send(o){o.g=G;try{var b=JSON.stringify(o);if(navigator.sendBeacon&&navigator.sendBeacon(EP,new Blob([b],{type:'text/plain'})))return;if(window.fetch)fetch(EP,{method:'POST',body:b,keepalive:true,credentials:'omit',headers:{'Content-Type':'text/plain'}}).catch(function(){})}catch(e){}}
+function ga(n,p){try{if(window.gtag){p=p||{};p.game=G;gtag('event',n,p)}}catch(e){}}
+var T=window.rnT={
+  start:function(mode){var s=ls(KEY)||{},t=day(),np=!s.first,rt=!!s.last&&s.last!==t,ft=s.last!==t;s.first=s.first||t;s.last=t;s.n=(s.n||0)+1;ls(KEY,s);
+    send({e:'start',np:np?1:0,ft:ft?1:0,rt:rt?1:0});ga('game_start',{mode:mode||'',play_number:s.n,new_player:np?'yes':'no',returning_player:rt?'yes':'no'})},
+  finish:function(mode,score,extra){send({e:'finish'});var p={mode:mode||'',score:Number(score)||0};if(extra)for(var k in extra)p[k]=extra[k];ga('game_finish',p)},
+  shareClick:function(mode,score){send({e:'share_click'});ga('game_share_click',{mode:mode||'',score:Number(score)||0})},
+  shareDone:function(method){send({e:'share_done',m:method});ga('share',{method:method,content_type:'game_score',item_id:G})},
+  url:function(base){return base+'?utm_source=share&utm_campaign='+G},
+  waitlistOpen:function(place){send({e:'waitlist_open'});ga('waitlist_open',{place:place||''})}
+};
+send({e:'view'});
+if(/[?&]utm_source=share(&|$)/.test(location.search)&&!ss('rn_arr_'+G)){ss('rn_arr_'+G,'1');send({e:'arrival'});ga('share_arrival',{})}
+document.addEventListener('click',function(ev){var a=ev.target&&ev.target.closest&&ev.target.closest('a[href*="/register"]');if(!a||G==='hub')return;
+  ls('rn_game_ref',{g:G,t:Date.now()});send({e:'cta'});ga('game_cta',{place:a.closest('.doc')?'article':'game_over'})},true);
+function watchRead(){var doc=document.querySelector('section.doc');if(!doc||G==='hub'||!window.IntersectionObserver)return;var h=doc.querySelectorAll('h2');var el=h[Math.min(2,h.length-1)];if(!el)return;
+  var io=new IntersectionObserver(function(es){for(var i=0;i<es.length;i++)if(es[i].isIntersecting||es[i].boundingClientRect.top<0){io.disconnect();send({e:'read'});ga('article_read',{});return}});io.observe(el)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',watchRead);else watchRead();
+})();
+</script>
+<style>
+@font-face{font-family:"Barlow Condensed";src:url(/games/_shared/fonts/barlow-condensed-latin-700-normal.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Barlow Condensed";src:url(/games/_shared/fonts/barlow-condensed-latin-800-normal.woff2) format("woff2");font-weight:800;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url(/games/_shared/fonts/ibm-plex-mono-latin-500-normal.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:Fraunces;src:url(/games/_shared/fonts/fraunces-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:Fraunces;src:url(/games/_shared/fonts/fraunces-latin-400-italic.woff2) format("woff2");font-weight:400;font-style:italic;font-display:swap}
+/* Layout: night stage on top (a ring and a growing ball of receipts), cream editorial article below. */
+:root{color-scheme:dark;
+  --night:#0f0d0b;--cream:#f3ead6;--paper:#f4ecda;--ink:#1d1b17;--muted:#a59a87;--muted-d:#6d6457;--yel:#ffd23f;--kraft:#c99a62;--red:#e0532f;--line:rgba(243,234,214,.14);
+  --disp:"Barlow Condensed","Arial Narrow",Impact,sans-serif;--serif:Fraunces,Georgia,serif;--sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--night);color:var(--cream);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid var(--yel);outline-offset:3px}
+.top{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 max(16px,env(safe-area-inset-left));background:var(--night);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;font-weight:600;font-size:15px}
+.brand img{width:26px;height:26px;border-radius:7px}
+.top nav{display:flex;align-items:center;gap:6px}
+.top nav a{font-size:14px;text-decoration:none;opacity:.75;padding:8px 10px}
+.top nav a:hover{opacity:1}
+@media (max-width:520px){.top nav a.hide-s{display:none}}
+.icon-btn{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:transparent}
+.icon-btn svg{width:18px;height:18px}
+.arena{position:relative;background:var(--night);overflow:hidden}
+.stage{position:relative;margin:0 auto;height:calc(100vh - 52px);height:calc(100svh - 52px);min-height:540px;max-height:940px}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none}
+.ov{position:absolute;left:max(16px,calc(50% - 250px));right:max(16px,calc(50% - 250px));bottom:max(16px,env(safe-area-inset-bottom,0px));padding:20px 20px 22px;border-radius:20px;background:rgba(15,13,11,.86);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--line);display:flex;flex-direction:column;gap:12px;transition:transform .35s cubic-bezier(.2,.9,.3,1),opacity .3s}
+.ov.hide{transform:translateY(24px);opacity:0;pointer-events:none}
+.kick{font-family:var(--disp);font-weight:800;font-size:13px;letter-spacing:.24em;color:var(--yel)}
+.ov h1{font-family:var(--disp);font-weight:800;font-size:52px;line-height:.88;letter-spacing:.01em;text-transform:uppercase;margin:0}
+.ov h1 span{color:var(--yel)}
+.lede{font-family:var(--serif);font-size:17px;line-height:1.3;margin:0;text-wrap:balance}
+.btns{display:flex;gap:10px}
+.btn{flex:1;display:inline-grid;place-items:center;height:52px;border-radius:14px;border:0;font-family:var(--disp);font-weight:800;font-size:20px;letter-spacing:.08em;text-transform:uppercase;text-decoration:none}
+.btn.pri{background:var(--yel);color:#1d1b17;box-shadow:0 10px 30px rgba(255,210,63,.22)}
+.btn.sec{background:transparent;border:1.5px solid rgba(243,234,214,.35)}
+.btn:active{transform:scale(.97)}
+.small{font-size:12.5px;color:var(--muted);line-height:1.4;margin:0}
+.small a{color:var(--cream)}
+.linkbtn{background:none;border:0;padding:0;color:var(--cream);text-decoration:underline;text-underline-offset:3px;font-size:13px}
+.res{font-family:var(--serif);font-size:30px;line-height:1.08;margin:0;text-wrap:balance}
+.res em{font-style:italic;color:var(--yel)}
+.res .best{display:block;margin-top:6px;font-family:var(--sans);font-size:14px;color:var(--muted)}
+.cta{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:14px;background:rgba(255,210,63,.1);border:1px solid rgba(255,210,63,.35);text-decoration:none;color:var(--cream);font-size:14px;line-height:1.3}
+.cta b{color:var(--yel);white-space:nowrap;font-family:var(--disp);font-size:16px;letter-spacing:.06em}
+.toast{position:absolute;left:50%;top:12px;transform:translate(-50%,-10px);opacity:0;padding:8px 12px;border-radius:10px;background:var(--cream);color:#1d1b17;font-size:13px;font-weight:600;transition:all .25s;pointer-events:none;z-index:6}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.doc{background:var(--paper);color:var(--ink)}
+.wrap{max-width:680px;margin:0 auto;padding:56px max(20px,env(safe-area-inset-left)) 64px}
+.crumb{font-size:13px;color:var(--muted-d);margin:0 0 22px}
+.crumb a{text-decoration:none}
+.doc h2{font-family:var(--serif);font-weight:400;font-size:clamp(30px,5vw,40px);line-height:1.08;letter-spacing:-.01em;margin:44px 0 14px;text-wrap:balance}
+.doc h2:first-of-type{margin-top:0}
+.doc p,.doc li{font-size:17.5px;line-height:1.65;color:#2d2924}
+.doc ul,.doc ol{padding-left:22px}
+.doc li{margin:6px 0}
+.doc a{color:#9a3412;text-underline-offset:3px}
+.doc .lead{font-family:var(--serif);font-style:italic;font-size:22px;line-height:1.45;color:#3a342b}
+.note{border-left:4px solid var(--yel);background:rgba(255,210,63,.14);padding:14px 16px;border-radius:0 10px 10px 0;font-size:15.5px!important}
+details{border-top:1px solid rgba(29,27,23,.16);padding:14px 0}
+details:last-of-type{border-bottom:1px solid rgba(29,27,23,.16)}
+summary{cursor:pointer;font-weight:600;font-size:17px;list-style:none;display:flex;justify-content:space-between;gap:12px;color:var(--ink)}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-family:var(--disp);font-weight:800;font-size:22px;line-height:1;color:var(--muted-d)}
+details[open] summary::after{content:"\2212"}
+details p{margin:10px 0 0}
+.band{margin:44px 0 0;border-radius:22px;background:var(--night);color:var(--cream);padding:28px 24px;display:grid;gap:12px}
+.band .h{font-family:var(--serif);font-size:28px;line-height:1.1}
+.band .h em{color:var(--yel)}
+.band p{color:rgba(243,234,214,.8)!important;margin:0}
+.band .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.band .btn{flex:none;width:auto;padding:0 22px}
+.src li{font-size:14px;line-height:1.5;color:var(--muted-d)}
+.foot{background:var(--night);color:rgba(243,234,214,.7);font-size:14px}
+.foot .wrap{padding:28px 20px 36px;display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center}
+.foot a{text-decoration:none}
+.foot a:hover{text-decoration:underline}
+.foot .c{margin-left:auto;opacity:.6}
+@media (max-height:640px){.ov h1{font-size:42px}.lede{font-size:15px}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.ov{transition:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/"><img src="/receipt-nest.png" alt="ReceiptNest logo" width="26" height="26">ReceiptNest</a>
+  <nav aria-label="Games navigation">
+    <a href="/games">Games</a>
+    <a class="hide-s" href="#why">Why receipts pile up</a>
+    <button class="icon-btn" id="mute" type="button" aria-label="Mute sound">
+      <svg id="snd" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+    </button>
+  </nav>
+</header>
+
+<main>
+<section class="arena" aria-label="The Pile game">
+  <div class="stage">
+    <canvas id="cv" aria-label="A ball of receipts bouncing inside a ring and growing with every bounce"></canvas>
+    <div class="toast" id="toast" role="status">Link copied</div>
+    <section class="ov" id="ovStart">
+      <div class="kick">A RECEIPTNEST GAME</div>
+      <h1>The <span>pile</span></h1>
+      <p class="lede">Every bounce lands one more receipt on the pile. Tap the moment it hits the ring to snap that receipt before the box gives out.</p>
+      <div class="btns"><button class="btn pri" id="bPlay" type="button">Play</button><button class="btn sec" id="bWatch" type="button">Watch</button></div>
+      <p class="small">Tap anywhere, or press Space, each time the pile hits the ring. Get through 100 receipts. Every landing plays the next note of the Can-Can, so sound on.</p>
+    </section>
+    <section class="ov hide" id="ovEnd" aria-live="polite">
+      <div class="kick" id="eKick">THE BOX HELD</div>
+      <p class="res" id="eRes"></p>
+      <div class="btns"><button class="btn pri" id="bAgain" type="button">Play again</button><button class="btn sec" id="bShare" type="button">Share</button></div>
+      <p class="small">Or <button class="linkbtn" id="bAlt" type="button">just watch it grow</button>.</p>
+      <a class="cta" href="/register?utm_source=games&amp;utm_medium=web&amp;utm_campaign=pile"><span>Snap each receipt the day you get it and the pile never grows.</span><b>Start free →</b></a>
+    </section>
+  </div>
+</section>
+
+<section class="doc" id="why">
+  <div class="wrap">
+    <nav class="crumb" aria-label="Breadcrumb"><a href="/">ReceiptNest</a> › <a href="/games">Games</a> › The Pile</nav>
+
+    <h2>Why receipts pile up</h2>
+    <p class="lead">Nobody decides to keep a shoebox of receipts. It fills up one receipt at a time.</p>
+    <p>Each receipt is small, so it is easy to put off: into the wallet, the glovebox, the drawer. The trouble is that a pile gets harder to deal with the bigger it gets. Thermal paper fades, so the oldest receipts are the hardest to read (here’s <a href="/games/fade#why">why receipts fade</a>). And a receipt shows what you bought, never what it was for, so the longer it waits, the less you remember about it.</p>
+    <p>That matters because the IRS generally expects you to keep records that support the income and deductions on your return, and to keep them for at least three years after you file, longer in some cases. Here’s <a href="/blog/how-long-to-keep-receipts">how long to keep receipts, rule by rule</a>.</p>
+
+    <h2>How to keep the pile from growing</h2>
+    <ol>
+      <li><strong>Snap each receipt the day you get it.</strong> That is the whole game: one receipt at a time is easy, a hundred at once is not. A clear photo taken at the counter is the copy that stays readable.</li>
+      <li><strong>Add a few words about why.</strong> “Printer ink, client proposals” takes five seconds now and saves guessing in April.</li>
+      <li><strong>Keep everything in one place, by month.</strong> Month matches your bank and card statements, so checking for gaps takes minutes.</li>
+      <li><strong>Already have a shoebox? Clear it in batches.</strong> Sort it into months first, then snap one month at a time. The full routine is in <a href="/blog/how-to-keep-track-of-receipts">how to keep track of receipts all year</a>.</li>
+    </ol>
+    <p>Not sure which receipts you actually need? Start with <a href="/blog/do-you-need-receipts-for-taxes">do you need receipts for taxes</a>, which checks eight common myths against IRS guidance.</p>
+    <p class="note">This is general record-keeping information, not tax advice. Your tax professional can tell you what your situation needs.</p>
+
+    <h2>How to play The Pile</h2>
+    <ul>
+      <li>A ball of receipts bounces inside a ring. Every time it hits the ring, one more receipt lands on the pile and the ball grows.</li>
+      <li>Tap anywhere, or press Space, the moment it hits. A small circle closes around each landing: tap before it disappears and that receipt is snapped, so the pile shrinks.</li>
+      <li>Tap when nothing has landed and you fumble one, which also grows the pile. Mashing doesn’t work.</li>
+      <li>The bigger the pile, the less room it has, so it bounces faster. The bounces also speed up as the year goes on.</li>
+      <li>Get through 100 receipts before the pile fills the box. Snap all 100 for a perfect year.</li>
+      <li><strong>Watch</strong> lets the pile grow with nobody snapping, to see how far it gets.</li>
+    </ul>
+
+    <h2>Questions</h2>
+    <details><summary>Is every run different?</summary><p>Yes. The starting throw, every bounce angle and every receipt amount are random, so no two runs are the same. In Watch mode, with nobody snapping, the pile usually gets to somewhere between 90 and 110 receipts before the box gives out.</p></details>
+    <details><summary>What is the song?</summary><p>The Can-Can, from Jacques Offenbach’s <em>Orpheus in the Underworld</em> (1858), which is in the public domain. Every landing plays the next note, the tune moves up a key each time it comes round, and brass joins when the box is nearly full. Snapping a receipt adds a xylophone note on top.</p></details>
+    <details><summary>Once I’ve snapped a receipt, do I still need the paper?</summary><p>In general, the IRS accepts records kept electronically as long as the copies are accurate, complete and readable. Revenue Procedure 97-22 sets out the standards. If a specific receipt matters a lot, ask your tax professional before you throw away the original.</p></details>
+    <details><summary>Does ReceiptNest help with this?</summary><p>Yes. Snap a paper receipt or forward an email receipt, add a quick note, and ReceiptNest organizes it by month. Export a PDF or CSV for your accountant at tax time. See <a href="/receipt-organizer">how the receipt organizer works</a>.</p></details>
+    <details><summary>Are there other games?</summary><p>Yes: <a href="/games/escape">Escape the Year</a>, <a href="/games/shoebox">Shoebox Sort</a>, <a href="/games/charge">Guess the Charge</a> and <a href="/games/fade">Before It Fades</a>. All free, no signup.</p></details>
+
+    <div class="band">
+      <div class="h">Keep the pile <em>at zero.</em></div>
+      <p>Snap the receipt when you get it. ReceiptNest files it by month and exports a PDF or CSV for your accountant. No bank login, no bookkeeping.</p>
+      <div class="row">
+        <a class="btn pri" href="/register?utm_source=games&amp;utm_medium=web&amp;utm_campaign=pile_article">Start free</a>
+        <a class="btn sec" href="/receipt-organizer">How it works</a>
+      </div>
+    </div>
+
+    <h2 style="font-size:24px;margin-top:44px">Sources and credits</h2>
+    <ul class="src">
+      <li>IRS, <a href="https://www.irs.gov/businesses/small-businesses-self-employed/how-long-should-i-keep-records" rel="noopener">How long should I keep records?</a></li>
+      <li>IRS, <a href="https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep" rel="noopener">What kind of records should I keep?</a></li>
+      <li>IRS, <a href="https://www.irs.gov/pub/irs-drop/rp-97-22.pdf" rel="noopener">Revenue Procedure 97-22, electronic storage of records</a></li>
+      <li>Music: the Can-Can (Galop infernal) from <em>Orpheus in the Underworld</em> by Jacques Offenbach, 1858 (public domain). Sounds rendered with the MuseScore General soundfont (MIT license).</li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <a href="/">ReceiptNest</a>
+    <a href="/games">Games</a>
+    <a href="/games/escape">Escape the Year</a>
+    <a href="/games/shoebox">Shoebox Sort</a>
+    <a href="/games/charge">Guess the Charge</a>
+    <a href="/games/fade">Before It Fades</a>
+    <a href="/blog">Guides</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/terms">Terms</a>
+    <span class="c">© 2026 ReceiptNest</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+// ---------- world, in stage units (405 x 720), scaled to the screen ----------
+const VW=405,VH=720,CXV=202.5,CYV=400,RC=168;
+// GROW: how much an unsnapped receipt swells the pile in play. EARLY/LATE: the tap window around each landing.
+const P={G:700,R0:11,FILL:0.965,VMIN:300,VMAX:700,N:100,GROW:2.6,EARLY:0.12,LATE0:0.24,LATE1:0.17,FUMBLE:6,RAMP:0.45};
+const MERCH=['CAFE','FUEL','HARDWARE','PRINT SHOP','PARKING','SUPPLIES','DINER','TAXI','POST OFFICE','BAKERY','PHARMACY','SOFTWARE','HOME CENTER','LUNCH','TRAIN','HOTEL'];
+const COLS=['#ffd23f','#f3ead6','#e0532f','#c99a62','#9fd3a6','#ffb36b'];
+const GREEN='#9fd3a6';
+const money=v=>'$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+// ---------- simulation (pure, so it can also run headless for tuning) ----------
+function amount(r){const u=r();return Math.round((u<.55?3+u*40:u<.88?25+(u-.55)*260:110+(u-.88)*900)*100)/100}
+function Sim(seed,mode){const r=mulberry(seed);
+  return {r,mode,t:0,x:(r()-.5)*40,y:-60,vx:(r()<.5?-1:1)*(160+r()*160),vy:-80*r(),rad:P.R0,rot:0,vr:(r()-.5)*4,n:0,total:0,pileAmt:0,pileN:0,
+    recs:[],events:[],phase:'run',strainT:0,endT:0,lastHitT:-9,snapped:0,snapAmt:0,chk:0,armT:-9,fumbles:0,combo:0,best:0,result:''}}
+const late=s=>P.LATE0+(P.LATE1-P.LATE0)*Math.min(1,s.n/P.N);
+function doSnap(s,R){R.snapped=true;R.snapT=s.t;s.rad=Math.max(P.R0,s.rad-R.inc);s.snapped++;s.snapAmt+=R.amt;s.pileAmt-=R.amt;s.pileN--;s.combo++;s.best=Math.max(s.best,s.combo);s.events.push({e:'snap',t:s.t,R})}
+function fumble(s){s.fumbles++;s.combo=0;s.rad=Math.min(RC*P.FILL,s.rad+P.FUMBLE);s.events.push({e:'fumble',t:s.t})}
+function tap(s){if(s.phase!=='run'||s.mode!=='play')return;
+  for(let i=s.recs.length-1;i>=0;i--){const R=s.recs[i];if(s.t-R.t>late(s))break;if(!R.snapped){doSnap(s,R);return}}
+  if(s.armT<0)s.armT=s.t;else fumble(s)}
+function step(s,dt){
+  if(s.phase==='run'){
+    if(s.armT>=0&&s.t-s.armT>P.EARLY){s.armT=-9;fumble(s)}
+    while(s.chk<s.recs.length&&s.t-s.recs[s.chk].t>late(s)){if(!s.recs[s.chk].snapped)s.combo=0;s.chk++}
+    s.vy+=P.G*dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.t+=dt;s.rot+=s.vr*dt;
+    const d=Math.hypot(s.x,s.y);
+    if(d+s.rad>=RC){
+      const nx=s.x/d,ny=s.y/d,dot=s.vx*nx+s.vy*ny;s.x=nx*(RC-s.rad-0.01);s.y=ny*(RC-s.rad-0.01);
+      const open=s.mode!=='play'||s.n<P.N;
+      if(dot>0&&s.t-s.lastHitT>0.03){
+        s.vx-=2*dot*nx;s.vy-=2*dot*ny;
+        if(open){
+          const a=(s.r()-.5)*0.16,c=Math.cos(a),sn=Math.sin(a),vx=s.vx*c-s.vy*sn,vy=s.vx*sn+s.vy*c;s.vx=vx;s.vy=vy;
+          const ramp=s.mode==='play'?1+P.RAMP*s.n/P.N:1;let sp=Math.hypot(s.vx,s.vy),tg=Math.min(P.VMAX*ramp,Math.max(P.VMIN*ramp,sp));s.vx*=tg/sp;s.vy*=tg/sp;
+          s.vr=(s.vx*ny-s.vy*nx)/Math.max(10,s.rad)*0.6;
+          const amt=amount(s.r),m=MERCH[Math.floor(s.r()*MERCH.length)];
+          s.n++;s.total+=amt;s.pileAmt+=amt;s.pileN++;s.lastHitT=s.t;
+          const inc=(0.7+amt/58)*(s.mode==='play'?P.GROW:1);
+          const R={n:s.n,t:s.t,amt,inc,x:nx*RC,y:ny*RC,nx,ny,col:COLS[s.n%COLS.length],txt:m+' '+money(amt),snapped:false,snapT:0};s.recs.push(R);
+          s.rad=Math.min(RC*P.FILL,s.rad+inc);
+          s.events.push({e:'bounce',t:s.t,n:s.n,amt,fill:s.rad/RC});
+          if(s.armT>=0&&s.t-s.armT<=P.EARLY){s.armT=-9;doSnap(s,R)}
+        }
+      }
+    }
+    if(s.rad>=RC*P.FILL*0.999){s.phase='strain';s.strainT=s.t;s.result=s.mode==='play'?'burst':'snap';s.events.push({e:'strain',t:s.t,result:s.result})}
+    else if(s.mode==='play'&&s.n>=P.N&&s.t-s.lastHitT>late(s)){s.phase='strain';s.strainT=s.t;s.result='clear';s.events.push({e:'strain',t:s.t,result:'clear'})}
+  } else if(s.phase==='strain'){
+    s.t+=dt;if(s.result!=='burst'){s.x*=0.9;s.y*=0.9}
+    if(s.t-s.strainT>1.0){s.phase='end';s.endT=s.t;s.events.push({e:'end',t:s.t,result:s.result})}
+  } else s.t+=dt;
+}
+
+// ---------- canvas ----------
+const cv=$('cv'),ctx=cv.getContext('2d');let W=405,H=720,DPR=1,SC=1,OX=0,OY=0;
+let MANUAL=false,LOG=[];
+function measure(){const b=cv.getBoundingClientRect();W=b.width;H=b.height;DPR=Math.min(MANUAL?3:2,devicePixelRatio||1);cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);SC=Math.min(W/VW,H/VH);OX=(W-VW*SC)/2;OY=(H-VH*SC)/2}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+
+// ---------- audio: the Can-Can, one note per landing ----------
+// Offenbach, Galop infernal (1858), public domain. Notes and cues rendered from the MuseScore General soundfont (MIT).
+const TUNE=[60,62,65,64,62,67,67,67,69,64,65,62,62,62,65,64,62,60,72,71,69,67,65,64,62,60,62,65,64,62,67,67,67,69,64,65,62,62,62,65,64,62,60,67,64,62,60];
+let AC=null,muted=!!store.get('pile_mute'),MASTER=null;const BUF={};const AUD='/games/pile/audio/';
+function audio(){
+  if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();
+    const comp=AC.createDynamicsCompressor();comp.threshold.value=-12;comp.ratio.value=3;comp.attack.value=0.003;comp.release.value=0.25;
+    MASTER=AC.createGain();MASTER.gain.value=muted?0:0.9;MASTER.connect(comp).connect(AC.destination);
+    for(const k of ['notes','finale','burst'])fetch(AUD+k+'.mp3').then(r=>r.arrayBuffer()).then(b=>new Promise((ok,no)=>AC.decodeAudioData(b,ok,no))).then(b=>{BUF[k]=b}).catch(()=>{});
+  }catch(e){AC=null}}
+  if(AC&&AC.state==='suspended')AC.resume();
+}
+const hz=m=>440*Math.pow(2,(m-69)/12);
+// sprite slots: 0-16 piano 60..76, 17-33 xylophone 72..88, 34-50 brass 60..76, 51-53 pizzicato tonic, 54 low pizzicato
+function slot(i,vol,dur){if(!AC||muted)return false;if(!BUF.notes)return false;const s=AC.createBufferSource(),g=AC.createGain();s.buffer=BUF.notes;g.gain.value=vol;s.connect(g).connect(MASTER);s.start(AC.currentTime,i,dur||0.95);return true}
+function blip(m,vol){if(!AC||muted)return;const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.value=hz(m);o.connect(g).connect(MASTER);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.005);g.gain.exponentialRampToValueAtTime(0.0001,t+0.5);o.start(t);o.stop(t+0.55)}
+let cue=null;
+const SFX={
+  land(i,fill){const key=2*Math.min(2,Math.floor(i/TUNE.length)),m=TUNE[i%TUNE.length]+key;
+    if(!slot(m-60,0.62))blip(m,0.18);if(fill>0.72)slot(34+m-60,0.32*Math.min(1,(fill-0.72)/0.15+0.4));if(i%2===0)slot(51+key/2,0.34);return m},
+  snap(m){if(!slot(17+Math.min(16,Math.max(0,m+12-72)),0.5))blip(m+12,0.12)},
+  fumble(){if(!slot(54,0.55))blip(41,0.15)},
+  cue(k){SFX.stopCue();if(!AC||muted||!BUF[k])return;const s=AC.createBufferSource(),g=AC.createGain();s.buffer=BUF[k];g.gain.value=k==='finale'?1:0.85;s.connect(g).connect(MASTER);s.start();cue={s,g}},
+  stopCue(){if(cue&&AC){try{cue.g.gain.setTargetAtTime(0.0001,AC.currentTime,0.08);cue.s.stop(AC.currentTime+0.5)}catch(e){}}cue=null}
+};
+
+// ---------- drawing pieces ----------
+// the pile: one slip per receipt, packed in a sunflower spiral, clipped to a sphere with shading
+const SLIPS=(()=>{const r=mulberry(77),out=[];for(let i=0;i<160;i++){const f=Math.sqrt((i+.5)/160)*0.92,a=i*2.39996;out.push({x:Math.cos(a)*f,y:Math.sin(a)*f,rot:(r()-.5)*2.6,lines:2+Math.floor(r()*3),tint:r()})}return out})();
+function slip(w,h,lines,tint){
+  const t=Math.min(2.2,w*0.12);ctx.beginPath();ctx.moveTo(-w/2,-h/2+t);for(let k=0;k<4;k++){ctx.lineTo(-w/2+(k+.5)*w/4,-h/2);ctx.lineTo(-w/2+(k+1)*w/4,-h/2+t)}
+  ctx.lineTo(w/2,h/2-t);for(let k=0;k<4;k++){ctx.lineTo(w/2-(k+.5)*w/4,h/2);ctx.lineTo(w/2-(k+1)*w/4,h/2-t)}ctx.closePath();
+  ctx.fillStyle=tint<.2?'#f6efdc':tint<.4?'#fbf6ea':'#fffdf6';ctx.fill();ctx.strokeStyle='rgba(60,50,35,.18)';ctx.lineWidth=.6;ctx.stroke();
+  ctx.fillStyle='rgba(40,36,30,.7)';ctx.fillRect(-w*.3,-h*.32,w*.6,Math.max(1,h*.06));
+  ctx.fillStyle='rgba(40,36,30,.35)';for(let k=0;k<lines;k++)ctx.fillRect(-w*.3,-h*.16+k*h*.12,w*(.35+((k*37)%20)/100),Math.max(.7,h*.035));
+  ctx.fillStyle='rgba(40,36,30,.7)';ctx.fillRect(-w*.3,h*.26,w*.6,Math.max(1,h*.05));
+}
+function drawBall(x,y,rad,rot,alpha,count){
+  ctx.save();ctx.translate(x,y);ctx.globalAlpha=alpha;
+  ctx.shadowColor='rgba(255,210,63,.45)';ctx.shadowBlur=22;ctx.fillStyle='#e9dfc7';ctx.beginPath();ctx.arc(0,0,rad,0,7);ctx.fill();ctx.shadowBlur=0;
+  ctx.save();ctx.beginPath();ctx.arc(0,0,rad,0,7);ctx.clip();ctx.rotate(rot);
+  const n=Math.max(1,Math.min(SLIPS.length,count)),w=Math.max(11,rad*0.24),h=w*1.6;
+  for(let i=n-1;i>=0;i--){const S=SLIPS[i];ctx.save();ctx.translate(S.x*rad,S.y*rad);ctx.rotate(S.rot);slip(w,h,S.lines,S.tint);ctx.restore()}
+  ctx.restore();
+  const g=ctx.createRadialGradient(-rad*.35,-rad*.4,rad*.15,0,0,rad);g.addColorStop(0,'rgba(255,255,255,.18)');g.addColorStop(.65,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(40,28,10,.42)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,rad,0,7);ctx.fill();
+  ctx.restore();
+}
+function drawPhone(cx,cy,sc,alpha){ctx.save();ctx.translate(cx,cy);ctx.scale(sc,sc);ctx.globalAlpha=alpha;
+  ctx.shadowColor='rgba(255,210,63,.7)';ctx.shadowBlur=30;ctx.fillStyle='#14120f';rr(-36,-64,72,128,14);ctx.fill();ctx.shadowBlur=0;
+  ctx.strokeStyle='rgba(243,234,214,.35)';ctx.lineWidth=2;rr(-36,-64,72,128,14);ctx.stroke();
+  ctx.fillStyle='#2a2621';rr(-30,-56,60,112,9);ctx.fill();
+  for(let i=0;i<6;i++){ctx.fillStyle=i===0?'#ffd23f':'rgba(243,234,214,.75)';rr(-24,-46+i*16,48,11,3);ctx.fill()}
+  ctx.restore()}
+
+// ---------- run state ----------
+let sim=null,mode='attract',flash=0,flashCol='#ffd23f',shake=0,fly=[],bits=[],pops=[],endShown=false,lastRes=null,noteOf={};
+const CY0=CYV+RC+52;
+function start(m,seed){mode=m;sim=Sim(seed!=null?seed:(m==='attract'?4242:Math.floor(Math.random()*1e9)),m==='play'?'play':'watch');
+  fly=[];bits=[];pops=[];noteOf={};flash=0;shake=0;endShown=false;LOG.length=0;SFX.stopCue();
+  if(m!=='attract'&&!MANUAL&&window.rnT)rnT.start(m);
+  $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');if(m==='attract')$('ovStart').classList.remove('hide')}
+function handle(){
+  const s=sim,live=mode!=='attract';
+  for(const e of s.events){
+    if(MANUAL)LOG.push({e:e.e,t:e.t,n:e.n,amt:e.amt,fill:e.fill,result:e.result});
+    if(e.e==='bounce'){flash=Math.max(flash,.35);flashCol=COLS[e.n%COLS.length];if(live)noteOf[e.n]=SFX.land(e.n-1,e.fill)}
+    else if(e.e==='snap'){const R=e.R;fly.push({x:s.x,y:s.y,t:0});pops.push({x:R.x,y:R.y,txt:'SNAPPED',col:GREEN,t:0});flash=.6;flashCol=GREEN;if(live)SFX.snap(noteOf[R.n]||72)}
+    else if(e.e==='fumble'){pops.push({x:s.x,y:s.y-s.rad-10,txt:'MISS',col:'#e0532f',t:0});flash=.5;flashCol='#e0532f';shake=Math.max(shake,RM?1:4);if(live)SFX.fumble()}
+    else if(e.e==='strain'){shake=6;if(live)SFX.cue(e.result==='burst'?'burst':'finale')}
+    else if(e.e==='end'){
+      if(e.result==='burst'){flash=1;flashCol='#e0532f';shake=RM?3:14;
+        for(let i=0;i<90;i++){const a=Math.random()*Math.PI*2,sp=120+Math.random()*520;bits.push({x:s.x+Math.cos(a)*s.rad*.6,y:s.y+Math.sin(a)*s.rad*.6,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-120,a:Math.random()*6,va:(Math.random()-.5)*14,t:0,slip:1,tint:Math.random()})}
+        for(let i=0;i<14;i++){const a=i/14*Math.PI*2;bits.push({x:Math.cos(a)*RC,y:Math.sin(a)*RC,vx:Math.cos(a)*(160+Math.random()*120),vy:Math.sin(a)*(160+Math.random()*120),a:a+Math.PI/2,va:(Math.random()-.5)*5,t:0,arc:1})}}
+      else{flash=1;flashCol='#fffcf0'}
+      if(!MANUAL)setTimeout(showEnd,e.result==='burst'?1700:2300)}
+  }
+  s.events.length=0;
+}
+function showEnd(){
+  if(mode==='attract'){start('attract');return}
+  const s=sim;let kick,res;
+  if(mode==='watch'){kick='SNAPPED';res=`<em>${s.n} receipts</em>, ${money(s.total)}, before the box gave out.`}
+  else if(s.result==='clear'){kick=s.snapped===P.N?'PERFECT YEAR':'THE BOX HELD';res=`You snapped <em>${s.snapped} of ${P.N}</em> receipts. Longest streak: ${s.best}.`}
+  else{kick='THE BOX GAVE OUT';res=`It burst at receipt <em>${s.n}</em>. You snapped ${s.snapped}.`}
+  const best=store.get('pile_best')||0;let bestLine='';
+  if(mode==='play'){const score=s.result==='clear'?s.snapped:0;if(score>best){store.set('pile_best',score);if(best)bestLine=' New best.'}else if(best)bestLine=` Your best: ${best} snapped.`}
+  $('eKick').textContent=kick;$('eRes').innerHTML=res+(bestLine?`<span class="best">${bestLine}</span>`:'');
+  $('bAgain').textContent=mode==='play'?'Play again':'Watch again';$('bAlt').textContent=mode==='play'?'just watch it grow':'try to snap them yourself';
+  $('ovEnd').classList.remove('hide');endShown=true;
+  lastRes={mode,result:s.result,n:s.n,snapped:s.snapped,total:s.total,best:s.best};
+  if(window.rnT)rnT.finish(mode,mode==='play'?s.snapped:s.n,{result:s.result,receipts:s.n,best_streak:s.best});
+}
+$('bShare').onclick=()=>{if(!lastRes)return;const base='https://receipt-nest.com/games/pile',url=window.rnT?rnT.url(base):base;const L=lastRes;
+  const txt=L.mode==='watch'?`${L.n} receipts (${money(L.total)}) before the box gave out. How big does yours get?`:L.result==='clear'?`I snapped ${L.snapped} of 100 receipts and the box held. Can you beat it?`:`The box burst at receipt ${L.n}. Can you keep the pile down?`;
+  if(window.rnT)rnT.shareClick(L.mode,L.mode==='play'?L.snapped:L.n);
+  const done=m=>{if(window.rnT)rnT.shareDone(m);const t=$('toast');t.textContent=m==='copy'?'Link copied':'Shared';t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1600)};
+  if(navigator.share){navigator.share({title:'The Pile',text:txt,url}).then(()=>done('native')).catch(()=>{})}
+  else if(navigator.clipboard){navigator.clipboard.writeText(txt+' '+url).then(()=>done('copy')).catch(()=>{})}};
+$('bPlay').onclick=()=>{audio();start('play')};
+$('bWatch').onclick=()=>{audio();start('watch')};
+$('bAgain').onclick=()=>{audio();start(mode==='play'?'play':'watch')};
+$('bAlt').onclick=()=>{audio();start(mode==='play'?'watch':'play')};
+function setMute(){$('snd').style.opacity=muted?.35:1;$('mute').setAttribute('aria-label',muted?'Turn sound on':'Mute sound')}
+$('mute').onclick=()=>{muted=!muted;store.set('pile_mute',muted);setMute();audio();if(MASTER)MASTER.gain.value=muted?0:0.9};setMute();
+function tapNow(){audio();if(mode==='play'&&sim&&sim.phase==='run')tap(sim)}
+cv.addEventListener('pointerdown',e=>{e.preventDefault();tapNow()});
+addEventListener('keydown',e=>{if((e.code==='Space'||e.key===' '||e.key==='Enter')&&mode==='play'&&sim&&sim.phase==='run'&&!endShown){e.preventDefault();if(!e.repeat)tapNow()}});
+
+// ---------- render ----------
+let last=performance.now(),acc=0;
+function update(el,fixed){if(!sim)return;
+  if(fixed){for(let i=0;i<fixed;i++)step(sim,1/480)}else{acc+=el;let n=0;while(acc>=1/480&&n<60){step(sim,1/480);acc-=1/480;n++}if(n>=60)acc=0}
+  handle()}
+function frame(now){if(MANUAL)return;const el=Math.min(50,now-last)/1000;last=now;update(el);draw(el);requestAnimationFrame(frame)}
+function fitText(lines,max,fs){for(const L of lines){ctx.font=`800 ${fs}px "Barlow Condensed", Impact, sans-serif`;while(fs>18&&ctx.measureText(L).width>max){fs--;ctx.font=`800 ${fs}px "Barlow Condensed", Impact, sans-serif`}}return fs}
+function draw(el){
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  const bg=ctx.createRadialGradient(W/2,H*.55,0,W/2,H*.55,Math.max(W,H)*.75);bg.addColorStop(0,'#1d1a16');bg.addColorStop(1,'#0b0a08');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  if(!sim)return;
+  ctx.translate(OX,OY);ctx.scale(SC,SC);
+  const s=sim,play=s.mode==='play',ended=s.phase==='end';let sx=0,sy=0;
+  if(s.phase==='strain')shake=(RM?1:4)+(s.t-s.strainT)*(RM?2:8);
+  if(shake>0){sx=(Math.random()-.5)*shake;sy=(Math.random()-.5)*shake;if(s.phase!=='strain'){shake*=0.9;if(shake<.2)shake=0}}
+  ctx.save();ctx.translate(CXV+sx,CYV+sy);
+  const burst=s.result==='burst'&&ended,gather=ended&&!burst;
+  const snapK=gather?Math.min(1,(s.t-s.endT)/0.65):0,eK=snapK<.5?2*snapK*snapK:1-Math.pow(-2*snapK+2,2)/2;
+  const fill=s.rad/RC,bx=s.x*(1-eK),by=s.y*(1-eK);
+  // a line to every receipt still in the pile
+  if(!burst&&snapK<1){ctx.lineWidth=1.1;for(const R of s.recs){if(R.snapped)continue;const age=s.t-R.t;
+      ctx.strokeStyle=R.col;ctx.globalAlpha=(age<0.25?0.95:0.38)*(1-eK);ctx.beginPath();ctx.moveTo(R.x*(1-eK),R.y*(1-eK));ctx.lineTo(bx,by);ctx.stroke()}ctx.globalAlpha=1}
+  // the ring (the box)
+  if(!burst){const strain=s.phase==='strain'&&s.result!=='clear';
+    const ringCol=strain?(Math.floor(s.t*12)%2?'#e0532f':'#ffd23f'):(flash>.4?flashCol:(play&&fill>0.72?'#e0532f':COLS[s.n%COLS.length]));
+    ctx.globalAlpha=1-eK;ctx.shadowColor=ringCol;ctx.shadowBlur=14+30*flash;ctx.strokeStyle=ringCol;ctx.lineWidth=5+3*flash;ctx.beginPath();ctx.arc(0,0,RC*(1-eK*0.9),0,7);ctx.stroke();ctx.shadowBlur=0;ctx.globalAlpha=1}
+  flash*=0.88;
+  // play: a closing circle marks each landing while it can still be snapped
+  if(play&&s.phase==='run'){const L=late(s);for(let i=s.recs.length-1;i>=0;i--){const R=s.recs[i],age=s.t-R.t;if(age>L)break;if(R.snapped)continue;const k=age/L;
+      ctx.strokeStyle=R.col;ctx.globalAlpha=1-k*0.7;ctx.lineWidth=3;ctx.beginPath();ctx.arc(R.x,R.y,6+20*(1-k),0,7);ctx.stroke();
+      if(s.n<=3){ctx.globalAlpha=1;ctx.font='800 26px "Barlow Condensed", Impact, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#ffd23f';ctx.fillText('TAP!',R.x*0.62,R.y*0.62)}}
+    ctx.globalAlpha=1}
+  // merchant tags at each landing
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='500 10.5px "IBM Plex Mono", ui-monospace, monospace';
+  for(let i=s.recs.length-1;i>=0;i--){const R=s.recs[i],age=s.t-R.t;if(age>1.1)break;
+    const k=age/1.1,d=RC+16+18*k,txt=R.snapped?'✓ '+R.txt:R.txt;ctx.globalAlpha=(1-k)*(1-eK)*(burst?0:1);ctx.fillStyle=R.snapped?GREEN:R.col;const hw=ctx.measureText(txt).width/2+6;const tx=Math.max(-CXV+hw,Math.min(VW-CXV-hw,R.nx*d));ctx.fillText(txt,tx,R.ny*d)}
+  ctx.globalAlpha=1;
+  // the ball (or the phone)
+  if(!burst&&snapK<1)drawBall(bx,by,s.rad*(1-eK*0.92),s.rot,1-eK*0.6,(play?s.pileN:s.n)+1);
+  if(gather)drawPhone(0,MANUAL?0:-110*eK,0.6+0.55*eK,eK);
+  // pieces of a burst box
+  for(let i=bits.length-1;i>=0;i--){const b=bits[i];b.t+=el;if(b.t>2.2){bits.splice(i,1);continue}b.vy+=500*el;b.x+=b.vx*el;b.y+=b.vy*el;b.a+=b.va*el;
+    ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.a);ctx.globalAlpha=Math.max(0,1-b.t/2.2);
+    if(b.arc){ctx.strokeStyle='#e0532f';ctx.lineWidth=5;ctx.beginPath();ctx.arc(0,RC,RC,-Math.PI/2-0.2,-Math.PI/2+0.2);ctx.stroke()}else slip(12,19,2,b.tint);ctx.restore()}
+  ctx.globalAlpha=1;
+  // floating words
+  for(let i=pops.length-1;i>=0;i--){const p=pops[i];p.t+=el;if(p.t>0.7){pops.splice(i,1);continue}const k=p.t/0.7;ctx.globalAlpha=1-k;ctx.fillStyle=p.col;ctx.font='800 18px "Barlow Condensed", Impact, sans-serif';ctx.textAlign='center';
+    ctx.fillText(p.txt,Math.max(-CXV+40,Math.min(VW-CXV-40,p.x*0.8)),p.y*0.8-18*k)}
+  ctx.globalAlpha=1;
+  ctx.restore();
+  // snapped receipts fly down to the counter
+  for(let i=fly.length-1;i>=0;i--){const f=fly[i];f.t+=el;if(f.t>0.45){fly.splice(i,1);continue}const k=f.t/0.45,e=k*k;const x0=CXV+f.x,y0=CYV+f.y,x1=VW/2,y1=CY0+24;
+    ctx.save();ctx.translate(x0+(x1-x0)*e,y0+(y1-y0)*e-60*Math.sin(Math.PI*k));ctx.rotate(k*6);ctx.globalAlpha=1-k*0.5;slip(14,22,2,1);ctx.restore()}
+  // header
+  ctx.textAlign='center';ctx.textBaseline='top';ctx.lineJoin='round';ctx.lineWidth=6;ctx.strokeStyle='rgba(0,0,0,.85)';
+  const ty=MANUAL?70:22,done=ended&&(burst||snapK>=1);let l1,l2;
+  if(play){l1=done?(burst?'THE BOX GAVE OUT.':'SNAPPED & SORTED.'):s.n<6?'TAP THE MOMENT IT HITS THE RING':'SNAP EVERY RECEIPT';l2=done?'':(s.n<6?'EACH TAP SNAPS ONE RECEIPT':'BEFORE THE BOX GIVES OUT')}
+  else{l1=done?'OR… JUST SNAP THEM.':'EVERY BOUNCE = ONE MORE RECEIPT';l2=done?'':'HOW BIG BEFORE THE BOX GIVES OUT?'}
+  const fs=fitText([l1,l2],372,33);ctx.font=`800 ${fs}px "Barlow Condensed", Impact, sans-serif`;
+  ctx.strokeText(l1,VW/2,ty);ctx.fillStyle=done?(burst?'#e0532f':'#ffd23f'):'#f3ead6';ctx.fillText(l1,VW/2,ty);
+  if(l2){ctx.strokeText(l2,VW/2,ty+fs*1.1);ctx.fillStyle='#ffd23f';ctx.fillText(l2,VW/2,ty+fs*1.1)}
+  if(play&&s.combo>=3&&!ended){ctx.font='800 17px "Barlow Condensed", sans-serif';ctx.fillStyle=GREEN;ctx.fillText('STREAK '+s.combo,VW/2,ty+fs*2.3)}
+  // counter
+  ctx.textBaseline='alphabetic';ctx.font='800 13px "Barlow Condensed", sans-serif';ctx.fillStyle='rgba(243,234,214,.6)';
+  ctx.textAlign='left';ctx.fillText(play?'RECEIPTS':'RECEIPTS',VW/2-150,CY0);ctx.textAlign='right';ctx.fillText(gather&&snapK>=1&&!play?'SNAPPED & SORTED':'IN THE PILE',VW/2+150,CY0);
+  if(play){ctx.textAlign='center';ctx.fillText('SNAPPED',VW/2,CY0)}
+  ctx.font='800 40px "Barlow Condensed", Impact, sans-serif';ctx.fillStyle='#f3ead6';ctx.textAlign='left';ctx.fillText(play?s.n+'/'+P.N:String(s.n),VW/2-150,CY0+40);
+  if(play){ctx.textAlign='center';ctx.fillStyle=GREEN;ctx.fillText(String(s.snapped),VW/2,CY0+40)}
+  ctx.textAlign='right';ctx.fillStyle='#ffd23f';ctx.font=`800 ${play?32:40}px "Barlow Condensed", Impact, sans-serif`;ctx.fillText(money(play?Math.max(0,s.pileAmt):s.total),VW/2+150,CY0+40);
+  // how full the box is
+  ctx.fillStyle='rgba(243,234,214,.12)';ctx.fillRect(VW/2-150,CY0+52,300,5);ctx.fillStyle=fill>0.72?'#e0532f':'#ffd23f';ctx.fillRect(VW/2-150,CY0+52,300*Math.min(1,fill/P.FILL),5);
+  // white flash when it all snaps
+  if(gather){const f=Math.max(0,1-(s.t-s.endT)/0.5);if(f>0){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle=`rgba(255,252,240,${f*0.9})`;ctx.fillRect(0,0,W,H)}}
+  if(MANUAL&&ended&&s.t-s.endT>2.6)endCard(Math.min(1,(s.t-s.endT-2.6)/0.6));
+}
+// end card for recorded videos
+function endCard(a){const e=a*a*(3-2*a);ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle=`rgba(15,13,11,${0.93*e})`;ctx.fillRect(0,0,W,H);ctx.translate(OX,OY);ctx.scale(SC,SC);ctx.globalAlpha=e;
+  ctx.textAlign='center';ctx.textBaseline='middle';const y0=250;
+  ctx.font='800 54px "Barlow Condensed", Impact, sans-serif';ctx.fillStyle='#ffd23f';ctx.fillText(sim.n+' RECEIPTS.',VW/2,y0);
+  ctx.font='italic 400 24px Fraunces, Georgia, serif';ctx.fillStyle='#f3ead6';ctx.fillText(money(sim.total)+' in one shoebox.',VW/2,y0+50);
+  ctx.font='400 20px Fraunces, Georgia, serif';ctx.fillStyle='rgba(243,234,214,.8)';ctx.fillText('Snap each one the day you get it,',VW/2,y0+116);ctx.fillText('and the pile never grows.',VW/2,y0+144);
+  const pw=290,ph=66,px=(VW-pw)/2,py=y0+190;ctx.fillStyle='#ffd23f';rr(px,py,pw,ph,16);ctx.fill();
+  ctx.font='800 34px "Barlow Condensed", Impact, sans-serif';ctx.fillStyle='#1d1b17';ctx.fillText('receipt-nest.com',VW/2,py+ph/2+1);
+  ctx.font='800 15px "Barlow Condensed", sans-serif';ctx.fillStyle='rgba(243,234,214,.65)';ctx.fillText('PLAY IT FREE · RECEIPT-NEST.COM/GAMES',VW/2,py+ph+34);ctx.globalAlpha=1}
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(measure,150)});
+document.fonts.ready.then(()=>{measure();start('attract');requestAnimationFrame(frame)});
+// headless hooks for tuning and video capture
+window.__pile={P,Sim,step,tap,manual(seed,m){MANUAL=true;measure();start(m||'watch',seed);$('ovStart').classList.add('hide')},advance(){update(1/30,16);draw(1/30);return {phase:sim.phase,t:sim.t,n:sim.n,endT:sim.endT,result:sim.result}},
+  log:()=>LOG,tapNow,audioReady:()=>Object.keys(BUF),get sim(){return sim},get mode(){return mode},get ended(){return endShown}};
+})();
+</script>
+</body>
+</html>

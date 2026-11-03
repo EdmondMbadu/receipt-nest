@@ -20,6 +20,11 @@ export const gamePages: readonly GamePage[] = [
     description: 'Quick, free browser games about receipts from ReceiptNest. Decode cryptic bank charges, file a shoebox of receipts by month, or read a total before it fades.'
   },
   {
+    path: '/games/pile', kind: 'game', label: 'The Pile', updated: '2026-11-02',
+    title: 'The Pile: How Many Receipts Before the Box Bursts? | ReceiptNest',
+    description: 'Every bounce adds a receipt to the pile. Tap to snap each one before the box gives out, all set to the Can-Can. Then learn how to stop receipts piling up.'
+  },
+  {
     path: '/games/escape', kind: 'game', label: 'Escape the Year', updated: '2026-11-02',
     title: 'Escape the Year: Can the Receipt Beat Tax Day? | ReceiptNest',
     description: '365 rings, one for every day of the year. Watch a receipt bounce through them before the tax-day clock runs out, or help it escape. Then learn how to keep a year of receipts.'
