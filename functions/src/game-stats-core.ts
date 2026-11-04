@@ -3,7 +3,7 @@
  * Stores only daily aggregate counters. No IDs, IPs, cookies or personal data.
  */
 
-export const GAME_IDS = ["hub", "fade", "shoebox", "charge", "escape", "pile", "versus", "decoder"] as const;
+export const GAME_IDS = ["hub", "fade", "shoebox", "charge", "escape", "pile", "versus", "fadeout", "decoder"] as const;
 export type GameId = (typeof GAME_IDS)[number];
 
 export const GAME_EVENTS = [

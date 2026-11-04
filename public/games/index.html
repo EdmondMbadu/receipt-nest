@@ -36,7 +36,7 @@
 {"@type":"Organization","@id":"https://receipt-nest.com/#organization","name":"ReceiptNest","url":"https://receipt-nest.com/","logo":{"@type":"ImageObject","url":"https://receipt-nest.com/receipt-nest.png"}},
 {"@type":"WebSite","@id":"https://receipt-nest.com/#website","url":"https://receipt-nest.com/","name":"ReceiptNest","publisher":{"@id":"https://receipt-nest.com/#organization"}},
 {"@type":"CollectionPage","@id":"https://receipt-nest.com/games#webpage","url":"https://receipt-nest.com/games","name":"Receipt Games: Free Browser Games About Receipts | ReceiptNest","isPartOf":{"@id":"https://receipt-nest.com/#website"},
- "mainEntity":{"@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"url":"https://receipt-nest.com/games/snap-vs-pile","name":"Snap vs Pile"},{"@type":"ListItem","position":2,"url":"https://receipt-nest.com/games/pile","name":"The Pile"},{"@type":"ListItem","position":3,"url":"https://receipt-nest.com/games/escape","name":"Escape the Year"},{"@type":"ListItem","position":4,"url":"https://receipt-nest.com/games/charge","name":"Guess the Charge"},{"@type":"ListItem","position":5,"url":"https://receipt-nest.com/games/shoebox","name":"Shoebox Sort"},{"@type":"ListItem","position":6,"url":"https://receipt-nest.com/games/fade","name":"Before It Fades"}]}},
+ "mainEntity":{"@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"url":"https://receipt-nest.com/games/fade-out","name":"Fade Out"},{"@type":"ListItem","position":2,"url":"https://receipt-nest.com/games/snap-vs-pile","name":"Snap vs Pile"},{"@type":"ListItem","position":3,"url":"https://receipt-nest.com/games/pile","name":"The Pile"},{"@type":"ListItem","position":4,"url":"https://receipt-nest.com/games/escape","name":"Escape the Year"},{"@type":"ListItem","position":5,"url":"https://receipt-nest.com/games/charge","name":"Guess the Charge"},{"@type":"ListItem","position":6,"url":"https://receipt-nest.com/games/shoebox","name":"Shoebox Sort"},{"@type":"ListItem","position":7,"url":"https://receipt-nest.com/games/fade","name":"Before It Fades"}]}},
 {"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ReceiptNest","item":"https://receipt-nest.com/"},{"@type":"ListItem","position":2,"name":"Games","item":"https://receipt-nest.com/games"}]}
 ]}
 </script>
@@ -165,7 +165,7 @@ h1 .y{color:var(--yel)}
 <header class="top">
   <a class="brand" href="/"><img src="/receipt-nest.png" alt="ReceiptNest logo" width="26" height="26">ReceiptNest</a>
   <nav aria-label="Games navigation">
-    <a href="/games/snap-vs-pile">Play</a>
+    <a href="/games/fade-out">Play</a>
     <a href="/blog">Guides</a>
   </nav>
 </header>
@@ -177,10 +177,28 @@ h1 .y{color:var(--yel)}
       <p class="lede">Quick, free games about the little strips of paper that hold your money. Pick one and try to beat your best.</p>
     </section>
 
-    <a class="feature" href="/games/snap-vs-pile" aria-label="Play Snap vs Pile">
+    <a class="feature" href="/games/fade-out" aria-label="Play Fade Out">
       <div class="art">
         <span class="stamp">NEW</span>
-        <img class="phone" src="/games/snap-vs-pile/card.webp" alt="Snap vs Pile: a yellow phone ball and a red receipt ball fighting over a circle full of receipts, with a snapped versus in-the-pile score" width="420" height="782" fetchpriority="high">
+        <img class="phone" src="/games/fade-out/card.webp" alt="Fade Out: a round receipt fading inside a turning ring, surrounded by blank receipts that faded before they got out" width="420" height="782" fetchpriority="high">
+      </div>
+      <div class="txt">
+        <div class="meta"><span class="chip">Watch or play</span><span class="chip">About 45 seconds</span><span class="chip">Free · no signup</span></div>
+        <h2>Fade <span>out</span></h2>
+        <p>Every receipt has 4 seconds before its print fades. Push it out through the gap in a turning ring before it goes blank. The ones that fade freeze in the way.</p>
+        <ul class="rules">
+          <li><b>4s</b>Of ink per receipt, counting down as it bounces</li>
+          <li><b>10</b>Receipts to save, with two nudges each</li>
+          <li><b>♪</b>One note of The Entertainer per bounce</li>
+        </ul>
+        <div class="dare">How many can you save?</div>
+        <span class="play">Play now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <a class="feature" href="/games/snap-vs-pile" aria-label="Play Snap vs Pile">
+      <div class="art">
+        <img class="phone" src="/games/snap-vs-pile/card.webp" alt="Snap vs Pile: a yellow phone ball and a red receipt ball fighting over a circle full of receipts, with a snapped versus in-the-pile score" width="420" height="782" loading="lazy">
       </div>
       <div class="txt">
         <div class="meta"><span class="chip">Watch or play</span><span class="chip">About 45 seconds</span><span class="chip">Free · no signup</span></div>
@@ -319,6 +337,7 @@ h1 .y{color:var(--yel)}
 <footer class="foot">
   <div class="wrap">
     <a href="/">ReceiptNest</a>
+    <a href="/games/fade-out">Fade Out</a>
     <a href="/games/snap-vs-pile">Snap vs Pile</a>
     <a href="/games/pile">The Pile</a>
     <a href="/games/escape">Escape the Year</a>

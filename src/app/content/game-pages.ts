@@ -20,6 +20,11 @@ export const gamePages: readonly GamePage[] = [
     description: 'Quick, free browser games about receipts from ReceiptNest. Decode cryptic bank charges, file a shoebox of receipts by month, or read a total before it fades.'
   },
   {
+    path: '/games/fade-out', kind: 'game', label: 'Fade Out', updated: '2026-11-04',
+    title: 'Fade Out: Save the Receipt Before the Ink Fades | ReceiptNest',
+    description: 'Every receipt has 4 seconds before its print fades. Nudge it out of the ring in time, set to The Entertainer. Then learn why receipts fade and how to keep them.'
+  },
+  {
     path: '/games/snap-vs-pile', kind: 'game', label: 'Snap vs Pile', updated: '2026-11-04',
     title: 'Snap vs Pile: Can the Phone Clear the Box? | ReceiptNest',
     description: 'Yellow snaps receipts, red adds them, and whoever leads grows. Watch the duel or take control of yellow, set to the Turkish March. Then learn to beat a backlog.'
