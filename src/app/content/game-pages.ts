@@ -15,9 +15,14 @@ export interface GamePage {
 
 export const gamePages: readonly GamePage[] = [
   {
-    path: '/games', kind: 'game', label: 'Games', updated: '2026-11-02',
+    path: '/games', kind: 'game', label: 'Games', updated: '2026-11-04',
     title: 'Receipt Games: Free Browser Games About Receipts | ReceiptNest',
     description: 'Quick, free browser games about receipts from ReceiptNest. Decode cryptic bank charges, file a shoebox of receipts by month, or read a total before it fades.'
+  },
+  {
+    path: '/games/snap-vs-pile', kind: 'game', label: 'Snap vs Pile', updated: '2026-11-04',
+    title: 'Snap vs Pile: Can the Phone Clear the Box? | ReceiptNest',
+    description: 'Yellow snaps receipts, red adds them, and whoever leads grows. Watch the duel or take control of yellow, set to the Turkish March. Then learn to beat a backlog.'
   },
   {
     path: '/games/pile', kind: 'game', label: 'The Pile', updated: '2026-11-02',

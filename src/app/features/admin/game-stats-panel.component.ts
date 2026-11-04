@@ -20,7 +20,8 @@ const GAMES = [
   { id: 'shoebox', label: 'Shoebox Sort', short: 'Shoebox' },
   { id: 'fade', label: 'Before It Fades', short: 'Fade' },
   { id: 'escape', label: 'Escape the Year', short: 'Escape' },
-  { id: 'pile', label: 'The Pile', short: 'Pile' }
+  { id: 'pile', label: 'The Pile', short: 'Pile' },
+  { id: 'versus', label: 'Snap vs Pile', short: 'Versus' }
 ];
 
 const METRICS: Metric[] = [
