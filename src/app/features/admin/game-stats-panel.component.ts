@@ -22,7 +22,8 @@ const GAMES = [
   { id: 'escape', label: 'Escape the Year', short: 'Escape' },
   { id: 'pile', label: 'The Pile', short: 'Pile' },
   { id: 'versus', label: 'Snap vs Pile', short: 'Versus' },
-  { id: 'fadeout', label: 'Fade Out', short: 'Fade Out' }
+  { id: 'fadeout', label: 'Fade Out', short: 'Fade Out' },
+  { id: 'luck', label: 'Sorted by Luck', short: 'Luck' }
 ];
 
 const METRICS: Metric[] = [

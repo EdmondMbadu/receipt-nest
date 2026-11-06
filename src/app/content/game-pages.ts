@@ -15,9 +15,14 @@ export interface GamePage {
 
 export const gamePages: readonly GamePage[] = [
   {
-    path: '/games', kind: 'game', label: 'Games', updated: '2026-11-04',
+    path: '/games', kind: 'game', label: 'Games', updated: '2026-11-05',
     title: 'Receipt Games: Free Browser Games About Receipts | ReceiptNest',
     description: 'Quick, free browser games about receipts from ReceiptNest. Decode cryptic bank charges, file a shoebox of receipts by month, or read a total before it fades.'
+  },
+  {
+    path: '/games/sorted-by-luck', kind: 'game', label: 'Sorted by Luck', updated: '2026-11-05',
+    title: 'Sorted by Luck: Which Month Wins the Receipt Plinko? | ReceiptNest',
+    description: '365 receipts drop through a Plinko board into 12 month bins. Call the month with the most and the fewest. Then learn how to sort receipts by month for real.'
   },
   {
     path: '/games/fade-out', kind: 'game', label: 'Fade Out', updated: '2026-11-04',
