@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ReceiptIssuesService, waitingSince } from './receipt-issues.service';
@@ -21,7 +21,8 @@ import { ReceiptIssuesService, waitingSince } from './receipt-issues.service';
               <p class="mt-2 text-sm text-slate-500 dark:text-slate-400" role="status">Checking receipt health…</p>
             } @else {
               <p class="mt-2 text-slate-900 dark:text-white"><span class="text-3xl font-semibold tracking-tight">{{ issues.unresolved().length | number }}</span><span class="ml-2 text-sm">unresolved · {{ issues.affectedUsers() }} affected users</span></p>
-              <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{{ count('failed') }} failed · {{ count('stuck') }} stuck · {{ count('incomplete') }} incomplete @if (issues.oldest()) { <span class="mx-1">/</span> Oldest: {{ waiting(issues.oldest()) }} }</p>
+              <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{{ count('pending') }} pending · {{ count('failed') }} failed · {{ count('stuck') }} stuck · {{ count('incomplete') }} incomplete @if (issues.oldest()) { <span class="mx-1">/</span> Oldest: {{ waiting(issues.oldest()) }} }</p>
+              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ issues.live() ? 'Live updates on' : 'Refreshes every minute' }} · Updated {{ issues.fetchedAt() | date:'h:mm a' }}</p>
             }
           </div>
         </div>
@@ -30,9 +31,11 @@ import { ReceiptIssuesService, waitingSince } from './receipt-issues.service';
     </section>
   `,
 })
-export class ReceiptIssuesCardComponent implements OnInit {
+export class ReceiptIssuesCardComponent implements OnInit, OnDestroy {
   readonly issues = inject(ReceiptIssuesService);
   readonly waiting = waitingSince;
   count(kind: string) { return this.issues.unresolved().filter(row => row.kind === kind).length; }
-  ngOnInit() { void this.issues.load(false); }
+  private stopWatching?: () => void;
+  ngOnInit() { this.stopWatching = this.issues.watch(); }
+  ngOnDestroy() { this.stopWatching?.(); }
 }

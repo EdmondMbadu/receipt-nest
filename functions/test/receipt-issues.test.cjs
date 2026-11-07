@@ -3,10 +3,10 @@ const assert = require('node:assert/strict');
 const policy = require('../lib/receipt-issue-policy');
 const valid = { totalAmount: 23.5, currency: 'USD', date: '2026-10-20', merchant: { canonicalName: 'Corner Market', matchedBy: 'ai' }, category: { id: 'groceries', name: 'Groceries', assignedBy: 'ai' } };
 
-test('normal processing stays out of the queue; uploaded and processing receipts become stuck at ten minutes', () => {
+test('new uploads are pending immediately; uploaded and processing receipts become stuck at ten minutes', () => {
   for (const status of ['uploaded', 'processing']) {
     const data = { status, createdAt: 1000, updatedAt: 1000 };
-    assert.equal(policy.diagnoseReceipt(data, 600999), null);
+    assert.equal(policy.diagnoseReceipt(data, 600999).kind, 'pending');
     assert.equal(policy.diagnoseReceipt(data, 601000).kind, 'stuck');
     assert.equal(policy.diagnoseReceipt({ ...data, skipProcessing: true }, 9999999), null);
   }
@@ -19,6 +19,11 @@ test('failures, partial extractions, and older review receipts receive evidence-
   assert.equal(policy.processingFailure(new Error('429 quota'), 'extraction').code, 'rate_limit');
   assert.equal(policy.processingFailure(new Error('secret payload'), 'file').reason, 'The original file could not be opened');
   assert.equal(policy.processingFailure(new Error('bad JSON with private details'), 'extraction').reason, 'The model returned no usable receipt data');
+});
+test('email receipts that skip automatic processing still appear when they need review', () => {
+  assert.equal(policy.diagnoseReceipt({ ...valid, totalAmount:0, status:'needs_review', skipProcessing:true }).reason,'Missing total');
+  assert.equal(policy.diagnoseReceipt({ ...valid, status:'needs_review', skipProcessing:true }).kind,'incomplete');
+  assert.equal(policy.diagnoseReceipt({ ...valid, status:'final', skipProcessing:true }),null);
 });
 test('retry merging replaces old extraction values, preserves manual values, and respects edits made in flight', () => {
   const initial = { ...valid, extraction: { totalAmount: {value: 23.5}, currency: {value:'USD'}, date:{value:'2026-10-20'} } };
@@ -54,7 +59,7 @@ test('admin callables and the processing worker enforce authorization, concurren
       get:key=>key.split('.').reduce((v,k)=>v?.[k],saved?.data)};
   };
   const doc = path => ({path,id:path.split('/').at(-1),parent:collection(path.split('/').slice(0,-1).join('/')),
-    get:async()=>snapshot(path),delete:async()=>documents.delete(path),collection:name=>collection(`${path}/${name}`)});
+    get:async()=>snapshot(path),set:async data=>seed(path,data),delete:async()=>documents.delete(path),collection:name=>collection(`${path}/${name}`)});
   const collection = (path, group=false, predicate=()=>true, sort=null, max=Infinity) => ({path,id:path.split('/').at(-1),get parent(){return path.includes('/') ? doc(path.split('/').slice(0,-1).join('/')) : null;},
     doc:id=>doc(`${path}/${id}`),select:()=>collection(path,group,predicate,sort,max),
     where:(key,operator,value)=>collection(path,group,data=>predicate(data)&&(operator==='in'?value.includes(data[key]):data[key]===value),sort,max),
@@ -98,6 +103,42 @@ test('admin callables and the processing worker enforce authorization, concurren
     assert.equal(result.rows.length,1);assert.equal(result.rows[0].cause,'unknown');assert.equal(result.rows[0].email,'customer@example.com');
     assert.equal(result.rows[0].uploadedAt, snapshot(path).get('createdAt').toDate().toISOString());
     assert.equal((await detail()).events.length,0);
+  });
+  await t.test('new uploads and processing receipts appear immediately across users, then disappear on completion',async()=>{
+    const uploaded='users/new-customer/receipts/new-upload';
+    const running='users/customer/receipts/running';
+    seed(uploaded,{status:'uploaded',createdAt:timestamp(),updatedAt:timestamp()});
+    const email='users/new-customer/receipts/email-review';
+    seed(email,{...valid,totalAmount:0,status:'needs_review',skipProcessing:true,createdAt:timestamp()});
+    seed(running,{status:'processing',createdAt:timestamp(),processingAttempt:{state:'running',startedAt:timestamp()}});
+    let result=await api.getAdminReceiptIssues.run({auth,data:{}});
+    for (const id of ['new-upload','running']) {
+      const row=result.rows.find(row=>row.receiptId===id);
+      assert.equal(row.kind,'pending');assert.equal(row.active,true);assert.equal(row.state,'open');
+    }
+    assert.equal(result.rows.find(row=>row.receiptId==='email-review').reason,'Missing total');
+    seed(uploaded,{...snapshot(uploaded).data(),...valid,status:'final'});
+    seed(running,{...snapshot(running).data(),status:'processing',processingAttempt:{state:'running',startedAt:Date.now()-policy.RECEIPT_STUCK_MS}});
+    result=await api.getAdminReceiptIssues.run({auth,data:{}});
+    assert.ok(!result.rows.some(row=>row.receiptId==='new-upload'));
+    assert.equal(result.rows.find(row=>row.receiptId==='running').kind,'stuck');
+    assert.equal(result.rows.find(row=>row.receiptId==='running').active,false);
+    documents.delete(uploaded);documents.delete(running);documents.delete(email);
+  });
+  await t.test('a stale resolved record cannot hide a receipt that needs attention again',async()=>{
+    const ref=worker.issueRefFor('customer','receipt-1');
+    seed(ref.path,{receiptPath:path,state:'resolved',kind:'failed',reason:'Previous failure'});
+    const result=await api.getAdminReceiptIssues.run({auth,data:{}});
+    assert.equal(result.rows.find(row=>row.receiptId==='receipt-1').state,'open');
+    documents.delete(ref.path);
+  });
+  await t.test('receipt and issue changes publish only a server timestamp for live admin refreshes',async()=>{
+    for (const trigger of [api.onReceiptHealthChanged,api.onReceiptIssueHealthChanged]) {
+      await trigger.run({});
+      const data=snapshot('adminReceiptHealth/current').data();
+      assert.deepEqual(Object.keys(data),['updatedAt']);
+      assert.ok(data.updatedAt instanceof admin.firestore.Timestamp);
+    }
   });
   await t.test('receipt detail preserves source provenance separately from the individual file',async()=>{
     const sourceBundle={storagePath:'users/customer/receipts/original.pdf',originalName:'Original.pdf',page:1,pageCount:17};

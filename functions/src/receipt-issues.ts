@@ -1,6 +1,6 @@
 import * as admin from "firebase-admin";
 import { randomUUID } from "node:crypto";
-import { onDocumentDeleted } from "firebase-functions/v2/firestore";
+import { onDocumentDeleted, onDocumentWritten } from "firebase-functions/v2/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { assertAdmin } from "./authz";
 import { diagnoseReceipt, ISSUE_CAUSES, missingReceiptFields, RECEIPT_STUCK_MS, receiptValues } from "./receipt-issue-policy";
@@ -36,14 +36,15 @@ function row(snap: admin.firestore.DocumentSnapshot, issue?: any, email?: string
     userId, receiptId: snap.id, email: email || userId,
     fileName: data.file?.originalName || "Receipt", merchant: data.merchant?.canonicalName || "Unknown merchant",
     kind: diagnosis?.kind || issue?.kind || "incomplete",
-    state: issue?.state || "open", reason: issue?.reason || diagnosis?.reason,
+    state: diagnosis ? (issue?.state === "awaiting_user" ? "awaiting_user" : "open") : issue?.state || "open",
+    reason: diagnosis?.kind === "pending" || diagnosis?.kind === "stuck" ? diagnosis.reason : issue?.reason || diagnosis?.reason,
     recommendation: diagnosis?.recommendation || issue?.recommendation || "Compare the receipt with the original and verify its values.",
     cause: issue?.cause || diagnosis?.cause || "unknown", notes: issue?.notes || "",
     uploadedAt: data.createdAt || null,
     openedAt: issue?.openedAt || data.processingAttempt?.startedAt || data.createdAt || data.updatedAt,
     updatedAt: issue?.updatedAt || data.updatedAt, resolvedAt: issue?.resolvedAt || null,
     attempts: data.processingAttempt ? 1 : 0,
-    active: ["uploaded", "processing"].includes(data.status) && !diagnosis,
+    active: diagnosis?.kind === "pending",
     model: data.processingAttempt?.model || "Not recorded", pipelineVersion: data.processingAttempt?.pipelineVersion || "Not recorded",
   });
 }
@@ -67,6 +68,22 @@ export const getAdminReceiptIssues = onCall(options, async request => {
   const rows = [...receipts.values()].map(doc => row(doc, records.get(doc.ref.path), emails.get(doc.ref.parent.parent!.id))).filter(Boolean);
   return { rows, fetchedAt: new Date().toISOString(), stuckAfterMinutes: RECEIPT_STUCK_MS / 60000 };
 });
+
+// A metadata-only notification keeps admin clients fresh without exposing receipts
+// or allowing direct access to private operational records.
+async function notifyReceiptHealthChanged() {
+  await admin.firestore().doc("adminReceiptHealth/current").set({
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+}
+export const onReceiptHealthChanged = onDocumentWritten(
+  { document: "users/{userId}/receipts/{receiptId}", region: "us-central1", retry: true },
+  notifyReceiptHealthChanged,
+);
+export const onReceiptIssueHealthChanged = onDocumentWritten(
+  { document: "receiptIssues/{issueId}", region: "us-central1", retry: true },
+  notifyReceiptHealthChanged,
+);
 
 export const getAdminReceiptIssue = onCall(options, async request => {
   await authorize(request);

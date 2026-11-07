@@ -2,7 +2,7 @@
 export const RECEIPT_STUCK_MS = 10 * 60 * 1000;
 export const RECEIPT_MODEL_ID = "gemini-2.5-flash";
 export const RECEIPT_PIPELINE_VERSION = "receipt-extraction-v2";
-export type IssueKind = "failed" | "stuck" | "incomplete";
+export type IssueKind = "pending" | "failed" | "stuck" | "incomplete";
 export type IssueCause = "service_error" | "file_problem" | "unreadable_image" | "extraction_mistake" | "classification_mistake" | "unknown";
 export const ISSUE_CAUSES: IssueCause[] = ["service_error", "file_problem", "unreadable_image", "extraction_mistake", "classification_mistake", "unknown"];
 
@@ -31,14 +31,19 @@ export function missingReceiptFields(data: any): string[] {
 }
 
 export function diagnoseReceipt(data: any, now = Date.now()): { kind: IssueKind; reason: string; recommendation: string; cause: IssueCause } | null {
-  if (data.skipProcessing === true) return null;
   if (["uploaded", "processing"].includes(data.status)) {
+    // Email-body imports and manually recovered receipts bypass the extraction
+    // worker, but still need admin review when their extracted fields are missing.
+    if (data.skipProcessing === true) return null;
     const started = millis(data.processingAttempt?.startedAt) || millis(data.updatedAt) || millis(data.createdAt);
     if (started && now - started >= RECEIPT_STUCK_MS) return {
       kind: "stuck", reason: data.status === "uploaded" ? "Processing never started" : "Processing is taking too long",
       recommendation: "Retry processing. If this happens again, inspect the attempt history and file.", cause: "unknown",
     };
-    return null;
+    return {
+      kind: "pending", reason: data.status === "uploaded" ? "Waiting for processing to start" : "Processing receipt",
+      recommendation: "Wait for processing to finish. Receipts still pending after 10 minutes are marked stuck.", cause: "unknown",
+    };
   }
   if (data.processingAttempt?.state === "failed") return {
     kind: "failed", reason: data.processingAttempt.reason || "Processing failed",

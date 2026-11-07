@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { ReceiptIssuesComponent } from './receipt-issues.component';
+import { ReceiptIssuesCardComponent } from './receipt-issues-card.component';
 import { ReceiptIssueDetailComponent } from './receipt-issue-detail.component';
 import { IssueDetail, ReceiptIssueRow, ReceiptIssuesService } from './receipt-issues.service';
 import { PdfThumbnailService } from '../../services/pdf-thumbnail.service';
@@ -16,9 +17,10 @@ const issue = (id: string, kind: ReceiptIssueRow['kind'], state: ReceiptIssueRow
 
 describe('Receipt issues workspace', () => {
   function mockService() {
+    const stopWatching = jasmine.createSpy('stopWatching');
     const rows = signal([issue('failed', 'failed'), issue('stuck', 'stuck'), issue('partial', 'incomplete', 'awaiting_user'), issue('fixed', 'failed', 'resolved')]);
     return {
-      rows, loading: signal(false), loaded: signal(true), error: signal(''), fetchedAt: signal('2026-10-29T12:00:00Z'),
+      stopWatching, watch: jasmine.createSpy('watch').and.returnValue(stopWatching), live: signal(true), rows, loading: signal(false), loaded: signal(true), error: signal(''), fetchedAt: signal('2026-10-29T12:00:00Z'),
       unresolved: computed(() => rows().filter(row => row.state !== 'resolved')), affectedUsers: signal(1), oldest: signal('2026-10-20T12:00:00Z'),
       load: jasmine.createSpy('load').and.resolveTo(), act: jasmine.createSpy('act').and.resolveTo({}),
       detail: jasmine.createSpy('detail'), message: (_error: unknown, fallback: string) => fallback,
@@ -42,6 +44,27 @@ describe('Receipt issues workspace', () => {
     component.setFilter('resolved'); expect(component.visible().map(row => row.receiptId)).toEqual(['fixed']);
     component.setFilter('all'); component.search.set('partial'); fixture.detectChanges();
     expect(component.visible().length).toBe(1); expect(fixture.nativeElement.textContent).toContain('Awaiting user');
+  });
+  it('includes new pending receipts in the overall queue and offers a pending filter', async () => {
+    const { fixture, component, service } = await queue();
+    service.rows.update(rows => [{...issue('fresh-upload', 'pending'),active:true}, ...rows]);
+    expect(component.count('all')).toBe(4);
+    expect(component.count('pending')).toBe(1);
+    component.setFilter('pending'); fixture.detectChanges();
+    expect(component.visible().map(row => row.receiptId)).toEqual(['fresh-upload']);
+    expect(fixture.nativeElement.textContent).toContain('Pending');
+    fixture.destroy(); expect(service.stopWatching).toHaveBeenCalledTimes(1);
+  });
+  it('keeps the dashboard card live and shows pending uploads immediately', async () => {
+    const service = mockService();
+    await TestBed.configureTestingModule({ imports: [ReceiptIssuesCardComponent], providers: [provideZonelessChangeDetection(), provideRouter([]), { provide: ReceiptIssuesService, useValue: service }] }).compileComponents();
+    const fixture = TestBed.createComponent(ReceiptIssuesCardComponent); fixture.detectChanges();
+    expect(service.watch).toHaveBeenCalledTimes(1);
+    service.rows.update(rows => [{...issue('fresh-upload', 'pending'),active:true}, ...rows]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('1 pending');
+    expect(fixture.nativeElement.textContent).toContain('Live updates on');
+    fixture.destroy(); expect(service.stopWatching).toHaveBeenCalledTimes(1);
   });
   it('keeps stale results visible on refresh failure and shows an actionable error', async () => {
     const { fixture, service } = await queue(); service.error.set('Service unavailable'); fixture.detectChanges();
@@ -82,7 +105,7 @@ describe('Receipt issues workspace', () => {
     ]);
     expect(component.visible().map(row => row.receiptId)).toEqual(['new-upload', 'old-retried']);
     expect(component.dateFor(service.rows()[0])).toBe('2026-05-01');
-    expect(service.load).toHaveBeenCalledWith(false);
+    expect(service.watch).toHaveBeenCalled();
   });
   it('sorts resolved history by its displayed resolution date and leaves unknown dates at the end', async () => {
     const {component,service,fixture}=await queue();

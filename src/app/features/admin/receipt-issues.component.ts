@@ -22,10 +22,10 @@ export class ReceiptIssuesComponent implements OnInit, OnDestroy {
   readonly sort = signal<IssueSort>('newest');
   readonly sortDescription = computed(() => this.sort() === 'newest' ? this.filter() === 'resolved' ? 'Most recently resolved first.' : 'Latest uploads first, across all issue types.' : this.sort() === 'oldest' ? 'Oldest dates first, across all issue types.' : this.filter() === 'resolved' ? 'Most recently resolved first.' : 'Failures first, then the oldest receipts in each group.');
   readonly dateSort = computed(() => this.sort() === 'newest' || (this.sort() === 'priority' && this.filter() === 'resolved') ? 'descending' : this.sort() === 'oldest' ? 'ascending' : 'none');
-  readonly filters: IssueFilter[] = ['all', 'failed', 'stuck', 'incomplete', 'awaiting_user', 'resolved', 'all_history'];
+  readonly filters: IssueFilter[] = ['all', 'pending', 'failed', 'stuck', 'incomplete', 'awaiting_user', 'resolved', 'all_history'];
   readonly lookupUser = signal('');
   readonly lookupReceipt = signal('');
-  private timer?: ReturnType<typeof setInterval>;
+  private stopWatching?: () => void;
   readonly filtered = computed(() => {
     const search = this.search().trim().toLowerCase();
     return this.issues.rows().filter(row => {
@@ -35,7 +35,7 @@ export class ReceiptIssuesComponent implements OnInit, OnDestroy {
     }).sort((a, b) => {
       if (this.sort() !== 'priority') return this.compareDate(a, b, this.sort() === 'newest');
       if (this.filter() === 'resolved') return this.compareDate(a, b, true);
-      const rank = { failed: 0, stuck: 1, incomplete: 2 };
+      const rank = { failed: 0, stuck: 1, incomplete: 2, pending: 3 };
       return Number(a.state === 'resolved') - Number(b.state === 'resolved') || rank[a.kind] - rank[b.kind] || this.compareDate(a, b, false);
     });
   });
@@ -79,8 +79,7 @@ export class ReceiptIssuesComponent implements OnInit, OnDestroy {
     if (this.lookupUser().trim() && this.lookupReceipt().trim()) void this.router.navigate(['/app/admin/receipt-issues', this.lookupUser().trim(), this.lookupReceipt().trim()]);
   }
   ngOnInit() {
-    void this.issues.load(false);
-    this.timer = setInterval(() => { if (document.visibilityState === 'visible') void this.issues.load(); }, 60000);
+    this.stopWatching = this.issues.watch();
   }
-  ngOnDestroy() { clearInterval(this.timer); }
+  ngOnDestroy() { this.stopWatching?.(); }
 }

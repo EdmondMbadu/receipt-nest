@@ -1,12 +1,13 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { doc, getFirestore, onSnapshot } from 'firebase/firestore';
 import { app } from '../../../../environments/environments';
 import { ReceiptSourceBundle } from '../../models/receipt.model';
 
-export type IssueFilter = 'all' | 'failed' | 'stuck' | 'incomplete' | 'awaiting_user' | 'resolved' | 'all_history';
+export type IssueFilter = 'all' | 'pending' | 'failed' | 'stuck' | 'incomplete' | 'awaiting_user' | 'resolved' | 'all_history';
 export interface ReceiptIssueRow {
   userId: string; receiptId: string; email: string; fileName: string; merchant: string;
-  kind: 'failed' | 'stuck' | 'incomplete'; state: 'open' | 'awaiting_user' | 'resolved';
+  kind: 'pending' | 'failed' | 'stuck' | 'incomplete'; state: 'open' | 'awaiting_user' | 'resolved';
   reason: string; recommendation: string; cause: string; notes: string;
   uploadedAt?: string | null; openedAt: string | null; updatedAt: string | null; resolvedAt: string | null; active: boolean;
   model: string; pipelineVersion: string;
@@ -38,6 +39,7 @@ export const ISSUE_CAUSE_OPTIONS = [
   { value: 'classification_mistake', label: 'Category or merchant mistake' },
 ];
 export function issueLabel(value: string): string {
+  if (value === 'pending') return 'Pending';
   if (value === 'bundle_split') return 'Recovered from combined PDF';
   return ({ all: 'All unresolved', all_history: 'All history', failed: 'Failed', stuck: 'Stuck', incomplete: 'Incomplete', awaiting_user: 'Awaiting user', resolved: 'Resolved', open: 'Open', processing: 'Initial processing', retry_requested: 'Retry requested', retry: 'Processing retry', correct: 'Fields corrected', resolve: 'Verified & resolved', reopen: 'Reopened', flag: 'Flagged for review', succeeded: 'Validated', verified: 'Verified', service_error: 'Service error', file_problem: 'File problem', unreadable_image: 'Unreadable image', extraction_mistake: 'Extraction mistake', classification_mistake: 'Category or merchant mistake', unknown: 'Unknown / investigate' } as Record<string, string>)[value] || value.replace(/_/g, ' ');
 }
@@ -58,19 +60,59 @@ export class ReceiptIssuesService {
   readonly loaded = signal(false);
   readonly error = signal('');
   readonly fetchedAt = signal<string | null>(null);
+  readonly live = signal(false);
+  private viewers = 0;
+  private stopWatching?: () => void;
+  private refreshQueued = false;
   private loadedAt = 0;
   readonly unresolved = computed(() => this.rows().filter(row => row.state !== 'resolved'));
   readonly affectedUsers = computed(() => new Set(this.unresolved().map(row => row.userId)).size);
   readonly oldest = computed(() => this.unresolved().map(row => row.openedAt).filter((v): v is string => !!v).sort()[0]);
+  watch(): () => void {
+    if (typeof document === 'undefined') return () => {};
+    if (++this.viewers === 1) {
+      let debounce: ReturnType<typeof setTimeout> | undefined;
+      const refresh = () => { if (document.visibilityState === 'visible') void this.load(); };
+      const unsubscribe = this.listenForChanges(() => {
+        this.live.set(true);
+        clearTimeout(debounce);
+        debounce = setTimeout(refresh, 250);
+      }, () => this.live.set(false));
+      // Time alone can turn a pending receipt into a stuck one. Also serves as
+      // a fallback if the live connection fails.
+      const timer = setInterval(refresh, 60000);
+      document.addEventListener('visibilitychange', refresh);
+      this.stopWatching = () => {
+        unsubscribe(); clearInterval(timer); clearTimeout(debounce);
+        document.removeEventListener('visibilitychange', refresh);
+        this.live.set(false);
+      };
+      void this.load();
+    }
+    let stopped = false;
+    return () => {
+      if (stopped) return;
+      stopped = true;
+      if (--this.viewers === 0) { this.stopWatching?.(); this.stopWatching = undefined; }
+    };
+  }
+  protected listenForChanges(changed: () => void, failed: () => void): () => void {
+    return onSnapshot(doc(getFirestore(app), 'adminReceiptHealth/current'), { includeMetadataChanges: true }, snapshot => {
+      if (!snapshot.metadata.fromCache) changed();
+    }, failed);
+  }
   async load(force = true) {
-    if (this.loading()) return;
+    if (this.loading()) { if (force) this.refreshQueued = true; return; }
     if (!force && this.loaded() && !this.error() && Date.now() - this.loadedAt < 60000) return;
     this.loading.set(true); this.error.set('');
     try {
       const data = await this.fetchRows();
       this.rows.set(data.rows); this.fetchedAt.set(data.fetchedAt); this.loaded.set(true); this.loadedAt = Date.now();
     } catch (error) { this.error.set(this.message(error, 'Receipt issues could not be loaded. Please try again.')); }
-    finally { this.loading.set(false); }
+    finally {
+      this.loading.set(false);
+      if (this.refreshQueued) { this.refreshQueued = false; void this.load(); }
+    }
   }
   protected async fetchRows(): Promise<{ rows: ReceiptIssueRow[]; fetchedAt: string }> {
     const response = await httpsCallable<void, { rows: ReceiptIssueRow[]; fetchedAt: string }>(this.functions, 'getAdminReceiptIssues')();
