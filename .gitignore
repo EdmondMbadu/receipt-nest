@@ -40,6 +40,17 @@ testem.log
 /typings
 __screenshots__/
 
+# Local generated media and production artifacts
+/Claude outputs/
+/artifacts/
+
+# Local tool caches and sessions
+/.firebase/
+/.npm-cache/
+/:memory:.ses
+__pycache__/
+*.pyc
+
 # System files
 .DS_Store
 Thumbs.db

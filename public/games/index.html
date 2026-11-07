@@ -36,7 +36,7 @@
 {"@type":"Organization","@id":"https://receipt-nest.com/#organization","name":"ReceiptNest","url":"https://receipt-nest.com/","logo":{"@type":"ImageObject","url":"https://receipt-nest.com/receipt-nest.png"}},
 {"@type":"WebSite","@id":"https://receipt-nest.com/#website","url":"https://receipt-nest.com/","name":"ReceiptNest","publisher":{"@id":"https://receipt-nest.com/#organization"}},
 {"@type":"CollectionPage","@id":"https://receipt-nest.com/games#webpage","url":"https://receipt-nest.com/games","name":"Receipt Games: Free Browser Games About Receipts | ReceiptNest","isPartOf":{"@id":"https://receipt-nest.com/#website"},
- "mainEntity":{"@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"url":"https://receipt-nest.com/games/sorted-by-luck","name":"Sorted by Luck"},{"@type":"ListItem","position":2,"url":"https://receipt-nest.com/games/fade-out","name":"Fade Out"},{"@type":"ListItem","position":3,"url":"https://receipt-nest.com/games/snap-vs-pile","name":"Snap vs Pile"},{"@type":"ListItem","position":4,"url":"https://receipt-nest.com/games/pile","name":"The Pile"},{"@type":"ListItem","position":5,"url":"https://receipt-nest.com/games/escape","name":"Escape the Year"},{"@type":"ListItem","position":6,"url":"https://receipt-nest.com/games/charge","name":"Guess the Charge"},{"@type":"ListItem","position":7,"url":"https://receipt-nest.com/games/shoebox","name":"Shoebox Sort"},{"@type":"ListItem","position":8,"url":"https://receipt-nest.com/games/fade","name":"Before It Fades"}]}},
+ "mainEntity":{"@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"url":"https://receipt-nest.com/games/escape-3d","name":"Escape the Year in 3D"},{"@type":"ListItem","position":2,"url":"https://receipt-nest.com/games/sorted-by-luck","name":"Sorted by Luck"},{"@type":"ListItem","position":3,"url":"https://receipt-nest.com/games/fade-out","name":"Fade Out"},{"@type":"ListItem","position":4,"url":"https://receipt-nest.com/games/snap-vs-pile","name":"Snap vs Pile"},{"@type":"ListItem","position":5,"url":"https://receipt-nest.com/games/pile","name":"The Pile"},{"@type":"ListItem","position":6,"url":"https://receipt-nest.com/games/escape","name":"Escape the Year"},{"@type":"ListItem","position":7,"url":"https://receipt-nest.com/games/charge","name":"Guess the Charge"},{"@type":"ListItem","position":8,"url":"https://receipt-nest.com/games/shoebox","name":"Shoebox Sort"},{"@type":"ListItem","position":9,"url":"https://receipt-nest.com/games/fade","name":"Before It Fades"}]}},
 {"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ReceiptNest","item":"https://receipt-nest.com/"},{"@type":"ListItem","position":2,"name":"Games","item":"https://receipt-nest.com/games"}]}
 ]}
 </script>
@@ -165,7 +165,7 @@ h1 .y{color:var(--yel)}
 <header class="top">
   <a class="brand" href="/"><img src="/receipt-nest.png" alt="ReceiptNest logo" width="26" height="26">ReceiptNest</a>
   <nav aria-label="Games navigation">
-    <a href="/games/sorted-by-luck">Play</a>
+    <a href="/games/escape-3d">Play</a>
     <a href="/blog">Guides</a>
   </nav>
 </header>
@@ -177,10 +177,28 @@ h1 .y{color:var(--yel)}
       <p class="lede">Quick, free games about the little strips of paper that hold your money. Pick one and try to beat your best.</p>
     </section>
 
+    <a class="feature" href="/games/escape-3d" aria-label="Play Escape the Year in 3D">
+      <div class="art">
+        <span class="stamp">NEW · 3D</span>
+        <img class="phone" src="/games/escape-3d/card.webp" alt="Escape the Year in 3D: a receipt inside nested glowing glass spheres, with 117 days left on the counter" width="420" height="782" fetchpriority="high">
+      </div>
+      <div class="txt">
+        <div class="meta"><span class="chip">Watch or help</span><span class="chip">About 50 seconds</span><span class="chip">Free · no signup</span></div>
+        <h2>Escape the year <span>in 3D</span></h2>
+        <p>365 glass spheres, one for every day of the year, each with a turning hole. Every hole the receipt slips through shatters a day. Can it break all 365 before tax day?</p>
+        <ul class="rules">
+          <li><b>365</b>Glass spheres, one per day, nested inside each other</li>
+          <li><b>50</b>Seconds on the tax-day clock</li>
+          <li><b>3</b>Nudges if you help it. Drag to turn the view</li>
+        </ul>
+        <div class="dare">About 4 in 10 runs escape.</div>
+        <span class="play">Play now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
     <a class="feature" href="/games/sorted-by-luck" aria-label="Play Sorted by Luck">
       <div class="art">
-        <span class="stamp">NEW</span>
-        <img class="phone" src="/games/sorted-by-luck/card.webp" alt="Sorted by Luck: coloured receipts piled into twelve month bins under a Plinko board, with May, July and August tied at 70" width="420" height="782" fetchpriority="high">
+        <img class="phone" src="/games/sorted-by-luck/card.webp" alt="Sorted by Luck: coloured receipts piled into twelve month bins under a Plinko board, with May, July and August tied at 70" width="420" height="782" loading="lazy">
       </div>
       <div class="txt">
         <div class="meta"><span class="chip">Prediction</span><span class="chip">About 40 seconds</span><span class="chip">Free · no signup</span></div>
@@ -355,6 +373,7 @@ h1 .y{color:var(--yel)}
 <footer class="foot">
   <div class="wrap">
     <a href="/">ReceiptNest</a>
+    <a href="/games/escape-3d">Escape the Year in 3D</a>
     <a href="/games/sorted-by-luck">Sorted by Luck</a>
     <a href="/games/fade-out">Fade Out</a>
     <a href="/games/snap-vs-pile">Snap vs Pile</a>
