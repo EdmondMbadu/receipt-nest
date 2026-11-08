@@ -98,7 +98,7 @@
               <!-- HTML email preview -->
               <div *ngIf="hasHtmlPreview()" class="receipt-preview-scroll h-[62svh] max-h-[520px] min-h-[320px] w-full overflow-auto bg-white sm:h-[520px]">
                 <iframe *ngIf="safeHtmlPreviewUrl()" [src]="safeHtmlPreviewUrl()!" class="h-full w-[760px] max-w-none rounded sm:w-full"
-                  title="HTML Email Preview"></iframe>
+                  title="HTML Email Preview" sandbox=""></iframe>
               </div>
 
               <!-- Regular image preview (not HEIC, not PDF) -->
@@ -143,10 +143,13 @@
                   <p class="truncate">{{ receipt()!.file.originalName }}</p>
                   <p class="mt-0.5">{{ (receipt()!.file.sizeBytes || 0) / 1024 | number:'1.0-0' }} KB</p>
                   <p *ngIf="hasHtmlPreview()" class="mt-1 text-[11px] text-emerald-600 dark:text-emerald-400">
-                    Showing the stored HTML email preview for closer visual fidelity.
+                    Showing the saved email.
                   </p>
+                  <p *ngIf="emailPdfPreparing()" role="status" class="mt-1 text-xs text-slate-500 dark:text-slate-400">Preparing full email PDF…</p>
+                  <p *ngIf="receipt()!.email?.renderStatus === 'failed'" role="status" class="mt-1 text-xs text-amber-700 dark:text-amber-300">The PDF could not be prepared. Your saved email is still available.</p>
+                  <p *ngIf="receipt()!.email?.missingAssets" class="mt-1 text-xs text-slate-500 dark:text-slate-400">Some external images were unavailable when this email was captured.</p>
                 </div>
-                <button data-onboarding="original-download" type="button" (click)="downloadReceipt()" *ngIf="imageUrl()"
+                <button data-onboarding="original-download" type="button" (click)="downloadReceipt()" *ngIf="imageUrl() && !(receipt()!.email?.pipelineVersion === 2 && receipt()!.email?.ingestMode === 'text_fallback' && receipt()!.email?.renderStatus !== 'ready')"
                   class="inline-flex w-full flex-shrink-0 items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600 sm:w-auto">
                   <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -154,6 +157,11 @@
                   </svg>
                   Download
                 </button>
+              </div>
+              <div *ngIf="receipt()!.email?.sourceStoragePath" class="mt-3 flex flex-wrap gap-4 text-xs">
+                <button type="button" (click)="downloadEmailDocument('source')" class="font-medium text-emerald-700 underline dark:text-emerald-400">Download email source</button>
+                <button *ngIf="receipt()!.email?.ingestMode === 'attachment' && receipt()!.email?.pdfStoragePath" type="button" (click)="downloadEmailDocument('pdf')" class="font-medium text-emerald-700 underline dark:text-emerald-400">Download full email PDF</button>
+                <button *ngIf="receipt()!.email?.renderStatus === 'failed'" type="button" (click)="retryEmailPdf()" class="font-medium text-emerald-700 underline dark:text-emerald-400">Retry email PDF</button>
               </div>
               @if (receipt()!.sourceBundle; as bundle) {
                 <div class="mt-3 border-t border-slate-200 pt-3 text-xs text-slate-600 dark:border-slate-700 dark:text-slate-400">

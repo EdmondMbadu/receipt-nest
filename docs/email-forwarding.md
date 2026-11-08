@@ -10,7 +10,9 @@ This project now supports receipt ingestion from forwarded emails without creati
 - A single public webhook (`inboundEmailWebhook`) receives all inbound mail from your email provider.
 - The webhook maps recipient alias token -> user account, then:
   - saves supported attachments (PDF/images) to Storage and creates normal receipt docs (`status: uploaded`)
-  - or, if no attachment exists, extracts from the email body/HTML and creates a generated PDF email document for previewing (`skipProcessing: true`)
+  - archives the complete received email before extraction, including HTML, plain text and attachment bytes
+  - if no receipt attachment exists, extracts from the email body and immediately creates the receipt (`skipProcessing: true`)
+  - queues `renderForwardedEmailPdf` separately to render the full HTML email in Chromium, retaining tables, branding, available images and the complete visible body
 - Existing `processReceipt` pipeline handles attachment-based receipts exactly as before.
 
 ## Why this is low-cost
@@ -44,6 +46,38 @@ Set these Firebase function secrets:
 - Home dashboard shows a generated forwarding address and a copy button.
 - User forwards receipt emails to that address.
 - Receipts appear in the same list and follow the same status flow.
+- The receipt is available while its full PDF is prepared. The detail view updates automatically without clearing edits.
+- Body-only emails download as full PDFs. The temporary thumbnail is not offered as the finished document.
+- Receipt attachments remain the primary document; **Download full email PDF** preserves their email context separately.
+- **Download email source** returns an original `.eml` when raw delivery is configured, otherwise the complete provider payload as JSON.
+- Failed PDFs retry up to three times, retain the saved email, and offer an owner-only retry action.
+
+## Full-email preservation and performance (pipeline v2)
+
+The webhook accepts up to 28 MB and preserves the payload in private Storage before invoking AI. Configure SendGrid's **Send Raw** option for an RFC 822 original. Both raw and parsed delivery formats are supported. Normal forwarding can alter an email before ReceiptNest receives it. Original source bytes are separate from the sanitized display document.
+
+HTTP multipart parsing uses Busboy; raw MIME parsing uses MailParser, including nested alternatives and forwarded `.eml` attachments. Content IDs distinguish embedded logos from receipt attachments. Delivery fingerprints and deterministic receipt IDs prevent duplicate receipts on provider retries.
+
+`renderForwardedEmailPdf` is a separate Firebase Gen 2 worker (1 GiB, concurrency 1, at most 3 instances). Chromium loads lazily and is reused for warm renders. Forwarding does not wait for browser startup or image fetching. No new service URL or browser credentials are required. General receipts use one Gemini call; complete, evidence-backed money transfers can use source labels and arithmetic without an AI call.
+
+The renderer disables scripts and browser network access. HTTPS image fetching validates and pins public DNS addresses, rejects private destinations, limits redirects/bytes, and has a six-second total asset budget. Missing assets are recorded instead of discarding the email. Captured images are embedded in the printable HTML. Fonts use local fallbacks; external font stylesheets, tracking pixels and active content are omitted. Oversized PDFs fail visibly and retain their source.
+
+Extraction preserves table labels, supports international decimal amounts, requires evidence for total/date, distinguishes transfer principal/fees/recipient amount, validates calendar dates, and flags conflicting totals or arithmetic. Currency is not blindly defaulted to USD. Money transfers use the **Money transfers** category without inferring their purpose. Ambiguous transaction dates require review.
+
+## Verification and deployment
+
+```sh
+npm --prefix functions test
+# Real Chromium PDF regression; root dependencies provide PDF.js for text verification.
+cd functions
+EMAIL_CHROME_EXECUTABLE='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' npm run test:email-pdf
+```
+
+On Linux, omit `EMAIL_CHROME_EXECUTABLE` to exercise bundled Chromium. The PDF regression checks multiple pages, selectable total/date, Unicode and the last terms/footer. Synthetic fixtures contain no customer data.
+
+Deploy the changed backend functions together: `inboundEmailWebhook`, `renderForwardedEmailPdf`, `retryForwardedEmailPdf`, `cleanupForwardedEmailFiles`, and `processReceipt` (updated category list). Deploy Hosting for live PDF status, retry and source download controls. The existing webhook URL and key remain valid.
+
+This applies to newly forwarded emails. Old summaries are not silently rewritten. Forward the original again when the old source lacks images or styles.
 
 ## Troubleshooting
 
@@ -57,3 +91,7 @@ Set these Firebase function secrets:
     - `email.textStoragePath` stores the normalized body text used for extraction.
     - `email.htmlStoragePath` is populated when HTML content was available from the inbound email.
     - `email.pdfStoragePath` is populated when the generated PDF succeeded.
+    - `email.pipelineVersion: 2` identifies full-email preservation.
+    - `email.renderStatus` is `queued`, `rendering`, `ready`, or `failed`.
+    - `email.documentStoragePath` holds the full rendering input; `sourceStoragePath` holds the provider payload; `rawStoragePath` holds raw MIME when delivered.
+    - `email.missingAssets` and `renderDurationMs` describe capture completeness and processing time.

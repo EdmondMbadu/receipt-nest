@@ -90,6 +90,7 @@ const CATEGORIES = [
   { id: "gifts_donations", name: "Gifts & Donations", keywords: ["gift", "donation", "charity", "church", "tithe", "offering", "gofundme", "nonprofit", "red cross", "salvation army", "goodwill", "united way", "hallmark", "card shop", "flower shop", "florist", "bouquet"] },
   { id: "pets", name: "Pets", keywords: ["pet", "petsmart", "petco", "veterinarian", "vet", "animal hospital", "dog", "cat", "puppy", "kitten", "pet food", "chewy", "groomer", "kennel", "boarding"] },
   { id: "fitness", name: "Fitness & Sports", keywords: ["gym", "fitness", "crossfit", "planet fitness", "la fitness", "anytime fitness", "orangetheory", "equinox", "ymca", "ywca", "peloton", "sporting goods", "dick's sporting", "rei", "sports authority", "athletic", "workout", "yoga studio", "martial arts", "swimming pool"] },
+  { id: "money_transfers", name: "Money transfers", keywords: ["western union", "moneygram", "remittance", "money transfer"] },
   { id: "other", name: "Other", keywords: [] },
 ];
 

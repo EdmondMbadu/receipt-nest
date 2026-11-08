@@ -71,9 +71,11 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
     return r?.status === 'needs_review' || r?.status === 'extracted';
   });
 
-  readonly hasHtmlPreview = computed(() => !!this.htmlPreviewUrl());
+  readonly hasHtmlPreview = computed(() => !!this.htmlPreviewUrl() && !(this.receipt()?.email?.pipelineVersion === 2 && this.receipt()?.email?.renderStatus === 'ready' && !!this.imageUrl()));
+  readonly emailPdfPreparing = computed(() => ['queued', 'rendering'].includes(this.receipt()?.email?.renderStatus || ''));
 
   private receiptId: string = '';
+  private stopWatchingEmail: (() => void) | null = null;
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -83,10 +85,12 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Cleanup if needed
+    this.stopWatchingEmail?.();
   }
 
   async loadReceipt(): Promise<void> {
+    this.stopWatchingEmail?.();
+    this.stopWatchingEmail = null;
     this.isLoading.set(true);
     this.error.set(null);
 
@@ -126,7 +130,7 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
         }
       }
 
-      if (receipt.email?.htmlStoragePath) {
+      if (receipt.email?.htmlStoragePath && !(receipt.email.pipelineVersion === 2 && receipt.email.ingestMode === 'attachment')) {
         try {
           const htmlUrl = await this.receiptService.getReceiptFileUrl(receipt.email.htmlStoragePath);
           this.htmlPreviewUrl.set(htmlUrl);
@@ -135,11 +139,62 @@ export class ReceiptDetailComponent implements OnInit, OnDestroy {
           console.warn('Could not load HTML receipt preview:', e);
         }
       }
+      if (['queued', 'rendering'].includes(receipt.email?.renderStatus || '')) {
+        this.watchEmailPdf(receipt.id);
+      }
     } catch (e: any) {
       this.error.set(e.message || 'Failed to load receipt');
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  private watchEmailPdf(receiptId: string): void {
+    this.stopWatchingEmail?.();
+    this.stopWatchingEmail = this.receiptService.watchReceipt(receiptId, updated => {
+      if (!updated || this.receipt()?.id !== updated.id) return;
+      const current = this.receipt()!;
+      // Keep unsaved form edits while the background worker replaces the preview with the PDF.
+      this.receipt.set({ ...current, file: updated.file, email: updated.email });
+      if (updated.file.storagePath !== current.file.storagePath) {
+        this.imageUrl.set(null);
+        this.safeImageUrl.set(null);
+        void this.receiptService.getReceiptFileUrl(updated.file.storagePath).then(url => {
+          if (this.receipt()?.id !== updated.id || this.receipt()?.file.storagePath !== updated.file.storagePath) return;
+          this.imageUrl.set(url);
+          this.safeImageUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(url));
+        }).catch(error => console.warn('Could not load full email PDF:', error));
+      }
+      if (['ready', 'failed'].includes(updated.email?.renderStatus || '')) this.stopWatchingEmail?.();
+    });
+  }
+
+  async retryEmailPdf(): Promise<void> {
+    const receipt = this.receipt();
+    if (!receipt) return;
+    try {
+      await this.receiptService.retryEmailPdf(receipt.id);
+      this.watchEmailPdf(receipt.id);
+    } catch (error: any) {
+      this.error.set(error.message || 'Could not retry the email PDF.');
+    }
+  }
+
+  async downloadEmailDocument(kind: 'source' | 'pdf'): Promise<void> {
+    const receipt = this.receipt();
+    const path = kind === 'pdf' ? receipt?.email?.pdfStoragePath : receipt?.email?.rawStoragePath || receipt?.email?.sourceStoragePath;
+    if (!receipt || !path) return;
+    try {
+      const url = await this.receiptService.getReceiptFileUrl(path);
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Could not download the saved email.');
+      const objectUrl = URL.createObjectURL(await response.blob());
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = kind === 'pdf' ? 'full-email.pdf' : receipt.email?.rawStoragePath ? 'original-email.eml' : 'original-email-source.json';
+      document.body.appendChild(link); link.click(); link.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (error: any) { this.error.set(error.message || 'Could not download the saved email.'); }
   }
 
   async loadSourceBundle(receipt = this.receipt()): Promise<void> {

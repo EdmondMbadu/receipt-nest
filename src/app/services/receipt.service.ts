@@ -30,6 +30,7 @@ import {
 } from 'firebase/storage';
 
 import { app } from '../../../environments/environments';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { AppConfigService } from './app-config.service';
 import { AuthService } from './auth.service';
 import { getEffectiveSubscriptionPlan } from '../utils/subscription.utils';
@@ -306,6 +307,18 @@ export class ReceiptService {
     return { id: snapshot.id, ...snapshot.data() } as Receipt;
   }
 
+  watchReceipt(receiptId: string, next: (receipt: Receipt | null) => void): Unsubscribe {
+    const userId = this.auth.user()?.id;
+    if (!userId) throw new Error('User not authenticated');
+    return onSnapshot(doc(this.db, `users/${userId}/receipts`, receiptId), snapshot => {
+      next(snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } as Receipt : null);
+    }, error => console.warn('Could not watch receipt document:', error));
+  }
+
+  async retryEmailPdf(receiptId: string): Promise<void> {
+    await httpsCallable(getFunctions(app, 'us-central1'), 'retryForwardedEmailPdf')({ receiptId });
+  }
+
   /**
    * Update a receipt
    */
@@ -337,10 +350,14 @@ export class ReceiptService {
       receipt.email?.textStoragePath || undefined,
       receipt.email?.htmlStoragePath || undefined,
       receipt.email?.pdfStoragePath || undefined,
-      receipt.email?.previewStoragePath || undefined
+      receipt.email?.previewStoragePath || undefined,
+      receipt.email?.sourceStoragePath || undefined,
+      receipt.email?.rawStoragePath || undefined,
+      receipt.email?.documentStoragePath || undefined
     ].filter((path): path is string => !!path)));
 
-    for (const storagePath of storagePaths) {
+    // The server cleans up v2 email files after deletion, retaining archives used by sibling attachments.
+    for (const storagePath of receipt.email?.pipelineVersion === 2 ? [] : storagePaths) {
       try {
         const storageRef = ref(this.storage, storagePath);
         await deleteObject(storageRef);

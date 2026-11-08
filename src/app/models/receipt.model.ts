@@ -9,7 +9,7 @@ export type ReceiptStatus = 'uploaded' | 'processing' | 'extracted' | 'needs_rev
 /**
  * Source of extraction data
  */
-export type ExtractionSource = 'document_ai' | 'gemini' | 'manual';
+export type ExtractionSource = 'document_ai' | 'gemini' | 'manual' | 'email_rules';
 
 /**
  * How the merchant was matched
@@ -74,6 +74,11 @@ export interface ExtractionResult {
   date?: ExtractedField<string>; // ISO date string YYYY-MM-DD
   supplierName?: ExtractedField<string>;
   lineItems?: LineItem[];
+  transferAmount?: ExtractedField<number>;
+  fees?: ExtractedField<number>;
+  recipientAmount?: ExtractedField<number>;
+  transactionType?: 'purchase' | 'money_transfer' | 'refund' | 'unknown';
+  reviewReasons?: string[];
 
   overallConfidence: number;
   rawResponse?: string; // For debugging, optional
@@ -101,6 +106,18 @@ export interface ReceiptCategory {
 }
 
 export interface ReceiptEmailMetadata {
+  pipelineVersion?: number;
+  sourceStoragePath?: string | null;
+  rawStoragePath?: string | null;
+  documentStoragePath?: string | null;
+  initialHtmlStoragePath?: string | null;
+  originalFormat?: 'rfc822' | 'provider_payload';
+  renderStatus?: 'queued' | 'rendering' | 'ready' | 'failed';
+  renderRequestId?: string;
+  renderAttempts?: number;
+  renderError?: string;
+  missingAssets?: number;
+  renderDurationMs?: number;
   from?: string;
   to?: string;
   subject?: string;

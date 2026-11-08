@@ -33,7 +33,8 @@ function mediaType(contentType: string | undefined, path: string) {
 export async function loadReceiptPreview(data: any, userId: string, bucket: ReturnType<admin.storage.Storage["bucket"]>): Promise<ReceiptPreview> {
   const result: ReceiptPreview = { imageUrl: "", pdfUrl: "", originalUrl: "", error: "" };
   const originalPath = data.file?.storagePath;
-  const paths = [...new Set([data.email?.previewStoragePath, originalPath, data.email?.pdfStoragePath])].filter(path => ownedPath(userId, path));
+  const candidates = data.email?.pipelineVersion >= 2 ? [originalPath, data.email?.pdfStoragePath, data.email?.previewStoragePath] : [data.email?.previewStoragePath, originalPath, data.email?.pdfStoragePath];
+  const paths = [...new Set(candidates)].filter(path => ownedPath(userId, path));
   if (!paths.length) return { ...result, error: "No original file is attached to this receipt. You can still enter and save its values." };
   let missing = false;
   for (const path of paths) {

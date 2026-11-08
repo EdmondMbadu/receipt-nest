@@ -12,7 +12,7 @@ import { ThemeService } from '../../services/theme.service';
 import { PdfThumbnailService } from '../../services/pdf-thumbnail.service';
 
 describe('Recovered receipt details', () => {
-  async function setup(failSource = false) {
+  async function setup(failSource = false, forwardedEmail = false) {
     const at = Timestamp.fromMillis(1000);
     const receipt: Receipt = { id:'page-03', userId:'owner', status:'final', totalAmount:46.91, currency:'AUD', date:'2026-06-29', createdAt:at, updatedAt:at,
       file:{ storagePath:'users/owner/receipts/page-03.pdf', originalName:'Woolworths.pdf', mimeType:'application/pdf', sizeBytes:5000, uploadedAt:at },
@@ -20,8 +20,17 @@ describe('Recovered receipt details', () => {
       category:{ id:'groceries', name:'Groceries', assignedBy:'user', confidence:1 },
       sourceBundle:{ recoveryId:'recovery', sourceReceiptId:'source', storagePath:'users/owner/receipts/original.pdf', originalName:'Original.pdf', page:3, pageCount:17, sha256:'source-hash', receiptSha256:'page-hash' },
     };
+    if (forwardedEmail) {
+      receipt.sourceBundle = undefined;
+      receipt.file = { ...receipt.file, storagePath: 'users/owner/receipts/preview.png', mimeType: 'image/png' };
+      receipt.email = { pipelineVersion: 2, ingestMode: 'text_fallback', renderStatus: 'queued', htmlStoragePath: 'users/owner/receipts/email.html', sourceStoragePath: 'users/owner/receipts/source.json' };
+    }
+    let listener: ((receipt: Receipt | null) => void) | undefined;
+    const unsubscribe = jasmine.createSpy('unsubscribe');
+    const watchReceipt = jasmine.createSpy('watchReceipt').and.callFake((_id: string, next: (receipt: Receipt | null) => void) => { listener = next; return unsubscribe; });
+    const retryEmailPdf = jasmine.createSpy('retryEmailPdf').and.resolveTo();
     const getReceiptFileUrl = jasmine.createSpy('getReceiptFileUrl').and.callFake(async (path: string) => {
-      if (path === receipt.sourceBundle!.storagePath) {
+      if (path === receipt.sourceBundle?.storagePath) {
         if (failSource) throw new Error('Unavailable');
         return 'about:blank#original-bundle';
       }
@@ -29,7 +38,7 @@ describe('Recovered receipt details', () => {
     });
     await TestBed.configureTestingModule({ imports:[ReceiptDetailComponent], providers:[provideZonelessChangeDetection(), provideRouter([]),
       {provide:ActivatedRoute,useValue:{params:of({id:receipt.id})}},
-      {provide:ReceiptService,useValue:{getReceipt:jasmine.createSpy().and.resolveTo(receipt),getReceiptFileUrl}},
+      {provide:ReceiptService,useValue:{getReceipt:jasmine.createSpy().and.resolveTo(receipt),getReceiptFileUrl,watchReceipt,retryEmailPdf}},
       {provide:ThemeService,useValue:{isDarkMode:signal(false)}},
       {provide:PdfThumbnailService,useValue:{generateThumbnail:jasmine.createSpy().and.resolveTo('data:image/png;base64,receipt-preview')}},
       {provide:ReceiptTourService,useValue:{active:signal(false),preview:signal(false),receiptLoaded:jasmine.createSpy()}},
@@ -38,7 +47,7 @@ describe('Recovered receipt details', () => {
     const load = spyOn(fixture.componentInstance, 'loadReceipt').and.callThrough();
     fixture.detectChanges(); await load.calls.mostRecent().returnValue;
     await fixture.whenStable(); fixture.detectChanges();
-    return { fixture, component:fixture.componentInstance, getReceiptFileUrl };
+    return { fixture, component:fixture.componentInstance, getReceiptFileUrl, receipt, emit: (value: Receipt) => listener?.(value), unsubscribe, retryEmailPdf };
   }
   it('opens the individual PDF by default and offers the full original as a separate link', async () => {
     const { fixture, component } = await setup();
@@ -56,4 +65,32 @@ describe('Recovered receipt details', () => {
     expect(component.imageUrl()).toBe('about:blank#single-receipt');
     expect(fixture.nativeElement.textContent).toContain('Reload original upload link');
   });
+  it('shows the full saved email while its PDF is being prepared, without offering the temporary summary download', async () => {
+    const {fixture,component} = await setup(false,true);
+    expect(component.emailPdfPreparing()).toBeTrue();
+    expect(fixture.nativeElement.textContent).toContain('Preparing full email PDF');
+    expect(fixture.nativeElement.querySelector('iframe[title="HTML Email Preview"]')?.getAttribute('sandbox')).toBe('');
+    expect(fixture.nativeElement.querySelector('[data-onboarding="original-download"]')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Download email source');
+  });
+  it('switches to the finished email PDF live and keeps unsaved corrections', async () => {
+    const {fixture,component,receipt,emit,unsubscribe} = await setup(false,true);
+    component.editAmount.set(123); component.editNotes.set('My unsaved correction');
+    emit({...receipt,file:{...receipt.file,storagePath:'users/owner/receipts/full.pdf',mimeType:'application/pdf'},email:{...receipt.email,renderStatus:'ready'}});
+    await fixture.whenStable(); fixture.detectChanges();
+    expect(component.hasHtmlPreview()).toBeFalse(); expect(component.emailPdfPreparing()).toBeFalse();
+    expect(fixture.nativeElement.querySelector('iframe[title="PDF Preview"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('iframe[title="HTML Email Preview"]')).toBeNull();
+    expect(component.editAmount()).toBe(123); expect(component.editNotes()).toBe('My unsaved correction');
+    expect(unsubscribe).toHaveBeenCalled();
+  });
+  it('offers a retry after PDF failure and keeps the saved email visible', async () => {
+    const {fixture,component,receipt,emit,retryEmailPdf} = await setup(false,true);
+    emit({...receipt,email:{...receipt.email,renderStatus:'failed'}});
+    await fixture.whenStable(); fixture.detectChanges();
+    expect(component.hasHtmlPreview()).toBeTrue();
+    expect(fixture.nativeElement.textContent).toContain('Retry email PDF');
+    await component.retryEmailPdf(); expect(retryEmailPdf).toHaveBeenCalledWith(receipt.id);
+  });
+
 });

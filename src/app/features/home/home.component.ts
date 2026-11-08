@@ -1798,7 +1798,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   // Format date
   formatDate(dateString?: string): string {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('en-US', {
+    const date = new Date(/^\d{4}-\d{2}-\d{2}$/.test(dateString) ? `${dateString}T12:00:00` : dateString);
+    return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric'
     });

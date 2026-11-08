@@ -3,7 +3,10 @@ import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import { VertexAI } from "@google-cloud/vertexai";
-import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
+import { simpleParser } from "mailparser";
+import Busboy from "busboy";
+import { buildEmailHtml, emailExtractionText, EMAIL_PIPELINE_VERSION, MAX_EMAIL_SOURCE_BYTES, type EmailDocumentSource } from "./email-content";
+import { emailExtractionPrompt, validateEmailValues, type EmailValues } from "./email-intelligence";
 import * as crypto from "crypto";
 import type { Request } from "express";
 import sharp from "sharp";
@@ -18,9 +21,6 @@ const VERTEX_LOCATION = "us-central1";
 
 const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
 const MAX_ATTACHMENTS_PER_EMAIL = 6;
-const MAX_EMAIL_TEXT_LENGTH = 12000;
-const MAX_EMAIL_HTML_LENGTH = 250000;
-const MAX_EMAIL_DOCUMENT_TEXT_LENGTH = 50000;
 const MAX_ALIAS_LOCAL_PART_LENGTH = 64;
 const RECEIPT_FORWARDING_ALIAS_COLLECTION = "receiptForwardingAliases";
 
@@ -44,24 +44,13 @@ const ALLOWED_ATTACHMENT_EXTENSIONS = new Set([
   "pdf",
 ]);
 
-const CATEGORIES = [
-  { id: "groceries", name: "Groceries", keywords: ["grocery", "supermarket", "food", "whole foods", "trader joe", "kroger"] },
-  { id: "restaurants", name: "Restaurants", keywords: ["restaurant", "cafe", "coffee", "starbucks", "mcdonalds", "uber eats"] },
-  { id: "shopping", name: "Shopping", keywords: ["amazon", "target", "walmart", "costco", "best buy", "retail"] },
-  { id: "transportation", name: "Transportation", keywords: ["gas", "fuel", "uber", "lyft", "parking", "transit"] },
-  { id: "entertainment", name: "Entertainment", keywords: ["movie", "netflix", "spotify", "gaming", "concert"] },
-  { id: "subscriptions", name: "Subscriptions", keywords: ["subscription", "monthly", "recurring", "membership"] },
-  { id: "utilities", name: "Utilities", keywords: ["electric", "water", "internet", "phone", "utility"] },
-  { id: "healthcare", name: "Healthcare", keywords: ["pharmacy", "doctor", "hospital", "cvs", "walgreens"] },
-  { id: "travel", name: "Travel", keywords: ["hotel", "flight", "airline", "airbnb", "booking"] },
-  { id: "other", name: "Other", keywords: [] },
-];
-
 interface ParsedAttachment {
   fieldName: string;
   fileName: string;
   mimeType: string;
   data: Buffer;
+  contentId?: string;
+  disposition?: string;
 }
 
 interface ParsedInboundEmail {
@@ -74,20 +63,9 @@ interface InboundEmailPayload {
   attachments: ParsedAttachment[];
 }
 
-interface ExtractedField<T> {
-  value: T;
-  confidence: number;
-  rawText?: string;
-}
-
-interface EmailExtractionResult {
-  source: "gemini" | "manual";
+interface EmailExtractionResult extends EmailValues {
+  source: "gemini" | "manual" | "email_rules";
   processedAt: admin.firestore.FieldValue;
-  totalAmount?: ExtractedField<number>;
-  currency?: ExtractedField<string>;
-  date?: ExtractedField<string>;
-  supplierName?: ExtractedField<string>;
-  overallConfidence: number;
 }
 
 interface ReceiptMerchant {
@@ -96,13 +74,6 @@ interface ReceiptMerchant {
   rawName: string;
   matchConfidence: number;
   matchedBy: "exact" | "fuzzy" | "alias" | "ai" | "manual";
-}
-
-interface ReceiptCategory {
-  id: string;
-  name: string;
-  confidence: number;
-  assignedBy: "ai" | "user" | "rule" | "default";
 }
 
 interface EmailPreviewImageInput {
@@ -116,20 +87,6 @@ interface EmailPreviewImageInput {
   status: "final" | "needs_review";
 }
 
-interface EmailDocumentPdfInput {
-  subject: string;
-  sender: string;
-  recipient: string;
-  merchantName: string;
-  totalAmount?: number;
-  currency?: string;
-  transactionDate?: string;
-  bodyText: string;
-  status: "final" | "needs_review";
-}
-
-const PART_SEPARATOR_CRLF = Buffer.from("\r\n\r\n");
-const PART_SEPARATOR_LF = Buffer.from("\n\n");
 
 export const generateReceiptForwardingAddress = onCall(
   { region: "us-central1", secrets: [receiptInboundDomain] },
@@ -212,9 +169,17 @@ export const inboundEmailWebhook = onRequest(
       return;
     }
 
+    if (((req as Request & { rawBody?: Buffer }).rawBody?.length || 0) > MAX_EMAIL_SOURCE_BYTES) {
+      res.status(413).send("Email exceeds the 28 MB ingestion limit.");
+      return;
+    }
+
     try {
-      const parsedEmail = parseInboundEmail(req);
-      const payload = enrichInboundPayload(parsedEmail);
+      const parsedEmail = await parseInboundEmail(req);
+      const parsedSize = Object.values(parsedEmail.fields).reduce((size, value) => size + Buffer.byteLength(value), 0)
+        + parsedEmail.attachments.reduce((size, file) => size + file.data.length, 0);
+      if (parsedSize > MAX_EMAIL_SOURCE_BYTES) { res.status(413).send("Email exceeds the 28 MB ingestion limit."); return; }
+      const payload = await enrichInboundPayload(parsedEmail);
       const recipients = extractRecipientAddresses(payload.fields);
       logger.info("Parsed inbound email", {
         contentType: String(req.headers["content-type"] || ""),
@@ -267,30 +232,32 @@ export const inboundEmailWebhook = onRequest(
           continue;
         }
 
-        const validAttachments = payload.attachments
-          .filter((attachment) => isAllowedAttachment(attachment))
-          .slice(0, MAX_ATTACHMENTS_PER_EMAIL);
-
-        logger.info("Resolved inbound attachments for user", {
-          userId,
-          recipientLocals,
-          parsedAttachmentCount: parsedEmail.attachments.length,
-          enrichedAttachmentCount: payload.attachments.length,
-          validAttachmentCount: validAttachments.length,
-          rejectedAttachmentCount: Math.max(payload.attachments.length - validAttachments.length, 0),
+        const deliveryId = emailDeliveryId(payload);
+        const ingestionRef = admin.firestore().doc(`users/${userId}/emailIngestions/${deliveryId}`);
+        const claimed = await admin.firestore().runTransaction(async tx => {
+          const snap = await tx.get(ingestionRef);
+          if (snap.get("state") === "complete") return false;
+          if (snap.get("leaseUntil")?.toMillis() > Date.now()) throw new Error("Email delivery is already being processed");
+          tx.set(ingestionRef, { state: "processing", leaseUntil: admin.firestore.Timestamp.fromMillis(Date.now() + 150000) });
+          return true;
         });
-
-        if (validAttachments.length > 0) {
-          for (const attachment of validAttachments) {
-            await saveAttachmentReceipt(userId, attachment, payload.fields);
-            createdReceipts += 1;
-          }
-          continue;
-        }
-
-        const createdTextReceipt = await saveTextOnlyReceipt(userId, payload.fields);
-        if (createdTextReceipt) {
-          createdReceipts += 1;
+        if (!claimed) continue;
+        try {
+          const archive = await saveEmailArchive(userId, deliveryId, payload);
+          const validAttachments = payload.attachments
+            .filter(attachment => isAllowedAttachment(attachment) && !isInlineEmailAsset(attachment, payload.fields))
+            .slice(0, MAX_ATTACHMENTS_PER_EMAIL);
+          if (validAttachments.length) {
+            for (const [index, attachment] of validAttachments.entries()) {
+              if (!await canUserAcceptNewReceipt(userId)) break;
+              await saveAttachmentReceipt(userId, attachment, payload.fields, `${deliveryId}_${index}`, archive);
+              createdReceipts++;
+            }
+          } else if (await saveTextOnlyReceipt(userId, payload.fields, deliveryId, archive)) createdReceipts++;
+          await ingestionRef.set({ state: "complete", completedAt: admin.firestore.FieldValue.serverTimestamp() });
+        } catch (error) {
+          await ingestionRef.delete();
+          throw error;
         }
       }
 
@@ -307,137 +274,40 @@ export const inboundEmailWebhook = onRequest(
   }
 );
 
-function parseInboundEmail(req: Request): ParsedInboundEmail {
+export async function parseInboundEmail(req: Request): Promise<ParsedInboundEmail> {
   const fields: Record<string, string> = {};
   const attachments: ParsedAttachment[] = [];
   const contentType = String(req.headers["content-type"] || "");
-  const isMultipart = contentType.toLowerCase().includes("multipart/form-data");
   const rawBody = (req as Request & { rawBody?: Buffer }).rawBody;
-
-  if (!isMultipart || !rawBody || rawBody.length === 0) {
-    const body = req.body as Record<string, unknown> | undefined;
-    if (body) {
-      for (const [key, value] of Object.entries(body)) {
-        if (typeof value === "string") {
-          fields[key] = value;
-        } else if (typeof value === "number" || typeof value === "boolean") {
-          fields[key] = String(value);
-        } else if (Array.isArray(value)) {
-          fields[key] = value.map((item) => String(item)).join(", ");
-        } else if (value && typeof value === "object") {
-          fields[key] = JSON.stringify(value);
-        }
-      }
+  if (!contentType.toLowerCase().includes("multipart/form-data") || !rawBody?.length) {
+    for (const [key, value] of Object.entries((req.body || {}) as Record<string, unknown>)) {
+      if (typeof value === "string") fields[key] = value;
+      else if (value !== undefined && value !== null) fields[key] = typeof value === "object" ? JSON.stringify(value) : String(value);
     }
     return { fields, attachments };
   }
-
-  const boundary = extractMultipartBoundary(contentType);
-  if (!boundary) {
-    logger.warn("Multipart request missing boundary.");
-    return { fields, attachments };
-  }
-
-  const delimiter = Buffer.from(`--${boundary}`);
-  const closingDelimiter = Buffer.from(`--${boundary}--`);
-  let cursor = 0;
-
-  while (cursor < rawBody.length) {
-    const startIndex = rawBody.indexOf(delimiter, cursor);
-    if (startIndex < 0) {
-      break;
-    }
-
-    if (rawBody.indexOf(closingDelimiter, startIndex) === startIndex) {
-      break;
-    }
-
-    let partStart = startIndex + delimiter.length;
-    if (rawBody[partStart] === 13 && rawBody[partStart + 1] === 10) {
-      partStart += 2;
-    }
-
-    let headerEndIndex = rawBody.indexOf(PART_SEPARATOR_CRLF, partStart);
-    let separatorLength = PART_SEPARATOR_CRLF.length;
-    if (headerEndIndex < 0) {
-      headerEndIndex = rawBody.indexOf(PART_SEPARATOR_LF, partStart);
-      separatorLength = PART_SEPARATOR_LF.length;
-    }
-    if (headerEndIndex < 0) {
-      break;
-    }
-
-    const headerLines = rawBody.slice(partStart, headerEndIndex).toString("utf8").split(/\r?\n/);
-    const headers: Record<string, string> = {};
-    let activeHeaderKey: string | null = null;
-    for (const line of headerLines) {
-      if (/^\s/.test(line) && activeHeaderKey) {
-        headers[activeHeaderKey] = `${headers[activeHeaderKey]} ${line.trim()}`;
-        continue;
-      }
-      const separatorIndex = line.indexOf(":");
-      if (separatorIndex > 0) {
-        const key = line.slice(0, separatorIndex).trim().toLowerCase();
-        const value = line.slice(separatorIndex + 1).trim();
-        headers[key] = value;
-        activeHeaderKey = key;
-      }
-    }
-
-    const dataStart = headerEndIndex + separatorLength;
-    const nextDelimiterIndex = rawBody.indexOf(delimiter, dataStart);
-    if (nextDelimiterIndex < 0) {
-      break;
-    }
-
-    let partData = rawBody.slice(dataStart, nextDelimiterIndex);
-    while (
-      partData.length > 0 &&
-      (partData[partData.length - 1] === 10 || partData[partData.length - 1] === 13)
-    ) {
-      partData = partData.slice(0, partData.length - 1);
-    }
-    cursor = nextDelimiterIndex;
-
-    const contentDisposition = headers["content-disposition"] || "";
-    const fieldName = extractContentDispositionParam(contentDisposition, "name");
-    if (!fieldName) {
-      continue;
-    }
-
-    const fileNameRaw = extractContentDispositionParam(contentDisposition, "filename");
-    if (!fileNameRaw) {
-      fields[fieldName] = partData.toString("utf8");
-      continue;
-    }
-
-    if (partData.length === 0 || partData.length > MAX_ATTACHMENT_SIZE_BYTES) {
-      continue;
-    }
-
-    const fileName = sanitizeFileName(decodeRfc2231Value(fileNameRaw) || `${fieldName}.bin`);
-    const mimeType = headers["content-type"] || "application/octet-stream";
-    attachments.push({
-      fieldName,
-      fileName,
-      mimeType,
-      data: partData,
+  await new Promise<void>((resolve, reject) => {
+    const parser = Busboy({ headers: { "content-type": contentType }, limits: {
+      fileSize: MAX_EMAIL_SOURCE_BYTES, fieldSize: MAX_EMAIL_SOURCE_BYTES, fields: 100, files: 100, parts: 200,
+    } });
+    parser.on("field", (name, value, info) => {
+      if (info.valueTruncated || info.nameTruncated) reject(new Error("Email field exceeds limit"));
+      fields[name] = value;
     });
-  }
-
+    parser.on("file", (fieldName, stream, info) => {
+      const chunks: Buffer[] = [];
+      stream.on("data", (chunk: Buffer) => chunks.push(chunk));
+      stream.on("error", reject);
+      stream.on("limit", () => reject(new Error("Email attachment exceeds limit")));
+      stream.on("end", () => attachments.push({ fieldName, fileName: sanitizeFileName(info.filename || `${fieldName}.bin`),
+        mimeType: info.mimeType, data: Buffer.concat(chunks) }));
+    });
+    for (const event of ["partsLimit", "filesLimit", "fieldsLimit"] as const) parser.on(event, () => reject(new Error("Email has too many MIME parts")));
+    parser.on("error", reject);
+    parser.on("close", resolve);
+    parser.end(rawBody);
+  });
   return { fields, attachments };
-}
-
-function extractMultipartBoundary(contentType: string): string | null {
-  const match = contentType.match(/boundary=(?:"([^"]+)"|([^;]+))/i);
-  if (!match) {
-    return null;
-  }
-  const value = (match[1] || match[2] || "").trim();
-  if (!value) {
-    return null;
-  }
-  return value;
 }
 
 function extractRecipientAddresses(fields: Record<string, string>): string[] {
@@ -560,18 +430,21 @@ async function findUsersByRecipientLocals(recipientLocals: string[]): Promise<Se
 async function saveAttachmentReceipt(
   userId: string,
   attachment: ParsedAttachment,
-  fields: Record<string, string>
+  fields: Record<string, string>,
+  deliveryId: string,
+  archive: EmailArchive
 ): Promise<void> {
+  const receiptRef = admin.firestore().doc(`users/${userId}/receipts/email_${deliveryId}`);
+  if ((await receiptRef.get()).exists) return;
   const resolvedMimeType = normalizeAttachmentMimeType(attachment) || "application/octet-stream";
-  const timestamp = Date.now();
-  const storagePath = `users/${userId}/receipts/${timestamp}_${sanitizeFileName(attachment.fileName)}`;
+  const storagePath = `users/${userId}/receipts/email_${deliveryId}_${sanitizeFileName(attachment.fileName)}`;
   const bucket = admin.storage().bucket();
   await bucket.file(storagePath).save(attachment.data, {
-    metadata: { contentType: resolvedMimeType },
+    metadata: { metadata: { firebaseStorageDownloadTokens: crypto.randomUUID() }, contentType: resolvedMimeType },
   });
 
-  const db = admin.firestore();
-  const receiptRef = await db.collection(`users/${userId}/receipts`).add({
+  await receiptRef.create({
+    id: receiptRef.id,
     userId,
     status: "uploaded",
     file: {
@@ -587,601 +460,135 @@ async function saveAttachmentReceipt(
       to: fields.to || "",
       subject: fields.subject || "",
       messageId: extractMessageId(fields),
+      ...archive.metadata,
       ingestMode: "attachment",
+      renderStatus: "queued",
+      renderRequestId: crypto.randomBytes(8).toString("hex"),
+      renderAttempts: 0,
       ingestedAt: admin.firestore.FieldValue.serverTimestamp(),
     },
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   });
 
-  await receiptRef.update({ id: receiptRef.id });
+}
+
+interface EmailArchive {
+  document: EmailDocumentSource;
+  metadata: Record<string, unknown>;
+}
+
+export function emailDeliveryId(payload: InboundEmailPayload): string {
+  const hash = crypto.createHash("sha256");
+  hash.update(extractMessageId(payload.fields) || payload.fields.headers || "");
+  hash.update(payload.fields.subject || ""); hash.update(payload.fields.text || ""); hash.update(payload.fields.html || "");
+  for (const attachment of payload.attachments) hash.update(attachment.data);
+  return hash.digest("hex").slice(0, 32);
+}
+
+export function isInlineEmailAsset(attachment: ParsedAttachment, fields: Record<string, string>): boolean {
+  if (attachment.disposition === "inline") return true;
+  return !!attachment.contentId && (fields.html || "").includes(`cid:${attachment.contentId.replace(/^<|>$/g, "")}`);
+}
+
+async function saveEmailArchive(userId: string, deliveryId: string, payload: InboundEmailPayload): Promise<EmailArchive> {
+  const base = `users/${userId}/receipts/email_${deliveryId}`;
+  const document: EmailDocumentSource = {
+    subject: payload.fields.subject || "", sender: payload.fields.from || "", recipient: payload.fields.to || "",
+    sentAt: payload.fields.date || payload.fields.headers?.match(/^date:\s*(.+)$/im)?.[1] || "", html: extractHtmlFromEmailFields(payload.fields),
+    text: payload.fields.text || payload.fields["stripped-text"] || "", inlineImages: {},
+  };
+  for (const attachment of payload.attachments) {
+    if (attachment.contentId && /^image\/(?:png|jpe?g|gif|webp|avif)$/i.test(attachment.mimeType)) {
+      document.inlineImages![attachment.contentId.replace(/^<|>$/g, "")] = `data:${attachment.mimeType};base64,${attachment.data.toString("base64")}`;
+    }
+  }
+  const bucket = admin.storage().bucket();
+  const sourceStoragePath = `${base}_source.json`;
+  const rawStoragePath = payload.fields.email ? `${base}_original.eml` : null;
+  const documentStoragePath = `${base}_document.json`;
+  const textStoragePath = `${base}_body.txt`;
+  const htmlStoragePath = `${base}_preview.html`;
+  const source = JSON.stringify({ version: EMAIL_PIPELINE_VERSION, fields: payload.fields,
+    attachments: payload.attachments.map(a => ({ ...a, data: a.data.toString("base64") })) });
+  if (Buffer.byteLength(source) > MAX_EMAIL_SOURCE_BYTES * 2) throw new Error("Email archive too large");
+  const writes = [
+    bucket.file(sourceStoragePath).save(Buffer.from(source), { metadata: { metadata: { firebaseStorageDownloadTokens: crypto.randomUUID() }, contentType: "application/json", cacheControl: "private, no-store" } }),
+    bucket.file(documentStoragePath).save(Buffer.from(JSON.stringify(document)), { metadata: { metadata: { firebaseStorageDownloadTokens: crypto.randomUUID() }, contentType: "application/json", cacheControl: "private, no-store" } }),
+    bucket.file(textStoragePath).save(Buffer.from(document.text || emailExtractionText(document.html, "")), { metadata: { metadata: { firebaseStorageDownloadTokens: crypto.randomUUID() }, contentType: "text/plain; charset=utf-8" } }),
+    bucket.file(htmlStoragePath).save(Buffer.from(buildEmailHtml(document)), { metadata: { metadata: { firebaseStorageDownloadTokens: crypto.randomUUID() }, contentType: "text/html; charset=utf-8", cacheControl: "private, no-store" } }),
+  ];
+  if (rawStoragePath) writes.push(bucket.file(rawStoragePath).save(Buffer.from(payload.fields.email), { metadata: { metadata: { firebaseStorageDownloadTokens: crypto.randomUUID() }, contentType: "message/rfc822", cacheControl: "private, no-store" } }));
+  await Promise.all(writes);
+  return { document, metadata: { sourceStoragePath, rawStoragePath, documentStoragePath, textStoragePath, htmlStoragePath, initialHtmlStoragePath: htmlStoragePath,
+    pipelineVersion: EMAIL_PIPELINE_VERSION, originalFormat: rawStoragePath ? "rfc822" : "provider_payload" } };
 }
 
 async function saveTextOnlyReceipt(
-  userId: string,
-  fields: Record<string, string>
+  userId: string, fields: Record<string, string>, deliveryId: string, archive: EmailArchive
 ): Promise<boolean> {
-  const subject = fields.subject || "";
-  const sender = fields.from || "";
-  const recipient = fields.to || "";
-  const htmlSource = extractHtmlFromEmailFields(fields);
-  const readableBodySource =
-    fields.text ||
-    fields["stripped-text"] ||
-    htmlToReadableText(htmlSource) ||
-    extractReadableTextFromRawEmail(fields.email || "");
-  const text = normalizeEmailText(readableBodySource);
-  const documentBodyText = normalizeEmailDocumentText(readableBodySource);
-  if (!subject && !text) {
-    return false;
-  }
-
-  const extraction = await extractFromEmailContent(subject, sender, text);
-  const merchantName = extraction.supplierName?.value || inferMerchantFromSender(sender) || "Email Receipt";
+  const { subject, sender, recipient, html, text } = archive.document;
+  const body = emailExtractionText(html, text);
+  if (!subject && !body) return false;
+  const receiptRef = admin.firestore().doc(`users/${userId}/receipts/email_${deliveryId}_body`);
+  if ((await receiptRef.get()).exists) return true;
+  const extraction = await extractFromEmailContent(subject, sender, body);
+  const merchantName = extraction.supplierName?.value || "Email Receipt";
   const merchant = await normalizeMerchant(userId, merchantName, extraction.supplierName?.confidence || 0.5);
-  const category = classifyCategory({
-    merchantName: merchant.canonicalName,
-    rawMerchantName: merchant.rawName,
-    sender,
-    subject,
-  });
-  const hasTotal = extraction.totalAmount?.value !== undefined && extraction.totalAmount.value > 0;
-  const status = hasTotal ? "final" : "needs_review";
-
-  const timestamp = Date.now();
-  const textPayload = [
-    `Subject: ${subject || "(none)"}`,
-    `From: ${sender || "(unknown)"}`,
-    `To: ${recipient || "(unknown recipient)"}`,
-    "",
-    documentBodyText || "(empty body)",
-  ].join("\n");
-  const textStoragePath = `users/${userId}/receipts/${timestamp}_email_body.txt`;
-  const htmlStoragePath = htmlSource ? `users/${userId}/receipts/${timestamp}_email_body.html` : null;
-  const pdfStoragePath = `users/${userId}/receipts/${timestamp}_email_rendered.pdf`;
-  const previewStoragePath = `users/${userId}/receipts/${timestamp}_email_preview.png`;
-
-  const bucket = admin.storage().bucket();
-  await bucket.file(textStoragePath).save(Buffer.from(textPayload, "utf8"), {
-    metadata: { contentType: "text/plain; charset=utf-8" },
-  });
-  if (htmlStoragePath && htmlSource) {
-    const htmlPayload = buildStoredEmailHtmlDocument({
-      subject,
-      sender,
-      recipient,
-      htmlBody: htmlSource,
-    });
-    await bucket.file(htmlStoragePath).save(Buffer.from(htmlPayload, "utf8"), {
-      metadata: { contentType: "text/html; charset=utf-8" },
-    });
-  }
-
-  let receiptFileStoragePath = textStoragePath;
-  let receiptFileOriginalName = `${sanitizeFileName(subject || "forwarded-email")}.txt`;
-  let receiptFileMimeType = "text/plain";
-  let receiptFileSizeBytes = Buffer.byteLength(textPayload, "utf8");
-  let pdfGenerated = false;
-  let previewGenerated = false;
-
-  try {
-    const pdfBuffer = await generateEmailDocumentPdf({
-      subject,
-      sender,
-      recipient,
-      merchantName: merchant.canonicalName || merchantName,
-      totalAmount: extraction.totalAmount?.value,
-      currency: extraction.currency?.value,
-      transactionDate: extraction.date?.value,
-      bodyText: documentBodyText || text,
-      status,
-    });
-
-    await bucket.file(pdfStoragePath).save(pdfBuffer, {
-      metadata: { contentType: "application/pdf" },
-    });
-
-    receiptFileStoragePath = pdfStoragePath;
-    receiptFileOriginalName = `${sanitizeFileName(subject || "forwarded-email")}_email.pdf`;
-    receiptFileMimeType = "application/pdf";
-    receiptFileSizeBytes = pdfBuffer.length;
-    pdfGenerated = true;
-  } catch (error) {
-    logger.warn("Failed to generate email PDF document. Falling back to preview image.", {
-      userId,
-      messageId: extractMessageId(fields),
-      error,
-    });
-  }
-
-  if (!pdfGenerated) {
-    try {
-      const previewBuffer = await generateEmailPreviewImage({
-        subject,
-        sender,
-        merchantName: merchant.canonicalName || merchantName,
-        totalAmount: extraction.totalAmount?.value,
-        currency: extraction.currency?.value,
-        transactionDate: extraction.date?.value,
-        bodyText: documentBodyText || text,
-        status,
-      });
-
-      await bucket.file(previewStoragePath).save(previewBuffer, {
-        metadata: { contentType: "image/png" },
-      });
-
-      receiptFileStoragePath = previewStoragePath;
-      receiptFileOriginalName = `${sanitizeFileName(subject || "forwarded-email")}_preview.png`;
-      receiptFileMimeType = "image/png";
-      receiptFileSizeBytes = previewBuffer.length;
-      previewGenerated = true;
-    } catch (error) {
-      logger.warn("Failed to generate text-email preview image. Falling back to text file.", {
-        userId,
-        messageId: extractMessageId(fields),
-        error,
-      });
-    }
-  }
-
-  const updateData: Record<string, unknown> = {
-    userId,
-    status,
-    processedAt: admin.firestore.FieldValue.serverTimestamp(),
-    skipProcessing: true,
-    source: "email",
-    file: {
-      storagePath: receiptFileStoragePath,
-      originalName: receiptFileOriginalName,
-      mimeType: receiptFileMimeType,
-      sizeBytes: receiptFileSizeBytes,
-      uploadedAt: admin.firestore.FieldValue.serverTimestamp(),
-    },
-    extraction,
-    merchant,
-    category,
-    email: {
-      from: sender,
-      to: recipient,
-      subject,
-      messageId: extractMessageId(fields),
-      ingestMode: "text_fallback",
-      textStoragePath,
-      htmlStoragePath,
-      pdfStoragePath: pdfGenerated ? pdfStoragePath : null,
-      previewStoragePath: previewGenerated ? previewStoragePath : null,
-      pdfGenerated,
-      previewGenerated,
-      ingestedAt: admin.firestore.FieldValue.serverTimestamp(),
-    },
-    notes: `Imported from forwarded email${subject ? `: ${subject}` : ""}.`,
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  const status = extraction.reviewReasons.length ? "needs_review" : "final";
+  const previewStoragePath = `users/${userId}/receipts/email_${deliveryId}_preview.png`;
+  let file = {
+    storagePath: archive.metadata.htmlStoragePath as string,
+    originalName: `${sanitizeFileName(subject || "email")}.html`, mimeType: "text/html",
+    sizeBytes: Buffer.byteLength(buildEmailHtml(archive.document)), uploadedAt: admin.firestore.FieldValue.serverTimestamp(),
   };
-
-  if (hasTotal) {
-    updateData.totalAmount = extraction.totalAmount?.value;
-  }
-  if (extraction.currency?.value) {
-    updateData.currency = extraction.currency.value;
-  }
-  if (extraction.date?.value) {
-    updateData.date = extraction.date.value;
-  }
-
-  const db = admin.firestore();
-  const receiptRef = await db.collection(`users/${userId}/receipts`).add(updateData);
-  await receiptRef.update({ id: receiptRef.id });
+  let previewGenerated = false;
+  try {
+    const preview = await generateEmailPreviewImage({ subject, sender, merchantName,
+      totalAmount: extraction.totalAmount?.value, currency: extraction.currency?.value,
+      transactionDate: extraction.date?.value, bodyText: body, status });
+    await admin.storage().bucket().file(previewStoragePath).save(preview, {
+      metadata: { metadata: { firebaseStorageDownloadTokens: crypto.randomUUID() }, contentType: "image/png" },
+    });
+    file = { storagePath: previewStoragePath, originalName: `${sanitizeFileName(subject || "email")}_preview.png`,
+      mimeType: "image/png", sizeBytes: preview.length, uploadedAt: admin.firestore.FieldValue.serverTimestamp() };
+    previewGenerated = true;
+  } catch (error) { logger.warn("Temporary email thumbnail unavailable; keeping full HTML preview", { error }); }
+  await receiptRef.create({
+    id: receiptRef.id, userId, source: "email", status, skipProcessing: true,
+    file,
+    extraction, merchant, category: extraction.category,
+    ...(extraction.totalAmount ? { totalAmount: extraction.totalAmount.value } : {}),
+    ...(extraction.currency ? { currency: extraction.currency.value } : {}),
+    ...(extraction.date ? { date: extraction.date.value } : {}),
+    email: { ...archive.metadata, from: sender, to: recipient, subject, messageId: extractMessageId(fields),
+      ingestMode: "text_fallback", previewStoragePath: previewGenerated ? previewStoragePath : null, previewGenerated, pdfGenerated: false,
+      renderStatus: "queued", renderRequestId: crypto.randomBytes(8).toString("hex"), renderAttempts: 0,
+      ingestedAt: admin.firestore.FieldValue.serverTimestamp() },
+    notes: `Imported from forwarded email${subject ? `: ${subject}` : ""}.`,
+    processedAt: admin.firestore.FieldValue.serverTimestamp(), createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
   return true;
 }
 
-async function extractFromEmailContent(
-  subject: string,
-  sender: string,
-  textBody: string
-): Promise<EmailExtractionResult> {
-  const bodyExcerpt = textBody.length > MAX_EMAIL_TEXT_LENGTH
-    ? textBody.slice(0, MAX_EMAIL_TEXT_LENGTH)
-    : textBody;
-
-  const fallbackMerchant = inferMerchantFromSender(sender);
-
+async function extractFromEmailContent(subject: string, sender: string, text: string): Promise<EmailExtractionResult> {
+  const labeled = validateEmailValues({}, text, sender);
+  if (labeled.transactionType === "money_transfer" && !labeled.reviewReasons.length) {
+    return { ...labeled, source: "email_rules", processedAt: admin.firestore.FieldValue.serverTimestamp() };
+  }
+  let parsed: Record<string, unknown> = {};
+  let source: "gemini" | "manual" = "manual";
   try {
-    const vertexAI = new VertexAI({
-      project: PROJECT_ID,
-      location: VERTEX_LOCATION,
-    });
-
-    const model = vertexAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      generationConfig: {
-        temperature: 0.1,
-        maxOutputTokens: 1024,
-        responseMimeType: "application/json",
-      },
-    });
-
-    const prompt = `You are extracting purchase details from a forwarded receipt email.
-Return ONLY JSON with this structure:
-{
-  "total": 12.34,
-  "merchant": "Store Name",
-  "date": "2025-01-30",
-  "currency": "USD"
-}
-
-Rules:
-- Use the final amount paid (not subtotal/tax).
-- If a value is not available, set it to null.
-- date must be YYYY-MM-DD when present.
-
-Sender: ${sender || "(unknown)"}
-Subject: ${subject || "(none)"}
-Email body:
-${bodyExcerpt}`;
-
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-    });
-    const responseText = result.response.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    const parsed = parseJsonPayload(responseText);
-
-    const total = parsePositiveNumber(
-      parsed.total ?? parsed.totalAmount ?? parsed.total_amount ?? parsed.amount
-    );
-
-    const merchantRaw = parsed.merchant ?? parsed.vendor ?? parsed.store ?? parsed.businessName ?? parsed.business_name;
-    const merchantValue = merchantRaw
-      ? String(merchantRaw).trim().replace(/\s+/g, " ")
-      : fallbackMerchant;
-
-    const dateRaw = parsed.date ?? parsed.transactionDate ?? parsed.transaction_date ?? parsed.purchaseDate ?? parsed.purchase_date;
-    const dateValue = dateRaw ? parseDate(String(dateRaw)) || undefined : undefined;
-
-    const currencyRaw = parsed.currency ?? parsed.currencyCode ?? parsed.currency_code;
-    const currencyValue = currencyRaw ? String(currencyRaw).toUpperCase() : "USD";
-
-    let confidence = 0.8;
-    if (!total) confidence = 0.55;
-    if (!merchantValue) confidence = 0.45;
-
-    const extraction: EmailExtractionResult = {
-      source: "gemini",
-      processedAt: admin.firestore.FieldValue.serverTimestamp(),
-      overallConfidence: confidence,
-      currency: {
-        value: currencyValue,
-        confidence: 0.8,
-      },
-    };
-
-    if (total !== undefined && total > 0) {
-      extraction.totalAmount = {
-        value: total,
-        confidence,
-        rawText: String(total),
-      };
-    }
-    if (merchantValue) {
-      extraction.supplierName = {
-        value: merchantValue,
-        confidence,
-        rawText: merchantValue,
-      };
-    }
-    if (dateValue) {
-      extraction.date = {
-        value: dateValue,
-        confidence,
-      };
-    }
-
-    return extraction;
-  } catch (error) {
-    logger.warn("Gemini email extraction failed. Falling back to manual extraction.", error);
-    const extraction: EmailExtractionResult = {
-      source: "manual",
-      processedAt: admin.firestore.FieldValue.serverTimestamp(),
-      overallConfidence: fallbackMerchant ? 0.5 : 0.35,
-      currency: {
-        value: "USD",
-        confidence: 0.5,
-      },
-    };
-
-    if (fallbackMerchant) {
-      extraction.supplierName = {
-        value: fallbackMerchant,
-        confidence: 0.5,
-      };
-    }
-
-    return extraction;
-  }
-}
-
-async function generateEmailDocumentPdf(input: EmailDocumentPdfInput): Promise<Buffer> {
-  const pdfDoc = await PDFDocument.create();
-  pdfDoc.setTitle(input.subject || "Forwarded Email Receipt");
-  pdfDoc.setAuthor("ReceiptNest");
-  pdfDoc.setCreator("ReceiptNest inbound email ingestion");
-  pdfDoc.setProducer("ReceiptNest");
-  pdfDoc.setSubject("Forwarded email receipt");
-  pdfDoc.setKeywords(["receipt", "email", "forwarded"]);
-
-  const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
-
-  const pageWidth = 612;
-  const pageHeight = 792;
-  const margin = 44;
-  const contentWidth = pageWidth - margin * 2;
-  const bodyTopY = pageHeight - 252;
-  const bodyBottomY = 62;
-  const lineGap = 5;
-  const paragraphGap = 12;
-  const footerHeight = 22;
-  const statusColor = input.status === "final" ? rgb(0.04, 0.46, 0.43) : rgb(0.71, 0.36, 0.03);
-  const statusBg = input.status === "final" ? rgb(0.88, 0.98, 0.96) : rgb(0.99, 0.95, 0.82);
-  const statusLabel = input.status === "final" ? "Auto-classified" : "Review required";
-  const pages: PDFPage[] = [];
-
-  const addPage = () => {
-    const page = pdfDoc.addPage([pageWidth, pageHeight]);
-    pages.push(page);
-    return page;
-  };
-
-  const drawHeader = (page: PDFPage) => {
-    page.drawRectangle({
-      x: 0,
-      y: pageHeight - 170,
-      width: pageWidth,
-      height: 170,
-      color: rgb(0.95, 0.97, 0.99),
-    });
-    page.drawRectangle({
-      x: margin,
-      y: pageHeight - 122,
-      width: contentWidth,
-      height: 1,
-      color: rgb(0.87, 0.9, 0.94),
-    });
-
-    page.drawText("Forwarded Email Receipt", {
-      x: margin,
-      y: pageHeight - 56,
-      size: 20,
-      font: boldFont,
-      color: rgb(0.06, 0.09, 0.16),
-    });
-    page.drawText("Captured from the original forwarded email content", {
-      x: margin,
-      y: pageHeight - 78,
-      size: 10.5,
-      font: regularFont,
-      color: rgb(0.39, 0.45, 0.53),
-    });
-
-    page.drawRectangle({
-      x: pageWidth - margin - 118,
-      y: pageHeight - 62,
-      width: 118,
-      height: 24,
-      color: statusBg,
-    });
-    page.drawText(statusLabel, {
-      x: pageWidth - margin - 108,
-      y: pageHeight - 54,
-      size: 10,
-      font: boldFont,
-      color: statusColor,
-    });
-
-    const summaryLabelSize = 9;
-    const summaryValueSize = 11.5;
-    const summaryTop = pageHeight - 104;
-    const summaryColumns = [
-      { label: "Merchant", value: input.merchantName || "Email Receipt" },
-      { label: "Detected total", value: formatEmailPreviewAmount(input.totalAmount, input.currency) },
-      { label: "Date", value: formatEmailPreviewDate(input.transactionDate) },
-    ];
-
-    summaryColumns.forEach((column, index) => {
-      const x = margin + index * (contentWidth / 3);
-      page.drawText(column.label, {
-        x,
-        y: summaryTop,
-        size: summaryLabelSize,
-        font: boldFont,
-        color: rgb(0.39, 0.45, 0.53),
-      });
-      const wrappedValue = wrapPdfText(column.value, boldFont, summaryValueSize, contentWidth / 3 - 16).slice(0, 2);
-      wrappedValue.forEach((line, lineIndex) => {
-        page.drawText(line, {
-          x,
-          y: summaryTop - 16 - lineIndex * 14,
-          size: summaryValueSize,
-          font: lineIndex === 0 ? boldFont : regularFont,
-          color: rgb(0.06, 0.09, 0.16),
-        });
-      });
-    });
-
-    let cursorY = pageHeight - 150;
-    cursorY = drawPdfMetadataBlock(page, "Subject", input.subject || "(no subject)", margin, cursorY, contentWidth, regularFont, boldFont);
-    cursorY = drawPdfMetadataBlock(page, "From", input.sender || "(unknown sender)", margin, cursorY, contentWidth, regularFont, boldFont);
-    drawPdfMetadataBlock(page, "To", input.recipient || "(unknown recipient)", margin, cursorY, contentWidth, regularFont, boldFont);
-  };
-
-  let currentPage = addPage();
-  drawHeader(currentPage);
-  let cursorY = bodyTopY;
-
-  const paragraphs = buildPdfParagraphs(input.bodyText);
-  if (paragraphs.length === 0) {
-    paragraphs.push("No readable email body content was detected.");
-  }
-
-  currentPage.drawText("Email content", {
-    x: margin,
-    y: cursorY,
-    size: 13,
-    font: boldFont,
-    color: rgb(0.06, 0.09, 0.16),
-  });
-  cursorY -= 24;
-
-  const bodyTextSize = 11.25;
-  const paragraphSpacing = bodyTextSize + lineGap;
-  const minY = bodyBottomY + footerHeight;
-
-  for (const paragraph of paragraphs) {
-    const wrappedLines = paragraph
-      ? wrapPdfText(paragraph, regularFont, bodyTextSize, contentWidth)
-      : [""];
-
-    const paragraphHeight = wrappedLines.length * paragraphSpacing + (paragraph ? paragraphGap : 0);
-    if (cursorY - paragraphHeight < minY) {
-      currentPage = addPage();
-      drawHeader(currentPage);
-      cursorY = bodyTopY;
-    }
-
-    if (!paragraph) {
-      cursorY -= paragraphGap;
-      continue;
-    }
-
-    for (const line of wrappedLines) {
-      currentPage.drawText(line, {
-        x: margin,
-        y: cursorY,
-        size: bodyTextSize,
-        font: regularFont,
-        color: rgb(0.11, 0.16, 0.23),
-      });
-      cursorY -= paragraphSpacing;
-    }
-
-    cursorY -= paragraphGap;
-  }
-
-  pages.forEach((page, index) => {
-    const footerText = `ReceiptNest • Forwarded email • Page ${index + 1} of ${pages.length}`;
-    page.drawLine({
-      start: { x: margin, y: bodyBottomY + 8 },
-      end: { x: pageWidth - margin, y: bodyBottomY + 8 },
-      thickness: 1,
-      color: rgb(0.9, 0.93, 0.96),
-    });
-    page.drawText(footerText, {
-      x: margin,
-      y: bodyBottomY - 4,
-      size: 9.5,
-      font: italicFont,
-      color: rgb(0.45, 0.5, 0.57),
-    });
-  });
-
-  const pdfBytes = await pdfDoc.save();
-  return Buffer.from(pdfBytes);
-}
-
-function drawPdfMetadataBlock(
-  page: PDFPage,
-  label: string,
-  value: string,
-  x: number,
-  y: number,
-  maxWidth: number,
-  regularFont: PDFFont,
-  boldFont: PDFFont
-): number {
-  page.drawText(label, {
-    x,
-    y,
-    size: 9,
-    font: boldFont,
-    color: rgb(0.39, 0.45, 0.53),
-  });
-
-  const wrappedLines = wrapPdfText(value, regularFont, 11, maxWidth - 54).slice(0, 3);
-  wrappedLines.forEach((line, index) => {
-    page.drawText(line, {
-      x: x + 54,
-      y: y - index * 13,
-      size: 11,
-      font: regularFont,
-      color: rgb(0.06, 0.09, 0.16),
-    });
-  });
-
-  return y - Math.max(wrappedLines.length, 1) * 13 - 10;
-}
-
-function wrapPdfText(value: string, font: PDFFont, size: number, maxWidth: number): string[] {
-  const normalized = value.replace(/\s+/g, " ").trim();
-  if (!normalized) {
-    return [];
-  }
-
-  const words = normalized.split(" ");
-  const lines: string[] = [];
-  let current = "";
-
-  for (const word of words) {
-    const candidate = current ? `${current} ${word}` : word;
-    if (font.widthOfTextAtSize(candidate, size) <= maxWidth) {
-      current = candidate;
-      continue;
-    }
-
-    if (current) {
-      lines.push(current);
-      current = "";
-    }
-
-    if (font.widthOfTextAtSize(word, size) <= maxWidth) {
-      current = word;
-      continue;
-    }
-
-    let segment = "";
-    for (const char of word) {
-      const charCandidate = `${segment}${char}`;
-      if (font.widthOfTextAtSize(charCandidate, size) <= maxWidth) {
-        segment = charCandidate;
-        continue;
-      }
-
-      if (segment) {
-        lines.push(segment);
-      }
-      segment = char;
-    }
-    current = segment;
-  }
-
-  if (current) {
-    lines.push(current);
-  }
-
-  return lines;
-}
-
-function buildPdfParagraphs(value: string): string[] {
-  const normalized = normalizeEmailDocumentText(value);
-  if (!normalized) {
-    return [];
-  }
-
-  return normalized
-    .split(/\n{2,}/)
-    .map((paragraph) => paragraph.replace(/\s*\n\s*/g, " ").trim())
-    .filter((paragraph) => !!paragraph);
+    const vertexAI = new VertexAI({ project: PROJECT_ID, location: VERTEX_LOCATION });
+    const model = vertexAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig: {
+      temperature: 0, maxOutputTokens: 1600, responseMimeType: "application/json",
+    } });
+    const result = await model.generateContent({ contents: [{ role: "user", parts: [{ text: emailExtractionPrompt(subject, sender, text) }] }] });
+    parsed = parseJsonPayload(result.response.candidates?.[0]?.content?.parts?.[0]?.text || "");
+    source = "gemini";
+  } catch (error) { logger.warn("Email AI extraction unavailable; validating labeled source fields", { error }); }
+  return { ...validateEmailValues(parsed, text, sender), source, processedAt: admin.firestore.FieldValue.serverTimestamp() };
 }
 
 async function generateEmailPreviewImage(input: EmailPreviewImageInput): Promise<Buffer> {
@@ -1538,122 +945,26 @@ async function normalizeMerchant(
   };
 }
 
-function classifyCategory(input: {
-  merchantName?: string;
-  rawMerchantName?: string;
-  sender?: string;
-  subject?: string;
-}): ReceiptCategory {
-  const candidateValues = [
-    input.merchantName,
-    input.rawMerchantName,
-    inferMerchantFromSender(input.sender || ""),
-    input.subject,
-  ]
-    .map((value) => String(value || "").toLowerCase().trim())
-    .filter((value, index, array) => !!value && array.indexOf(value) === index);
-
-  for (const candidate of candidateValues) {
-    for (const category of CATEGORIES) {
-      if (category.keywords.some((keyword) => candidate.includes(keyword))) {
-        return {
-          id: category.id,
-          name: category.name,
-          confidence: candidate === (input.merchantName || "").toLowerCase().trim() ? 0.9 : 0.78,
-          assignedBy: "rule",
-        };
-      }
-    }
-  }
-
-  return {
-    id: "other",
-    name: "Other",
-    confidence: 0.5,
-    assignedBy: "default",
-  };
-}
-
 function parseJsonPayload(rawResponse: string): Record<string, unknown> {
   if (!rawResponse) {
     return {};
   }
 
   try {
-    return JSON.parse(rawResponse) as Record<string, unknown>;
+    const parsed = JSON.parse(rawResponse);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
   } catch {
     const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       return {};
     }
     try {
-      return JSON.parse(jsonMatch[0]) as Record<string, unknown>;
+      const parsed = JSON.parse(jsonMatch[0]);
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
     } catch {
       return {};
     }
   }
-}
-
-function parsePositiveNumber(value: unknown): number | undefined {
-  if (value === null || value === undefined) {
-    return undefined;
-  }
-
-  if (typeof value === "number" && isFinite(value) && value > 0) {
-    return value;
-  }
-
-  if (typeof value === "string") {
-    const normalized = value
-      .replace(/[$,\s]/g, "")
-      .replace(/[^\d.-]/g, "");
-    const parsed = parseFloat(normalized);
-    if (!isNaN(parsed) && isFinite(parsed) && parsed > 0) {
-      return parsed;
-    }
-  }
-
-  return undefined;
-}
-
-function parseDate(value: string): string | null {
-  const cleaned = value.trim();
-  const direct = new Date(cleaned);
-  if (!isNaN(direct.getTime())) {
-    return direct.toISOString().split("T")[0];
-  }
-
-  const patterns = [
-    /(\d{1,2})\/(\d{1,2})\/(\d{4})/,
-    /(\d{1,2})-(\d{1,2})-(\d{4})/,
-    /(\d{4})\/(\d{1,2})\/(\d{1,2})/,
-    /(\d{4})-(\d{1,2})-(\d{1,2})/,
-  ];
-
-  for (const pattern of patterns) {
-    const match = cleaned.match(pattern);
-    if (!match) continue;
-
-    const parts = match.slice(1).map(Number);
-    let year: number;
-    let month: number;
-    let day: number;
-
-    if (parts[0] > 1000) {
-      [year, month, day] = parts;
-    } else if (parts[2] > 1000) {
-      [month, day, year] = parts;
-    } else {
-      continue;
-    }
-
-    const candidate = new Date(year, month - 1, day);
-    if (!isNaN(candidate.getTime())) {
-      return candidate.toISOString().split("T")[0];
-    }
-  }
-
-  return null;
 }
 
 function extractHtmlFromEmailFields(fields: Record<string, string>): string {
@@ -1662,7 +973,7 @@ function extractHtmlFromEmailFields(fields: Record<string, string>): string {
     return directHtml;
   }
 
-  return extractHtmlFromRawEmail(fields.email || "");
+  return "";
 }
 
 function normalizeEmailHtml(value: string): string {
@@ -1675,165 +986,7 @@ function normalizeEmailHtml(value: string): string {
     return "";
   }
 
-  return compact.length > MAX_EMAIL_HTML_LENGTH ? compact.slice(0, MAX_EMAIL_HTML_LENGTH) : compact;
-}
-
-function htmlToReadableText(html: string): string {
-  if (!html) {
-    return "";
-  }
-
-  const normalized = html
-    .replace(/<!--[\s\S]*?-->/g, " ")
-    .replace(/<(script|style|noscript|svg|canvas)[\s\S]*?<\/\1>/gi, " ")
-    .replace(/<(br|hr)\s*\/?>/gi, "\n")
-    .replace(/<\/(p|div|section|article|header|footer|aside|blockquote|pre|tr|table|h[1-6])>/gi, "\n\n")
-    .replace(/<(p|div|section|article|header|footer|aside|blockquote|pre|table|h[1-6])[^>]*>/gi, "\n")
-    .replace(/<li[^>]*>/gi, "\n• ")
-    .replace(/<\/li>/gi, "\n")
-    .replace(/<(td|th)[^>]*>/gi, " ")
-    .replace(/<\/(td|th)>/gi, "    ")
-    .replace(/<[^>]+>/g, " ");
-
-  return decodeHtmlEntities(normalized)
-    .replace(/\r/g, "")
-    .replace(/[ \t]+\n/g, "\n")
-    .replace(/\n[ \t]+/g, "\n")
-    .replace(/[ \t]{2,}/g, " ")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
-
-function stripHtml(html: string): string {
-  return htmlToReadableText(html).replace(/\s+/g, " ").trim();
-}
-
-function normalizeEmailText(value: string): string {
-  if (!value) {
-    return "";
-  }
-  const compact = value.replace(/\u0000/g, "").replace(/\s+/g, " ").trim();
-  return compact.length > MAX_EMAIL_TEXT_LENGTH ? compact.slice(0, MAX_EMAIL_TEXT_LENGTH) : compact;
-}
-
-function normalizeEmailDocumentText(value: string): string {
-  if (!value) {
-    return "";
-  }
-
-  const compact = value
-    .replace(/\u0000/g, "")
-    .replace(/\r/g, "")
-    .replace(/[ \t]+\n/g, "\n")
-    .replace(/\n[ \t]+/g, "\n")
-    .replace(/[ \t]{2,}/g, " ")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-
-  if (!compact) {
-    return "";
-  }
-
-  return compact.length > MAX_EMAIL_DOCUMENT_TEXT_LENGTH
-    ? `${compact.slice(0, MAX_EMAIL_DOCUMENT_TEXT_LENGTH)}\n\n[Email content truncated]`
-    : compact;
-}
-
-function buildStoredEmailHtmlDocument(input: {
-  subject: string;
-  sender: string;
-  recipient: string;
-  htmlBody: string;
-}): string {
-  const safeTitle = escapeHtmlAttribute(input.subject || "Forwarded Email Receipt");
-  const headerHtml = `
-    <section style="margin:0 0 24px; padding:20px 24px; border-radius:16px; border:1px solid #dbe3ee; background:#f8fafc; font-family:Arial,sans-serif;">
-      <div style="font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#64748b; margin-bottom:12px;">ReceiptNest Email Capture</div>
-      <div style="font-size:13px; color:#334155; line-height:1.6;">
-        <div><strong>Subject:</strong> ${escapeHtmlContent(input.subject || "(no subject)")}</div>
-        <div><strong>From:</strong> ${escapeHtmlContent(input.sender || "(unknown sender)")}</div>
-        <div><strong>To:</strong> ${escapeHtmlContent(input.recipient || "(unknown recipient)")}</div>
-      </div>
-    </section>
-  `;
-  const sanitizedBody = sanitizeStoredEmailHtmlBody(input.htmlBody);
-
-  return `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>${safeTitle}</title>
-  </head>
-  <body style="margin:0; padding:24px; background:#eef2f7; color:#0f172a;">
-    <main style="max-width:860px; margin:0 auto; background:#ffffff; border-radius:20px; padding:24px; box-shadow:0 16px 40px rgba(15, 23, 42, 0.08);">
-      ${headerHtml}
-      ${sanitizedBody}
-    </main>
-  </body>
-</html>`;
-}
-
-function sanitizeStoredEmailHtmlBody(value: string): string {
-  const normalized = normalizeEmailHtml(value);
-  if (!normalized) {
-    return `<p style="font-family:Arial,sans-serif; color:#475569;">No HTML body was available for this email.</p>`;
-  }
-
-  const bodyMatch = normalized.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-  const bodyHtml = bodyMatch?.[1] || normalized;
-
-  return sanitizeEmailCssUrls(
-    bodyHtml
-    .replace(/<!--[\s\S]*?-->/g, "")
-    .replace(/<(script|iframe|object|embed|form|input|button|textarea|select|video|audio|source|link|meta|base)[\s\S]*?<\/\1>/gi, "")
-    .replace(/<(script|iframe|object|embed|form|input|button|textarea|select|video|audio|source|link|meta|base)[^>]*\/?>/gi, "")
-    .replace(/\son[a-z]+\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, "")
-    .replace(/<img\b[^>]*>/gi, "")
-    .trim()
-  );
-}
-
-function escapeHtmlContent(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
-function escapeHtmlAttribute(value: string): string {
-  return escapeHtmlContent(value);
-}
-
-function sanitizeEmailCssUrls(value: string): string {
-  return value
-    .replace(/@import\s+[^;]+;/gi, "")
-    .replace(/url\(\s*(['"]?)(?!data:)[^)]+\1\s*\)/gi, "none");
-}
-
-function inferMerchantFromSender(senderField: string): string | null {
-  if (!senderField) return null;
-  const emailMatch = senderField.match(/[A-Z0-9._%+-]+@([A-Z0-9.-]+\.[A-Z]{2,})/i);
-  if (!emailMatch) return null;
-
-  const domain = emailMatch[1].toLowerCase();
-  const pieces = domain.split(".");
-  if (pieces.length < 2) return null;
-
-  const blockedNames = new Set(["mail", "email", "notifications", "notification", "no-reply", "noreply"]);
-  let label = pieces[0];
-  if (blockedNames.has(label) && pieces.length > 2) {
-    label = pieces[1];
-  }
-
-  if (!label) return null;
-  return label
-    .replace(/[-_]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  return compact;
 }
 
 function extractMessageId(fields: Record<string, string>): string | null {
@@ -1855,9 +1008,36 @@ function isAllowedAttachment(attachment: ParsedAttachment): boolean {
   return attachment.data.length > 0 && attachment.data.length <= MAX_ATTACHMENT_SIZE_BYTES;
 }
 
-function enrichInboundPayload(parsed: ParsedInboundEmail): InboundEmailPayload {
+export async function enrichInboundPayload(parsed: ParsedInboundEmail): Promise<InboundEmailPayload> {
   const fields: Record<string, string> = { ...parsed.fields };
   const attachments = [...parsed.attachments];
+  if (fields.email) {
+    const message = await simpleParser(fields.email, { skipHtmlToText: true, skipTextToHtml: true, skipImageLinks: true });
+    fields.html ||= typeof message.html === "string" ? message.html : "";
+    fields.text ||= message.text || "";
+    fields.subject ||= message.subject || "";
+    fields.from ||= message.from?.text || "";
+    fields.to ||= Array.isArray(message.to) ? message.to.map(a => a.text).join(", ") : message.to?.text || "";
+    fields.date ||= message.date?.toISOString() || "";
+    fields["message-id"] ||= message.messageId || "";
+    for (const attachment of message.attachments) {
+      if (attachment.contentType === "message/rfc822") {
+        const inner = await simpleParser(attachment.content, { skipHtmlToText: true, skipTextToHtml: true, skipImageLinks: true });
+        if (inner.html || inner.text) { fields.html = typeof inner.html === "string" ? inner.html : ""; fields.text = inner.text || ""; }
+        for (const a of inner.attachments) attachments.push({ fieldName: `mime_${attachments.length}`, fileName: a.filename || "attachment", mimeType: a.contentType, data: a.content, contentId: a.contentId, disposition: a.contentDisposition });
+      } else attachments.push({ fieldName: `mime_${attachments.length}`, fileName: attachment.filename || "attachment", mimeType: attachment.contentType,
+        data: attachment.content, contentId: attachment.contentId, disposition: attachment.contentDisposition });
+    }
+  }
+  let info: Record<string, { "content-id"?: string; disposition?: string }> = {};
+  try { info = JSON.parse(fields["attachment-info"] || "{}"); } catch { /* optional provider metadata */ }
+  let contentIds: Record<string, string> = {};
+  try { contentIds = JSON.parse(fields["content-ids"] || "{}"); } catch { /* optional provider metadata */ }
+  for (const attachment of attachments) {
+    attachment.contentId ||= info[attachment.fieldName]?.["content-id"] || Object.keys(contentIds).find(id => contentIds[id] === attachment.fieldName);
+    attachment.disposition ||= info[attachment.fieldName]?.disposition;
+  }
+
 
   if (!fields.text && fields["stripped-text"]) {
     fields.text = fields["stripped-text"];
@@ -1866,12 +1046,6 @@ function enrichInboundPayload(parsed: ParsedInboundEmail): InboundEmailPayload {
     fields.html = fields["stripped-html"];
   }
 
-  if (attachments.length === 0 && fields.email) {
-    const rawMimeAttachments = extractAttachmentsFromRawEmail(fields.email);
-    if (rawMimeAttachments.length > 0) {
-      attachments.push(...rawMimeAttachments);
-    }
-  }
   if (attachments.length === 0 && fields["attachment-info"]) {
     const infoAttachments = extractAttachmentsFromAttachmentInfo(fields);
     if (infoAttachments.length > 0) {
@@ -1879,6 +1053,15 @@ function enrichInboundPayload(parsed: ParsedInboundEmail): InboundEmailPayload {
     }
   }
 
+  // SendGrid can deliver a forward-as-attachment as a parsed file instead of a raw message.
+  if (!fields.email) {
+    for (const attachment of attachments.filter(a => a.mimeType === "message/rfc822" || /\.eml$/i.test(a.fileName))) {
+      const inner = await simpleParser(attachment.data, { skipHtmlToText: true, skipTextToHtml: true, skipImageLinks: true });
+      if (inner.html || inner.text) { fields.html = typeof inner.html === "string" ? inner.html : ""; fields.text = inner.text || ""; }
+      for (const a of inner.attachments) attachments.push({ fieldName: `mime_${attachments.length}`, fileName: a.filename || "attachment", mimeType: a.contentType, data: a.content, contentId: a.contentId, disposition: a.contentDisposition });
+    }
+  }
+  for (const attachment of attachments) attachment.contentId ||= info[attachment.fieldName]?.["content-id"] || Object.keys(contentIds).find(id => contentIds[id] === attachment.fieldName);
   const deduped = dedupeAttachments(attachments);
   return { fields, attachments: deduped };
 }
@@ -1887,72 +1070,16 @@ function dedupeAttachments(attachments: ParsedAttachment[]): ParsedAttachment[] 
   const seen = new Set<string>();
   const deduped: ParsedAttachment[] = [];
   for (const attachment of attachments) {
-    const signature = `${attachment.fileName.toLowerCase()}::${attachment.data.length}`;
+    const signature = `${attachment.fileName.toLowerCase()}::${crypto.createHash("sha256").update(attachment.data).digest("hex")}`;
     if (seen.has(signature)) {
+      const previous = deduped.find(a => `${a.fileName.toLowerCase()}::${crypto.createHash("sha256").update(a.data).digest("hex")}` === signature);
+      if (previous) { previous.contentId ||= attachment.contentId; previous.disposition ||= attachment.disposition; }
       continue;
     }
     seen.add(signature);
     deduped.push(attachment);
   }
   return deduped;
-}
-
-function extractAttachmentsFromRawEmail(rawEmail: string): ParsedAttachment[] {
-  const normalized = rawEmail.replace(/\r\n/g, "\n");
-  const lower = normalized.toLowerCase();
-  const attachments: ParsedAttachment[] = [];
-  let cursor = 0;
-
-  while (cursor < normalized.length) {
-    const dispositionIndex = lower.indexOf("content-disposition:", cursor);
-    if (dispositionIndex < 0) {
-      break;
-    }
-
-    const headerStart = Math.max(
-      normalized.lastIndexOf("\n--", dispositionIndex),
-      normalized.lastIndexOf("\ncontent-type:", dispositionIndex)
-    );
-    const headerBlockStart = headerStart >= 0 ? headerStart + 1 : dispositionIndex;
-    const headerEnd = normalized.indexOf("\n\n", dispositionIndex);
-    if (headerEnd < 0) {
-      break;
-    }
-
-    const headerBlock = normalized.slice(headerBlockStart, headerEnd);
-    const bodyStart = headerEnd + 2;
-    const nextBoundary = normalized.indexOf("\n--", bodyStart);
-    const bodyEnd = nextBoundary >= 0 ? nextBoundary : normalized.length;
-    const encodedBody = normalized.slice(bodyStart, bodyEnd).trim();
-    cursor = bodyEnd;
-
-    const fileNameRaw = extractHeaderValue(headerBlock, "content-disposition", "filename");
-    if (!fileNameRaw) {
-      continue;
-    }
-    const dispositionType = (extractPrimaryHeaderValue(headerBlock, "content-disposition") || "").toLowerCase();
-    if (dispositionType !== "attachment" && dispositionType !== "inline") {
-      continue;
-    }
-    const decodedFileName = decodeRfc2231Value(fileNameRaw || "");
-    const fileName = sanitizeFileName(decodedFileName || `attachment_${attachments.length + 1}.bin`);
-    const mimeType = (extractPrimaryHeaderValue(headerBlock, "content-type") || "application/octet-stream").toLowerCase();
-    const transferEncoding = (extractPrimaryHeaderValue(headerBlock, "content-transfer-encoding") || "7bit").toLowerCase();
-
-    const data = decodeMimeBodyToBuffer(encodedBody, transferEncoding);
-    if (!data || data.length === 0 || data.length > MAX_ATTACHMENT_SIZE_BYTES) {
-      continue;
-    }
-
-    attachments.push({
-      fieldName: `raw_attachment_${attachments.length + 1}`,
-      fileName,
-      mimeType,
-      data,
-    });
-  }
-
-  return attachments;
 }
 
 function extractAttachmentsFromAttachmentInfo(fields: Record<string, string>): ParsedAttachment[] {
@@ -1993,223 +1120,6 @@ function extractAttachmentsFromAttachmentInfo(fields: Record<string, string>): P
   return attachments;
 }
 
-function extractReadableTextFromRawEmail(rawEmail: string): string {
-  if (!rawEmail) {
-    return "";
-  }
-
-  const normalized = rawEmail.replace(/\r\n/g, "\n");
-  const chunks: string[] = [];
-
-  const collectFromType = (contentType: "text/plain" | "text/html") => {
-    let cursor = 0;
-    const needle = `content-type: ${contentType}`;
-    const lower = normalized.toLowerCase();
-
-    while (cursor < normalized.length) {
-      const contentTypeIndex = lower.indexOf(needle, cursor);
-      if (contentTypeIndex < 0) {
-        break;
-      }
-
-      const headerStart = Math.max(
-        normalized.lastIndexOf("\n--", contentTypeIndex),
-        normalized.lastIndexOf("\ncontent-type:", contentTypeIndex)
-      );
-      const headerBlockStart = headerStart >= 0 ? headerStart + 1 : contentTypeIndex;
-      const headerEnd = normalized.indexOf("\n\n", contentTypeIndex);
-      if (headerEnd < 0) {
-        break;
-      }
-
-      const headerBlock = normalized.slice(headerBlockStart, headerEnd);
-      const headerBlockLower = headerBlock.toLowerCase();
-      if (headerBlockLower.includes("content-disposition: attachment")) {
-        cursor = headerEnd + 2;
-        continue;
-      }
-
-      const bodyStart = headerEnd + 2;
-      const nextBoundary = normalized.indexOf("\n--", bodyStart);
-      const bodyEnd = nextBoundary >= 0 ? nextBoundary : normalized.length;
-      const encodedBody = normalized.slice(bodyStart, bodyEnd).trim();
-      cursor = bodyEnd;
-
-      const transferEncoding = (extractPrimaryHeaderValue(headerBlock, "content-transfer-encoding") || "7bit").toLowerCase();
-      const decodedText = decodeMimeBodyToText(encodedBody, transferEncoding);
-      if (!decodedText) {
-        continue;
-      }
-
-      const cleaned = contentType === "text/html" ? stripHtml(decodedText) : decodedText;
-      const compact = normalizeEmailText(cleaned);
-      if (compact) {
-        chunks.push(compact);
-      }
-    }
-  };
-
-  collectFromType("text/plain");
-  collectFromType("text/html");
-
-  if (chunks.length > 0) {
-    return chunks.join("\n");
-  }
-
-  // Last resort: strip obvious MIME/base64 noise and return compact text.
-  const fallback = normalized
-    .replace(/^Content-[^\n]*$/gim, " ")
-    .replace(/^[A-Za-z0-9+/]{80,}={0,2}$/gm, " ")
-    .replace(/--[A-Za-z0-9'()+_,./:=?-]+--?/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  return fallback;
-}
-
-function extractHtmlFromRawEmail(rawEmail: string): string {
-  if (!rawEmail) {
-    return "";
-  }
-
-  const normalized = rawEmail.replace(/\r\n/g, "\n");
-  const lower = normalized.toLowerCase();
-  const chunks: string[] = [];
-  let cursor = 0;
-  const needle = "content-type: text/html";
-
-  while (cursor < normalized.length) {
-    const contentTypeIndex = lower.indexOf(needle, cursor);
-    if (contentTypeIndex < 0) {
-      break;
-    }
-
-    const headerStart = Math.max(
-      normalized.lastIndexOf("\n--", contentTypeIndex),
-      normalized.lastIndexOf("\ncontent-type:", contentTypeIndex)
-    );
-    const headerBlockStart = headerStart >= 0 ? headerStart + 1 : contentTypeIndex;
-    const headerEnd = normalized.indexOf("\n\n", contentTypeIndex);
-    if (headerEnd < 0) {
-      break;
-    }
-
-    const headerBlock = normalized.slice(headerBlockStart, headerEnd);
-    const headerBlockLower = headerBlock.toLowerCase();
-    if (headerBlockLower.includes("content-disposition: attachment")) {
-      cursor = headerEnd + 2;
-      continue;
-    }
-
-    const bodyStart = headerEnd + 2;
-    const nextBoundary = normalized.indexOf("\n--", bodyStart);
-    const bodyEnd = nextBoundary >= 0 ? nextBoundary : normalized.length;
-    const encodedBody = normalized.slice(bodyStart, bodyEnd).trim();
-    cursor = bodyEnd;
-
-    const transferEncoding = (extractPrimaryHeaderValue(headerBlock, "content-transfer-encoding") || "7bit").toLowerCase();
-    const decodedHtml = decodeMimeBodyToText(encodedBody, transferEncoding);
-    const compact = normalizeEmailHtml(decodedHtml);
-    if (compact) {
-      chunks.push(compact);
-    }
-  }
-
-  return chunks.join("\n");
-}
-
-function extractHeaderValue(headerBlock: string, headerName: string, paramName: string): string | null {
-  const normalizedHeaderBlock = headerBlock.replace(/\r?\n[ \t]+/g, " ");
-  const headerRegex = new RegExp(`${headerName}:\\s*([^\\n]+)`, "i");
-  const headerMatch = normalizedHeaderBlock.match(headerRegex);
-  if (!headerMatch) {
-    return null;
-  }
-
-  const paramRegex = new RegExp(`${paramName}\\*?=(\"[^\"]+\"|[^;\\n]+)`, "i");
-  const paramMatch = headerMatch[1].match(paramRegex);
-  if (!paramMatch) {
-    return null;
-  }
-
-  return paramMatch[1].replace(/^"|"$/g, "").trim();
-}
-
-function extractContentDispositionParam(contentDisposition: string, paramName: string): string | null {
-  if (!contentDisposition) {
-    return null;
-  }
-
-  const starRegex = new RegExp(`${paramName}\\*=([^;\\n]+)`, "i");
-  const starMatch = contentDisposition.match(starRegex);
-  if (starMatch?.[1]) {
-    return starMatch[1].replace(/^"|"$/g, "").trim();
-  }
-
-  const regularRegex = new RegExp(`${paramName}=((\"[^\"]*\")|[^;\\n]+)`, "i");
-  const regularMatch = contentDisposition.match(regularRegex);
-  if (!regularMatch?.[1]) {
-    return null;
-  }
-
-  return regularMatch[1].replace(/^"|"$/g, "").trim();
-}
-
-function extractPrimaryHeaderValue(headerBlock: string, headerName: string): string | null {
-  const normalizedHeaderBlock = headerBlock.replace(/\r?\n[ \t]+/g, " ");
-  const headerRegex = new RegExp(`${headerName}:\\s*([^\\n]+)`, "i");
-  const match = normalizedHeaderBlock.match(headerRegex);
-  if (!match) {
-    return null;
-  }
-  return match[1].split(";")[0].trim();
-}
-
-function decodeRfc2231Value(value: string): string {
-  if (!value) return "";
-  const trimmed = value.trim();
-  const parts = trimmed.split("''");
-  if (parts.length === 2) {
-    try {
-      return decodeURIComponent(parts[1]);
-    } catch {
-      return parts[1];
-    }
-  }
-  return trimmed;
-}
-
-function decodeMimeBodyToText(body: string, transferEncoding: string): string {
-  if (!body) return "";
-  if (transferEncoding.includes("base64")) {
-    try {
-      const bytes = Buffer.from(body.replace(/\s+/g, ""), "base64");
-      return bytes.toString("utf8");
-    } catch {
-      return "";
-    }
-  }
-  if (transferEncoding.includes("quoted-printable")) {
-    return decodeQuotedPrintable(body);
-  }
-  return body;
-}
-
-function decodeMimeBodyToBuffer(body: string, transferEncoding: string): Buffer | null {
-  if (!body) return null;
-  if (transferEncoding.includes("base64")) {
-    try {
-      const bytes = Buffer.from(body.replace(/\s+/g, ""), "base64");
-      return bytes.length > 0 ? bytes : null;
-    } catch {
-      return null;
-    }
-  }
-  if (transferEncoding.includes("quoted-printable")) {
-    return Buffer.from(decodeQuotedPrintable(body), "utf8");
-  }
-  return Buffer.from(body, "utf8");
-}
-
 function decodePotentialBase64(value: string): Buffer | null {
   const trimmed = value.trim();
   if (trimmed.startsWith("{") && trimmed.includes("\"type\":\"Buffer\"")) {
@@ -2241,27 +1151,6 @@ function decodePotentialBase64(value: string): Buffer | null {
   } catch {
     return null;
   }
-}
-
-function decodeQuotedPrintable(value: string): string {
-  const softBreakRemoved = value.replace(/=\r?\n/g, "");
-  const bytes: number[] = [];
-
-  for (let i = 0; i < softBreakRemoved.length; i++) {
-    const char = softBreakRemoved[i];
-    if (char === "=" && i + 2 < softBreakRemoved.length) {
-      const hex = softBreakRemoved.slice(i + 1, i + 3);
-      if (/^[A-Fa-f0-9]{2}$/.test(hex)) {
-        bytes.push(parseInt(hex, 16));
-        i += 2;
-        continue;
-      }
-    }
-
-    bytes.push(char.charCodeAt(0));
-  }
-
-  return Buffer.from(bytes).toString("utf8");
 }
 
 function normalizeAttachmentMimeType(attachment: ParsedAttachment): string | null {
@@ -2302,16 +1191,6 @@ function getFileExtension(fileName: string): string | null {
   }
 
   return cleaned.slice(dotIndex + 1);
-}
-
-function decodeHtmlEntities(value: string): string {
-  return value
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, "\"")
-    .replace(/&#39;/g, "'");
 }
 
 function sanitizeFileName(name: string): string {

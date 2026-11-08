@@ -134,6 +134,13 @@ export const DEFAULT_CATEGORIES: Category[] = [
     keywords: ['gym', 'fitness', 'crossfit', 'planet fitness', 'la fitness', 'orangetheory', 'equinox', 'ymca', 'peloton', 'sporting goods', 'rei', 'yoga studio', 'martial arts']
   },
   {
+    id: 'money_transfers',
+    name: 'Money transfers',
+    icon: '💸',
+    color: '#0d9488',
+    keywords: ['western union', 'moneygram', 'remittance', 'money transfer']
+  },
+  {
     id: 'other',
     name: 'Other',
     icon: '📦',
