@@ -15,9 +15,14 @@ export interface GamePage {
 
 export const gamePages: readonly GamePage[] = [
   {
-    path: '/games', kind: 'game', label: 'Games', updated: '2026-11-06',
+    path: '/games', kind: 'game', label: 'Games', updated: '2026-11-07',
     title: 'Receipt Games: Free Browser Games About Receipts | ReceiptNest',
     description: 'Quick, free browser games about receipts from ReceiptNest. Decode cryptic bank charges, file a shoebox of receipts by month, or read a total before it fades.'
+  },
+  {
+    path: '/games/pile-3d', kind: 'game', label: 'The Pile in 3D', updated: '2026-11-07',
+    title: 'The Pile in 3D: How Many Receipts Before the Glass Breaks? | ReceiptNest',
+    description: 'A ball of receipts bounces inside a glass sphere, one more receipt every bounce. Tap to snap each one before the glass gives out. Then learn to take receipt photos that hold up.'
   },
   {
     path: '/games/escape-3d', kind: 'game', label: 'Escape the Year in 3D', updated: '2026-11-06',
