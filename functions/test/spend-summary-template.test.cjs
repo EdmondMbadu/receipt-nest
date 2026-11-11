@@ -120,7 +120,11 @@ test('real admin and scheduled sends use the new template, correct periods and d
   sg.setApiKey = () => undefined;
   sg.client.request = async request => {requests.push(JSON.parse(JSON.stringify(request.body))); return [{statusCode: 202}, {}];};
   const {sendSpendSummaryEmail, dispatchScheduledSpendSummaryEmails} = require('../lib/spend-summary-email');
+  // Historical schedule runs use their actual attempt time for email cadence.
+  const clock = t.mock.method(Date, 'now');
   for (const period of ['week', 'month']) {
+    const scheduleTime = period === 'week' ? '2026-10-19T15:00:00Z' : '2026-11-01T16:00:00Z';
+    clock.mock.mockImplementation(() => Date.parse(scheduleTime));
     fake.documents.set('systemConfig/spendSummaryEmailSchedule', {timeZone:'America/Los_Angeles', weekly:{enabled:period==='week',dayOfWeek:'monday',time:'08:00'}, monthly:{enabled:period==='month',dayOfMonth:1,time:'08:00'}});
     const result = await sendSpendSummaryEmail.run({auth: {uid: 'admin', token: {admin: true}}, data: {
       to: user.email, userId: 'summary-fixture', periodType: period, week: '2026-W42', month: '2026-10',
@@ -138,7 +142,9 @@ test('real admin and scheduled sends use the new template, correct periods and d
     assert.equal((html.match(/id="receiptnest-social-footer"/g) || []).length, 1);
     assert.match(body.content.find(c => c.type === 'text/plain').value, /Open dashboard: https:\/\/receipt-nest.com\/app/);
     assert.ok(body.attachments.some(a => a.content_id === 'receiptnest-summary-logo'));
-    await dispatchScheduledSpendSummaryEmails.run({scheduleTime: period === 'week' ? '2026-10-19T15:00:00Z' : '2026-11-01T16:00:00Z'});
+    const requestCount = requests.length;
+    await dispatchScheduledSpendSummaryEmails.run({scheduleTime});
+    assert.equal(requests.length, requestCount + 1, `Expected one scheduled ${period} email`);
     const scheduled = requests.at(-1);
     assert.equal(scheduled.headers['List-Unsubscribe-Post'], 'List-Unsubscribe=One-Click');
     const oneClick = new URL(scheduled.headers['List-Unsubscribe'].slice(1, -1));
