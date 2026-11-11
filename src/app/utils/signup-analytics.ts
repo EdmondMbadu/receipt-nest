@@ -1,4 +1,5 @@
 import { armReceiptActivation } from './receipt-activation-analytics';
+import { consumeAcquisition } from './search-acquisition';
 
 /**
  * Records a completed signup in GA4 (`sign_up`) and, when the visitor clicked a
@@ -30,11 +31,12 @@ export function readGameRef(now: number = Date.now()): string | null {
 
 export function trackSignup(method: SignupMethod, userId?: string): void {
   if (typeof window === 'undefined') return;
-  if (userId) armReceiptActivation(userId);
+  const attribution = consumeAcquisition();
+  if (userId) armReceiptActivation(userId, Date.now(), attribution);
   const game = readGameRef();
   try {
     const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag;
-    gtag?.('event', 'sign_up', game ? { method, game } : { method });
+    gtag?.('event', 'sign_up', { method, ...attribution, ...(game ? { game } : {}) });
   } catch {
     /* analytics must never break signup */
   }

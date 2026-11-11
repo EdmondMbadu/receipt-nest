@@ -15,6 +15,7 @@ import { AuthService } from '../../services/auth.service';
 import { getPublicPage, workflowPages, informationPages } from '../../content/public-pages';
 import { SeoService } from '../../services/seo.service';
 import { ThemeService } from '../../services/theme.service';
+import { CtaPlacement, emitContentEvent, recordContentVisit } from '../../utils/search-acquisition';
 import { blogPosts } from '../blog/blog-posts';
 
 type DemoMonth = string;
@@ -216,6 +217,7 @@ export class LandingComponent implements OnDestroy {
   });
 
   constructor() {
+    recordContentVisit('/');
     void this.redirectSignedInUserToApp();
     this.applySeoTags();
 
@@ -227,6 +229,10 @@ export class LandingComponent implements OnDestroy {
     if (this.canAutoPlayDemo()) {
       this.scheduleSim(900, () => this.runSimCycle());
     }
+  }
+
+  trackSignupClick(placement: CtaPlacement): void {
+    emitContentEvent('content_cta_click', '/', placement);
   }
 
   ngOnDestroy() {

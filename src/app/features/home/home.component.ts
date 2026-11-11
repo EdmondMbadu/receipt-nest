@@ -12,6 +12,7 @@ import { ShareService } from '../../services/share.service';
 import { GettingStartedService } from '../../services/getting-started.service';
 import { ReceiptTourService } from '../../services/receipt-tour.service';
 import { OnboardingComponent } from '../../components/onboarding/onboarding.component';
+import { takeFirstReceiptEntry } from '../../utils/first-receipt-entry';
 import { shouldIntroduceGuide, canResumeGuide, trackReceiptDownload } from '../../utils/getting-started';
 import { UploadComponent } from '../../components/upload/upload.component';
 import { Receipt, ReceiptStatus } from '../../models/receipt.model';
@@ -1061,11 +1062,14 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     const tour = this.route.snapshot.queryParamMap.get('tour') === '1';
-    const upload = this.route.snapshot.queryParamMap.get('addReceipt') === '1';
+    const requestedUpload = this.route.snapshot.queryParamMap.get('addReceipt') === '1';
+    const resumedUpload = !tour && takeFirstReceiptEntry(this.user()?.id);
+    const upload = requestedUpload || resumedUpload;
     this.tour.enterHome();
     if (tour) { this.guideInitialized = true; this.tour.start(); }
+    else if (upload) this.guideInitialized = true;
     void this.onboarding.load();
-    if (tour || upload) {
+    if (tour || requestedUpload) {
       void this.router.navigate([], { relativeTo: this.route, queryParams: { tour: null, addReceipt: null }, queryParamsHandling: 'merge', replaceUrl: true });
     }
     if (upload) this.openUploadModal();

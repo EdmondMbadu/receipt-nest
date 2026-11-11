@@ -19,6 +19,7 @@ export class VerifyEmailComponent {
   private readonly meta = inject(Meta);
 
   readonly email: string = this.router.getCurrentNavigation()?.extras.state?.['email'] ?? '';
+  readonly startsWithReceipt = this.router.getCurrentNavigation()?.extras.state?.['startsWithReceipt'] === true;
   isSending = false;
   message = '';
   error = '';

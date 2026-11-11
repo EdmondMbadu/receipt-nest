@@ -57,7 +57,7 @@ const RATIOS: Metric[] = [
   { key: 'r_wl_join', label: 'Form → waitlist', hint: 'Waitlist joins ÷ form opens', kind: 'ratio', of: ['waitlist_join', 'waitlist_open'] }
 ];
 
-interface WaitlistEntry { name: string; email: string; source: string; emailStatus: string; createdAt: number | null }
+interface WaitlistEntry { name: string; email: string; source: string; entryChannel?: string; emailStatus: string; createdAt: number | null }
 interface WaitlistResponse { total: number; entries: WaitlistEntry[] }
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -68,6 +68,12 @@ const SOURCE_LABELS: Record<string, string> = {
   decoder_footer: 'Decoder page (bottom)',
   hub: 'Games hub'
 };
+const ENTRY_CHANNELS = [
+  { key: 'google_organic', label: 'Google organic' },
+  { key: 'game', label: 'Game' },
+  { key: 'other', label: 'Other referral' },
+  { key: 'unknown', label: 'Direct or unknown' }
+];
 
 @Component({
   selector: 'app-game-stats-panel',
@@ -217,6 +223,14 @@ const SOURCE_LABELS: Record<string, string> = {
           <p class="mt-3 text-sm text-rose-600 dark:text-rose-400">{{ waitlistError() }}</p>
         } @else if (waitlist(); as wl) {
           @if (wl.entries.length) {
+            <dl class="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm" [attr.aria-label]="wl.total > wl.entries.length ? 'Entry channel counts for the most recent joins' : 'Unique waitlist joins by entry channel'">
+              @for (channel of waitlistChannels(); track channel.key) {
+                <div class="flex items-baseline gap-1.5">
+                  <dt class="text-slate-600 dark:text-slate-400">{{ channel.label }}</dt>
+                  <dd class="font-semibold tabular-nums">{{ channel.count | number }}</dd>
+                </div>
+              }
+            </dl>
             <div class="mt-3 max-h-80 overflow-auto rounded-lg border border-slate-100 dark:border-slate-800">
               <table class="min-w-full text-sm">
                 <thead class="sticky top-0 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:bg-slate-800 dark:text-slate-400">
@@ -268,6 +282,15 @@ export class GameStatsPanelComponent {
   readonly data = signal<GameStatsResponse | null>(null);
   readonly dayGame = signal('all');
   readonly waitlist = signal<WaitlistResponse | null>(null);
+  readonly waitlistChannels = computed(() => {
+    const counts = new Map<string, number>();
+    for (const entry of this.waitlist()?.entries ?? []) {
+      const channel = entry.entryChannel ?? (entry.source === 'hub' || entry.source.startsWith('charge_') ? 'game' : 'unknown');
+      const key = ENTRY_CHANNELS.some(item => item.key === channel) ? channel : 'unknown';
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return ENTRY_CHANNELS.map(item => ({ ...item, count: counts.get(item.key) ?? 0 }));
+  });
   readonly waitlistError = signal<string | null>(null);
   readonly copied = signal(false);
 

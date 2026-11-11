@@ -2,11 +2,12 @@ import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Meta, Title } from '@angular/platform-browser';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../services/auth.service';
 import { SIGNUP_SOURCE_OPTIONS, SignupSource } from '../../../models/user.model';
 import { getAuthErrorMessage } from '../../../utils/auth-error.utils';
+import { FIRST_RECEIPT_PATH, FIRST_RECEIPT_SIGNUP, rememberFirstReceiptEntry } from '../../../utils/first-receipt-entry';
 
 @Component({
   selector: 'app-register',
@@ -19,6 +20,7 @@ export class RegisterComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
@@ -32,6 +34,8 @@ export class RegisterComponent {
   });
 
   readonly signupSourceOptions = SIGNUP_SOURCE_OPTIONS;
+  readonly startsWithReceipt = this.route.snapshot.queryParamMap.get('start') === FIRST_RECEIPT_SIGNUP.start;
+  readonly signInParams = this.startsWithReceipt ? { redirect: FIRST_RECEIPT_PATH } : null;
 
   isSubmitting = false;
   errorMessage = '';
@@ -54,14 +58,15 @@ export class RegisterComponent {
 
     try {
       const { firstName, lastName, email, password } = this.form.getRawValue();
-      await this.authService.registerUser({
+      const credential = await this.authService.registerUser({
         firstName: firstName ?? '',
         lastName: lastName ?? '',
         email: email ?? '',
         password: password ?? '',
         signupSource: this.selectedSignupSource()
       });
-      await this.router.navigateByUrl('/verify', { state: { email: email ?? '' } });
+      if (this.startsWithReceipt) rememberFirstReceiptEntry(credential.user.uid);
+      await this.router.navigateByUrl('/verify', { state: { email: email ?? '', startsWithReceipt: this.startsWithReceipt } });
     } catch (error: any) {
       this.errorMessage = getAuthErrorMessage(
         error,
@@ -80,7 +85,7 @@ export class RegisterComponent {
 
     try {
       await this.authService.loginWithGoogle(this.selectedSignupSource());
-      await this.router.navigateByUrl('/app');
+      await this.router.navigateByUrl(this.startsWithReceipt ? FIRST_RECEIPT_PATH : '/app');
     } catch (error: any) {
       this.errorMessage = getAuthErrorMessage(error, 'provider', 'Unable to continue with Google right now.');
     } finally {
@@ -95,7 +100,7 @@ export class RegisterComponent {
 
     try {
       await this.authService.loginWithApple(this.selectedSignupSource());
-      await this.router.navigateByUrl('/app');
+      await this.router.navigateByUrl(this.startsWithReceipt ? FIRST_RECEIPT_PATH : '/app');
     } catch (error: any) {
       this.errorMessage = getAuthErrorMessage(error, 'provider', 'Unable to continue with Apple right now.');
     } finally {

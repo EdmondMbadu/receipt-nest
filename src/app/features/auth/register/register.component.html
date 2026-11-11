@@ -15,7 +15,7 @@
             <span class="text-slate-900 dark:text-white">Receipt</span><span class="text-emerald-600 dark:text-emerald-400">Nest</span>
           </span>
         </a>
-        <a routerLink="/login"
+        <a routerLink="/login" [queryParams]="signInParams"
           class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
           Sign in
           <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -35,7 +35,7 @@
             <p class="text-sm font-medium text-emerald-600 dark:text-emerald-400 mb-2">Get started for free</p>
             <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Create your account</h1>
             <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              Start organizing your receipts in seconds
+              {{ startsWithReceipt ? 'Create a free account, then add a receipt photo or PDF.' : 'Start organizing your receipts.' }}
             </p>
           </div>
 
@@ -164,7 +164,7 @@
             <!-- Sign In Link -->
             <p class="text-center text-sm text-slate-500 dark:text-slate-400">
               Already have an account?
-              <a routerLink="/login" class="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors">
+              <a routerLink="/login" [queryParams]="signInParams" class="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors">
                 Sign in
               </a>
             </p>

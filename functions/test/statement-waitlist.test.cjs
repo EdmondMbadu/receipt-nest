@@ -6,7 +6,7 @@ const { parseGameEvent } = require("../lib/game-stats-core.js");
 test("accepts a valid signup and normalizes fields", () => {
   const r = parseWaitlistRequest(JSON.stringify({ name: "  Ana  María ", email: " Ana@Example.COM ", source: "charge_finish" }));
   assert.equal(r.ok, true);
-  assert.deepEqual(r.value, { name: "Ana María", email: "ana@example.com", source: "charge_finish", bot: false });
+  assert.deepEqual(r.value, { name: "Ana María", email: "ana@example.com", source: "charge_finish", entryChannel: "game", bot: false });
 });
 
 test("rejects missing name, bad email and junk bodies with a field hint", () => {
@@ -56,6 +56,13 @@ test("decoder page sources are accepted and counted under the decoder page", () 
   assert.equal(parseWaitlistRequest(JSON.stringify({ name: "Ana", email: "a@b.co", source: "decoder_hero" })).value.source, "decoder_hero");
   assert.equal(statsPageForSource("decoder_footer"), "decoder");
   assert.equal(statsPageForSource("charge_finish"), "charge");
+});
+
+test("decoder traffic attribution only accepts a fixed channel and game forms always credit the game", () => {
+  const request = { name: "Ana", email: "a@b.co" };
+  assert.equal(parseWaitlistRequest(JSON.stringify({ ...request, source: "decoder_hero", entryChannel: "google_organic" })).value.entryChannel, "google_organic");
+  assert.equal(parseWaitlistRequest(JSON.stringify({ ...request, source: "decoder_footer", entryChannel: "https://example.com/private" })).value.entryChannel, "unknown");
+  assert.equal(parseWaitlistRequest(JSON.stringify({ ...request, source: "charge_finish", entryChannel: "google_organic" })).value.entryChannel, "game");
 });
 
 test("the decoder page only reports page events, never game runs", () => {

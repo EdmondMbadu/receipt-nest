@@ -390,11 +390,11 @@ export const blogPosts: readonly BlogPost[] = [
     title: 'How Long to Keep Receipts for Taxes: The 3-Year Rule, the Exceptions, and When You Can Shred',
     seoTitle: 'How Long to Keep Receipts for Taxes: IRS Rules Explained',
     description:
-      'How long to keep receipts for taxes: generally 3 years from when you file, not from the purchase. Here are the IRS exceptions (4, 6, 7 years, property, forever) and a pre-shred checklist.',
+      'See how long to keep U.S. tax receipts, when the IRS retention clock starts, and which exceptions to check before discarding business records.',
     excerpt:
-      'Most receipts need to be kept for three years. But the clock starts when you file the return, not when you buy, and a few situations stretch it to six, seven years or longer.',
+      'For many U.S. federal returns, keep supporting receipts for at least three years from filing. Check the exceptions before discarding anything.',
     datePublished: '2026-10-22',
-    dateModified: '2026-10-22',
+    dateModified: '2026-11-10',
     readTime: '10 min read',
     image: '/assets/images/blog/how-long-to-keep-receipts.webp',
     imageWidth: 1672,
@@ -408,8 +408,8 @@ export const blogPosts: readonly BlogPost[] = [
       'when can I throw away tax receipts'
     ],
     intro: [
-      `How long are you supposed to keep a receipt? One year? Three? Forever? Ask five people and you'll get five answers, and a drawer of receipts from 2015 that nobody dares to throw out.`,
-      `Here's the short answer for U.S. taxes: keep receipts that support your tax return for three years from the date you file that return, not from the date you made the purchase. A few situations stretch that to four, six or seven years, records for equipment and other property are kept until the period runs out for the return covering the year you sell it, and if a return was never filed there is no end date at all. This guide explains each rule from IRS guidance, walks through real dates, and ends with a checklist to run before you shred anything.`
+      `For many U.S. federal income tax returns, the IRS's general retention period is three years from filing. An early return counts as filed on the due date. The date on the receipt does not start the clock.`,
+      `Check the table before throwing anything away. The rules can differ for refund claims, unreported income, bad debts, employment records, and property. A state tax agency, insurer, or creditor may also need records for longer.`
     ],
     sections: [
       {
@@ -1333,7 +1333,7 @@ export const blogPosts: readonly BlogPost[] = [
     excerpt:
       'Same store, same $62, two pieces of paper. The card slip proves you paid. Only the itemized receipt shows what you bought, and that is the part a business record usually needs.',
     datePublished: '2026-10-19',
-    dateModified: '2026-10-19',
+    dateModified: '2026-11-10',
     readTime: '8 min read',
     image: '/assets/images/blog/itemized-receipt-vs-credit-card-slip.webp',
     imageWidth: 1672,
@@ -1365,6 +1365,16 @@ export const blogPosts: readonly BlogPost[] = [
         id: 'short-answer',
         title: 'The short answer: the slip proves payment, the itemized receipt proves the purchase',
         blocks: [
+          {
+            kind: 'table',
+            table: {
+              columns: ['Same $62 purchase', 'Credit card slip', 'Itemized receipt'],
+              rows: [
+                ['What it prints', 'Corner Hardware • Sep 14 • $62.00 • card payment approved', 'Corner Hardware • Sep 14 • deck screws, wood glue, sandpaper, and sales tax • $62.00'],
+                ['What you can tell', 'A card payment was made at the store', 'Which supplies the payment covered']
+              ]
+            }
+          },
           {
             kind: 'table',
             table: {
@@ -1824,7 +1834,7 @@ export const blogPosts: readonly BlogPost[] = [
     excerpt:
       `Your accountant asked for receipts. Send four things: the period, readable originals, a reviewed summary, and a short list of what you could not resolve.`,
     datePublished: '2026-10-12',
-    dateModified: '2026-10-21',
+    dateModified: '2026-11-10',
     readTime: '6 min read',
     image: '/assets/images/blog/organize-receipts-for-accountant.webp',
     imageAlt: 'A receipt handoff checklist beside a spreadsheet summary and a small stack of receipts',
@@ -1871,6 +1881,29 @@ export const blogPosts: readonly BlogPost[] = [
             tone: 'note',
             title: 'Accountants have preferences',
             text: `Some want every original file, some want a spreadsheet first, and many have their own portal. Treat the steps below as a starting point and confirm the details with the person doing the work.`
+          }
+        ]
+      },
+      {
+        id: 'checklist',
+        title: 'The handoff checklist you can copy',
+        blocks: [
+          {
+            kind: 'list',
+            items: [
+              'Confirm the date range and delivery method with your accountant.',
+              'Gather readable originals: photos, emailed receipts, invoices, and PDFs.',
+              'Check the merchant, purchase date, and amount against each original.',
+              'Remove duplicates, match refunds, and note the business purpose where needed.',
+              'Open the CSV and verify the amounts. Exclude the final Total row from any import or sum.',
+              'Send the files in the requested format and keep your own copy.',
+              'List unresolved purchases separately, with what you tried and what is still missing.'
+            ]
+          },
+          {
+            kind: 'paragraph',
+            text: 'Want to check the layout before organizing your own receipts? Use the sample with three fictional purchases and a Total row.',
+            source: { href: '/receipt-to-csv', label: 'Open the sample receipt CSV.' }
           }
         ]
       },
@@ -2051,30 +2084,6 @@ export const blogPosts: readonly BlogPost[] = [
             tone: 'warning',
             title: 'Record organization, not tax advice',
             text: `ReceiptNest organizes the receipts you have. It does not prepare taxes, decide what is deductible, or replace missing evidence. Ask your tax professional how to treat anything on your open-questions list.`
-          }
-        ]
-      },
-      {
-        id: 'checklist',
-        title: 'The handoff checklist you can copy',
-        blocks: [
-          {
-            kind: 'list',
-            items: [
-              `Period confirmed with my accountant: ______ to ______.`,
-              `Format and delivery method confirmed.`,
-              `Paper receipts photographed, email receipts saved or forwarded, PDF invoices downloaded.`,
-              `Each record's merchant, date, and amount checked against its original.`,
-              `Duplicates removed; refunds kept with their purchases.`,
-              `Business purpose added where it is not obvious.`,
-              `CSV opened, dates and decimals checked, Total row excluded from any calculations.`,
-              `Originals sent the agreed way; my own copy kept.`,
-              `Open-questions list attached.`
-            ]
-          },
-          {
-            kind: 'paragraph',
-            text: `Running this checklist once a month turns the year-end request into a quick export. The tax guide below covers the full year of record organization; this checklist is the part you send.`
           }
         ]
       }
@@ -2441,11 +2450,11 @@ export const blogPosts: readonly BlogPost[] = [
     title: 'Can Bank Statements Replace Receipts for Taxes?',
     seoTitle: 'Can Bank Statements Replace Receipts? U.S. Tax Guide',
     description:
-      'Can bank statements replace receipts for taxes? Compare proof of payment with itemized receipts, recover missing records, and build a simple receipt habit.',
+      'A bank statement can show payment. Learn how to recover a lost business receipt, document what is missing, and prepare your records for your accountant.',
     excerpt:
-      'You paid $86.40. Months later, your accountant asks what it was for. Here is what your bank statement can tell you, what your receipt adds, and how to keep both useful.',
+      'A bank statement can show you paid. If you lost the receipt, use the charge to find an itemized copy and give your accountant a clear record of anything still missing.',
     datePublished: '2026-07-16',
-    dateModified: '2026-10-17',
+    dateModified: '2026-11-10',
     readTime: '8 min read',
     image: '/assets/images/blog/bank-statements-vs-receipts.webp',
     imageWidth: 1897,
@@ -2454,7 +2463,7 @@ export const blogPosts: readonly BlogPost[] = [
     video: {
       youtubeId: 'vH_EjIIeEJY',
       title: 'What Was That $86.40 Charge? | Paper Trail, Part 1 — ReceiptNest',
-      description: 'A mystery charge, an accountant’s question, and a small habit that preserves the answer. This one-minute Short introduces the example below: keep the receipt and add the context while you still remember the purchase.',
+      description: 'A mystery charge, an accountant’s question, and a small habit that preserves the answer. This one-minute video illustrates why it helps to keep the receipt and add the context while you still remember the purchase.',
       uploadDate: '2026-10-17T15:48:04-07:00',
       duration: 'PT1M'
     },
@@ -2466,9 +2475,47 @@ export const blogPosts: readonly BlogPost[] = [
     ],
     intro: [
       `A bank statement can help prove that you paid, but it does not automatically replace an itemized receipt for U.S. business taxes. Your records also need to show what you bought and why it was a business expense. That can take a receipt, an invoice, a note, or a combination of documents.`,
-      `Now the practical question: what did you buy for $86.40 on October 3? Plants? A birthday present? A very fancy sandwich? You were there. You paid. Months later, the statement line may be the only thing you remember to look at. This first article in our Paper Trail series explains how to preserve the rest of the story.`
+      `If you have already lost the receipt, start with the charge amount and date. Search your email and order history, then ask the seller for an itemized copy. If you cannot recover it, keep the available records and flag the gap for your tax professional.`
     ],
     sections: [
+      {
+        id: 'missing-receipt',
+        title: 'Lost a business receipt? Get a copy and document what is missing',
+        blocks: [
+          {
+            kind: 'ordered',
+            items: [
+              'Write down the merchant description, amount, and transaction date. If the only date you have is a posting date, search a few days on either side.',
+              'Search your inbox and merchant account for the amount, seller, order number, or a nearby date. Look for an itemized receipt, invoice, or order record.',
+              'Ask the seller for a duplicate through its official support channel. Give the date, amount, and order number if you have it. Do not send your full card number or a full bank statement.',
+              'Compare the document with the charge. Check for a tip, a refund, or a posting date that differs from the purchase date. Save the readable copy and note the business purpose you can verify.',
+              'If the original is still missing, keep any relevant records and list what is unresolved for your accountant. Do not create a receipt or present a guess as an established purchase.'
+            ]
+          },
+          {
+            kind: 'callout',
+            tone: 'tip',
+            title: 'Message you can send to the merchant',
+            text: 'Could you send me an itemized copy of my receipt for a purchase around October 3 for $86.40? I can provide the order number or store location if that helps.'
+          },
+          {
+            kind: 'table',
+            table: {
+              columns: ['Record for your accountant', 'Fictional example'],
+              rows: [
+                ['What you can verify', 'October 3 · $86.40 · Greenline Plumbing Supply shown on the card statement'],
+                ['What you tried', 'Checked email and order history; requested an itemized copy'],
+                ['What is missing', 'No itemized receipt yet; what was bought and the job it supported are still unverified']
+              ]
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: 'A missing receipt and a questionable deduction are separate issues. Let your tax professional decide how to handle the gap. The IRS explains what account statements can show and why proof of payment alone is insufficient.',
+            source: { href: 'https://www.irs.gov/publications/p583', label: 'Read IRS Publication 583 on supporting documents.' }
+          }
+        ]
+      },
       {
         id: 'short-answer',
         title: 'Bank statements vs. receipts: what each record tells you',
@@ -2580,31 +2627,6 @@ export const blogPosts: readonly BlogPost[] = [
         ]
       },
       {
-        id: 'missing-receipt',
-        title: 'What to do if you lost a business receipt',
-        blocks: [
-          {
-            kind: 'paragraph',
-            text: `Use the statement as a search clue. The merchant, amount, and approximate date give you somewhere to start. Work through the steps below before trying to remember a whole year of purchases at once.`
-          },
-          {
-            kind: 'ordered',
-            items: [
-              'Search your email for the merchant, amount, order number, and nearby dates. Check for both receipts and invoices.',
-              'Look in the merchant account or shopping app for order history and downloadable purchase details.',
-              'Ask the seller for a duplicate receipt. Give the date and amount through its normal support process.',
-              'Compare the recovered document with the payment. Check for a tip, a refund, or a posting date that differs from the purchase date.',
-              'Add the business context you can honestly establish, and keep the recovered documents together.',
-              'If the record is still incomplete, flag the gap for your accountant. Separate what you know from what you could not verify.'
-            ]
-          },
-          {
-            kind: 'paragraph',
-            text: `A useful open question might read: “October 3, $86.40, merchant description unclear; searched email and requested a duplicate, no response yet.” That gives your accountant something concrete to review without inventing a purchase or presenting a guess as a fact.`
-          }
-        ]
-      },
-      {
         id: 'monthly-system',
         title: 'The small receipt habit that prevents the mystery',
         blocks: [
@@ -2705,14 +2727,14 @@ export const blogPosts: readonly BlogPost[] = [
     slug: 'receipt-tracking-delivery-drivers',
     path: '/blog/receipt-tracking-delivery-drivers',
     category: 'By Profession',
-    title: 'Receipt Tracking for Delivery Drivers: What DoorDash, Uber Eats, and Instacart Workers Should Save in 2026',
-    seoTitle: 'Receipt Tracking for Delivery Drivers (2026)',
+    title: 'Receipt Tracking for Delivery Drivers: What to Save for Taxes',
+    seoTitle: 'Receipt Tracking for DoorDash and Uber Eats Drivers',
     description:
-      'A practical receipt and expense-record workflow for DoorDash, Uber Eats, Instacart, and other independent delivery drivers in 2026.',
+      'Learn what receipts, payout statements, and mileage records to save for DoorDash, Uber Eats, Instacart, and other independent delivery work.',
     excerpt:
       'Your delivery app tracks orders, not every cost of doing the work. Learn which records to preserve and how to build a five-minute end-of-shift routine.',
     datePublished: '2026-07-16',
-    dateModified: '2026-09-13',
+    dateModified: '2026-11-10',
     readTime: '11 min read',
     image: '/assets/images/blog/delivery-driver-receipts.webp',
     imageWidth: 1672,
@@ -2725,6 +2747,7 @@ export const blogPosts: readonly BlogPost[] = [
       'Instacart driver expenses'
     ],
     intro: [
+      `If you deliver for DoorDash, Uber Eats, or Instacart, keep payout statements for income, a mileage log for work trips, and readable receipts for expenses you plan to review. Save the receipt and the context for a work purchase at the end of the shift, while both are easy to find.`,
       `Delivery work creates a strange kind of financial blur. Your phone is personal and business. Your car is personal and business. A fuel stop might support both. Meanwhile, the platform records completed orders and payouts, but it does not build a complete record of every cost you incurred to earn them.`,
       `A useful system separates two streams: records of the income you received and records of the expenses you paid. This guide focuses on preserving the second stream so you and your tax professional can review it later. It is organization guidance, not a promise that every listed cost is deductible.`
     ],
@@ -2793,7 +2816,8 @@ export const blogPosts: readonly BlogPost[] = [
         blocks: [
           {
             kind: 'paragraph',
-            text: `Self-employed drivers generally calculate eligible car expenses using either the standard mileage rate or the actual-expense method, subject to IRS rules and qualifications. For 2026, the IRS business standard mileage rate is 72.5 cents per business mile. Rates can change each year, so verify the rate for the tax year you are filing.`
+            text: `Self-employed drivers generally calculate eligible car expenses using the standard mileage rate or actual expenses, subject to IRS rules. For 2026, the IRS business rate is 72.5 cents per mile for January through June and 76 cents per mile for July through December. Verify the applicable dates and rates for the year you are filing.`,
+            source: { href: 'https://www.irs.gov/tax-professionals/standard-mileage-rates', label: 'See the IRS standard mileage rates.' }
           },
           {
             kind: 'table',
@@ -3097,14 +3121,14 @@ export const blogPosts: readonly BlogPost[] = [
     slug: 'organize-receipts-taxes-freelancer-guide',
     path: '/blog/organize-receipts-taxes-freelancer-guide',
     category: 'Tax Guides',
-    title: 'How to Organize Receipts for Taxes: The Complete 1099 Freelancer Guide (2026)',
-    seoTitle: 'How to Organize Receipts for Taxes',
+    title: 'How to Organize Receipts for Taxes as a 1099 Freelancer',
+    seoTitle: 'How to Organize Receipts for Taxes as a Freelancer',
     description:
       'Learn how to organize receipts for taxes as a self-employed freelancer, including retention rules, categories, digital receipts, and a monthly system.',
     excerpt:
       'A practical receipt organization system for 1099 freelancers, with retention rules, Schedule C categories, audit prep, and a month-by-month workflow.',
     datePublished: '2026-06-09',
-    dateModified: '2026-10-10',
+    dateModified: '2026-11-10',
     readTime: '12 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Forganizing-chaos.png?alt=media&token=a4ddd1e9-0056-4011-bf78-fe1e297f89ef',
     imageWidth: 1672,
@@ -3113,7 +3137,7 @@ export const blogPosts: readonly BlogPost[] = [
     keywords: ['how to organize receipts for taxes self employed', '1099 receipt organizer', 'freelancer tax receipts'],
     intro: [
       `Organize freelance tax receipts by collecting photos, PDFs, and email receipts in one place, reviewing their dates and amounts, and grouping them by month and expense type. Keep the supporting documents alongside any spreadsheet summary and confirm what your tax preparer needs.`,
-      `The better system is boring in the best way. Capture the receipt when it happens, give it a category, keep the original proof, and review once a month. This guide is organization guidance, not tax advice, but it will help you show up to tax season with cleaner records.`
+      `If you are catching up before a tax appointment, start with one month. Gather what you already have, keep business and personal purchases distinguishable, and make a separate list of charges that still need a receipt. Repeat for the next month after you have reviewed the first.`
     ],
     sections: [
       {

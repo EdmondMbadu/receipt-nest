@@ -7,6 +7,7 @@ import { PublicHeaderComponent } from '../../components/public-layout/public-hea
 import { PublicFooterComponent } from '../../components/public-layout/public-footer.component';
 import { SeoService } from '../../services/seo.service';
 import { ThemeService } from '../../services/theme.service';
+import { recordContentVisit } from '../../utils/search-acquisition';
 import { BlogCategory, blogCategories, blogPosts } from './blog-posts';
 
 @Component({
@@ -34,6 +35,12 @@ export class BlogIndexComponent {
     { path: '/receipt-to-csv', label: 'Inspect the CSV export' },
     { path: '/tax-receipt-organizer', label: 'Prepare records for tax review' }
   ];
+  readonly taxSeasonLinks = [
+    { path: '/blog/organize-receipts-taxes-freelancer-guide', label: 'Organize freelance receipts for taxes' },
+    { path: '/blog/organize-receipts-for-accountant', label: 'Copy the accountant handoff checklist' },
+    { path: '/blog/can-bank-statements-replace-receipts', fragment: 'missing-receipt', label: 'Find a copy of a lost business receipt' },
+    { path: '/blog/receipt-tracking-delivery-drivers', label: 'Keep mileage and receipt records for delivery work' }
+  ];
   readonly filteredPosts = computed(() => {
     const selected = this.selectedCategory();
     return selected === 'All' ? this.posts : this.posts.filter(post => post.category === selected);
@@ -41,6 +48,7 @@ export class BlogIndexComponent {
 
   constructor() {
     const page = getPublicPage('/blog');
+    recordContentVisit(page.path);
     this.seo.apply({ title: page.title, description: page.description, canonicalPath: page.path });
 
     this.seo.setJsonLd('blog-index', {

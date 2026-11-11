@@ -297,7 +297,6 @@ export class AuthService {
     const auth = this.requireAuth();
     const db = this.requireDb();
     const credential = await createUserWithEmailAndPassword(auth, form.email, form.password);
-    trackSignup('email', credential.user.uid);
 
     const profile: UserProfile = {
       id: credential.user.uid,
@@ -313,7 +312,7 @@ export class AuthService {
     };
 
     await Promise.all([
-      setDoc(doc(db, 'users', credential.user.uid), profile),
+      setDoc(doc(db, 'users', credential.user.uid), profile).then(() => trackSignup('email', credential.user.uid)),
       this.sendVerificationEmail()
     ]);
 

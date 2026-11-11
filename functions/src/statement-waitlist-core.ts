@@ -6,6 +6,8 @@
 export const WAITLIST_MAX_BODY_BYTES = 2048;
 export const WAITLIST_SOURCES = ["charge_finish", "charge_article", "charge_link", "decoder_hero", "decoder_footer", "hub"] as const;
 export type WaitlistSource = (typeof WAITLIST_SOURCES)[number];
+const DECODER_ENTRY_CHANNELS = ["google_organic", "game", "other", "unknown"] as const;
+export type WaitlistEntryChannel = (typeof DECODER_ENTRY_CHANNELS)[number];
 
 /** Which page's stats a signup is counted under. */
 export const statsPageForSource = (source: WaitlistSource): "charge" | "decoder" | "hub" =>
@@ -17,6 +19,7 @@ export interface WaitlistRequest {
   name: string;
   email: string;
   source: WaitlistSource;
+  entryChannel: WaitlistEntryChannel;
   bot: boolean;
 }
 
@@ -55,8 +58,14 @@ export const parseWaitlistRequest = (raw: string | undefined | null): WaitlistPa
   if (!bot && name.length < 1) return { ok: false, field: "name", message: "Please add your first name." };
   if (!bot && !EMAIL_PATTERN.test(email)) return { ok: false, field: "email", message: "Please check your email address." };
   const source = (WAITLIST_SOURCES as readonly string[]).includes(String(d.source)) ? (d.source as WaitlistSource) : "charge_link";
-  return { ok: true, value: { name, email, source, bot } };
+  return { ok: true, value: { name, email, source, entryChannel: waitlistEntryChannel(source, d.entryChannel), bot } };
 };
+
+export function waitlistEntryChannel(source: string, value: unknown): WaitlistEntryChannel {
+  if (source === "hub" || source.startsWith("charge_")) return "game";
+  return typeof value === "string" && (DECODER_ENTRY_CHANNELS as readonly string[]).includes(value)
+    ? value as WaitlistEntryChannel : "unknown";
+}
 
 const esc = (value: string): string =>
   value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");

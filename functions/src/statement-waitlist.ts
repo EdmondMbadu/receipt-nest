@@ -22,7 +22,7 @@ import { addEmailDarkMode } from "./email-theme";
 import { isAllowedSource } from "./game-stats-core";
 import { incrementGameCounters } from "./game-stats";
 import { sendSendgridMail } from "./sendgrid";
-import { WAITLIST_MAX_BODY_BYTES, buildWaitlistEmail, parseWaitlistRequest, statsPageForSource } from "./statement-waitlist-core";
+import { WAITLIST_MAX_BODY_BYTES, buildWaitlistEmail, parseWaitlistRequest, statsPageForSource, waitlistEntryChannel } from "./statement-waitlist-core";
 
 const sendgridApiKey = defineSecret("SENDGRID_API_KEY");
 const COLLECTION = "statementWaitlist";
@@ -95,7 +95,7 @@ export const joinStatementWaitlist = onRequest(
       response.status(400).json({ ok: false, field: parsed.field, message: parsed.message });
       return;
     }
-    const { name, email, source, bot } = parsed.value;
+    const { name, email, source, entryChannel, bot } = parsed.value;
     if (bot) {
       response.status(200).json({ ok: true });
       return;
@@ -103,40 +103,39 @@ export const joinStatementWaitlist = onRequest(
 
     const db = admin.firestore();
     const ref = db.collection(COLLECTION).doc(docIdFor(email));
-    let isNew = false;
-    let needsEmail = false;
+    let join: { isNew: boolean; needsEmail: boolean };
     try {
-      await db.runTransaction(async (tx) => {
+      join = await db.runTransaction(async (tx) => {
         const snap = await tx.get(ref);
         const now = admin.firestore.FieldValue.serverTimestamp();
         if (!snap.exists) {
-          isNew = true;
-          needsEmail = true;
           tx.set(ref, {
             name,
             email,
             source,
+            entryChannel,
             sources: [source],
             consent: "notify_when_statement_decoder_launches",
             createdAt: now,
             updatedAt: now,
             emailStatus: "pending",
           });
-        } else {
-          needsEmail = snap.get("emailStatus") !== "sent";
-          tx.update(ref, {
-            name,
-            sources: admin.firestore.FieldValue.arrayUnion(source),
-            updatedAt: now,
-            rejoinCount: admin.firestore.FieldValue.increment(1),
-          });
+          return { isNew: true, needsEmail: true };
         }
+        tx.update(ref, {
+          name,
+          sources: admin.firestore.FieldValue.arrayUnion(source),
+          updatedAt: now,
+          rejoinCount: admin.firestore.FieldValue.increment(1),
+        });
+        return { isNew: false, needsEmail: snap.get("emailStatus") !== "sent" };
       });
     } catch (error) {
       logger.error("Statement waitlist write failed", { error });
       response.status(500).json({ ok: false, message: "We couldn't save that. Please try again." });
       return;
     }
+    const { isNew, needsEmail } = join;
 
     if (isNew) {
       try {
@@ -187,10 +186,12 @@ export const getStatementWaitlist = onCall({ region: "us-central1" }, async (req
   const entries = listSnap.docs.map((doc) => {
     const d = doc.data();
     const created = d.createdAt as admin.firestore.Timestamp | undefined;
+    const source = typeof d.source === "string" ? d.source : "";
     return {
       name: typeof d.name === "string" ? d.name : "",
       email: typeof d.email === "string" ? d.email : "",
-      source: typeof d.source === "string" ? d.source : "",
+      source,
+      entryChannel: waitlistEntryChannel(source, d.entryChannel),
       emailStatus: typeof d.emailStatus === "string" ? d.emailStatus : "",
       createdAt: created ? created.toMillis() : null,
     };

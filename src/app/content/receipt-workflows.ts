@@ -5,6 +5,8 @@ export interface ReceiptWorkflow {
   readonly h1: string;
   readonly intro: string;
   readonly benefit: string;
+  readonly ctaLabel?: string;
+  readonly quickStart?: string;
   readonly image?: string;
   readonly imageAlt?: string;
   readonly imageWidth?: number;
@@ -26,9 +28,11 @@ export interface ReceiptWorkflow {
 
 export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
   "receipt-tracker": {
-    "h1": "A receipt tracker for freelance purchases, from capture to CSV.",
-    "intro": "A paper receipt in your wallet. A PDF in Downloads. An email you cannot find. ReceiptNest brings those records together so a simple question—what did I buy, and where is the receipt?—does not turn into an evening of searching.",
+    "h1": "Receipt tracker for freelancers: scan, review, and export.",
+    "intro": "Track paper, PDF, and email receipts in one place. Find a purchase by merchant or month, open the original, and export a monthly CSV when your accountant asks.",
     "benefit": "Capture now. Review by month. Export when you need to.",
+    "ctaLabel": "Track your first receipt",
+    "quickStart": "Upload a receipt → check the extracted details → download a monthly CSV.",
     "image": "/assets/monthly-light.webp",
     "imageWidth": 881,
     "imageHeight": 1785,
@@ -118,7 +122,7 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       },
       {
         "path": "/blog/receipt-tracking-delivery-drivers",
-        "label": "Keep delivery-work receipts organized"
+        "label": "Track receipts for DoorDash, Uber Eats, and other delivery work"
       },
       {
         "path": "/email-receipt-organizer",
@@ -127,9 +131,11 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
     ]
   },
   "receipt-organizer": {
-    "h1": "Organize paper, PDF, and email receipts in one place.",
-    "intro": "The hard part is often not saving a receipt. It is finding the right one later. ReceiptNest gives photos, PDFs, and forwarded receipts a shared place, with merchant, date, amount, and category details you can review.",
+    "h1": "A digital receipt organizer for paper, PDFs, and email.",
+    "intro": "Clear a receipt backlog one month at a time. ReceiptNest makes the merchant, date, and amount searchable and keeps the original document with the record.",
     "benefit": "Keep the document and the useful details together.",
+    "ctaLabel": "Organize your first receipt",
+    "quickStart": "Start with one photo from your camera roll, a PDF from Downloads, or an email you can forward.",
     "image": "/assets/auto-light.webp",
     "imageWidth": 883,
     "imageHeight": 1782,
@@ -150,28 +156,28 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       }
     ],
     "example": {
-      "title": "From scattered file to useful record",
-      "description": "Examples of where receipt organization helps.",
+      "title": "Three scattered receipts, one searchable history",
+      "description": "A fictional September backlog. Each source file stays with its reviewed receipt record.",
       "columns": [
-        "Where it starts",
-        "Why it is hard to find",
-        "A useful habit"
+        "What you have",
+        "How to add it",
+        "What you can look up later"
       ],
       "rows": [
         [
-          "Camera roll",
-          "Photos mixed with everything else",
-          "Upload the receipt soon after purchase"
+          "Photo of a hardware store receipt",
+          "Upload from your camera roll",
+          "The store, September 4, and the saved photo"
         ],
         [
-          "Email inbox",
-          "Merchant messages use different subjects",
-          "Forward the receipt to your account"
+          "Email for a software renewal",
+          "Forward the receipt to your ReceiptNest address",
+          "The software merchant, September 8, and the saved receipt"
         ],
         [
-          "Downloads folder",
-          "PDF names are not descriptive",
-          "Review merchant and date after upload"
+          "PDF from a print shop",
+          "Upload the downloaded file",
+          "The print shop, September 10, and the original PDF"
         ]
       ],
       "caption": "Email forwarding is a deliberate action. ReceiptNest does not need access to your entire inbox for this workflow."
@@ -224,9 +230,10 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
     ]
   },
   "receipt-scanner": {
-    "h1": "Scan a receipt. Review the details. Keep a usable record.",
+    "h1": "Scan receipts from photos and PDFs.",
     "intro": "A receipt photo is a useful start. ReceiptNest turns it into a record with a merchant, date, total, currency, and suggested category, while keeping the original available for review. Upload a photo or PDF and check the result before you use it.",
     "benefit": "Less retyping, with room to check and correct.",
+    "ctaLabel": "Scan your first receipt",
     "image": "/assets/capture-light.webp",
     "imageWidth": 883,
     "imageHeight": 1781,
@@ -247,11 +254,11 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       }
     ],
     "example": {
-      "title": "What a receipt record contains",
-      "description": "Illustrative fields—not a measured OCR result or an accuracy benchmark.",
+      "title": "From a receipt photo to an editable record",
+      "description": "Compare the fictional receipt with the review fields below. See the ReceiptNest walkthrough for the actual upload and review flow.",
       "columns": [
         "Field",
-        "Example",
+        "Editable record",
         "What to verify"
       ],
       "rows": [
@@ -268,7 +275,7 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
         [
           "Total / currency",
           "27.48 USD",
-          "Use the final amount paid"
+          "Correct 24.00 to 27.48 if the scanner read the subtotal instead of the total"
         ],
         [
           "Category",
@@ -316,15 +323,21 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
         "label": "Read the capture-and-review guide"
       },
       {
+        "path": "/getting-started",
+        "label": "Watch an actual receipt upload in ReceiptNest"
+      },
+      {
         "path": "/security",
         "label": "Understand cloud receipt processing"
       }
     ]
   },
   "receipt-management-software": {
-    "h1": "Receipt management for a small business—not a whole finance department.",
-    "intro": "If your immediate problem is collecting receipts and preparing them for review, a full accounting rollout may be more than you need. ReceiptNest focuses on capture, organization, original-document access, and exports.",
+    "h1": "Receipt management software for small businesses.",
+    "intro": "Give your month-end receipt handoff a routine. Collect receipts as you pay, check missing or duplicate records against your statements, then send a reviewed CSV and the supporting originals.",
     "benefit": "A repeatable handoff from scattered receipts to reviewed records.",
+    "ctaLabel": "Try your first month of receipts",
+    "quickStart": "One example: collect the printer invoice, supplies receipt, and software renewal. Review the three records together before sending a summary.",
     "image": "/assets/auto-light.webp",
     "imageWidth": 883,
     "imageHeight": 1782,
@@ -512,9 +525,11 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
     ]
   },
   "tax-receipt-organizer": {
-    "h1": "Organize tax receipts before the year-end scramble.",
-    "intro": "Give your future self a better starting point. ReceiptNest helps freelancers collect receipt photos, PDFs, and forwarded emails, review the purchase details, and export records for tax-preparation review.",
-    "benefit": "Record organization—not tax advice or a guarantee of deductibility.",
+    "h1": "Organize tax receipts for your accountant.",
+    "intro": "Bring paper, PDF, and email receipts together before your tax appointment. Review each purchase, keep the original, and export a monthly CSV to share alongside your supporting records.",
+    "benefit": "Prepare a handoff your accountant can review.",
+    "ctaLabel": "Start organizing tax receipts",
+    "quickStart": "Pick one month. Gather the originals, check the summary, and make a short list of what is still missing.",
     "image": "/assets/auto-light.webp",
     "imageWidth": 883,
     "imageHeight": 1782,
@@ -535,28 +550,28 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       }
     ],
     "example": {
-      "title": "Before you hand over a receipt",
-      "description": "A US-focused record-organization checklist; requirements vary by situation.",
+      "title": "What a receipt handoff can look like",
+      "description": "A fictional September handoff for a U.S. freelancer. Ask your accountant which records and format they want.",
       "columns": [
-        "Question",
-        "Supporting detail to check"
+        "What you send",
+        "Example"
       ],
       "rows": [
         [
-          "Who was paid?",
-          "Recognizable merchant or payee"
+          "Period",
+          "September 1–30, 2026"
         ],
         [
-          "What was purchased, and when?",
-          "Original receipt or invoice and date"
+          "Original documents",
+          "Three readable receipts: office supplies, software renewal, and a print job"
         ],
         [
-          "How much was paid?",
-          "Amount and evidence of payment"
+          "Reviewed CSV summary",
+          "Merchant, date, and amount checked against the originals; $49.22 total"
         ],
         [
-          "How does it relate to work?",
-          "Business-purpose explanation and other records"
+          "Open questions",
+          "One separate card charge still needs a duplicate receipt; state what you know and what you tried"
         ]
       ],
       "caption": "A combination of documents may be needed. See the IRS recordkeeping guidance linked below."
@@ -591,6 +606,10 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
     ],
     "related": [
       {
+        "path": "/blog/organize-receipts-for-accountant",
+        "label": "Copy the accountant handoff checklist"
+      },
+      {
         "path": "/blog/organize-receipts-taxes-freelancer-guide",
         "label": "Read the freelancer receipt-organization guide"
       },
@@ -618,6 +637,7 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
     "h1": "Turn receipt records into a CSV you can actually inspect.",
     "intro": "Need your receipts in Excel or Google Sheets? ReceiptNest exports a simple CSV of recorded purchases. See the columns and download an example before creating an account, so you know whether the format fits your workflow.",
     "benefit": "Sample download: no account. Exporting your own receipts: account required.",
+    "ctaLabel": "Export your own receipts",
     "steps": [
       {
         "title": "Capture and review your receipts",

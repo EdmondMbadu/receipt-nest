@@ -6,6 +6,8 @@ import { DEFAULT_FREE_PLAN_RECEIPT_LIMIT } from '../../config/subscription.const
 import { getPublicPage } from '../../content/public-pages';
 import { receiptWorkflows } from '../../content/receipt-workflows';
 import { SeoService } from '../../services/seo.service';
+import { FIRST_RECEIPT_SIGNUP } from '../../utils/first-receipt-entry';
+import { CtaPlacement, emitContentEvent, recordContentVisit } from '../../utils/search-acquisition';
 
 @Component({
   selector: 'app-seo-page',
@@ -21,8 +23,11 @@ export class SeoPageComponent {
   readonly meta = getPublicPage('/' + this.key);
   readonly page = receiptWorkflows[this.key];
   readonly freeLimit = DEFAULT_FREE_PLAN_RECEIPT_LIMIT;
+  readonly sampleCsvPath = '/samples/receiptnest-monthly-example.csv';
+  readonly firstReceiptSignup = FIRST_RECEIPT_SIGNUP;
 
   constructor() {
+    recordContentVisit(this.meta.path);
     this.seo.apply({
       title: this.meta.title,
       description: this.meta.description,
@@ -51,5 +56,13 @@ export class SeoPageComponent {
         }
       ]
     });
+  }
+
+  trackSignupClick(placement: CtaPlacement): void {
+    emitContentEvent('content_cta_click', this.meta.path, placement);
+  }
+
+  trackSampleDownload(placement: 'hero' | 'example'): void {
+    emitContentEvent('receipt_csv_sample_download', this.meta.path, placement);
   }
 }

@@ -9,6 +9,8 @@ import { PublicHeaderComponent } from '../../components/public-layout/public-hea
 import { PublicFooterComponent } from '../../components/public-layout/public-footer.component';
 import { SeoService } from '../../services/seo.service';
 import { ThemeService } from '../../services/theme.service';
+import { FIRST_RECEIPT_SIGNUP } from '../../utils/first-receipt-entry';
+import { emitContentEvent, recordContentVisit } from '../../utils/search-acquisition';
 import { BlogBlock, BlogPost, getBlogPost, getRelatedPosts } from './blog-posts';
 
 @Component({
@@ -29,6 +31,7 @@ export class BlogArticleComponent implements OnDestroy {
 
   readonly isDarkMode = this.theme.isDarkMode;
   readonly currentYear = new Date().getFullYear();
+  readonly firstReceiptSignup = FIRST_RECEIPT_SIGNUP;
   article: BlogPost = this.requirePost(this.route.snapshot.paramMap.get('slug'));
   editorial = getBlogEditorial(this.article.slug);
   relatedPosts = getRelatedPosts(this.article);
@@ -45,10 +48,14 @@ export class BlogArticleComponent implements OnDestroy {
         ? this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube-nocookie.com/embed/${videoId}?rel=0`)
         : null;
       this.applySeo();
+      recordContentVisit(this.article.path, this.article.slug);
       // This component is reused for article-to-article navigation in the zoneless app.
       this.changeDetector.markForCheck();
-      this.scrollToTop();
     });
+  }
+
+  trackSignupClick(): void {
+    emitContentEvent('content_cta_click', this.article.path, 'end');
   }
 
   private requirePost(slug: string | null): BlogPost {
@@ -176,14 +183,6 @@ export class BlogArticleComponent implements OnDestroy {
         }
       }
     }];
-  }
-
-  private scrollToTop(): void {
-    if (!isPlatformBrowser(this.platformId)) {
-      return;
-    }
-
-    window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'auto' }));
   }
 
   calloutClasses(block: BlogBlock): string {
