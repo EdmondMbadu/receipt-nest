@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const { readFileSync, existsSync } = require("node:fs");
 const path = require("node:path");
 const { test } = require("node:test");
+const { EMAIL_APP_BADGES, EMAIL_APP_BADGES_ID, renderAppDownloadBadges } = require("../lib/email-app-badges.js");
 const { EMAIL_SOCIAL_LINKS, appendEmailSocialHtml, appendEmailSocialText } = require("../lib/email-social-links.js");
 const { appendUnsubscribeHtml, appendUnsubscribeText } = require("../lib/email-suppression.js");
 
@@ -35,6 +36,21 @@ test("wraps custom HTML fragments with a viewport and preserves their contents",
   assert.match(html, /<meta name="viewport"/);
   assert.match(html, /<body[^>]*><p>Your receipt is ready\.<\/p>/);
   assert.match(html, /<\/body><\/html>$/);
+});
+
+test("adds the store badges once and keeps an existing badge row in place", () => {
+  const badgeRows = html => (html.match(new RegExp(`id="${EMAIL_APP_BADGES_ID}"`, "g")) || []).length;
+  const fallback = appendEmailSocialHtml("<p>Your receipt is ready.</p>");
+  assert.equal(badgeRows(fallback), 1);
+  for (const { label, href } of EMAIL_APP_BADGES) {
+    assert.ok(fallback.includes(`href="${href}"`));
+    assert.ok(fallback.includes(`alt="${label}"`));
+  }
+
+  const existing = renderAppDownloadBadges();
+  const html = appendEmailSocialHtml(`<p>Your receipt is ready.</p>${existing}`);
+  assert.equal(badgeRows(html), 1);
+  assert.ok(html.includes(existing));
 });
 
 test("keeps the custom email unsubscribe footer after the social links", () => {
@@ -77,6 +93,14 @@ test("the shared transport decorates HTML/text and preserves delivery metadata",
   assert.deepEqual(body.reply_to, message.replyTo);
   assert.deepEqual(body.headers, message.headers);
   assert.equal(body.attachments[0].content_id, 'preview-icon');
+  const html = body.content.find(part => part.type === 'text/html').value;
+  for (const { contentId, filename } of EMAIL_APP_BADGES) {
+    assert.match(html, new RegExp(`src="cid:${contentId}"`));
+    const attachment = body.attachments.find(item => item.content_id === contentId);
+    assert.equal(attachment?.filename, filename);
+    assert.equal(attachment?.type, 'image/png');
+    assert.equal(attachment?.disposition, 'inline');
+  }
   for (const content of body.content) assert.match(content.value, /Follow ReceiptNest/);
   assert.equal(message.text, 'Summary');
   assert.doesNotMatch(message.html, /Follow ReceiptNest/);

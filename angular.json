@@ -32,6 +32,11 @@
                 "input": "public"
               },
               {
+                "glob": "*-badge.png",
+                "input": "functions/assets/email",
+                "output": "email/stores"
+              },
+              {
                 "glob": "**/*",
                 "input": "src/assets",
                 "output": "assets"

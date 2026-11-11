@@ -14,7 +14,7 @@ import {
   getGenericBillingSnapshot,
   getModeBillingSnapshot,
 } from "./billing-state";
-import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
+import { appendAppDownloadText, renderAppDownloadHtmlCard } from "./email-app-links";
 import { addEmailDarkMode } from "./email-theme";
 import { sendSendgridMail } from "./sendgrid";
 import { getEffectiveSubscriptionPlan } from "./subscription";
@@ -371,7 +371,6 @@ export const sendTestEmail = onCall(
         subject,
         text: appendAppDownloadText(message),
         html: addEmailDarkMode(html),
-        attachments: getEmailAppIconAttachments(),
       });
     } catch (error) {
       logger.error("SendGrid test email failed", error);

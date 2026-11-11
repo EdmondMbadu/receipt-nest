@@ -2,7 +2,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
-import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
+import { appendAppDownloadText, renderAppDownloadHtmlCard } from "./email-app-links";
 import { addEmailDarkMode } from "./email-theme";
 import { sendSendgridMail } from "./sendgrid";
 import { buildOnboardingEmailMessage } from "./onboarding-email-message";
@@ -119,7 +119,6 @@ const sendEmail = async (to: string, subject: string, text: string, html: string
     subject,
     text,
     html: addEmailDarkMode(html),
-    attachments: getEmailAppIconAttachments(),
   });
 };
 

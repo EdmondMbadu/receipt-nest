@@ -1,3 +1,5 @@
+import { EMAIL_APP_BADGES_ID, renderAppDownloadBadges } from "./email-app-badges";
+
 // Browser-safe: the admin preview and outgoing emails use the same footer.
 export const EMAIL_SOCIAL_LINKS = [
   { label: "YouTube", key: "youtube", href: "https://www.youtube.com/@ReceiptNest" },
@@ -29,7 +31,7 @@ const renderLink = (link: typeof EMAIL_SOCIAL_LINKS[number], width: string) => `
     </a>
   </td>`;
 
-const renderFooter = () => `
+const renderFooter = (showAppBadges: boolean) => `
 <table id="${footerId}" class="rn-social-surface" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
   style="width:100%; background-color:#f8fafc; border-collapse:collapse;">
   <tr><td align="center" style="padding:16px 12px 24px;">
@@ -37,6 +39,7 @@ const renderFooter = () => `
     <table class="rn-social-card" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
       style="width:100%; max-width:600px; background-color:#ffffff; border:1px solid #e2e8f0; border-radius:14px;">
       <tr><td align="center" style="padding:18px 10px 12px;">
+        ${showAppBadges ? renderAppDownloadBadges() : ""}
         <p class="rn-social-heading" style="margin:0 0 10px; font-family:Arial,sans-serif; font-size:14px; line-height:20px; font-weight:700; color:#065f46;">${heading}</p>
         <!--[if mso]><table role="presentation" width="330" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; max-width:330px; table-layout:fixed;">
@@ -72,8 +75,9 @@ export const appendEmailSocialHtml = (html: string): string => {
   const unsubscribeIndex = document.indexOf("<!-- receiptnest-unsubscribe-footer -->");
   const bodyIndex = document.search(/<\/body\s*>/i);
   const insertAt = unsubscribeIndex >= 0 ? unsubscribeIndex : bodyIndex;
-  if (insertAt >= 0) return `${document.slice(0, insertAt)}${renderFooter()}\n${document.slice(insertAt)}`;
-  return document.replace(/<\/html\s*>/i, `${renderFooter()}</html>`);
+  const footer = renderFooter(!new RegExp(`\\bid=["']${EMAIL_APP_BADGES_ID}["']`, "i").test(document));
+  if (insertAt >= 0) return `${document.slice(0, insertAt)}${footer}\n${document.slice(insertAt)}`;
+  return document.replace(/<\/html\s*>/i, `${footer}</html>`);
 };
 
 export const appendEmailSocialText = (text: string): string => {

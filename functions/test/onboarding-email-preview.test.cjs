@@ -4,6 +4,7 @@ const {installFakeFirestore} = require('./fixtures/fake-firestore.cjs');
 const {sendOnboardingTestEmail} = require('../lib/onboarding-email-preview');
 const {buildOnboardingEmailMessage} = require('../lib/onboarding-email-message');
 const {appendEmailSocialText} = require('../lib/email-social-links');
+const {embedEmailAppBadges} = require('../lib/email-app-links');
 
 const sourceId='source-user';
 const recipient='test-inbox@example.com';
@@ -41,7 +42,7 @@ for(const template of ['welcome','first-receipt','receipt-shortcut','receipt-hel
   assert.equal(sent.from.email,'info@receipt-nest.com');assert.equal(sent.reply_to.name,'ReceiptNest');
   const expected=buildOnboardingEmailMessage(template,'https://receipt-nest.com','Edmond');
   assert.equal(sent.subject,`[Test] ${expected.subject}`);
-  assert.equal(sent.content.find(c=>c.type==='text/html').value,expected.html);
+  assert.equal(sent.content.find(c=>c.type==='text/html').value,embedEmailAppBadges(expected.html).html);
   assert.equal(sent.content.find(c=>c.type==='text/plain').value,appendEmailSocialText(expected.text));
   assert.equal((expected.html.match(/id="receiptnest-social-footer"/g)||[]).length,1);
   assert.equal(sent.attachments[0].content_id,'receiptnest-summary-logo');

@@ -8,6 +8,7 @@ import {createRequire} from 'node:module';
 const require = createRequire(import.meta.url);
 const {buildSpendSummaryHtml, getSpendSummaryAttachments} = require('../functions/lib/spend-summary-template');
 const {buildOnboardingEmailMessage} = require('../functions/lib/onboarding-email-message');
+const {embedEmailAppBadges} = require('../functions/lib/email-app-links');
 const {fixture, emptyFixture} = require('../functions/test/fixtures/spend-summary.cjs');
 const directory = resolve('output/spend-summary-email');
 mkdirSync(directory, {recursive: true});
@@ -83,7 +84,11 @@ try {
       if (period==='welcome') html=html.replace('https://receipt-nest.com/media/getting-started/receiptnest-quick-start-v1.jpg','data:image/jpeg;base64,'+readFileSync(resolve('public/media/getting-started/receiptnest-quick-start-v1.jpg')).toString('base64'));
     }
     if (variant === 'blocked') html=html.replace(/<img[^>]*>/g,'');
-    for (const a of getSpendSummaryAttachments()) html = html.replaceAll('cid:' + a.contentId, 'data:' + a.type + ';base64,' + a.content);
+    const badgePreview = embedEmailAppBadges(html);
+    html = badgePreview.html;
+    for (const a of [...getSpendSummaryAttachments(), ...badgePreview.attachments]) {
+      html = html.replaceAll('cid:' + a.contentId, 'data:' + a.type + ';base64,' + a.content);
+    }
     if (variant === 'inline') html = html.replace(/<style>[\s\S]*?<\/style>/g, '');
     writeFileSync(join(directory, name + '.html'), html);
     await tab('Emulation.setDeviceMetricsOverride', {width, height: 1100, deviceScaleFactor: 1, mobile: width < 500});

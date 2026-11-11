@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { APP_STORE_URL, GOOGLE_PLAY_URL } from "./email-app-links";
+import { renderAppDownloadBadges } from "./email-app-badges";
 import { EMAIL_SOCIAL_LINKS } from "./email-social-links";
 
 export type SummaryPeriodType = "week" | "month";
@@ -201,7 +201,7 @@ const renderReceipts = (data: SpendSummaryData, dashboardUrl: string) => `
 const renderFooter = (data: SpendSummaryData, links: Required<SummaryLinks>) => `
   ${renderEmailBrand(true)}
   ${paragraph("Your receipts. A clearer picture.", "font-size:12px; margin-top:8px;")}
-  <p style="margin:4px 0 0; font-size:12px; line-height:1.8; color:${muted};">Get the app: ${textLink("App Store", APP_STORE_URL)} &nbsp;·&nbsp; ${textLink("Google Play", GOOGLE_PLAY_URL)}</p>
+  ${renderAppDownloadBadges()}
   <p id="receiptnest-social-footer" style="margin:4px 0 0; font-size:12px; line-height:1.8; color:${muted};">${EMAIL_SOCIAL_LINKS.map(link => `<a href="${escapeHtml(link.href)}" aria-label="ReceiptNest on ${escapeHtml(link.label)}" style="display:inline-block; color:${muted}; text-decoration:underline;">${escapeHtml(link.label)}</a>`).join(" &nbsp;·&nbsp; ")}</p>
   <p style="margin:4px 0 0; font-size:12px; line-height:1.8; color:${muted};">${textLink("Support", links.supportUrl)} &nbsp;·&nbsp; ${textLink("Terms", links.termsUrl)} &nbsp;·&nbsp; ${textLink("Unsubscribe", links.unsubscribeUrl)}</p>
   ${paragraph(`© ${new Date().getFullYear()} ReceiptNest`, "font-size:11px; margin-top:10px;")}

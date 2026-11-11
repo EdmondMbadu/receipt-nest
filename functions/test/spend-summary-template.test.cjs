@@ -4,7 +4,7 @@ const {readFileSync} = require('node:fs');
 const {buildSpendSummaryHtml, getSpendSummaryAttachments} = require('../lib/spend-summary-template');
 const {appendEmailSocialHtml, EMAIL_SOCIAL_LINKS} = require('../lib/email-social-links');
 const {buildUnsubscribeUrls, verifyUnsubscribeToken} = require('../lib/email-suppression');
-const {APP_STORE_URL, GOOGLE_PLAY_URL} = require('../lib/email-app-links');
+const {APP_STORE_URL, GOOGLE_PLAY_URL, embedEmailAppBadges} = require('../lib/email-app-links');
 const {fixture, emptyFixture, rawReceipts} = require('./fixtures/spend-summary.cjs');
 
 async function document(html) {
@@ -45,10 +45,11 @@ for (const period of ['week', 'month']) test(`${period}: complete calm layout, c
 });
 
 test('embedded logo is byte-for-byte the official brand asset, and every CID resolves', async () => {
-  const attachments = getSpendSummaryAttachments();
+  const embedded = embedEmailAppBadges(buildSpendSummaryHtml(fixture()));
+  const attachments = [...getSpendSummaryAttachments(), ...embedded.attachments];
   const logo = attachments.find(a => a.filename === 'receipt-nest.png');
   assert.deepEqual(Buffer.from(logo.content, 'base64'), readFileSync(require('node:path').resolve(__dirname, '../../public/receipt-nest.png')));
-  const nodes = await document(buildSpendSummaryHtml(fixture()));
+  const nodes = await document(embedded.html);
   for (const img of nodes.filter(n => n.tagName === 'img')) {
     const cid = attr(img, 'src').slice(4);
     assert.ok(attachments.some(a => a.contentId === cid), `unresolved CID ${cid}`);

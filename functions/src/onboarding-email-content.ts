@@ -1,4 +1,4 @@
-import { APP_STORE_URL, GOOGLE_PLAY_URL } from "./email-app-links";
+import { renderAppDownloadBadges } from "./email-app-badges";
 import { EMAIL_SOCIAL_LINKS } from "./email-social-links";
 import { renderEmailBrand, getSpendSummaryAttachments } from "./spend-summary-template";
 
@@ -45,7 +45,7 @@ export const buildOnboardingEmailHtml = (options: {
           <tr><td style="padding:26px 0 0; border-top:1px solid #e0e5e1; font-size:12px; line-height:1.8; color:#626e67;">
             ${renderEmailBrand(true)}
             <p style="margin:10px 0 0; font-size:12px; line-height:1.8; color:#626e67;">Your receipts. A clearer picture.</p>
-            <p style="margin:4px 0 0; font-size:12px; line-height:1.8; color:#626e67;">Get the app: ${link("App Store", APP_STORE_URL)} &nbsp;·&nbsp; ${link("Google Play", GOOGLE_PLAY_URL)}</p>
+            ${renderAppDownloadBadges()}
             <p id="receiptnest-social-footer" style="margin:4px 0 0; font-size:12px; line-height:1.8; color:#626e67;">${EMAIL_SOCIAL_LINKS.map(item => `<a href="${item.href}" aria-label="ReceiptNest on ${item.label}" style="display:inline-block; color:#626e67; text-decoration:underline;">${item.label}</a>`).join(" &nbsp;·&nbsp; ")}</p>
             <p style="margin:4px 0 0; font-size:12px; line-height:1.8; color:#626e67;">${link("Support", `${base}/support`)} &nbsp;·&nbsp; ${link("Email preferences", `${base}/app?settings=notifications`)} &nbsp;·&nbsp; ${link("Unsubscribe", options.unsubscribeUrl || `${base}/unsubscribe`)}</p>
             <p style="margin:12px 0 0; font-size:11px; line-height:1.8; color:#626e67;">© ${new Date().getFullYear()} ReceiptNest</p>

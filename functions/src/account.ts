@@ -3,7 +3,7 @@ import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import Stripe from "stripe";
-import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
+import { appendAppDownloadText, renderAppDownloadHtmlCard } from "./email-app-links";
 import { addEmailDarkMode } from "./email-theme";
 import { sendSendgridMail } from "./sendgrid";
 
@@ -218,7 +218,6 @@ const sendAccountDeletionEmail = async (email: string): Promise<void> => {
       subject,
       text,
       html: addEmailDarkMode(html),
-      attachments: getEmailAppIconAttachments(),
     });
   } catch (error) {
     logger.error("Failed sending account deletion confirmation email", { recipient, error });

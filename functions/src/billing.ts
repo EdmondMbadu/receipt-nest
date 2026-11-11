@@ -12,7 +12,7 @@ import {
   getModeBillingFieldName,
   getStoredCustomerIdForMode,
 } from "./billing-state";
-import { appendAppDownloadText, getEmailAppIconAttachments, renderAppDownloadHtmlCard } from "./email-app-links";
+import { appendAppDownloadText, renderAppDownloadHtmlCard } from "./email-app-links";
 import { addEmailDarkMode } from "./email-theme";
 import { sendSendgridMail } from "./sendgrid";
 
@@ -456,7 +456,6 @@ const sendSubscriptionReceiptEmail = async ({
     subject,
     text,
     html: addEmailDarkMode(html),
-    attachments: getEmailAppIconAttachments(),
   });
 };
 
