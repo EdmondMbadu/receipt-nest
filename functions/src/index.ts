@@ -69,5 +69,6 @@ export { dispatchOnboardingEmails, recordReceiptEmailActivation } from "./onboar
 export { sendOnboardingTestEmail } from "./onboarding-email-preview";
 
 export { getAdminReceiptIssues, getAdminReceiptIssue, getAdminReceiptPreview, actOnAdminReceiptIssue, cleanupReceiptIssue, onReceiptHealthChanged, onReceiptIssueHealthChanged } from "./receipt-issues";
+export { notifyAdminReceiptNeedsReview } from "./receipt-review-alerts";
 
 export { renderForwardedEmailPdf, retryForwardedEmailPdf, cleanupForwardedEmailFiles } from "./email-pdf-worker";

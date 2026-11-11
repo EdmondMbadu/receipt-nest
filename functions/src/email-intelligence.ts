@@ -10,6 +10,7 @@ export const EMAIL_CATEGORIES = [
 ] as const;
 
 export interface EmailField<T> { value: T; confidence: number; rawText?: string }
+export const EMAIL_EXTRACTION_PIPELINE_VERSION = "email-extraction-v3";
 export interface EmailValues {
   totalAmount?: EmailField<number>;
   currency?: EmailField<string>;
@@ -71,6 +72,22 @@ function quotedEvidence(value: unknown, text: string): string | undefined {
 
 interface AmountRow { value: number; currency?: string; rawText: string; rank: number }
 const CURRENCIES = new Set((Intl as unknown as { supportedValuesOf: (key: string) => string[] }).supportedValuesOf("currency"));
+
+function isSunStrongPaymentConfirmation(text: string, sender: string): boolean {
+  const forwardedFrom = text.match(/^-{2,} Forwarded message -{2,}\nFrom:[ \t]*([^\n]+)$/im)?.[1];
+  // SunStrong's U.S. lease/PPA billing portal uses MyAccountInfo. Require the
+  // confirmation title and its billing contact because the domain is shared.
+  return /(?:^|<)noreply@myaccountinfo\.com>?$/i.test((forwardedFrom ?? sender).trim())
+    && /^Bill Charge Credit Card Payment Confirmation[ |]*$/im.test(text)
+    && /\b866[-. ]279[-. ]5421\b/.test(text);
+}
+
+function paymentDate(text: string, usFormat: boolean) {
+  const lines = [...text.matchAll(/^payment date[ \t|:]+(\d{4}-\d{2}-\d{2}|\d{1,2}[/-]\d{1,2}[/-]\d{4})[ \t|]*$/gim)];
+  const dates = new Set(lines.map(([, value]) => emailDate(value, usFormat)));
+  const date = dates.size === 1 ? [...dates][0] : undefined;
+  return date ? { date, evidence: lines[0][0] } : undefined;
+}
 function amountRows(text: string, label: string): AmountRow[] {
   const lines = cleanText(text).replace(/\*/g, "").split("\n").map(l => l.replace(/\|/g, " ").trim());
   const rows: AmountRow[] = [];
@@ -107,8 +124,9 @@ export function validateEmailValues(parsed: Record<string, unknown>, text: strin
     if (numbers.some(n => emailMoney(n) === proposed)) total = { value: proposed, rawText: evidence, rank: 1 };
   }
   const explicitCurrencies = [...new Set((text.match(/\b(?:USD|EUR|GBP|CAD|AUD|NZD|CHF|JPY|CNY|INR|ZAR|NGN|CDF|KES|MXN|BRL|AED|SGD|HKD|PHP)\b/g) || []))];
+  const sunStrongPayment = isSunStrongPaymentConfirmation(text, sender);
   const symbols = [/€/.test(text) ? "EUR" : "", /£/.test(text) ? "GBP" : "", /₹/.test(text) ? "INR" : "",
-    /\$/.test(text) && /\bUNITED STATES\b/i.test(text) ? "USD" : ""].filter(Boolean);
+    (/\$/.test(text) && /\bUNITED STATES\b/i.test(text)) || (sunStrongPayment && /\$/.test(total?.rawText || "")) ? "USD" : ""].filter(Boolean);
   const symbolCurrency = symbols.length === 1 ? symbols[0] : undefined;
   const currencyCandidate = total?.currency || (explicitCurrencies.length === 1 ? explicitCurrencies[0] : explicitCurrencies.length === 0 ? symbolCurrency : undefined);
   const currency = currencyCandidate && CURRENCIES.has(currencyCandidate) ? currencyCandidate : undefined;
@@ -130,7 +148,9 @@ export function validateEmailValues(parsed: Record<string, unknown>, text: strin
   // ISO model dates can resolve named month dates, but must be quoted and explicitly labeled.
   const namedDate = !date && modelDateEvidence && /\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\b/i.test(modelDateEvidence)
     ? new Date(modelDateEvidence.replace(/^.*?(?:date|on)\s*[:|]?\s*/i, "")) : undefined;
-  const finalDate = date || (namedDate && !isNaN(namedDate.getTime()) && emailDate(namedDate.toISOString().slice(0, 10)));
+  const existingDate = date || (namedDate && !isNaN(namedDate.getTime()) && emailDate(namedDate.toISOString().slice(0, 10)));
+  const completedPayment = !existingDate && sunStrongPayment ? paymentDate(text, currency === "USD") : undefined;
+  const finalDate = existingDate || completedPayment?.date;
   if (!finalDate) reasons.push("Missing or ambiguous transaction date");
   const proposedMerchant = typeof parsed.merchant === "string" ? parsed.merchant.trim().slice(0, 160) : "";
   const nameKey = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
@@ -142,7 +162,7 @@ export function validateEmailValues(parsed: Record<string, unknown>, text: strin
   const field = (r?: AmountRow): EmailField<number> | undefined => r ? { value: r.value, rawText: r.rawText, confidence: 0.96 } : undefined;
   return {
     totalAmount: field(total), currency: currency ? { value: currency, confidence: 0.96, rawText: total?.rawText || currency } : undefined,
-    date: finalDate ? { value: finalDate, confidence: 0.93, rawText: dateEvidence } : undefined,
+    date: finalDate ? { value: finalDate, confidence: 0.93, rawText: completedPayment?.evidence || dateEvidence } : undefined,
     supplierName: merchant ? { value: merchant, confidence: 0.9, rawText: merchant } : undefined,
     transferAmount: field(principal), fees: field(fees), recipientAmount: field(recipient), transactionType,
     category: { id: categoryEntry[0], name: categoryEntry[1], confidence: transfer ? 0.98 : categoryEntry[0] === "other" ? 0.5 : 0.85,

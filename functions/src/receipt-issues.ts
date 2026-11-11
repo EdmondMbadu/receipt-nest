@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { onDocumentDeleted, onDocumentWritten } from "firebase-functions/v2/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { assertAdmin } from "./authz";
-import { diagnoseReceipt, ISSUE_CAUSES, missingReceiptFields, RECEIPT_STUCK_MS, receiptValues } from "./receipt-issue-policy";
+import { diagnoseReceipt, emailRetrySource, ISSUE_CAUSES, missingReceiptFields, RECEIPT_STUCK_MS, receiptValues } from "./receipt-issue-policy";
 import { issueRefFor } from "./receipt-processing-state";
 import { loadReceiptPreview, loadReceiptSourceBundlePreview } from "./receipt-preview";
 
@@ -97,6 +97,7 @@ export const getAdminReceiptIssue = onCall(options, async request => {
   return {
     row: row(snap, issue.data(), user.get("email")), revision: snap.updateTime!.toMillis(),
     receipt: json({ id: ref.id, userId: ref.parent.parent!.id, status: data.status, file: data.file, email: data.email,
+      canRetry: data.skipProcessing !== true || !!emailRetrySource(data, ref.parent.parent!.id),
       ...receiptValues(data), extraction: data.extraction, processingAttempt: data.processingAttempt,
       createdAt: data.createdAt, updatedAt: data.updatedAt, processedAt: data.processedAt, sourceBundle: data.sourceBundle }),
     issue: json(issue.data()), events: events.docs.map(doc => json({ id: doc.id, ...doc.data() })),
@@ -134,7 +135,9 @@ export const actOnAdminReceiptIssue = onCall(options, async request => {
     const diagnosis = diagnoseReceipt(current);
     const active = ["uploaded", "processing"].includes(current.status) && diagnosis?.kind !== "stuck";
     if (active) throw new HttpsError("failed-precondition", "This receipt is still processing. Wait for it to finish.");
-    if (data.action === "retry" && current.skipProcessing === true) throw new HttpsError("failed-precondition", "Automatic processing is disabled for this receipt.");
+    if (data.action === "retry" && current.skipProcessing === true && !emailRetrySource(current, data.userId)) {
+      throw new HttpsError("failed-precondition", "Enter the verified values and save this receipt manually.");
+    }
     const update: Record<string, any> = {};
     if (data.action === "correct") {
       const values = data.values;

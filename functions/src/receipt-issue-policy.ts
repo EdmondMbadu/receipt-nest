@@ -30,11 +30,16 @@ export function missingReceiptFields(data: any): string[] {
   return missing;
 }
 
+export function emailRetrySource(data: any, userId: string): string | undefined {
+  if (data.skipProcessing !== true || data.source !== "email" || data.email?.ingestMode !== "text_fallback" || data.userId !== userId) return undefined;
+  const path = data.email.documentStoragePath;
+  const prefix = `users/${userId}/receipts/`;
+  return typeof path === "string" && path.startsWith(prefix) && /^[^/]+_document\.json$/.test(path.slice(prefix.length)) ? path : undefined;
+}
+
 export function diagnoseReceipt(data: any, now = Date.now()): { kind: IssueKind; reason: string; recommendation: string; cause: IssueCause } | null {
   if (["uploaded", "processing"].includes(data.status)) {
-    // Email-body imports and manually recovered receipts bypass the extraction
-    // worker, but still need admin review when their extracted fields are missing.
-    if (data.skipProcessing === true) return null;
+    if (data.skipProcessing === true && !emailRetrySource(data, data.userId)) return null;
     const started = millis(data.processingAttempt?.startedAt) || millis(data.updatedAt) || millis(data.createdAt);
     if (started && now - started >= RECEIPT_STUCK_MS) return {
       kind: "stuck", reason: data.status === "uploaded" ? "Processing never started" : "Processing is taking too long",
@@ -51,8 +56,10 @@ export function diagnoseReceipt(data: any, now = Date.now()): { kind: IssueKind;
     cause: data.processingAttempt.cause || "unknown",
   };
   const missing = missingReceiptFields(data);
+  const emailReasons = data.source === "email" && data.skipProcessing === true && Array.isArray(data.extraction?.reviewReasons)
+    ? data.extraction.reviewReasons.filter((reason: unknown) => typeof reason === "string").join(". ") : "";
   if (["needs_review", "extracted"].includes(data.status) || (data.processingAttempt && missing.length)) return {
-    kind: "incomplete", reason: missing.length ? `Missing ${missing.join(", ")}` : "Receipt needs verification",
+    kind: "incomplete", reason: emailReasons || (missing.length ? `Missing ${missing.join(", ")}` : "Receipt needs verification"),
     recommendation: "Compare the extracted fields with the original. Correct the values, or retry if the receipt is readable.", cause: "unknown",
   };
   return null;

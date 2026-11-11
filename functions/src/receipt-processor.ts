@@ -13,8 +13,9 @@ import { VertexAI } from "@google-cloud/vertexai";
 import sharp from "sharp";
 import heicDecode from "heic-decode";
 import { assertAdmin } from "./authz";
+import { extractArchivedEmail, loadArchivedEmail } from "./email-ingest";
 import { claimReceiptAttempt, finishReceiptAttempt } from "./receipt-processing-state";
-import { processingFailure, RECEIPT_MODEL_ID } from "./receipt-issue-policy";
+import { emailRetrySource, processingFailure, RECEIPT_MODEL_ID } from "./receipt-issue-policy";
 
 // Types
 interface ExtractedField<T> {
@@ -407,6 +408,14 @@ async function runReceiptProcessing(userId: string, receiptId: string, attemptId
     let stage = "file";
     let extractedForHistory: ExtractionResult | undefined;
     try {
+      const emailSource = emailRetrySource(receiptData, userId);
+      if (emailSource) {
+        const document = await loadArchivedEmail(emailSource);
+        stage = "extraction";
+        const proposed = await extractArchivedEmail(userId, document);
+        await finishReceiptAttempt(receiptRef, attemptId, receiptData, retry, proposed);
+        return;
+      }
       // Get the file from Storage
       const storagePath = receiptData.file?.storagePath;
       if (!storagePath) {

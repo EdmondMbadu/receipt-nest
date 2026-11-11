@@ -591,6 +591,32 @@ async function extractFromEmailContent(subject: string, sender: string, text: st
   return { ...validateEmailValues(parsed, text, sender), source, processedAt: admin.firestore.FieldValue.serverTimestamp() };
 }
 
+export async function loadArchivedEmail(path: string): Promise<EmailDocumentSource> {
+  const file = admin.storage().bucket().file(path);
+  const [metadata] = await file.getMetadata();
+  if (Number(metadata.size) > MAX_EMAIL_SOURCE_BYTES) throw new Error("Email source is too large");
+  const [bytes] = await file.download();
+  const document = JSON.parse(bytes.toString("utf8")) as EmailDocumentSource;
+  if (typeof document?.subject !== "string" || typeof document.sender !== "string" ||
+      typeof document.html !== "string" || typeof document.text !== "string" || (!document.html && !document.text)) {
+    throw new Error("Email source has no readable body");
+  }
+  return document;
+}
+
+export async function extractArchivedEmail(userId: string, { subject, sender, html, text }: EmailDocumentSource) {
+  const extraction = await extractFromEmailContent(subject, sender, emailExtractionText(html, text));
+  const supplier = extraction.supplierName;
+  return {
+    extraction,
+    merchant: supplier ? await normalizeMerchant(userId, supplier.value, supplier.confidence) : undefined,
+    category: extraction.category,
+    totalAmount: extraction.totalAmount?.value,
+    currency: extraction.currency?.value,
+    date: extraction.date?.value,
+  };
+}
+
 async function generateEmailPreviewImage(input: EmailPreviewImageInput): Promise<Buffer> {
   const width = 1200;
   const height = 1600;

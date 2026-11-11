@@ -25,6 +25,28 @@ test('mismatched arithmetic, conflicting totals, unsupported currency and missin
   assert.ok(validateEmailValues({},'Total 25.00 USD\nForwarded on 2026-11-08','').reviewReasons.includes('Missing or ambiguous transaction date'));
 });
 
+test('a forwarded SunStrong payment confirmation supports USD and its labeled payment date', () => {
+  const html = `<div>---------- Forwarded message ---------<br>From: &lt;NOREPLY@myaccountinfo.com&gt;<br>
+    Date: Wed, Nov 11, 2026</div>
+    <table><tr><td>Bill Charge Credit Card Payment Confirmation</td></tr>
+    <tr><td>Total Amount:</td><td>$50.00</td></tr>
+    <tr><td>Request Date:</td><td>11/09/2026</td></tr>
+    <tr><td>Payment Date:</td><td>11/10/2026</td></tr></table>
+    <p>For questions please call 866-279-5421.</p>`;
+  const body = emailExtractionText(html, '');
+  const validate = text => validateEmailValues({merchant: 'Bill Charge'}, text, 'customer@example.com');
+  const result = validate(body);
+  assert.deepEqual(result.reviewReasons, []);
+  assert.equal(result.totalAmount.value, 50);
+  assert.equal(result.currency.value, 'USD');
+  assert.equal(result.date.value, '2026-11-10');
+  assert.match(result.date.rawText, /Payment Date.*11\/10\/2026/i);
+  assert.equal(validate(body.replace('866-279-5421', '866-111-2222')).currency, undefined);
+  assert.equal(validate(body.replace('NOREPLY@myaccountinfo.com', 'merchant@example.com')).currency, undefined);
+  assert.equal(validate(body.replace('Payment Date:', 'Scheduled Payment Date:')).date, undefined);
+  assert.equal(validate(body + '\nPayment Date: 11/12/2026').date, undefined);
+});
+
 test('money/date parsing rejects malformed input and calendar rollover, preserves international decimal amounts', () => {
   for(const [raw,value] of [['670.99 USD',670.99],['1,234.56 USD',1234.56],['1.234,56 EUR',1234.56],['12,50 EUR',12.5]])assert.equal(emailMoney(raw),value);
   for(const raw of ['600abc99','1,2,3','--3','NaN','Infinity'])assert.equal(emailMoney(raw),undefined);

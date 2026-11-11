@@ -1,6 +1,7 @@
 import * as admin from "firebase-admin";
 import { createHash } from "node:crypto";
-import { diagnoseReceipt, mergeRetryValues, missingReceiptFields, RECEIPT_MODEL_ID, RECEIPT_PIPELINE_VERSION, RECEIPT_STUCK_MS, receiptValues } from "./receipt-issue-policy";
+import { diagnoseReceipt, emailRetrySource, mergeRetryValues, missingReceiptFields, RECEIPT_MODEL_ID, RECEIPT_PIPELINE_VERSION, RECEIPT_STUCK_MS, receiptValues } from "./receipt-issue-policy";
+import { EMAIL_EXTRACTION_PIPELINE_VERSION } from "./email-intelligence";
 
 export function issueRefFor(userId: string, receiptId: string) {
   return admin.firestore().collection("receiptIssues").doc(createHash("sha256").update(`${userId}/${receiptId}`).digest("hex"));
@@ -9,8 +10,10 @@ export function issueRefFor(userId: string, receiptId: string) {
 export async function claimReceiptAttempt(ref: admin.firestore.DocumentReference, attemptId: string, retry: boolean) {
   return admin.firestore().runTransaction(async tx => {
     const snap = await tx.get(ref);
-    if (!snap.exists || snap.get("skipProcessing") === true) return null;
+    if (!snap.exists) return null;
     const data = snap.data()!;
+    const emailSource = retry && emailRetrySource(data, ref.parent.parent!.id);
+    if (data.skipProcessing === true && !emailSource) return null;
     // A creation event must never restart an already attempted receipt.
     if (!retry && data.processingAttempt) return null;
     if (retry && (data.processingAttempt?.id !== attemptId || data.processingAttempt?.state !== "queued")) return null;
@@ -19,7 +22,7 @@ export async function claimReceiptAttempt(ref: admin.firestore.DocumentReference
       processingAttempt: {
         ...data.processingAttempt, id: attemptId, state: "running", stage: "file",
         startedAt: admin.firestore.Timestamp.now(), leaseUntil: admin.firestore.Timestamp.fromMillis(Date.now() + RECEIPT_STUCK_MS),
-        model: RECEIPT_MODEL_ID, pipelineVersion: RECEIPT_PIPELINE_VERSION,
+        model: RECEIPT_MODEL_ID, pipelineVersion: emailSource ? EMAIL_EXTRACTION_PIPELINE_VERSION : RECEIPT_PIPELINE_VERSION,
       },
     });
     return data;
@@ -40,13 +43,15 @@ export async function finishReceiptAttempt(
     const values = mergeRetryValues(initial, current, proposed);
     const effective = { ...current, ...values };
     const missing = missingReceiptFields(effective);
-    const state = failure ? "failed" : missing.length ? "incomplete" : "succeeded";
+    const reviewReasons = proposed.extraction?.reviewReasons as string[] | undefined;
+    const reviewReason = reviewReasons?.join(". ") || (missing.length ? `Missing ${missing.join(", ")}` : "");
+    const state = failure ? "failed" : reviewReason ? "incomplete" : "succeeded";
     const attempt = {
       ...current.processingAttempt, state, stage: failure?.stage || "complete",
-      finishedAt: admin.firestore.Timestamp.now(), reason: failure?.reason || (missing.length ? `Missing ${missing.join(", ")}` : "Receipt validated"),
-      cause: failure?.cause || (missing.length ? "unknown" : issueSnap.get("cause") || "unknown"), code: failure?.code || null,
+      finishedAt: admin.firestore.Timestamp.now(), reason: failure?.reason || reviewReason || "Receipt validated",
+      cause: failure?.cause || (reviewReason ? "unknown" : issueSnap.get("cause") || "unknown"), code: failure?.code || null,
     };
-    const status = failure || missing.length ? "needs_review" : "final";
+    const status = state === "succeeded" ? "final" : "needs_review";
     const update: Record<string, any> = {
       ...values, status, processingAttempt: attempt,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(), processedAt: admin.firestore.FieldValue.serverTimestamp(),

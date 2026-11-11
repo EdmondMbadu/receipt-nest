@@ -15,7 +15,7 @@ export interface ReceiptIssueRow {
 export interface IssueDetail {
   row: ReceiptIssueRow | null; revision: number;
   receipt: {
-    id: string; userId: string; status: string; totalAmount: number | null; currency: string;
+    id: string; userId: string; status: string; totalAmount: number | null; currency: string; canRetry?: boolean;
     sourceBundle?: ReceiptSourceBundle;
     date: string; merchant: string; category: string; createdAt: string; updatedAt: string;
     file?: { storagePath: string; mimeType: string; originalName: string; sizeBytes: number };

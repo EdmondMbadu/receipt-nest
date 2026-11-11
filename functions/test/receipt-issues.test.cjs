@@ -153,6 +153,68 @@ test('admin callables and the processing worker enforce authorization, concurren
     await assert.rejects(act('correct',{values:{...valid,merchant:'Shop',date:'2026-02-30',category:'Other'}}),{code:'invalid-argument'});
     await assert.rejects(act('awaiting_user',{notes:''}),{code:'invalid-argument'});
   });
+  await t.test('admin can rerun archived email extraction and manually save older email receipts', async t => {
+    const { VertexAI } = require('@google-cloud/vertexai');
+    const { processAdminReceiptRetry } = require('../lib/receipt-processor');
+    const storage = admin.storage();
+    const originalBucket = storage.bucket;
+    const originalModel = VertexAI.prototype.getGenerativeModel;
+    t.after(() => {
+      storage.bucket = originalBucket;
+      VertexAI.prototype.getGenerativeModel = originalModel;
+    });
+    const archive = 'users/customer/receipts/email_123_document.json';
+    const emailPath = 'users/customer/receipts/email_123_body';
+    const merchantPath = 'users/customer/merchants/bill-charge';
+    seed(merchantPath, {canonicalName:'Bill Charge',aliases:['Bill Charge']});
+    t.after(() => {
+      documents.delete(emailPath);
+      documents.delete(merchantPath);
+      documents.delete(worker.issueRefFor('customer','email_123_body').path);
+    });
+    const document = {
+      subject: 'Payment confirmation', sender: 'NOREPLY@myaccountinfo.com', html: '',
+      text: 'Bill Charge Credit Card Payment Confirmation\nTotal Amount: $50.00\nPayment Date: 11/10/2026\nCall 866-279-5421.',
+    };
+    storage.bucket = () => ({ file: filePath => {
+      assert.equal(filePath, archive);
+      return {
+        getMetadata: async () => [{size: 400}],
+        download: async () => [Buffer.from(JSON.stringify(document))],
+      };
+    }});
+    VertexAI.prototype.getGenerativeModel = () => ({generateContent: async () => ({
+      response: {candidates: [{content: {parts: [{text: '{"merchant":"Bill Charge","category":"Utilities & Bills"}'}]}}]},
+    })});
+    const email = {ingestMode:'text_fallback', documentStoragePath:archive};
+    const original = {source:'email', userId:'customer', skipProcessing:true, status:'needs_review',
+      totalAmount:55, extraction:{totalAmount:{value:50},reviewReasons:['Missing or ambiguous transaction date']},
+      merchant:{canonicalName:'Verified merchant',matchedBy:'manual'}, createdAt:timestamp(), email};
+    const detailEmail = async () => api.getAdminReceiptIssue.run({auth,data:{userId:'customer',receiptId:'email_123_body'}});
+    const actOnEmail = async (action, extra) => api.actOnAdminReceiptIssue.run({auth,data:{
+      userId:'customer',receiptId:'email_123_body',revision:(await detailEmail()).revision,cause:'unknown',action,...extra,
+    }});
+    seed(emailPath, original);
+    assert.equal((await detailEmail()).receipt.canRetry, true);
+    assert.equal(await worker.claimReceiptAttempt(doc(emailPath),'creation',false),null);
+    const {attemptId} = await actOnEmail('retry');
+    assert.equal((await detailEmail()).row.active, true);
+    await processAdminReceiptRetry.run({params:{jobId:attemptId},data:snapshot(`receiptProcessingJobs/${attemptId}`)});
+    const retried = await detailEmail();
+    assert.equal(retried.receipt.status, 'final');
+    assert.equal(retried.receipt.date, '2026-11-10');
+    assert.equal(retried.receipt.currency, 'USD');
+    assert.equal(retried.receipt.totalAmount, 55);
+    assert.equal(retried.receipt.merchant, 'Verified merchant');
+    assert.equal(retried.row.state, 'resolved');
+    assert.ok(retried.events.some(event => event.action === 'retry' && event.pipelineVersion === 'email-extraction-v3'));
+
+    seed(emailPath, {...original,email:{...email,documentStoragePath:'users/another/receipts/email_123_document.json'}});
+    assert.equal((await detailEmail()).receipt.canRetry, false);
+    await assert.rejects(actOnEmail('retry'), {code:'failed-precondition'});
+    await actOnEmail('correct', {values:{...valid,merchant:'Verified merchant',category:'Groceries'}});
+    assert.equal((await detailEmail()).receipt.status, 'final');
+  });
   let attempt;
   await t.test('concurrent retry requests create one job and duplicate worker delivery does not rerun extraction',async()=>{
     const revision=(await detail()).revision;
