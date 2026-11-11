@@ -28,6 +28,15 @@ const scanner = { href: '/receipt-scanner', label: 'See the receipt-scanning wor
 const email = { href: '/email-receipt-organizer', label: 'Set up email-receipt forwarding' };
 
 const editorial: Readonly<Record<string, BlogEditorial>> = {
+  'how-to-scan-receipts-for-taxes': {
+    note: taxNote + ' The office supply receipt in the illustration is fictional.',
+    sources: [
+      records,
+      { href: 'https://www.irs.gov/publications/p583', label: 'IRS Publication 583 on electronic records' }
+    ],
+    workflows: [scanner, csv, tax],
+    cta: { label: 'Scan your first business receipt', body: 'Upload one clear photo and check the merchant, date, and total against the original.' }
+  },
   'do-you-need-receipts-for-taxes': {
     note: taxNote,
     sources: [
@@ -48,7 +57,7 @@ const editorial: Readonly<Record<string, BlogEditorial>> = {
       { href: 'https://www.irs.gov/publications/p583', label: 'IRS Publication 583: how long to keep records and electronic records' },
       records
     ],
-    workflows: [tax, csv, scanner],
+    workflows: [tax, csv, { href: '/blog/how-to-scan-receipts-for-taxes', label: 'Scan a business receipt with your phone' }],
     cta: { label: 'Save a readable copy of your first receipt', body: 'Photograph one receipt while it is still readable and check that you can find it by merchant and month.' }
   },
   'how-to-sort-a-shoebox-of-receipts': {

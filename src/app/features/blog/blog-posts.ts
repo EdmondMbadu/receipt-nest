@@ -73,6 +73,111 @@ export const blogCategories: readonly BlogCategory[] = [
 
 export const blogPosts: readonly BlogPost[] = [
   {
+    slug: 'how-to-scan-receipts-for-taxes',
+    path: '/blog/how-to-scan-receipts-for-taxes',
+    category: 'Tax Guides',
+    title: 'How to Scan Receipts for Taxes With Your Phone',
+    seoTitle: 'How to Scan Receipts for Taxes and Keep Digital Copies',
+    description:
+      'Scan business receipts for taxes with your phone. Use this checklist to capture readable copies, check the details, and keep records your accountant can find.',
+    excerpt:
+      'Before you put the paper away, zoom in on the date, the items, and the total. Then give the scan a home where you can find it months later.',
+    datePublished: '2026-11-11',
+    dateModified: '2026-11-11',
+    readTime: '4 min read',
+    image: '/assets/images/blog/how-to-scan-receipts-for-taxes.webp',
+    imageWidth: 1672,
+    imageHeight: 941,
+    imageAlt: 'A hand holding a phone over a flattened office supply receipt on a cream desk',
+    keywords: ['how to scan receipts for taxes', 'scan receipts with your phone', 'digital receipts for taxes', 'business receipt photo checklist'],
+    intro: [
+      `To scan a receipt for taxes, flatten it under even light, capture the full slip with your phone, and zoom in on the saved image. You should be able to read the seller, date, items, and amount paid. Then save it somewhere you can find it by month and add a short note about the business purpose.`,
+      `The last step is easy to skip. Six months later, you might remember buying printer ink but have no idea which of the forty receipt photos in your camera roll shows it. The checklist below takes you from the paper slip to a record you can actually hand to your accountant.`
+    ],
+    sections: [
+      {
+        id: 'take-the-photo',
+        title: 'Take one clear photo of the entire receipt',
+        blocks: [
+          {
+            kind: 'ordered',
+            items: [
+              'Flatten the receipt on a plain surface that contrasts with the paper. Move it away from glare or heavy shadows.',
+              'Hold the phone directly above the receipt. Leave a little space around every edge so the merchant name and the final total stay in frame.',
+              'Open the saved image and zoom in. Check the date, the item descriptions, and the amount paid. Retake it while the paper is still in front of you if any of those are hard to read.',
+              'If the receipt is too long for one readable photo, take overlapping shots and save them together in order. If the vendor sent a complete PDF or itemized email, save that original file or message.'
+            ]
+          },
+          {
+            kind: 'callout',
+            tone: 'tip',
+            title: 'Check the small print before you move on',
+            text: `A photo can look sharp at thumbnail size while the date is unreadable. Zoom in to check the actual letters and digits. If the paper is already too faded to read, look for an order email or ask the merchant for a duplicate.`
+          }
+        ]
+      },
+      {
+        id: 'receipt-checklist',
+        title: 'Check what the scan shows and add the business purpose',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `The IRS says supporting documents for business expenses should establish who was paid, the amount, proof of payment, the date, and what the expense was for. You may need more than one document. Keep an itemized receipt when you have it and save the payment record alongside it if the receipt leaves that detail unclear.`,
+            source: {
+              href: 'https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep',
+              label: 'IRS guidance on supporting documents for business expenses'
+            }
+          },
+          {
+            kind: 'paragraph',
+            text: `Say a hardware store receipt lists masking tape, drop cloths, and paint trays. Add a note like “Supplies for the Maple Street repaint.” The receipt preserves what you bought and the note records why it belonged to that job. If you bought personal items on the same slip, flag them for review and keep the full receipt.`
+          }
+        ]
+      },
+      {
+        id: 'find-it-again',
+        title: 'Save the scan and make sure you can find it again',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `For a folder system, use a year and month and a consistent filename. For example, save 2026-11-11-hardware-store.pdf in Business receipts / 2026 / 11. Keep a backup you can reach if you lose your phone. At month-end, look up one receipt by date and open the full original. That quick test tells you whether your system will work when someone asks for a specific purchase.`
+          },
+          {
+            kind: 'paragraph',
+            text: `IRS Publication 583 applies the same recordkeeping requirements to electronic records as to paper. Your system needs to preserve complete, accurate records and reproduce them legibly. Check the rules that apply before discarding paper, especially for records you may also need for a warranty, insurance claim, or other purpose.`,
+            source: { href: 'https://www.irs.gov/publications/p583', label: 'IRS Publication 583 on electronic records' }
+          }
+        ]
+      },
+      {
+        id: 'try-one-in-receiptnest',
+        title: 'Try the workflow with one receipt in ReceiptNest',
+        blocks: [
+          {
+            kind: 'paragraph',
+            text: `Take a photo of one recent business receipt and upload it to ReceiptNest. Open the saved original and check the suggested merchant, date, total, and category. Add a note about the purchase if the receipt alone leaves the purpose unclear. Then find the same receipt in its month and reopen the original.`
+          },
+          {
+            kind: 'paragraph',
+            text: `When your accountant asks for a summary, you can export your receipt records to CSV. Keep the original scans available alongside that summary so you can share the documents behind the totals.`,
+            source: { href: '/receipt-to-csv', label: 'See a sample ReceiptNest CSV export' }
+          }
+        ]
+      }
+    ],
+    faq: [
+      {
+        question: 'Can I use a photo of a receipt for U.S. taxes?',
+        answer: 'A readable, complete photo can be part of your electronic records. You need to be able to retrieve it and reproduce it legibly. Keep any other supporting documents needed to show the payment and business purpose.'
+      },
+      {
+        question: 'Do receipt scans have to be PDFs?',
+        answer: 'A PDF is convenient for long receipts and multiple pages. For a single slip, a clear image can work when your recordkeeping system preserves it and you can retrieve and reproduce it legibly.'
+      }
+    ],
+    relatedSlugs: ['how-long-to-keep-receipts', 'itemized-receipt-vs-credit-card-slip', 'organize-receipts-for-accountant']
+  },
+  {
     slug: 'do-you-need-receipts-for-taxes',
     path: '/blog/do-you-need-receipts-for-taxes',
     category: 'Tax Guides',
