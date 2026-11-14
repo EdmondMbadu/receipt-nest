@@ -207,7 +207,7 @@ test('admin callables and the processing worker enforce authorization, concurren
     assert.equal(retried.receipt.totalAmount, 55);
     assert.equal(retried.receipt.merchant, 'Verified merchant');
     assert.equal(retried.row.state, 'resolved');
-    assert.ok(retried.events.some(event => event.action === 'retry' && event.pipelineVersion === 'email-extraction-v3'));
+    assert.ok(retried.events.some(event => event.action === 'retry' && event.pipelineVersion === 'email-extraction-v4'));
 
     seed(emailPath, {...original,email:{...email,documentStoragePath:'users/another/receipts/email_123_document.json'}});
     assert.equal((await detailEmail()).receipt.canRetry, false);

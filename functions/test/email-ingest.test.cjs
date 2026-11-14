@@ -47,6 +47,60 @@ test('a forwarded SunStrong payment confirmation supports USD and its labeled pa
   assert.equal(validate(body + '\nPayment Date: 11/12/2026').date, undefined);
 });
 
+const cardAlert = `<div>---------- Forwarded message ---------<br>
+  From: Bank Alerts &lt;alerts@notify.wellsfargo.com&gt;<br>
+  Date: 11/15/2026<br>Subject: Card purchase<br>To: &lt;customer@example.com&gt;</div>
+  <table><tr><td><p>You made a purchase of $100.00</p></td></tr>
+  <tr><td><p>Card number: <strong>…0000</strong></p></td></tr>
+  <tr><td><p>Purchase amount: <strong>$100.00</strong></p></td></tr>
+  <tr><td><p>Merchant: <strong>EXAMPLE *SUBSCRIPTION</strong> in <strong>CA, USA</strong></p></td></tr>
+  <tr><td><p>Date: <strong>11/07/2026</strong></p></td></tr></table>`;
+const cardAlertText = emailExtractionText(cardAlert, '');
+
+test('a forwarded card purchase alert supports source amount, merchant, currency and date without using the forward headers as evidence', () => {
+  const result = validateEmailValues({total: 500, date: '2026-11-15', dateEvidence: 'Date: 11/15/2026', category: 'Subscriptions'}, cardAlertText, 'customer@example.com');
+  assert.deepEqual(result.reviewReasons, []);
+  assert.equal(result.transactionType, 'purchase');
+  assert.equal(result.totalAmount.value, 100);
+  assert.equal(result.currency.value, 'USD');
+  assert.equal(result.date.value, '2026-11-07');
+  assert.equal(result.supplierName.value, 'EXAMPLE *SUBSCRIPTION');
+  assert.match(result.totalAmount.rawText, /^Purchase amount/i);
+  assert.match(result.date.rawText, /11\/07\/2026/);
+
+  const otherIssuer = cardAlertText.replace('alerts@notify.wellsfargo.com', 'alerts@example.ca')
+    .replaceAll('$100.00', 'CAD 100.00').replace('Purchase amount', 'Transaction amount').replace('11/07/2026', '2026-11-07');
+  const other = validateEmailValues({}, otherIssuer, 'customer@example.com');
+  assert.deepEqual(other.reviewReasons, []);
+  assert.equal(other.totalAmount.value, 100);
+  assert.equal(other.currency.value, 'CAD');
+  assert.equal(other.date.value, '2026-11-07');
+
+  const plainText = cardAlertText.replace('Purchase amount: $100.00', 'Purchase amount: * $100.00 *')
+    .replace('EXAMPLE *SUBSCRIPTION in CA, USA', '*EXAMPLE *SUBSCRIPTION* *in* *CA, USA*')
+    .replace('Date: 11/07/2026', 'Date: * 11/07/2026 *');
+  const plain = validateEmailValues({}, emailExtractionText('', plainText), 'customer@example.com');
+  assert.deepEqual(plain.reviewReasons, []);
+  assert.equal(plain.currency.value, 'USD');
+  assert.equal(plain.supplierName.value, 'EXAMPLE *SUBSCRIPTION');
+  assert.equal(plain.date.value, '2026-11-07');
+  assert.equal(validateEmailValues({}, cardAlertText.replace('11/07/2026', 'November 7, 2026'), '').date.value, '2026-11-07');
+});
+
+test('card alert evidence leaves conflicting amounts, ambiguous currency and unrelated dates for review', () => {
+  const validate = text => validateEmailValues({}, text, 'customer@example.com');
+  const noDate = cardAlertText.replace('Date: 11/07/2026', 'Scheduled date: 11/07/2026');
+  assert.equal(validate(noDate).date, undefined);
+  assert.equal(validate(cardAlertText.replace('Date: 11/07/2026', 'Date: 11/07/2026\nDate: 11/08/2026')).date, undefined);
+  assert.equal(validate(cardAlertText.replace('notify.wellsfargo.com', 'wellsfargo.com.example.ca')).currency, undefined);
+  assert.equal(validate(cardAlertText.replace('CA, USA', 'Toronto, Canada')).currency, undefined);
+  assert.equal(validate(cardAlertText.replace('CA, USA', 'Toronto, Canada') + '\nBilling help in EUR').currency, undefined);
+  assert.equal(validate(cardAlertText.replace('Purchase amount: $100.00', 'Purchase amount: $120.00')).totalAmount, undefined);
+  assert.equal(validate(cardAlertText.replace('You made a purchase of', 'Your pending authorization is for')).totalAmount, undefined);
+  assert.equal(validate(cardAlertText + '\nGrand total 125.00 USD').totalAmount, undefined);
+  assert.equal(validate(cardAlertText.replace('11/07/2026', 'February 30, 2026')).date, undefined);
+});
+
 test('money/date parsing rejects malformed input and calendar rollover, preserves international decimal amounts', () => {
   for(const [raw,value] of [['670.99 USD',670.99],['1,234.56 USD',1234.56],['1.234,56 EUR',1234.56],['12,50 EUR',12.5]])assert.equal(emailMoney(raw),value);
   for(const raw of ['600abc99','1,2,3','--3','NaN','Infinity'])assert.equal(emailMoney(raw),undefined);
