@@ -28,8 +28,8 @@ export interface ReceiptWorkflow {
 
 export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
   "receipt-tracker": {
-    "h1": "Receipt tracker for freelancers: scan, review, and export.",
-    "intro": "Track paper, PDF, and email receipts in one place. Find a purchase by merchant or month, open the original, and export a monthly CSV when your accountant asks.",
+    "h1": "Business receipt tracker for freelancers",
+    "intro": "Track paper, PDF, and email receipts in one place. Find a purchase by merchant or month, group receipts by client or project, and export a CSV when you need a summary.",
     "benefit": "Capture now. Review by month. Export when you need to.",
     "ctaLabel": "Track your first receipt",
     "quickStart": "Upload a receipt → check the extracted details → download a monthly CSV.",
@@ -81,6 +81,10 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
     },
     "sections": [
       {
+        "title": "Keep receipts for the same job together",
+        "body": "In the web app, save your receipts and add a short note about what each purchase was for. Open Collections to group the receipts for a client or project. Download the collection’s CSV when you need its merchant, date, and amount summary, and open individual receipts for the supporting documents."
+      },
+      {
         "title": "A manageable habit for freelancers",
         "body": "Start with the current month, even if older receipts are still scattered. Add a small backlog in each review session. Capturing a few receipts consistently is more useful than creating an elaborate filing system you never revisit."
       },
@@ -108,6 +112,10 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       }
     ],
     "related": [
+      {
+        "path": "/blog/track-business-receipts-by-project",
+        "label": "How to track business receipts by client or project"
+      },
       {
         "path": "/receipt-to-csv",
         "label": "See the CSV format before you export"

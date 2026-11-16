@@ -187,39 +187,39 @@
       },
       {
         "source": "/app{,/**}",
-        "destination": "/index.html"
+        "destination": "/index.csr.html"
       },
       {
         "source": "/home",
-        "destination": "/index.html"
+        "destination": "/index.csr.html"
       },
       {
         "source": "/verify",
-        "destination": "/index.html"
+        "destination": "/index.csr.html"
       },
       {
         "source": "/reset-password",
-        "destination": "/index.html"
+        "destination": "/index.csr.html"
       },
       {
         "source": "/share{,/**}",
-        "destination": "/index.html"
+        "destination": "/index.csr.html"
       },
       {
         "source": "/mobile-return{,/**}",
-        "destination": "/index.html"
+        "destination": "/index.csr.html"
       },
       {
         "source": "/feedback",
-        "destination": "/index.html"
+        "destination": "/index.csr.html"
       },
       {
         "source": "/goodbye",
-        "destination": "/index.html"
+        "destination": "/index.csr.html"
       },
       {
         "source": "/unsubscribe",
-        "destination": "/index.html"
+        "destination": "/index.csr.html"
       }
     ],
     "predeploy": [

@@ -140,6 +140,14 @@ for (const path of ['login', 'register', 'email-verified']) {
   assert.ok(!all.some(node => node.tagName === 'link' && attr(node, 'rel') === 'canonical'), path + ': no marketing canonical on account page');
 }
 const hosting = JSON.parse(read('firebase.json')).hosting;
+const appShell = nodes(parse(read(join(root, 'index.csr.html'))));
+assert.ok(appShell.some(node => attr(node, 'name') === 'robots' && attr(node, 'content')?.includes('noindex')), 'Client shell must default to noindex');
+assert.ok(!appShell.some(node => attr(node, 'rel') === 'canonical' || attr(node, 'property') === 'og:url' || attr(node, 'name') === 'twitter:url'), 'Client shell must not identify itself as the homepage');
+for (const path of ['/app', '/app/receipt/example', '/share/example', '/mobile-return/login',
+  '/home', '/verify', '/reset-password', '/feedback', '/goodbye', '/unsubscribe']) {
+  const rewrite = hosting.rewrites.find(rule => rule.source && matchesGlob(path, rule.source));
+  assert.equal(rewrite?.destination, '/index.csr.html', path + ': serve the client shell');
+}
 const noindex = path => hosting.headers.some(rule => matchesGlob(path, rule.source) &&
   rule.headers.some(header => header.key === 'X-Robots-Tag' && header.value.includes('noindex')));
 for (const path of ['/app', '/app/receipt/example', '/share/example', '/mobile-return/login',

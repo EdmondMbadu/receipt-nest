@@ -28,6 +28,16 @@ const scanner = { href: '/receipt-scanner', label: 'See the receipt-scanning wor
 const email = { href: '/email-receipt-organizer', label: 'Set up email-receipt forwarding' };
 
 const editorial: Readonly<Record<string, BlogEditorial>> = {
+  'track-business-receipts-by-project': {
+    note: 'Published by ReceiptNest. The projects and amounts in this example are fictional. Check extracted receipt details against the original before sharing a summary.',
+    sources: [records],
+    workflows: [
+      { href: '/receipt-tracker', label: 'See how the business receipt tracker works' },
+      email,
+      csv
+    ],
+    cta: { label: 'Track your first project receipt', body: 'Save one receipt from an active job and add a note while you still remember what it was for.' }
+  },
   'how-to-scan-receipts-for-taxes': {
     note: taxNote + ' The office supply receipt in the illustration is fictional.',
     sources: [
@@ -70,6 +80,7 @@ const editorial: Readonly<Record<string, BlogEditorial>> = {
     note: taxNote, sources: [records, retention],
     workflows: [
       { href: '/receipt-tracker', label: 'Track receipts by month' },
+      { href: '/blog/track-business-receipts-by-project', label: 'Track receipts by client or project' },
       { href: '/blog/receipt-tracking-delivery-drivers', label: 'Build an end-of-shift receipt routine for delivery work' },
       email, csv, tax
     ],

@@ -24,9 +24,9 @@ export const publicPages: readonly PublicPage[] = [
     description: 'Capture receipt photos, PDFs, and forwarded emails. Review purchases, keep originals, and export a CSV for your accountant. No bank connection required.'
   },
   {
-    path: '/receipt-tracker', kind: 'workflow', label: 'Receipt tracker', updated: '2026-11-10',
-    title: 'Receipt Tracker App — Scan, Organize & Export | ReceiptNest',
-    description: 'Track paper, PDF, and email receipts by merchant and month. Start free with up to 50 receipts, AI categorization, and CSV export. No bank connection needed.'
+    path: '/receipt-tracker', kind: 'workflow', label: 'Receipt tracker', updated: '2026-11-16',
+    title: 'Business Receipt Tracker for Freelancers | ReceiptNest',
+    description: 'Track business receipts from photos, PDFs, and email. Group receipts by client or project, find the originals, and export a CSV. Start free with up to 50 receipts.'
   },
   {
     path: '/receipt-organizer', kind: 'workflow', label: 'Receipt organizer', updated: '2026-11-10',
