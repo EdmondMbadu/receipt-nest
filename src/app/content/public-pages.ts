@@ -24,14 +24,14 @@ export const publicPages: readonly PublicPage[] = [
     description: 'Capture receipt photos, PDFs, and forwarded emails. Review purchases, keep originals, and export a CSV for your accountant. No bank connection required.'
   },
   {
-    path: '/receipt-tracker', kind: 'workflow', label: 'Receipt tracker', updated: '2026-11-16',
-    title: 'Business Receipt Tracker for Freelancers | ReceiptNest',
-    description: 'Track business receipts from photos, PDFs, and email. Group receipts by client or project, find the originals, and export a CSV. Start free with up to 50 receipts.'
+    path: '/receipt-tracker', kind: 'workflow', label: 'Receipt tracker', updated: '2026-11-18',
+    title: 'Receipt Tracker App for Freelancers | ReceiptNest',
+    description: 'Track receipts from photos, PDFs, and email. Review purchases by month, keep original documents, and export a CSV. Available on iPhone, Android, and web.'
   },
   {
-    path: '/receipt-organizer', kind: 'workflow', label: 'Receipt organizer', updated: '2026-11-10',
-    title: 'Digital Receipt Organizer for Photos, PDFs & Email | ReceiptNest',
-    description: 'Bring scattered receipts into one searchable place. Find a purchase, keep its original file, and organize your receipt backlog with ReceiptNest.'
+    path: '/receipt-organizer', kind: 'workflow', label: 'Receipt organizer', updated: '2026-11-18',
+    title: 'Receipt Organizer App for Photos, PDFs & Email | ReceiptNest',
+    description: 'Organize paper, PDF, and email receipts in one searchable place. Find purchases by merchant or month, keep originals, and export records when you need them.'
   },
   {
     path: '/receipt-scanner', kind: 'workflow', label: 'Receipt scanner', updated: '2026-11-10',

@@ -13,6 +13,13 @@ export interface ReceiptWorkflow {
   readonly imageHeight?: number;
   readonly imageCaption?: string;
   readonly steps: readonly WorkflowSection[];
+  readonly comparison?: {
+    readonly title: string;
+    readonly description: string;
+    readonly columns: readonly string[];
+    readonly rows: readonly (readonly string[])[];
+    readonly caption: string;
+  };
   readonly example: {
     readonly title: string;
     readonly description: string;
@@ -28,8 +35,8 @@ export interface ReceiptWorkflow {
 
 export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
   "receipt-tracker": {
-    "h1": "Business receipt tracker for freelancers",
-    "intro": "Track paper, PDF, and email receipts in one place. Find a purchase by merchant or month, group receipts by client or project, and export a CSV when you need a summary.",
+    "h1": "A receipt tracker app for your freelance business",
+    "intro": "A receipt tracker keeps a purchase record with its original photo, PDF, or email receipt. Use ReceiptNest to review purchases by month, find a merchant, and export a CSV without connecting your bank account.",
     "benefit": "Capture now. Review by month. Export when you need to.",
     "ctaLabel": "Track your first receipt",
     "quickStart": "Upload a receipt → check the extracted details → download a monthly CSV.",
@@ -52,6 +59,17 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
         "body": "Use the receipt history when a purchase needs checking, a return needs proof, or an accountant asks for records. Download a monthly CSV when you want to continue the review in a spreadsheet."
       }
     ],
+    "comparison": {
+      "title": "Receipt tracker app, spreadsheet, or accounting software?",
+      "description": "Choose the tool for the record you need. ReceiptNest focuses on the documents behind purchases; it does not replace a complete set of business accounts.",
+      "columns": ["Approach", "Useful when", "What you still need to do"],
+      "rows": [
+        ["Spreadsheet and receipt folder", "You have a few purchases and want control over your columns.", "Enter the details and keep each row connected to its original document."],
+        ["ReceiptNest receipt tracker", "You want photos, PDFs, and forwarded receipts in a receipt-focused history.", "Check the extracted fields, add missing receipts, and review the export."],
+        ["Accounting software", "You need broader bookkeeping such as invoicing, reconciliation, or financial reports.", "Check the product’s features and keep the supporting receipt documents."]
+      ],
+      "caption": "A receipt summary contains the records you add. It is not a bank reconciliation or a determination of which purchases are deductible."
+    },
     "example": {
       "title": "Give each receipt a next step",
       "description": "An illustrative weekly review—not a live customer account.",
@@ -94,6 +112,14 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       }
     ],
     "faq": [
+      {
+        "question": "Can I use the receipt tracker on iPhone, Android, and the web?",
+        "answer": "ReceiptNest has iPhone and Android apps as well as a web app. Use the official App Store and Google Play links on this page, or start on the web. Interface details and available workflows can differ by platform; project Collections are available in the web app."
+      },
+      {
+        "question": "What should I check before choosing a receipt tracker?",
+        "answer": "Try a receipt photo and a PDF you actually need to keep. Check the merchant, date, amount, and original file after processing, then inspect a CSV export. Confirm the plan limits and whether the export includes the documents or only a summary of their details."
+      },
       {
         "question": "Can I track personal and freelance receipts?",
         "answer": "Yes. You can organize records for either purpose. Review categories and keep a clear distinction between personal and business purchases; the app does not make tax decisions for you."
@@ -139,8 +165,8 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
     ]
   },
   "receipt-organizer": {
-    "h1": "A digital receipt organizer for paper, PDFs, and email.",
-    "intro": "Clear a receipt backlog one month at a time. ReceiptNest makes the merchant, date, and amount searchable and keeps the original document with the record.",
+    "h1": "A receipt organizer for paper, PDFs, and email",
+    "intro": "Bring receipts from your camera roll, Downloads folder, and inbox into one place. ReceiptNest reads the purchase details, keeps the original document, and helps you find a receipt by merchant or month instead of opening every file.",
     "benefit": "Keep the document and the useful details together.",
     "ctaLabel": "Organize your first receipt",
     "quickStart": "Start with one photo from your camera roll, a PDF from Downloads, or an email you can forward.",
@@ -163,6 +189,17 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
         "body": "Find the original for a purchase query or review a category at month-end. Export records when another person needs a spreadsheet. Keep any additional documents that establish payment, business purpose, or other context."
       }
     ],
+    "comparison": {
+      "title": "Do you need a receipt organizer or a folder?",
+      "description": "Start with the simplest system you can maintain. A dedicated app is useful when finding and reviewing purchases takes more effort than storing the files.",
+      "columns": ["Approach", "How you organize", "Tradeoff"],
+      "rows": [
+        ["Paper folders", "Separate receipts by month and keep them somewhere you can retrieve them.", "No scanning step, but you need to protect the paper and search it by hand."],
+        ["Cloud folders and a spreadsheet", "Save readable files by month and enter the merchant, date, and amount in a sheet.", "Flexible, but filenames, data entry, and links to originals need upkeep."],
+        ["ReceiptNest", "Upload photos or PDFs, or forward email receipts; review the extracted purchase details.", "Less retyping, but extraction needs checking and your plan’s receipt allowance applies."]
+      ],
+      "caption": "Keep any backups your recordkeeping process requires. Test that you can retrieve an original before relying on a new system."
+    },
     "example": {
       "title": "Three scattered receipts, one searchable history",
       "description": "A fictional September backlog. Each source file stays with its reviewed receipt record.",
@@ -198,9 +235,17 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       {
         "title": "Keep originals, not just totals",
         "body": "A row in a spreadsheet does not contain everything on an itemized receipt. Preserve the original document and relevant supporting records. For a return or warranty, check the retailer's requirements; keeping a receipt is not a guarantee of acceptance."
+      },
+      {
+        "title": "Sort a receipt backlog without losing the context",
+        "body": "Work through one month at a time. Check each receipt’s purchase date and merchant, keep personal and business purchases distinguishable, and add a note when the purpose is unclear. In the web app, use Collections to group receipts for one client or project. Set aside records that need clarification rather than guessing a category."
       }
     ],
     "faq": [
+      {
+        "question": "Can I organize receipts on my phone?",
+        "answer": "Yes. ReceiptNest is available on iPhone and Android, and you can also use the web app. Start with a readable photo or PDF, check the extracted purchase details, and open the saved original to confirm that the full receipt is available."
+      },
       {
         "question": "Can I organize PDF and photo receipts together?",
         "answer": "Yes. Receipt photos, uploaded PDFs, and forwarded receipts appear within the same receipt workflow rather than separate filing systems."
