@@ -47,6 +47,52 @@ test('a forwarded SunStrong payment confirmation supports USD and its labeled pa
   assert.equal(validate(body + '\nPayment Date: 11/12/2026').date, undefined);
 });
 
+const payGov = require('./fixtures/forwarded-paygov.cjs').source;
+const payGovText = emailExtractionText(payGov.html, '');
+
+test('USCIS Pay.gov confirmation supports transaction amount, USD and named transaction date without AI evidence', () => {
+  const result = validateEmailValues({total: 999, date: '2026-11-19', merchant: 'Customer'}, payGovText, payGov.sender);
+  assert.deepEqual(result.reviewReasons, []);
+  assert.equal(result.totalAmount.value, 710);
+  assert.equal(result.currency.value, 'USD');
+  assert.equal(result.date.value, '2026-11-20');
+  assert.equal(result.supplierName.value, 'USCIS');
+  assert.equal(result.transactionType, 'purchase');
+  assert.match(result.totalAmount.rawText, /Transaction Amount \$710\.00/);
+  assert.match(result.date.rawText, /Transaction Date: Nov 20, 2026 12:41:21 AM/);
+  const direct = payGovText.slice(payGovText.indexOf('Your payment has been submitted'));
+  assert.deepEqual(validateEmailValues({}, direct, 'USCIS <ELISdonotreply@uscis.dhs.gov>').reviewReasons, []);
+  assert.deepEqual(validateEmailValues({}, emailExtractionText('', payGovText), payGov.sender).reviewReasons, []);
+});
+
+test('Pay.gov support stays scoped to confirmed USCIS payments and keeps conflicting evidence for review', () => {
+  const validate = text => validateEmailValues({}, text, payGov.sender);
+  for (const text of [
+    payGovText.replace('uscis.dhs.gov', 'uscis.dhs.gov.example.com'),
+    payGovText.replace('ELISdonotreply@uscis.dhs.gov', 'merchant@example.com'),
+    payGovText.replace('Your payment has been submitted to Pay.gov', 'Your payment could not be submitted to Pay.gov'),
+    payGovText.replace('Application Name: USCIS', 'Application Name: Other'),
+    payGovText.replace('Transaction Type: Credit Card', 'Transaction Type: Refund'),
+  ]) {
+    const result = validate(text);
+    assert.equal(result.totalAmount, undefined);
+    assert.equal(result.currency, undefined);
+    assert.ok(result.reviewReasons.length);
+  }
+  assert.equal(validate(payGovText.replace('$710.00', '710.00')).currency, undefined);
+  for (const extra of ['\nTransaction Amount: $720.00', '\nGrand total: 720.00 USD']) {
+    assert.equal(validate(payGovText + extra).totalAmount, undefined);
+    assert.ok(validate(payGovText + extra).reviewReasons.includes('Conflicting labeled totals'));
+  }
+  assert.deepEqual(validate(payGovText + '\nTransaction Amount: $710.00').reviewReasons, []);
+  for (const text of [
+    payGovText.replace('Transaction Date:', 'Scheduled Date:'),
+    payGovText.replace('Nov 20, 2026 12:41:21 AM', 'Feb 30, 2026 12:41:21 AM'),
+    payGovText + '\nTransaction Date: Nov 21, 2026 12:41:21 AM',
+  ]) assert.equal(validate(text).date, undefined);
+  assert.ok(validateEmailValues({transactionType: 'refund'}, payGovText, payGov.sender).reviewReasons.includes('Verify refund treatment before including it in spending'));
+});
+
 const cardAlert = `<div>---------- Forwarded message ---------<br>
   From: Bank Alerts &lt;alerts@notify.wellsfargo.com&gt;<br>
   Date: 11/15/2026<br>Subject: Card purchase<br>To: &lt;customer@example.com&gt;</div>

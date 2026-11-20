@@ -69,6 +69,35 @@ test('malformed AI output leaves a reviewable receipt and never invents merchant
   assert.ok(receipt.email.sourceStoragePath);assert.equal(receipt.email.renderStatus,'queued');
 });
 
+test('forwarded USCIS Pay.gov payments finalize from their source labels when AI omits amount and date evidence', async t => {
+  const h = harness(t, {'receiptForwardingAliases/customer': {userId: 'owner'}, 'users/owner': {subscriptionPlan: 'pro'}});
+  process.env.RECEIPT_INBOUND_DOMAIN = 'inbound.example.com';
+  process.env.EMAIL_INGEST_WEBHOOK_KEY = 'test-key';
+  const {VertexAI} = require('@google-cloud/vertexai');
+  const original = VertexAI.prototype.getGenerativeModel;
+  VertexAI.prototype.getGenerativeModel = () => ({generateContent: async () => ({
+    response: {candidates: [{content: {parts: [{text: '{"merchant":"USCIS","transactionType":"purchase"}'}]}}]},
+  })});
+  t.after(() => {VertexAI.prototype.getGenerativeModel = original;});
+  const source = require('./fixtures/forwarded-paygov.cjs').source;
+  let status, result;
+  const res = {status(value) {status = value; return this;}, json(value) {result = value; return this;}, send() {return this;}};
+  await inboundEmailWebhook({method: 'POST', headers: {'content-type': 'application/json'}, query: {key: 'test-key'},
+    body: {...source, from: source.sender, to: source.recipient, 'message-id': '<paygov@example.com>'}}, res);
+  assert.equal(status, 200);
+  assert.equal(result.createdReceipts, 1);
+  const receipt = [...h.documents].find(([path]) => path.startsWith('users/owner/receipts/'))[1];
+  assert.equal(receipt.status, 'final');
+  assert.equal(receipt.totalAmount, 710);
+  assert.equal(receipt.currency, 'USD');
+  assert.equal(receipt.date, '2026-11-20');
+  assert.equal(receipt.merchant.canonicalName, 'USCIS');
+  assert.deepEqual(receipt.extraction.reviewReasons, []);
+  assert.equal(receipt.skipProcessing, true);
+  assert.equal(receipt.email.renderStatus, 'queued');
+  assert.ok(h.files.has(receipt.email.documentStoragePath));
+});
+
 test('three failed render attempts stop, retain the archive, and allow only the owner to request a fresh retry',async t=>{
   const path='users/owner/receipts/email';const sourcePath='users/owner/receipts/source.json';
   const h=harness(t,{[path]:{file:{storagePath:'preview.png'},email:{pipelineVersion:2,renderStatus:'queued',renderRequestId:'1234567890abcdef',documentStoragePath:sourcePath}}});

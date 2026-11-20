@@ -64,6 +64,8 @@ The renderer disables scripts and browser network access. HTTPS image fetching v
 
 Extraction preserves table labels, supports international decimal amounts, requires evidence for total/date, distinguishes transfer principal/fees/recipient amount, validates calendar dates, and flags conflicting totals or arithmetic. Currency is not blindly defaulted to USD. Money transfers use the **Money transfers** category without inferring their purpose. Ambiguous transaction dates require review.
 
+USCIS Pay.gov credit/debit card confirmations support their labeled **Transaction Amount** and **Transaction Date**, including named months and a time of day. USD inference requires the original USCIS sender, submitted-payment confirmation, USCIS application label and a dollar-denominated amount. Missing or conflicting evidence still requires review; forwarding headers and the payment date do not replace a missing transaction date.
+
 ## Verification and deployment
 
 ```sh

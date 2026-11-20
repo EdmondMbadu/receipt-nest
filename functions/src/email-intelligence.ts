@@ -10,7 +10,7 @@ export const EMAIL_CATEGORIES = [
 ] as const;
 
 export interface EmailField<T> { value: T; confidence: number; rawText?: string }
-export const EMAIL_EXTRACTION_PIPELINE_VERSION = "email-extraction-v4";
+export const EMAIL_EXTRACTION_PIPELINE_VERSION = "email-extraction-v5";
 export interface EmailValues {
   totalAmount?: EmailField<number>;
   currency?: EmailField<string>;
@@ -151,11 +151,39 @@ function cardPurchaseEvidence(text: string, sender: string) {
     date, dateEvidence: date ? dates[0][0] : undefined };
 }
 
+function uscisPayGovPaymentEvidence(text: string, sender: string) {
+  // A transaction amount is not generally proof of payment. Only accept this
+  // label in USCIS's submitted Pay.gov payment confirmation, using the original
+  // sender rather than the person forwarding it to ReceiptNest.
+  if (!/(?:^|<)ELISdonotreply@uscis\.dhs\.gov>?$/i.test(originalSender(text, sender))) return undefined;
+  const sections = text.split(FORWARD_MARKER);
+  const message = sections.length > 1 ? sections[1] : sections[0];
+  if (!/^Your payment has been submitted to Pay\.gov and the details are below\./im.test(message)
+      || !/^Application Name:[ \t]*USCIS\b/im.test(message)
+      || !/^Transaction Type:[ \t]*(?:Credit|Debit) Card[ \t|]*$/im.test(message)) return undefined;
+  const amounts = amountRows(message, "transaction amount");
+  if (!amounts.length) return undefined;
+  const currencies = new Set(amounts.map(row => row.currency || (row.rawText.includes("$") ? "USD" : undefined)));
+  const conflictingAmount = amounts.some(row => row.value !== amounts[0].value) || currencies.size > 1;
+  const amount = { ...amounts[0], currency: currencies.size === 1 ? [...currencies][0] : undefined };
+  const dates = [...message.matchAll(/^Transaction Date:[ \t]*([^\n|]+?)[ \t|]*$/gim)];
+  const values = new Set(dates.map(([, value]) => {
+    const match = value.match(/^(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?) +([0-9]{1,2}),? +([0-9]{4})(?: +(0?[1-9]|1[0-2]):[0-5][0-9](?::[0-5][0-9])? +[AP]M)?$/i);
+    if (!match) return emailDate(value, amount.currency === "USD");
+    const month = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
+      .indexOf(match[1].slice(0, 3).toLowerCase()) + 1;
+    return emailDate(`${match[3]}-${String(month).padStart(2, "0")}-${match[2].padStart(2, "0")}`);
+  }));
+  const date = values.size === 1 ? [...values][0] : undefined;
+  return { amount, conflictingAmount, merchant: "USCIS", date, dateEvidence: date ? dates[0][0] : undefined };
+}
+
 /** AI proposes fields; source labels and arithmetic decide whether they can be finalized. */
 export function validateEmailValues(parsed: Record<string, unknown>, text: string, sender: string): EmailValues {
   const reasons: string[] = [];
   const transfer = /\b(?:money transfer|transfer fees|total to (?:final )?receiver)\b/i.test(text);
-  const cardPurchase = !transfer && parsed.transactionType !== "refund" ? cardPurchaseEvidence(text, sender) : undefined;
+  const cardPurchase = !transfer && parsed.transactionType !== "refund"
+    ? cardPurchaseEvidence(text, sender) || uscisPayGovPaymentEvidence(text, sender) : undefined;
   const transactionType = transfer ? "money_transfer" : cardPurchase ? "purchase" :
     parsed.transactionType === "purchase" || parsed.transactionType === "refund" ? parsed.transactionType : "unknown";
   if (transactionType === "refund") reasons.push("Verify refund treatment before including it in spending");
