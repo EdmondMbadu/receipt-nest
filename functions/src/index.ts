@@ -72,3 +72,5 @@ export { getAdminReceiptIssues, getAdminReceiptIssue, getAdminReceiptPreview, ac
 export { notifyAdminReceiptNeedsReview } from "./receipt-review-alerts";
 
 export { renderForwardedEmailPdf, retryForwardedEmailPdf, cleanupForwardedEmailFiles } from "./email-pdf-worker";
+
+export { getNativeOnboardingState, saveNativeOnboardingProgress, recordNativeReceiptActivation } from "./native-onboarding";

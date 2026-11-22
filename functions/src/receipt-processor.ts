@@ -2,7 +2,7 @@
  * Receipt Processor Cloud Function
  *
  * Triggered when a new receipt is uploaded.
- * Uses a two-pass Gemini extraction for accurate receipt parsing.
+ * Preserves the existing Gemini extraction and receipt validation pipeline.
  */
 
 import { onDocumentCreated, onDocumentDeleted, onDocumentUpdated } from "firebase-functions/v2/firestore";
@@ -10,10 +10,8 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 import { VertexAI } from "@google-cloud/vertexai";
-import sharp from "sharp";
-import heicDecode from "heic-decode";
+import { performance } from "node:perf_hooks";
 import { assertAdmin } from "./authz";
-import { extractArchivedEmail, loadArchivedEmail } from "./email-ingest";
 import { claimReceiptAttempt, finishReceiptAttempt } from "./receipt-processing-state";
 import { emailRetrySource, processingFailure, RECEIPT_MODEL_ID } from "./receipt-issue-policy";
 
@@ -162,18 +160,16 @@ export const onReceiptDeletedUpdateUserCount = onDocumentDeleted(
  * Simple, robust Gemini extraction for receipts
  * Single pass with clear instructions - optimized for reliability
  */
-async function extractWithGemini(
-  fileBuffer: Buffer,
-  mimeType: string
-): Promise<ExtractionResult> {
+let sharedReceiptModel: ReturnType<VertexAI["getGenerativeModel"]> | undefined;
+function receiptModel() {
+  if (sharedReceiptModel) return sharedReceiptModel;
   const vertexAI = new VertexAI({
     project: PROJECT_ID,
     location: VERTEX_LOCATION,
   });
 
-  // Use stable model ID - gemini-2.5-flash is recommended
-  // Fallback order: gemini-2.5-flash -> gemini-2.0-flash
-  const model = vertexAI.getGenerativeModel({
+  // Reuse the same model client; extraction settings are intentionally unchanged.
+  sharedReceiptModel = vertexAI.getGenerativeModel({
     model: RECEIPT_MODEL_ID,
     generationConfig: {
       temperature: 0.1,
@@ -181,6 +177,15 @@ async function extractWithGemini(
       responseMimeType: "application/json",
     },
   });
+
+  return sharedReceiptModel;
+}
+
+async function extractWithGemini(
+  fileBuffer: Buffer,
+  mimeType: string
+): Promise<ExtractionResult> {
+  const model = receiptModel();
 
   // Normalize mimeType for Gemini
   const supportedMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"];
@@ -216,9 +221,11 @@ Return ONLY the JSON object, no other text.`;
   logger.info("Starting Gemini extraction", {
     model: RECEIPT_MODEL_ID,
     mimeType: geminiMimeType,
-    bufferSize: fileBuffer.length
+    bufferSize: fileBuffer.length,
+    inputMode: "inline"
   });
 
+  const modelStart = performance.now();
   const modelResult = await model.generateContent({
     contents: [
       {
@@ -231,6 +238,13 @@ Return ONLY the JSON object, no other text.`;
     ],
   });
 
+  logger.info("Receipt model timing", {
+    model: RECEIPT_MODEL_ID, inputMode: "inline",
+    durationMs: Math.round(performance.now() - modelStart),
+    promptTokens: modelResult.response.usageMetadata?.promptTokenCount,
+    outputTokens: modelResult.response.usageMetadata?.candidatesTokenCount,
+    totalTokens: modelResult.response.usageMetadata?.totalTokenCount,
+  });
   const responseText = modelResult.response.candidates?.[0]?.content?.parts?.[0]?.text || "";
   logger.info("Gemini raw response", { text: responseText });
 
@@ -377,6 +391,7 @@ export const processReceipt = onDocumentCreated(
     document: "users/{userId}/receipts/{receiptId}",
     region: "us-central1",
     memory: "1GiB",
+    minInstances: 0,
     timeoutSeconds: 300,
   },
   async (event) => {
@@ -387,7 +402,7 @@ export const processReceipt = onDocumentCreated(
     }
 
     const { userId, receiptId } = event.params;
-    await runReceiptProcessing(userId, receiptId, event.id, false);
+    await runReceiptProcessing(userId, receiptId, event.id, false, event.time);
   }
 );
 
@@ -396,24 +411,35 @@ export const processAdminReceiptRetry = onDocumentCreated(
   async event => {
     const job = event.data?.data();
     if (!job) return;
-    await runReceiptProcessing(job.userId, job.receiptId, event.params.jobId, true);
+    await runReceiptProcessing(job.userId, job.receiptId, event.params.jobId, true, event.time);
     await event.data!.ref.delete();
   }
 );
 
-async function runReceiptProcessing(userId: string, receiptId: string, attemptId: string, retry: boolean) {
+async function runReceiptProcessing(userId: string, receiptId: string, attemptId: string, retry: boolean, eventTime?: string) {
+    const workerStart = performance.now();
+    const enteredAt = Date.now();
+    const timings: Record<string, number> = {};
+    let outcome = "failed";
+    let inputMode = "inline";
+    const eventAt = eventTime ? Date.parse(eventTime) : NaN;
+    if (Number.isFinite(eventAt)) timings.eventDeliveryMs = Math.max(0, enteredAt - eventAt);
     const receiptRef = admin.firestore().doc(`users/${userId}/receipts/${receiptId}`);
     const receiptData = await claimReceiptAttempt(receiptRef, attemptId, retry);
+    timings.claimMs = Math.round(performance.now() - workerStart);
     if (!receiptData) return;
     let stage = "file";
     let extractedForHistory: ExtractionResult | undefined;
     try {
       const emailSource = emailRetrySource(receiptData, userId);
       if (emailSource) {
+        inputMode = "email";
+        const { extractArchivedEmail, loadArchivedEmail } = await import("./email-ingest.js");
         const document = await loadArchivedEmail(emailSource);
         stage = "extraction";
         const proposed = await extractArchivedEmail(userId, document);
         await finishReceiptAttempt(receiptRef, attemptId, receiptData, retry, proposed);
+        outcome = "completed";
         return;
       }
       // Get the file from Storage
@@ -430,101 +456,131 @@ async function runReceiptProcessing(userId: string, receiptId: string, attemptId
 
       const bucket = admin.storage().bucket();
       const file = bucket.file(storagePath);
-      const [fileBuffer] = await file.download();
-      let mimeType = receiptData.file?.mimeType || "application/octet-stream";
-
-      logger.info(`Downloaded file: ${storagePath}, size: ${fileBuffer.length} bytes, mimeType: ${mimeType}`);
-
-      stage = "conversion";
-      // Convert HEIC/HEIF to JPEG for processing
-      let processBuffer = fileBuffer;
-      let processMimeType = mimeType;
-
-      // Check if it's a HEIC/HEIF file (by mimeType or file extension)
-      const isHeic = mimeType === "image/heic" ||
-        mimeType === "image/heif" ||
-        storagePath.toLowerCase().endsWith(".heic") ||
-        storagePath.toLowerCase().endsWith(".heif");
-
-      if (isHeic) {
-        logger.info("Detected HEIC/HEIF image, attempting conversion to JPEG...");
-
-        // Method 1: Try sharp first (might have native HEIC support)
-        let converted = false;
+      const prepareOriginal = async () => {
+        const started = performance.now();
         try {
-          const jpegBuffer = await sharp(fileBuffer)
-            .jpeg({ quality: 90 })
-            .toBuffer();
-          processBuffer = jpegBuffer;
-          processMimeType = "image/jpeg";
-          converted = true;
-          logger.info(`HEIC conversion with sharp successful, new size: ${processBuffer.length} bytes`);
-        } catch (sharpError: unknown) {
-          const errorMessage = sharpError instanceof Error ? sharpError.message : String(sharpError);
-          logger.warn(`Sharp HEIC conversion failed: ${errorMessage}. Trying heic-decode...`);
-        }
+          stage = "file";
+          const [fileBuffer] = await file.download();
+          let mimeType = receiptData.file?.mimeType || "application/octet-stream";
 
-        // Method 2: Fallback to heic-decode (pure JavaScript, works everywhere)
-        if (!converted) {
-          try {
-            const { width, height, data } = await heicDecode({ buffer: fileBuffer });
-            logger.info(`HEIC decoded: ${width}x${height}, data length: ${data.length}`);
+          logger.info(`Downloaded file: ${storagePath}, size: ${fileBuffer.length} bytes, mimeType: ${mimeType}`);
 
-            // heic-decode returns RGBA data (4 channels)
-            // Use sharp to properly encode as JPEG with correct color handling
-            const jpegBuffer = await sharp(Buffer.from(data), {
-              raw: {
-                width,
-                height,
-                channels: 4, // RGBA
-              },
-            })
-              .jpeg({ quality: 90 })
-              .toBuffer();
+          stage = "conversion";
+          // Convert HEIC/HEIF to JPEG for processing
+          let processBuffer = fileBuffer;
+          let processMimeType = mimeType;
 
-            processBuffer = jpegBuffer;
-            processMimeType = "image/jpeg";
-            converted = true;
-            logger.info(`HEIC conversion with heic-decode + sharp successful, new size: ${processBuffer.length} bytes`);
-          } catch (heicDecodeError: unknown) {
-            const errorMessage = heicDecodeError instanceof Error ? heicDecodeError.message : String(heicDecodeError);
-            logger.error(`heic-decode conversion also failed: ${errorMessage}`);
+          // Check if it's a HEIC/HEIF file (by mimeType or file extension)
+          const isHeic = mimeType === "image/heic" ||
+            mimeType === "image/heif" ||
+            storagePath.toLowerCase().endsWith(".heic") ||
+            storagePath.toLowerCase().endsWith(".heif");
+
+          if (isHeic) {
+            const { default: sharp } = await import("sharp");
+            logger.info("Detected HEIC/HEIF image, attempting conversion to JPEG...");
+
+            // Method 1: Try sharp first (might have native HEIC support)
+            let converted = false;
+            try {
+              const jpegBuffer = await sharp(fileBuffer)
+                .jpeg({ quality: 90 })
+                .toBuffer();
+              processBuffer = jpegBuffer;
+              processMimeType = "image/jpeg";
+              converted = true;
+              logger.info(`HEIC conversion with sharp successful, new size: ${processBuffer.length} bytes`);
+            } catch (sharpError: unknown) {
+              const errorMessage = sharpError instanceof Error ? sharpError.message : String(sharpError);
+              logger.warn(`Sharp HEIC conversion failed: ${errorMessage}. Trying heic-decode...`);
+            }
+
+            // Method 2: Fallback to heic-decode (pure JavaScript, works everywhere)
+            if (!converted) {
+              try {
+                const { default: heicDecode } = await import("heic-decode");
+                const { width, height, data } = await heicDecode({ buffer: fileBuffer });
+                logger.info(`HEIC decoded: ${width}x${height}, data length: ${data.length}`);
+
+                // heic-decode returns RGBA data (4 channels)
+                // Use sharp to properly encode as JPEG with correct color handling
+                const jpegBuffer = await sharp(Buffer.from(data), {
+                  raw: {
+                    width,
+                    height,
+                    channels: 4, // RGBA
+                  },
+                })
+                  .jpeg({ quality: 90 })
+                  .toBuffer();
+
+                processBuffer = jpegBuffer;
+                processMimeType = "image/jpeg";
+                converted = true;
+                logger.info(`HEIC conversion with heic-decode + sharp successful, new size: ${processBuffer.length} bytes`);
+              } catch (heicDecodeError: unknown) {
+                const errorMessage = heicDecodeError instanceof Error ? heicDecodeError.message : String(heicDecodeError);
+                logger.error(`heic-decode conversion also failed: ${errorMessage}`);
+              }
+            }
+
+            // Keep conversion failures visible instead of mislabeling the original as a JPEG.
+            if (!converted) {
+              throw new Error("Image conversion failed");
+            }
           }
-        }
 
-        // Keep conversion failures visible instead of mislabeling the original as a JPEG.
-        if (!converted) {
-          throw new Error("Image conversion failed");
+          return { processBuffer, processMimeType };
+        } finally {
+          timings.filePrepareMs = Math.round(performance.now() - started);
         }
-      }
-
+      };
+      const prepared = await prepareOriginal();
       stage = "extraction";
-      const extraction = await extractWithGemini(processBuffer, processMimeType);
+      const modelStarted = performance.now();
+      let extraction: ExtractionResult;
+      try {
+        extraction = await extractWithGemini(prepared.processBuffer, prepared.processMimeType);
+      } finally {
+        timings.extractionMs = Math.round(performance.now() - modelStarted);
+      }
       if (!extraction) throw new Error("The model returned an empty response");
       extractedForHistory = extraction;
       stage = "classification";
       // Step 3: Normalize merchant name
+      const merchantStarted = performance.now();
       const merchant = await normalizeMerchant(
         userId,
         extraction.supplierName?.value || "Unknown",
         extraction.supplierName?.confidence || 0
       );
 
+      timings.merchantMs = Math.round(performance.now() - merchantStarted);
+      const categoryStarted = performance.now();
       // Step 4: Classify category
       const category = await classifyCategory(
         merchant.canonicalName,
         extraction
       );
 
+      timings.categoryMs = Math.round(performance.now() - categoryStarted);
+      const commitStarted = performance.now();
       await finishReceiptAttempt(receiptRef, attemptId, receiptData, retry, {
         extraction, merchant, category,
         totalAmount: extraction.totalAmount?.value,
         currency: extraction.currency?.value,
         date: extraction.date?.value,
       });
+      timings.commitMs = Math.round(performance.now() - commitStarted);
+      outcome = "completed";
     } catch (error) {
       logger.error("Error processing receipt", { userId, receiptId, attemptId, stage, error });
       await finishReceiptAttempt(receiptRef, attemptId, receiptData, retry, { extraction: extractedForHistory }, { ...processingFailure(error, stage), stage });
+    } finally {
+      logger.info("Receipt processing timing", {
+        attemptId, retry, outcome, inputMode,
+        ...timings, workerMs: Math.round(performance.now() - workerStart),
+      });
     }
 }
 
@@ -942,11 +998,13 @@ export const backfillReceiptCategories = onCall(
             storagePath.toLowerCase().endsWith(".heif");
 
           if (isHeic) {
+            const { default: sharp } = await import("sharp");
             try {
               processBuffer = await sharp(fileBuffer).jpeg({ quality: 90 }).toBuffer();
               processMimeType = "image/jpeg";
             } catch {
               try {
+                const { default: heicDecode } = await import("heic-decode");
                 const { width, height, data: rawData } = await heicDecode({ buffer: fileBuffer });
                 processBuffer = await sharp(Buffer.from(rawData), {
                   raw: { width, height, channels: 4 },
