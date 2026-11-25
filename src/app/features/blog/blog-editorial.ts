@@ -28,6 +28,116 @@ const scanner = { href: '/receipt-scanner', label: 'See the receipt-scanning wor
 const email = { href: '/email-receipt-organizer', label: 'Set up email-receipt forwarding' };
 
 const editorial: Readonly<Record<string, BlogEditorial>> = {
+  "organize-receipts-in-gmail": {
+    "note": "Published by ReceiptNest, the receipt app discussed here. The supplier, purchase, and label examples are illustrative. Gmail instructions follow Google’s documentation; this guide uses selected-message forwarding, not an automatic inbox integration. Hero image is an editorial illustration generated with AI.",
+    "sources": [
+      {
+        "href": "https://support.google.com/mail/answer/7190?hl=en",
+        "label": "Google: Gmail search operators"
+      },
+      {
+        "href": "https://support.google.com/mail/answer/118708?hl=en",
+        "label": "Google: create and manage Gmail labels"
+      },
+      {
+        "href": "https://support.google.com/mail/answer/6579?hl=en",
+        "label": "Google: create email filters"
+      },
+      {
+        "href": "https://support.google.com/mail/answer/30719?hl=en",
+        "label": "Google: download and forward attachments"
+      },
+      {
+        "href": "https://support.google.com/mail/answer/8255?hl=en",
+        "label": "Google: print an individual Gmail message"
+      }
+    ],
+    "workflows": [
+      {
+        "href": "/email-receipt-organizer",
+        "label": "Find your receipt-forwarding workflow"
+      },
+      {
+        "href": "/blog/receipt-folder-system",
+        "label": "Choose a filing system for saved originals"
+      },
+      {
+        "href": "/blog/receipt-pdfs-to-excel",
+        "label": "Turn reviewed receipts into a monthly spreadsheet"
+      },
+      {
+        "href": "/security",
+        "label": "Review how ReceiptNest handles receipt data"
+      }
+    ],
+    "quickLinks": [
+      {
+        "href": "/blog/organize-receipts-in-gmail",
+        "fragment": "find-receipt-emails",
+        "label": "See the Gmail searches"
+      },
+      {
+        "href": "/blog/organize-receipts-in-gmail",
+        "fragment": "forward-one-receipt",
+        "label": "Forward and check one receipt"
+      }
+    ],
+    "cta": {
+      "label": "Organize your first email receipt",
+      "body": "Forward one complete receipt to your personal ReceiptNest address, check the recorded details, and open the saved original before adding the rest."
+    }
+  },
+  "receipt-pdfs-to-excel": {
+    "note": "Published by ReceiptNest. Purchases and amounts in the worked example are fictional and match our public sample CSV. Product instructions describe the current monthly export, including its missing fields and Total row. Hero image is an editorial illustration generated with AI.",
+    "sources": [
+      {
+        "href": "https://support.microsoft.com/en-us/excel/get-started/import-or-export-text-txt-or-csv-files",
+        "label": "Microsoft: import CSV files in Excel"
+      },
+      {
+        "href": "https://support.microsoft.com/en-us/excel/import-data-from-a-csv-html-or-text-file",
+        "label": "Microsoft: import files in Excel for Mac"
+      }
+    ],
+    "workflows": [
+      {
+        "href": "/receipt-to-csv",
+        "label": "Download the same fictional CSV and inspect its columns"
+      },
+      {
+        "href": "/receipt-scanner",
+        "label": "Capture and review a receipt PDF"
+      },
+      {
+        "href": "/blog/organize-receipts-for-accountant",
+        "label": "Prepare a complete accountant handoff"
+      },
+      {
+        "href": "/blog/organize-receipts-in-gmail",
+        "label": "Find the receipts still in your inbox"
+      }
+    ],
+    "quickLinks": [
+      {
+        "href": "/blog/receipt-pdfs-to-excel",
+        "fragment": "worked-month",
+        "label": "See the three-purchase example"
+      },
+      {
+        "href": "/blog/receipt-pdfs-to-excel",
+        "fragment": "import-into-excel",
+        "label": "Check the Excel import steps"
+      },
+      {
+        "href": "/receipt-to-csv",
+        "label": "Download the sample CSV"
+      }
+    ],
+    "cta": {
+      "label": "Prepare your first receipt for export",
+      "body": "Upload one receipt PDF, compare the extracted merchant, date, and amount with the original, then try the monthly CSV in your spreadsheet."
+    }
+  },
   "chatgpt-claude-receipt-scanning": {
     "note": "Published by ReceiptNest, the receipt app discussed here. This is a documented workflow comparison, not an independent ranking or a hands-on accuracy benchmark. The prompt and purchase example are illustrative; model features and upload limits can change.",
     "sources": [

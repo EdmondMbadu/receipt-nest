@@ -73,6 +73,564 @@ export const blogCategories: readonly BlogCategory[] = [
 
 export const blogPosts: readonly BlogPost[] = [
   {
+    "slug": "organize-receipts-in-gmail",
+    "path": "/blog/organize-receipts-in-gmail",
+    "category": "How-To",
+    "title": "How to Find and Organize Receipt Emails in Gmail",
+    "seoTitle": "Organize Receipts in Gmail: Search, Label, and Save",
+    "description": "Find receipt emails in Gmail with copyable searches, label the records you need, keep the originals, and forward selected receipts into one organized place.",
+    "excerpt": "The receipt is somewhere in your inbox. Find it, keep the right document, and give the purchase a place you can find again next month.",
+    "datePublished": "2026-11-25",
+    "dateModified": "2026-11-25",
+    "readTime": "5 min read",
+    "image": "/assets/images/blog/organize-receipts-in-gmail.webp",
+    "imageWidth": 1672,
+    "imageHeight": 941,
+    "imageAlt": "A person sorting purchase receipts beside a laptop and an envelope on a sunlit desk",
+    "keywords": [
+      "organize receipts in Gmail",
+      "find receipt emails",
+      "Gmail receipt search",
+      "email receipt organization"
+    ],
+    "intro": [
+      "To organize receipts in Gmail, first find the purchase messages you need, label them for review, and save the document that actually records the purchase. Then check the merchant, purchase date, final amount, and currency before adding it to your monthly records.",
+      "Start with one month or one supplier. A search for every email containing “receipt” can bring back delivery notices, unpaid invoices, and several messages about the same order. A useful receipt collection starts with checking what each message represents."
+    ],
+    "sections": [
+      {
+        "id": "find-receipt-emails",
+        "title": "Start with a few targeted Gmail searches",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "On a computer, paste a search below into Gmail’s search box. Replace the example supplier and dates with your own. Braces match alternatives, while from:, subject:, filename:, after:, and before: narrow the results.",
+            "source": {
+              "href": "https://support.google.com/mail/answer/7190?hl=en",
+              "label": "Google: Gmail search operators"
+            }
+          },
+          {
+            "kind": "table",
+            "table": {
+              "columns": [
+                "What you are looking for",
+                "Search to adapt"
+              ],
+              "rows": [
+                [
+                  "Receipt or invoice subjects in a November delivery window",
+                  "{subject:receipt subject:invoice} after:2026/11/01 before:2026/12/01"
+                ],
+                [
+                  "A familiar supplier’s messages",
+                  "from:billing@example.com after:2026/11/01 before:2026/12/01"
+                ],
+                [
+                  "Possible receipt PDFs",
+                  "filename:pdf {receipt invoice} after:2026/11/01 before:2026/12/01"
+                ],
+                [
+                  "Payment-confirmation wording",
+                  "\"payment confirmation\" after:2026/11/01 before:2026/12/01"
+                ]
+              ]
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "These are search starting points, not a complete inventory. Some sellers use a different subject, put the purchase details in the message body, or send a link to their account portal. Search a known merchant separately when a receipt you expect is missing."
+          },
+          {
+            "kind": "callout",
+            "tone": "note",
+            "title": "Delivery date and purchase date are different",
+            "text": "Gmail’s date operators filter when messages were received. Use the date printed on the actual receipt for your purchase record. Widen the search around the month’s boundaries to look for receipts that arrived later."
+          }
+        ]
+      },
+      {
+        "id": "label-for-review",
+        "title": "Give the messages a review label",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "Create a label called Receipt review, then apply it to the messages you want to inspect. Keep a second label such as Receipts 2026 for messages you have already checked. Gmail supports multiple labels; labeling a message does not create a separate copy.",
+            "source": {
+              "href": "https://support.google.com/mail/answer/118708?hl=en",
+              "label": "Google: create and manage Gmail labels"
+            }
+          },
+          {
+            "kind": "ordered",
+            "items": [
+              "Open a promising message and check which purchase it concerns.",
+              "Apply Receipt review while you are checking its document and payment details.",
+              "Once the purchase is saved and verified, apply Receipts 2026 and remove Receipt review."
+            ]
+          },
+          {
+            "kind": "paragraph",
+            "text": "Choose your labels to match how you work. A small collection may only need one year label and a short review queue. Adding a separate label for every merchant can create more filing work than it saves."
+          },
+          {
+            "kind": "paragraph",
+            "text": "Keep the source messages. A label is a way to find mail inside the account, not an independent archive. If you need a copy outside Gmail, save the relevant document as part of the next step."
+          }
+        ]
+      },
+      {
+        "id": "keep-the-right-document",
+        "title": "Keep the receipt, not every message about the order",
+        "blocks": [
+          {
+            "kind": "table",
+            "table": {
+              "columns": [
+                "What the email contains",
+                "What to do next"
+              ],
+              "rows": [
+                [
+                  "An attached receipt PDF or image",
+                  "Download and inspect the attachment, or forward the message with the attachment included."
+                ],
+                [
+                  "Complete purchase details in the body",
+                  "Keep the message and check its final amount and payment status before saving it."
+                ],
+                [
+                  "Only a link to an online account",
+                  "Open the retailer account and obtain the actual receipt or invoice you need."
+                ],
+                [
+                  "An order confirmation followed by a paid receipt",
+                  "Check that they concern the same purchase before creating another expense record."
+                ],
+                [
+                  "An invoice showing a balance still due",
+                  "Keep it distinct from a record of payment; do not describe it as paid without supporting evidence."
+                ]
+              ]
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "In Gmail on a computer, open the message and use the attachment’s Download control to save its PDF or image. Google also documents that forwarding includes attachments, while replying does not automatically include them. Check the outgoing message before sending.",
+            "source": {
+              "href": "https://support.google.com/mail/answer/30719?hl=en",
+              "label": "Google: download and forward attachments"
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "For a body-only receipt, you can print the individual message from its More menu. If your browser or operating system offers Save as PDF in the print dialog, inspect the saved file to make sure the complete receipt is present.",
+            "source": {
+              "href": "https://support.google.com/mail/answer/8255?hl=en",
+              "label": "Google: print an individual Gmail message"
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "Use a meaningful filename for a saved document, such as 2026-11-03_Example-Office-Supply_USD-43.20.pdf. Keep an unreadable or missing value marked for review instead of guessing it to finish the filename."
+          }
+        ]
+      },
+      {
+        "id": "one-purchase-example",
+        "title": "Check one purchase before building the collection",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "Imagine three emails from a fictional office supplier: an order confirmation, a dispatch notice, and a paid receipt. All three refer to order EXAMPLE-104. The receipt shows a purchase date of November 3, 2026, subtotal USD 40.00, tax USD 3.20, and total paid USD 43.20."
+          },
+          {
+            "kind": "table",
+            "table": {
+              "columns": [
+                "Record to keep",
+                "Reviewed value"
+              ],
+              "rows": [
+                [
+                  "Merchant",
+                  "Example Office Supply"
+                ],
+                [
+                  "Purchase date",
+                  "2026-11-03"
+                ],
+                [
+                  "Final amount and currency",
+                  "43.20 USD"
+                ],
+                [
+                  "Original",
+                  "The paid receipt, with the order reference available"
+                ],
+                [
+                  "Your context",
+                  "Office supplies for the November client project"
+                ]
+              ]
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "This is one USD 43.20 purchase, not three expenses. Do not add the tax to the paid total again. The project note comes from you; the receipt itself cannot establish why you made the purchase."
+          },
+          {
+            "kind": "paragraph",
+            "text": "For a subscription, the merchant and amount may repeat each month. Compare the purchase date and reference as well as the amount before deciding that two records are duplicates."
+          }
+        ]
+      },
+      {
+        "id": "forward-one-receipt",
+        "title": "Bring one checked email into ReceiptNest",
+        "blocks": [
+          {
+            "kind": "ordered",
+            "items": [
+              "Sign in to ReceiptNest and copy the personal receipt-forwarding address shown in your account.",
+              "In Gmail, forward one complete receipt message to that address, including its PDF or image attachment when present.",
+              "Open the resulting ReceiptNest record and compare its merchant, purchase date, final amount, and currency with the original.",
+              "Open the saved email document or attached receipt to check that you can retrieve the evidence. Add your own project or purpose note if useful."
+            ]
+          },
+          {
+            "kind": "paragraph",
+            "text": "ReceiptNest can process supported receipt attachments or readable details in the email body. A message containing only a retailer link may require you to download the actual receipt and upload it separately. If a field needs review, resolve it before relying on an export."
+          },
+          {
+            "kind": "paragraph",
+            "text": "This workflow forwards selected messages; it does not connect ReceiptNest to your whole Gmail inbox. Forwarding shares those messages and attachments with ReceiptNest for cloud processing. Review the data-handling page and send only records you are authorized to use."
+          }
+        ]
+      },
+      {
+        "id": "label-future-receipts",
+        "title": "Use a narrow label filter for future messages",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "Once you know a supplier’s receipt sender and subject pattern, use Gmail’s search options to test those criteria and create a filter that applies your review label. Keep the filter limited to messages you actually want to inspect.",
+            "source": {
+              "href": "https://support.google.com/mail/answer/6579?hl=en",
+              "label": "Google: create email filters"
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "A label filter helps you find candidates; it does not verify payment, choose the correct purchase date, or remove duplicates. Review the matching messages before adding them to your receipt collection."
+          },
+          {
+            "kind": "callout",
+            "tone": "tip",
+            "title": "Keep the weekly routine small",
+            "text": "Open Receipt review, check the new purchases, and save the documents you need. At month end, make sure a few recorded purchases lead back to readable originals. The system is working when you can find the evidence without starting the inbox search again."
+          }
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "question": "Why does has:attachment miss some receipt emails?",
+        "answer": "Some receipts put their purchase information in the message body or link to a retailer account. Search the sender and subject as well as attached files."
+      },
+      {
+        "question": "Can I automatically import my Gmail inbox into ReceiptNest?",
+        "answer": "The workflow in this guide uses manual forwarding of selected messages to your personal ReceiptNest address. It does not provide or require an automatic Gmail inbox connection."
+      },
+      {
+        "question": "Should I delete the Gmail message after saving the receipt?",
+        "answer": "Keep it while you verify the saved original and decide how your records will be preserved. Applying or removing a Gmail label is different from maintaining an independent copy of the receipt."
+      }
+    ],
+    "relatedSlugs": [
+      "receipt-folder-system",
+      "organize-receipts-for-accountant",
+      "receipt-pdfs-to-excel"
+    ]
+  },
+  {
+    "slug": "receipt-pdfs-to-excel",
+    "path": "/blog/receipt-pdfs-to-excel",
+    "category": "How-To",
+    "title": "How to Turn Receipt PDFs into a Monthly Excel Expense Sheet",
+    "seoTitle": "Receipt PDFs to Excel: Build a Monthly Expense Sheet",
+    "description": "Turn receipt PDFs into a checked monthly spreadsheet. Follow a worked example, import the CSV into Excel, avoid double totals, and keep the originals.",
+    "excerpt": "A folder of PDFs preserves the receipts. A checked spreadsheet makes the month easier to review. Keep both, and make sure the numbers refer to the same purchases.",
+    "datePublished": "2026-11-25",
+    "dateModified": "2026-11-25",
+    "readTime": "5 min read",
+    "image": "/assets/images/blog/receipt-pdfs-to-excel.webp",
+    "imageWidth": 1672,
+    "imageHeight": 941,
+    "imageAlt": "Three purchase receipts beside an open notebook and laptop on a desk ready for review",
+    "keywords": [
+      "receipt PDFs to Excel",
+      "receipts to spreadsheet",
+      "monthly receipt spreadsheet",
+      "receipt CSV export"
+    ],
+    "intro": [
+      "To turn receipt PDFs into a useful Excel sheet, extract or enter one row for each purchase, check the values against the original documents, and import the rows into your workbook. Then confirm the dates, amounts, and total before adding any analysis.",
+      "For a small batch, manual entry may be enough. With ReceiptNest, you can upload the receipts, review the extracted details, and export a monthly CSV that Excel can open. This guide walks through that existing workflow, including the fields you will need to add yourself."
+    ],
+    "sections": [
+      {
+        "id": "prepare-one-month",
+        "title": "Prepare one month of receipts and keep the originals",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "Gather the PDFs you want to review. A PDF may contain selectable text or a scanned image, so copying text out of it may not produce a clean table. Whatever method you use, keep the source document available while checking the result."
+          },
+          {
+            "kind": "ordered",
+            "items": [
+              "Choose a purchase month and a single currency for the first batch.",
+              "Open each document and check the merchant, purchase date, final paid amount, and currency.",
+              "Check whether two files refer to the same purchase, especially when one is an invoice and another is a payment confirmation.",
+              "Keep incomplete, unreadable, refunded, or otherwise uncertain records in a review queue rather than forcing them into a clean total."
+            ]
+          },
+          {
+            "kind": "paragraph",
+            "text": "For this walkthrough, use one receipt per file. A PDF containing several separate receipts needs to be reviewed and separated or grouped appropriately before expecting one record per purchase. Several pages can also belong to one receipt, so page count alone is not a transaction count."
+          }
+        ]
+      },
+      {
+        "id": "review-the-extraction",
+        "title": "Read the PDF, then verify the purchase record",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "Upload a receipt PDF to ReceiptNest and wait for its extraction. Compare the recorded merchant, date, and amount with the original. Start with the paid total, not a subtotal, tendered amount, or remaining balance. Keep tax already included in that total from being added a second time."
+          },
+          {
+            "kind": "table",
+            "table": {
+              "columns": [
+                "Check",
+                "Question to answer against the PDF"
+              ],
+              "rows": [
+                [
+                  "Merchant",
+                  "Is this the seller, rather than the bank or person who forwarded the document?"
+                ],
+                [
+                  "Date",
+                  "Is this the purchase date, rather than the upload, forwarding, or due date?"
+                ],
+                [
+                  "Amount",
+                  "Is it the final amount paid for this purchase?"
+                ],
+                [
+                  "Currency",
+                  "Which currency does the document support? A dollar symbol alone may be ambiguous."
+                ],
+                [
+                  "Original",
+                  "Can you open the complete source document from the saved record?"
+                ]
+              ]
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "Correct an extraction error in the record before exporting. If the original does not establish a value, keep it for review. A spreadsheet looks tidy even when its source values are wrong; its appearance is not a check of the receipts."
+          }
+        ]
+      },
+      {
+        "id": "worked-month",
+        "title": "Work through three example purchases",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "The following fictional purchases match the public sample monthly CSV. All three are USD. They are examples of reviewed records, not a benchmark of automatic extraction accuracy."
+          },
+          {
+            "kind": "table",
+            "table": {
+              "columns": [
+                "Merchant",
+                "Date",
+                "Amount"
+              ],
+              "rows": [
+                [
+                  "Example Office Supply",
+                  "2026-09-04",
+                  "27.48"
+                ],
+                [
+                  "Example Software",
+                  "2026-09-08",
+                  "12.00"
+                ],
+                [
+                  "Example Print Shop",
+                  "2026-09-10",
+                  "9.74"
+                ],
+                [
+                  "Total",
+                  "",
+                  "49.22"
+                ]
+              ]
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "Check the arithmetic separately: 27.48 + 12.00 + 9.74 = 49.22. Keep each original PDF with its record so you can answer a question about any one of those purchases later."
+          },
+          {
+            "kind": "callout",
+            "tone": "tip",
+            "title": "The sample can be inspected before signup",
+            "text": "The receipt-to-CSV page has the downloadable fictional file used here. It shows the current monthly-export format. Downloading that sample does not require an account; processing and exporting your own receipts does."
+          }
+        ]
+      },
+      {
+        "id": "export-the-month",
+        "title": "Export the month and understand its columns",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "In ReceiptNest, open the relevant month’s download menu and choose its CSV export. Monthly and folder exports contain Merchant, Date, and Amount, followed by a Total row. Category exports also contain Category."
+          },
+          {
+            "kind": "paragraph",
+            "text": "The current monthly CSV does not include currency, notes, links to originals, separate tax, or line items. It is not a native XLSX workbook. Keep the original documents and add any extra context in a separate working copy."
+          },
+          {
+            "kind": "table",
+            "table": {
+              "columns": [
+                "Information you need",
+                "How to preserve it in this workflow"
+              ],
+              "rows": [
+                [
+                  "Currency",
+                  "Verify it on the original records and add a Currency column to your working copy."
+                ],
+                [
+                  "Project or business context",
+                  "Add your own Project or Purpose column; receipt notes are not exported in the monthly CSV."
+                ],
+                [
+                  "A way back to the original",
+                  "Keep a separate source index or add your own Original filename column. These links are not generated by the CSV export."
+                ],
+                [
+                  "Tax or line-item details",
+                  "Read the original document and record the required detail separately. Do not infer it from the summary amount."
+                ]
+              ]
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "Do not use a combined monthly total when the batch contains different currencies. Separate the rows by verified currency before summing. The monthly export does not convert amounts to a common currency."
+          }
+        ]
+      },
+      {
+        "id": "import-into-excel",
+        "title": "Import the CSV into Excel and check the preview",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "In supported desktop versions of Excel for Windows, use Data → From Text/CSV, select the file, inspect the import preview, and load the data. Check the delimiter and how dates and numbers are interpreted before treating the sheet as ready.",
+            "source": {
+              "href": "https://support.microsoft.com/en-us/excel/get-started/import-or-export-text-txt-or-csv-files",
+              "label": "Microsoft: import CSV files in Excel"
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "On a Mac, the exact menu depends on the Excel version; Microsoft documents the Get Data and file-import options. If your interface differs, follow the instructions for your edition.",
+            "source": {
+              "href": "https://support.microsoft.com/en-us/excel/import-data-from-a-csv-html-or-text-file",
+              "label": "Microsoft: import files in Excel for Mac"
+            }
+          },
+          {
+            "kind": "ordered",
+            "items": [
+              "Confirm that Merchant, Date, and Amount occupy separate columns.",
+              "Compare a date and a decimal amount with the CSV and original receipt. Check that an amount can be used as a number.",
+              "Remove the final Total row from the transaction table before calculating a new sum or importing the rows elsewhere.",
+              "For the three example purchases in rows 2–4, use =SUM(C2:C4). The result should be 49.22.",
+              "Save your working file as an Excel workbook if you add formulas, formatting, or extra sheets, and retain the original CSV as the exported snapshot."
+            ]
+          },
+          {
+            "kind": "callout",
+            "tone": "note",
+            "title": "Do not count the summary as another purchase",
+            "text": "The sample has three purchase rows and one Total row. Summing all four amount cells produces 98.44, which is double the actual 49.22. When adding more months, exclude each export’s Total row before combining the purchases."
+          }
+        ]
+      },
+      {
+        "id": "finish-the-handoff",
+        "title": "Make the spreadsheet useful to the next person",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "Add the context your reviewer needs, using clearly named columns. A project note or currency you add is your own annotation, not a field exported by ReceiptNest. Ask the person receiving the file which records and supporting documents they need."
+          },
+          {
+            "kind": "list",
+            "items": [
+              "Keep purchases and refunds distinguishable rather than hiding their treatment in a single number.",
+              "Use a source filename or index that still identifies a document after the spreadsheet is shared.",
+              "Retain receipt originals alongside the summary; a CSV contains the recorded values, not the PDF images.",
+              "Check the destination’s required columns before using a spreadsheet as an accounting-system import."
+            ]
+          },
+          {
+            "kind": "paragraph",
+            "text": "Try the process with one receipt first: open the PDF, verify its record, export the month, and find that purchase in Excel. Once that round trip works, repeat it for the rest of the month. The useful result is a number you can trace back to evidence."
+          }
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "question": "Can I convert receipt PDFs to Excel without a receipt app?",
+        "answer": "Yes. For a small batch, you can enter the values directly into a spreadsheet and retain the PDFs. Check each record against its source and avoid recording the same purchase twice."
+      },
+      {
+        "question": "Does ReceiptNest export a native Excel workbook?",
+        "answer": "The workflow described here exports CSV, which Excel can import. The monthly CSV contains Merchant, Date, and Amount plus a Total row. It is not native XLSX export or a line-item conversion."
+      },
+      {
+        "question": "Why is my receipt total twice what I expected?",
+        "answer": "Check whether your formula includes both the individual purchase rows and the export’s final Total row. In the sample, the purchases total 49.22; including the summary again gives 98.44."
+      },
+      {
+        "question": "Can I combine several currencies in one monthly total?",
+        "answer": "Keep verified currencies separate unless you deliberately apply and document a conversion outside this workflow. The monthly CSV has no currency column and does not perform currency conversion."
+      }
+    ],
+    "relatedSlugs": [
+      "organize-receipts-for-accountant",
+      "organize-receipts-in-gmail",
+      "chatgpt-claude-receipt-scanning"
+    ]
+  },
+  {
     "slug": "chatgpt-claude-receipt-scanning",
     "path": "/blog/chatgpt-claude-receipt-scanning",
     "category": "Comparisons",

@@ -853,6 +853,10 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       {
         "path": "/email-receipt-organizer",
         "label": "Capture emailed receipts before export"
+      },
+      {
+        "path": "/blog/receipt-pdfs-to-excel",
+        "label": "Follow a receipt PDF through a checked Excel import"
       }
     ],
     "sources": [
@@ -959,6 +963,10 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       {
         "path": "/blog/scan-receipts-automatically",
         "label": "Combine email, photo, and PDF capture"
+      },
+      {
+        "path": "/blog/organize-receipts-in-gmail",
+        "label": "Find and organize your receipt emails in Gmail"
       }
     ]
   }
