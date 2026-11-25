@@ -147,6 +147,80 @@ test('card alert evidence leaves conflicting amounts, ambiguous currency and unr
   assert.equal(validate(cardAlertText.replace('11/07/2026', 'February 30, 2026')).date, undefined);
 });
 
+const zelle = require('./fixtures/forwarded-zelle.cjs').source;
+const zelleText = emailExtractionText(zelle.html, '');
+
+test('completed Wells Fargo Zelle confirmation supports sent amount, USD and its own date without AI evidence', () => {
+  const result = validateEmailValues({total: 999, date: '2026-11-26', merchant: 'Customer', category: 'Shopping'}, zelleText, zelle.sender);
+  assert.deepEqual(result.reviewReasons, []);
+  assert.equal(result.totalAmount.value, 125.5);
+  assert.equal(result.currency.value, 'USD');
+  assert.equal(result.date.value, '2026-11-07');
+  assert.equal(result.supplierName.value, 'Wells Fargo');
+  assert.equal(result.transactionType, 'money_transfer');
+  assert.equal(result.category.id, 'money_transfers');
+  assert.equal(result.category.assignedBy, 'rule');
+  assert.match(result.totalAmount.rawText, /You sent \$125.50 to EXAMPLE RECIPIENT/);
+  assert.match(result.date.rawText, /Date: 11\/07\/2026/);
+  assert.equal(result.transferAmount, undefined);
+  assert.equal(result.fees, undefined);
+  assert.equal(result.recipientAmount, undefined);
+  const direct = zelleText.slice(zelleText.indexOf('You sent $'));
+  assert.deepEqual(validateEmailValues({}, direct, 'Wells Fargo <alerts@notify.wellsfargo.com>').reviewReasons, []);
+  assert.deepEqual(validateEmailValues({}, emailExtractionText('', zelleText), zelle.sender).reviewReasons, []);
+  assert.equal(validateEmailValues({}, zelleText.replace('$125.50', '$1,234.56'), zelle.sender).totalAmount.value, 1234.56);
+});
+
+test('Zelle support requires this bank and a completed outgoing confirmation, never requests or scheduled/incoming payments', () => {
+  for (const text of [
+    zelleText.replace('notify.wellsfargo.com', 'notify.wellsfargo.com.example.com'),
+    zelleText.replace('alerts@notify.wellsfargo.com', 'alerts@example.com'),
+    zelleText.replace('You sent $', 'You requested $'),
+    zelleText.replace('You sent $', 'You received $'),
+    zelleText.replace('You sent $', 'You scheduled $'),
+    zelleText.replace('You sent $', 'You could not send $'),
+    zelleText.replace('See Zelle® Activity', 'See payment activity'),
+    zelleText.replace('From account: ...0000', 'To account: ...0000'),
+    zelleText.replace('Confirmation:', 'Request:'),
+  ]) {
+    const result = validateEmailValues({}, text, zelle.sender);
+    assert.equal(result.totalAmount, undefined);
+    assert.equal(result.currency, undefined);
+    assert.equal(result.transactionType, 'unknown');
+    assert.ok(result.reviewReasons.length);
+  }
+  // The forwarding account cannot supply the bank identity when the original sender differs.
+  assert.equal(validateEmailValues({}, zelleText.replace('alerts@notify.wellsfargo.com', 'other@example.com'),
+    'alerts@notify.wellsfargo.com').currency, undefined);
+  const foreignCurrency = validateEmailValues({}, zelleText.replace('You sent $125.50 to', 'You sent $125.50 CAD to'), zelle.sender);
+  assert.equal(foreignCurrency.totalAmount, undefined);
+  assert.equal(foreignCurrency.currency.value, 'CAD');
+  assert.equal(foreignCurrency.transactionType, 'unknown');
+  assert.ok(validateEmailValues({transactionType: 'refund'}, zelleText, zelle.sender).reviewReasons.includes('Verify refund treatment before including it in spending'));
+});
+
+test('Zelle conflicts and missing/invalid dates stay reviewable even when AI proposes plausible values', () => {
+  const validate = text => validateEmailValues({total: 125.5, totalEvidence: 'You sent $125.50 to EXAMPLE RECIPIENT',
+    date: '2026-11-26', dateEvidence: 'Transaction date: 2026-11-26'}, text, zelle.sender);
+  for (const extra of ['\nYou sent $130.00 to EXAMPLE RECIPIENT', '\nYou sent $125.50 to SOMEONE ELSE', '\nGrand total: 130.00 USD', '\nTotal paid: 125.50 CAD']) {
+    const result = validate(zelleText + extra);
+    assert.equal(result.totalAmount, undefined);
+    assert.ok(result.reviewReasons.includes('Conflicting labeled totals'));
+  }
+  assert.deepEqual(validate(zelleText + '\nYou sent $125.50 to EXAMPLE RECIPIENT\nDate: 11/07/2026').reviewReasons, []);
+  for (const text of [
+    zelleText.replace('Date: 11/07/2026', 'Scheduled date: 11/07/2026'),
+    zelleText.replace('11/07/2026', '02/30/2026'),
+    zelleText + '\nDate: 11/08/2026',
+    zelleText + '\nDate: invalid',
+    zelleText.replace('Date: 11/07/2026', 'Transaction date: 2026-11-26'),
+  ]) {
+    const result = validate(text);
+    assert.equal(result.date, undefined);
+    assert.ok(result.reviewReasons.includes('Missing or ambiguous transaction date'));
+  }
+});
+
 test('money/date parsing rejects malformed input and calendar rollover, preserves international decimal amounts', () => {
   for(const [raw,value] of [['670.99 USD',670.99],['1,234.56 USD',1234.56],['1.234,56 EUR',1234.56],['12,50 EUR',12.5]])assert.equal(emailMoney(raw),value);
   for(const raw of ['600abc99','1,2,3','--3','NaN','Infinity'])assert.equal(emailMoney(raw),undefined);

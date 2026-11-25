@@ -172,7 +172,7 @@ test('admin callables and the processing worker enforce authorization, concurren
       documents.delete(merchantPath);
       documents.delete(worker.issueRefFor('customer','email_123_body').path);
     });
-    const document = {
+    let document = {
       subject: 'Payment confirmation', sender: 'NOREPLY@myaccountinfo.com', html: '',
       text: 'Bill Charge Credit Card Payment Confirmation\nTotal Amount: $50.00\nPayment Date: 11/10/2026\nCall 866-279-5421.',
     };
@@ -207,7 +207,30 @@ test('admin callables and the processing worker enforce authorization, concurren
     assert.equal(retried.receipt.totalAmount, 55);
     assert.equal(retried.receipt.merchant, 'Verified merchant');
     assert.equal(retried.row.state, 'resolved');
-    assert.ok(retried.events.some(event => event.action === 'retry' && event.pipelineVersion === 'email-extraction-v5'));
+    assert.ok(retried.events.some(event => event.action === 'retry' && event.pipelineVersion === 'email-extraction-v6'));
+
+    document = require('./fixtures/forwarded-zelle.cjs').source;
+    seed(merchantPath, {canonicalName:'Wells Fargo',aliases:['Wells Fargo']});
+    VertexAI.prototype.getGenerativeModel = () => { throw new Error('Complete Zelle retry must not use AI'); };
+    const zelleOriginal = {source:'email', userId:'customer', skipProcessing:true, status:'needs_review',
+      extraction:{reviewReasons:['Missing supported total paid','Missing or ambiguous currency','Missing or ambiguous transaction date']},
+      notes:'Keep existing notes', file:{storagePath:'users/customer/receipts/original-email.pdf',mimeType:'application/pdf'},
+      createdAt:timestamp(), email};
+    seed(emailPath, zelleOriginal);
+    const zelleAttempt = (await actOnEmail('retry')).attemptId;
+    await processAdminReceiptRetry.run({params:{jobId:zelleAttempt},data:snapshot(`receiptProcessingJobs/${zelleAttempt}`)});
+    const zelleRetried = await detailEmail();
+    assert.equal(zelleRetried.receipt.status, 'final');
+    assert.equal(zelleRetried.receipt.totalAmount, 125.5);
+    assert.equal(zelleRetried.receipt.currency, 'USD');
+    assert.equal(zelleRetried.receipt.date, '2026-11-07');
+    assert.equal(zelleRetried.receipt.category, 'Money transfers');
+    assert.equal(zelleRetried.receipt.file.storagePath, zelleOriginal.file.storagePath);
+    assert.equal(snapshot(emailPath).get('notes'), zelleOriginal.notes);
+    assert.deepEqual(zelleRetried.receipt.extraction.reviewReasons, []);
+    assert.equal(zelleRetried.row.state, 'resolved');
+    assert.ok(zelleRetried.events.some(event => event.action === 'retry' && event.outcome === 'succeeded'
+      && event.pipelineVersion === 'email-extraction-v6' && event.previousExtraction.reviewReasons.length === 3));
 
     seed(emailPath, {...original,email:{...email,documentStoragePath:'users/another/receipts/email_123_document.json'}});
     assert.equal((await detailEmail()).receipt.canRetry, false);

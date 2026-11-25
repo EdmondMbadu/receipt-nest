@@ -56,6 +56,48 @@ test('ordinary purchase emails use one AI call, supported source evidence and co
   assert.equal(receipt.status,'final');assert.equal(receipt.extraction.source,'gemini');
 });
 
+test('completed Zelle email uses zero AI calls, archives its source and queues PDF without waiting for rendering', async t => {
+  const h = harness(t, {'receiptForwardingAliases/customer': {userId: 'owner'}, 'users/owner': {subscriptionPlan: 'pro'}});
+  process.env.RECEIPT_INBOUND_DOMAIN = 'inbound.example.com';
+  process.env.EMAIL_INGEST_WEBHOOK_KEY = 'test-key';
+  const {VertexAI} = require('@google-cloud/vertexai');
+  const original = VertexAI.prototype.getGenerativeModel;
+  let calls = 0;
+  VertexAI.prototype.getGenerativeModel = () => { calls++; throw new Error('AI must not be called for this complete transfer'); };
+  t.after(() => { VertexAI.prototype.getGenerativeModel = original; });
+  const {source} = require('./fixtures/forwarded-zelle.cjs');
+  const req = {method: 'POST', headers: {'content-type': 'application/json'}, query: {key: 'test-key'},
+    body: {...source, from: source.sender, to: source.recipient, 'message-id': '<zelle@example.com>'}};
+  let status, result;
+  const res = {status(value) {status = value; return this;}, json(value) {result = value; return this;}, send() {return this;}};
+  await inboundEmailWebhook(req, res);
+  assert.equal(status, 200);
+  assert.equal(result.createdReceipts, 1);
+  assert.equal(calls, 0);
+  const receipt = [...h.documents].find(([path]) => path.startsWith('users/owner/receipts/'))[1];
+  assert.equal(receipt.status, 'final');
+  assert.equal(receipt.totalAmount, 125.5);
+  assert.equal(receipt.currency, 'USD');
+  assert.equal(receipt.date, '2026-11-07');
+  assert.equal(receipt.merchant.canonicalName, 'Wells Fargo');
+  assert.equal(receipt.extraction.transactionType, 'money_transfer');
+  assert.equal(receipt.category.id, 'money_transfers');
+  assert.equal(receipt.extraction.source, 'email_rules');
+  assert.deepEqual(receipt.extraction.reviewReasons, []);
+  assert.equal(receipt.skipProcessing, true);
+  assert.equal(receipt.email.renderStatus, 'queued');
+  assert.ok(h.files.has(receipt.email.documentStoragePath));
+  await inboundEmailWebhook(req, res);
+  assert.equal(result.createdReceipts, 0);
+  assert.equal(calls, 0);
+  const {extractArchivedEmail} = require('../lib/email-ingest');
+  const retry = await extractArchivedEmail('owner', source);
+  assert.equal(retry.totalAmount, 125.5);
+  assert.equal(retry.date, '2026-11-07');
+  assert.deepEqual(retry.extraction.reviewReasons, []);
+  assert.equal(calls, 0);
+});
+
 test('malformed AI output leaves a reviewable receipt and never invents merchant/currency/date',async t=>{
   const h=harness(t,{'receiptForwardingAliases/customer':{userId:'owner'},'users/owner':{subscriptionPlan:'pro'}});
   process.env.RECEIPT_INBOUND_DOMAIN='inbound.example.com';process.env.EMAIL_INGEST_WEBHOOK_KEY='test-key';

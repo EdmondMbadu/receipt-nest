@@ -66,6 +66,8 @@ Extraction preserves table labels, supports international decimal amounts, requi
 
 USCIS Pay.gov credit/debit card confirmations support their labeled **Transaction Amount** and **Transaction Date**, including named months and a time of day. USD inference requires the original USCIS sender, submitted-payment confirmation, USCIS application label and a dollar-denominated amount. Missing or conflicting evidence still requires review; forwarding headers and the payment date do not replace a missing transaction date.
 
+Completed Wells Fargo Zelle confirmations support **You sent $… to …** and the following **Date**. This rule requires the original Wells Fargo alerts sender, Zelle activity link text, masked source account and confirmation number before interpreting dollars as USD and numeric dates in US order. Complete matches use the existing transfer path without AI; requests, incoming/scheduled payments, conflicting amounts and missing/invalid transaction dates remain subject to review. They use **Money transfers** without inferring a purpose, fees or the amount received.
+
 ## Verification and deployment
 
 ```sh

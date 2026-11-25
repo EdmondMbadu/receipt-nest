@@ -10,7 +10,7 @@ export const EMAIL_CATEGORIES = [
 ] as const;
 
 export interface EmailField<T> { value: T; confidence: number; rawText?: string }
-export const EMAIL_EXTRACTION_PIPELINE_VERSION = "email-extraction-v5";
+export const EMAIL_EXTRACTION_PIPELINE_VERSION = "email-extraction-v6";
 export interface EmailValues {
   totalAmount?: EmailField<number>;
   currency?: EmailField<string>;
@@ -178,10 +178,34 @@ function uscisPayGovPaymentEvidence(text: string, sender: string) {
   return { amount, conflictingAmount, merchant: "USCIS", date, dateEvidence: date ? dates[0][0] : undefined };
 }
 
+function wellsFargoZelleEvidence(text: string, sender: string) {
+  // Scope dollar/US-date inference to this bank's completed Zelle confirmation.
+  // A request, scheduled payment, incoming transfer or generic "Amount" is not proof of money sent.
+  if (!/(?:^|<)alerts@notify\.wellsfargo\.com>?$/i.test(originalSender(text, sender))) return undefined;
+  const sections = text.split(FORWARD_MARKER);
+  const message = sections.length > 1 ? sections[1] : sections[0];
+  if (!/^See Zelle(?:®)? Activity[ \t|]*$/im.test(message)
+      || !/^From account:[ \t]*(?:\.{3}|…)[0-9]{4}[ \t|]*$/im.test(message)
+      || !/^Confirmation:[ \t]*[A-Z0-9]+[ \t|]*$/im.test(message)) return undefined;
+  const sent = [...message.matchAll(/^You sent[ \t]+((?:USD[ \t]*)?\$[ \t]*[\d,.]+(?:[ \t]+USD)?)[ \t]+to[ \t]+([^\n|]+?)[ \t|]*$/gim)];
+  if (!sent.length) return undefined;
+  const amounts = sent.map(([, value]) => emailMoney(value));
+  if (amounts.some(value => value === undefined)) return undefined;
+  const conflictingAmount = new Set(amounts).size > 1 || new Set(sent.map(([, , recipient]) => recipient.trim().toLowerCase())).size > 1;
+  // Start after the actual payment statement, excluding all forwarding header dates.
+  const details = message.slice(sent[0].index!);
+  const dates = [...details.matchAll(/^Date:[ \t]*([^\n|]+?)[ \t|]*$/gim)];
+  const values = new Set(dates.map(([, value]) => emailDate(value, true)));
+  const date = values.size === 1 ? [...values][0] : undefined;
+  return { amount: { value: amounts[0]!, currency: "USD", rawText: sent[0][0].trim(), rank: 2 },
+    conflictingAmount, merchant: "Wells Fargo", date, dateEvidence: date ? dates[0][0] : undefined };
+}
+
 /** AI proposes fields; source labels and arithmetic decide whether they can be finalized. */
 export function validateEmailValues(parsed: Record<string, unknown>, text: string, sender: string): EmailValues {
   const reasons: string[] = [];
-  const transfer = /\b(?:money transfer|transfer fees|total to (?:final )?receiver)\b/i.test(text);
+  const zelleTransfer = parsed.transactionType !== "refund" ? wellsFargoZelleEvidence(text, sender) : undefined;
+  const transfer = !!zelleTransfer || /\b(?:money transfer|transfer fees|total to (?:final )?receiver)\b/i.test(text);
   const cardPurchase = !transfer && parsed.transactionType !== "refund"
     ? cardPurchaseEvidence(text, sender) || uscisPayGovPaymentEvidence(text, sender) : undefined;
   const transactionType = transfer ? "money_transfer" : cardPurchase ? "purchase" :
@@ -191,18 +215,19 @@ export function validateEmailValues(parsed: Record<string, unknown>, text: strin
   const ranked = totals.filter(r => r.rank === Math.max(...totals.map(t => t.rank)));
   const distinct = [...new Set(ranked.map(r => `${r.value}:${r.currency || ""}`))];
   let total = distinct.length === 1 ? ranked[0] : undefined;
-  const cardAmount = cardPurchase?.amount;
-  const cardConflict = cardPurchase?.conflictingAmount || (cardAmount && ranked.some(row =>
-    row.value !== cardAmount.value || (row.currency && cardAmount.currency && row.currency !== cardAmount.currency)));
-  if (distinct.length > 1 || cardConflict) {
+  const transactionEvidence = cardPurchase || zelleTransfer;
+  const confirmedAmount = transactionEvidence?.amount;
+  const confirmationConflict = transactionEvidence?.conflictingAmount || (confirmedAmount && ranked.some(row =>
+    row.value !== confirmedAmount.value || (row.currency && confirmedAmount.currency && row.currency !== confirmedAmount.currency)));
+  if (distinct.length > 1 || confirmationConflict) {
     reasons.push("Conflicting labeled totals");
     total = undefined;
-  } else if (cardAmount) {
-    total = { ...cardAmount, currency: cardAmount.currency || total?.currency };
+  } else if (confirmedAmount) {
+    total = { ...confirmedAmount, currency: confirmedAmount.currency || total?.currency };
   }
   const evidence = quotedEvidence(parsed.totalEvidence, text);
   const proposed = emailMoney(parsed.total);
-  if (!total && !distinct.length && !cardPurchase && proposed !== undefined && evidence && /\b(?:total|paid|charged)\b/i.test(evidence)
+  if (!total && !distinct.length && !transactionEvidence && proposed !== undefined && evidence && /\b(?:total|paid|charged)\b/i.test(evidence)
       && !/subtotal|receiver|recipient|balance|reward/i.test(evidence)) {
     const numbers = evidence.match(/\d[\d.,]*\d/g) || [];
     if (numbers.some(n => emailMoney(n) === proposed)) total = { value: proposed, rawText: evidence, rank: 1 };
@@ -212,7 +237,7 @@ export function validateEmailValues(parsed: Record<string, unknown>, text: strin
   const symbols = [/€/.test(text) ? "EUR" : "", /£/.test(text) ? "GBP" : "", /₹/.test(text) ? "INR" : "",
     (/\$/.test(text) && /\bUNITED STATES\b/i.test(text)) || (sunStrongPayment && /\$/.test(total?.rawText || "")) ? "USD" : ""].filter(Boolean);
   const symbolCurrency = symbols.length === 1 ? symbols[0] : undefined;
-  const currencyCandidate = total?.currency || (!cardPurchase
+  const currencyCandidate = total?.currency || (!transactionEvidence
     ? (explicitCurrencies.length === 1 ? explicitCurrencies[0] : explicitCurrencies.length === 0 ? symbolCurrency : undefined)
     : undefined);
   const currency = currencyCandidate && CURRENCIES.has(currencyCandidate) ? currencyCandidate : undefined;
@@ -236,11 +261,11 @@ export function validateEmailValues(parsed: Record<string, unknown>, text: strin
     ? new Date(modelDateEvidence.replace(/^.*?(?:date|on)\s*[:|]?\s*/i, "")) : undefined;
   const existingDate = date || (namedDate && !isNaN(namedDate.getTime()) && emailDate(namedDate.toISOString().slice(0, 10)));
   const completedPayment = !existingDate && sunStrongPayment ? paymentDate(text, currency === "USD") : undefined;
-  const finalDate = cardPurchase ? cardPurchase.date : existingDate || completedPayment?.date;
+  const finalDate = transactionEvidence ? transactionEvidence.date : existingDate || completedPayment?.date;
   if (!finalDate) reasons.push("Missing or ambiguous transaction date");
   const proposedMerchant = typeof parsed.merchant === "string" ? parsed.merchant.trim().slice(0, 160) : "";
   const nameKey = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
-  const merchant = cardPurchase ? cardPurchase.merchant :
+  const merchant = transactionEvidence ? transactionEvidence.merchant :
     proposedMerchant.length >= 2 && nameKey(`${text}\n${sender}`).includes(nameKey(proposedMerchant)) ? proposedMerchant :
     /western\s*union/i.test(`${text}\n${sender}`) ? "Western Union" : undefined;
   if (!merchant) reasons.push("Missing original merchant");
@@ -249,7 +274,7 @@ export function validateEmailValues(parsed: Record<string, unknown>, text: strin
   const field = (r?: AmountRow): EmailField<number> | undefined => r ? { value: r.value, rawText: r.rawText, confidence: 0.96 } : undefined;
   return {
     totalAmount: field(total), currency: currency ? { value: currency, confidence: 0.96, rawText: total?.rawText || currency } : undefined,
-    date: finalDate ? { value: finalDate, confidence: 0.93, rawText: cardPurchase?.dateEvidence || completedPayment?.evidence || dateEvidence } : undefined,
+    date: finalDate ? { value: finalDate, confidence: 0.93, rawText: transactionEvidence?.dateEvidence || completedPayment?.evidence || dateEvidence } : undefined,
     supplierName: merchant ? { value: merchant, confidence: 0.9, rawText: merchant } : undefined,
     transferAmount: field(principal), fees: field(fees), recipientAmount: field(recipient), transactionType,
     category: { id: categoryEntry[0], name: categoryEntry[1], confidence: transfer ? 0.98 : categoryEntry[0] === "other" ? 0.5 : 0.85,
