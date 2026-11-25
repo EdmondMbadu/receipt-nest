@@ -29,6 +29,8 @@ export class BlogIndexComponent {
   readonly featuredPost = blogPosts.find(post => post.slug === 'can-bank-statements-replace-receipts') ?? blogPosts[0];
   readonly remainingPosts = blogPosts.filter(post => post.slug !== this.featuredPost.slug);
   readonly workflowLinks = [
+    { path: '/receipt-management-software', label: 'Manage small-business receipt records' },
+    { path: '/receipt-scanner', label: 'Scan receipt photos and PDFs' },
     { path: '/receipt-tracker', label: 'Track receipts by month' },
     { path: '/receipt-organizer', label: 'Organize a receipt backlog' },
     { path: '/email-receipt-organizer', label: 'Collect forwarded email receipts' },

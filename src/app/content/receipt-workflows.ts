@@ -265,6 +265,10 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
     ],
     "related": [
       {
+        "path": "/blog/receipt-folder-system",
+        "label": "Set up a paper or digital receipt folder system"
+      },
+      {
         "path": "/email-receipt-organizer",
         "label": "Bring email receipts into the same system"
       },
@@ -382,15 +386,19 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       {
         "path": "/security",
         "label": "Understand cloud receipt processing"
+      },
+      {
+        "path": "/blog/chatgpt-claude-receipt-scanning",
+        "label": "Try a receipt extraction prompt in ChatGPT or Claude"
       }
     ]
   },
   "receipt-management-software": {
     "h1": "Receipt management software for small businesses.",
-    "intro": "Give your month-end receipt handoff a routine. Collect receipts as you pay, check missing or duplicate records against your statements, then send a reviewed CSV and the supporting originals.",
+    "intro": "ReceiptNest is receipt management software for freelancers and small-business owners. Capture photos, PDFs, and forwarded email receipts, review the extracted purchase details, keep the originals, and export a monthly CSV for your accountant.",
     "benefit": "A repeatable handoff from scattered receipts to reviewed records.",
     "ctaLabel": "Try your first month of receipts",
-    "quickStart": "One example: collect the printer invoice, supplies receipt, and software renewal. Review the three records together before sending a summary.",
+    "quickStart": "Try one receipt photo, one PDF, and one forwarded email. Check the purchase details, find each original, and inspect the CSV before adding a backlog.",
     "image": "/assets/auto-light.webp",
     "imageWidth": 883,
     "imageHeight": 1782,
@@ -411,31 +419,31 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       }
     ],
     "example": {
-      "title": "Decide whether the workflow fits",
-      "description": "Start with the task you need to complete, not the longest feature list.",
+      "title": "A month-end receipt handoff with three purchases",
+      "description": "A fictional set of USD purchases. Keep the source documents alongside this working summary.",
       "columns": [
-        "Your requirement",
-        "ReceiptNest's role"
+        "Purchase",
+        "Reviewed amount",
+        "Before sending"
       ],
       "rows": [
         [
-          "Store and find receipt records",
-          "Receipt-focused capture and organization"
+          "Print shop PDF",
+          "$28.00",
+          "Check the final paid amount and note the project."
         ],
         [
-          "Share a spreadsheet summary",
-          "CSV export for review"
+          "Office supplies photo",
+          "$60.00",
+          "Confirm this is one purchase, even if it supports two projects."
         ],
         [
-          "Run employee approvals or reimbursements",
-          "Use an expense-management platform"
-        ],
-        [
-          "Maintain a ledger, payroll, or tax filing",
-          "Use appropriate accounting or tax software"
+          "Emailed software renewal",
+          "$46.00",
+          "Check that you have the itemized receipt and the correct purchase month."
         ]
       ],
-      "caption": "No native accounting integration, employee approval chain, or bookkeeping service is implied."
+      "caption": "These three purchases total $134.00. The monthly CSV includes Merchant, Date, Amount, then a Total row. Remove the summary row before calculating another total; keep notes, currency checks, and originals separately."
     },
     "sections": [
       {
@@ -448,6 +456,14 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       }
     ],
     "faq": [
+      {
+        "question": "What does receipt management software do?",
+        "answer": "It gives receipts a repeatable path from capture to review, retrieval, and export. ReceiptNest reads purchase details from uploaded photos, PDFs, and forwarded emails; keeps the original document available; and supports monthly receipt summaries. You review the extraction and supply any missing business context."
+      },
+      {
+        "question": "Can I manage receipts without connecting a bank account?",
+        "answer": "Yes. ReceiptNest starts with documents you upload or forward. It does not require a bank connection. Compare the receipt collection with payment records separately when you need to find missing purchases or review your complete books."
+      },
       {
         "question": "Does ReceiptNest replace bookkeeping software?",
         "answer": "No. It organizes receipts and supports record review. It is not a double-entry ledger, payroll system, tax-filing service, or bank-reconciliation tool."
@@ -467,6 +483,10 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
     ],
     "related": [
       {
+        "path": "/blog/organize-receipts-for-accountant",
+        "label": "Use the month-end accountant handoff checklist"
+      },
+      {
         "path": "/receipt-to-csv",
         "label": "Check whether the CSV fits your handoff"
       },
@@ -477,8 +497,44 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       {
         "path": "/tax-receipt-organizer",
         "label": "Prepare receipt records for tax review"
+      },
+      {
+        "path": "/blog/chatgpt-claude-receipt-scanning",
+        "label": "Compare receipt chat prompts with an ongoing receipt workflow"
       }
-    ]
+    ],
+    "comparison": {
+      "title": "What kind of receipt management software do you need?",
+      "description": "Choose for the work you repeat each month. The right workflow depends on who submits receipts, who reviews them, and what happens after the export.",
+      "columns": [
+        "Your workflow",
+        "Consider",
+        "Check before choosing"
+      ],
+      "rows": [
+        [
+          "An owner organizing their own purchases",
+          "A receipt-focused app such as ReceiptNest.",
+          "Photo, PDF, and email capture; original retrieval; review fields; and CSV columns."
+        ],
+        [
+          "A few receipts with custom spreadsheet columns",
+          "A document folder and a spreadsheet.",
+          "A consistent naming system, source links, and time for manual entry."
+        ],
+        [
+          "Employees submitting expenses for approval",
+          "An expense-management platform with the required controls.",
+          "Submission roles, approval rules, reimbursement workflows, and permissions."
+        ],
+        [
+          "Books that need a ledger and bank reconciliation",
+          "Accounting software alongside supporting receipt records.",
+          "Reconciliation, reporting, and the receipt attachments or imports it supports."
+        ]
+      ],
+      "caption": "This compares workflow types, not tested accuracy or a ranking of vendors. ReceiptNest focuses on capture, organization, review, and export."
+    }
   },
   "expense-tracker": {
     "h1": "See your receipt-backed expenses, one month at a time.",

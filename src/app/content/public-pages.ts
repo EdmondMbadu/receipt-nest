@@ -29,19 +29,19 @@ export const publicPages: readonly PublicPage[] = [
     description: 'Track receipts from photos, PDFs, and email. Review purchases by month, keep original documents, and export a CSV. Available on iPhone, Android, and web.'
   },
   {
-    path: '/receipt-organizer', kind: 'workflow', label: 'Receipt organizer', updated: '2026-11-18',
+    path: '/receipt-organizer', kind: 'workflow', label: 'Receipt organizer', updated: '2026-11-24',
     title: 'Receipt Organizer App for Photos, PDFs & Email | ReceiptNest',
     description: 'Organize paper, PDF, and email receipts in one searchable place. Find purchases by merchant or month, keep originals, and export records when you need them.'
   },
   {
-    path: '/receipt-scanner', kind: 'workflow', label: 'Receipt scanner', updated: '2026-11-10',
+    path: '/receipt-scanner', kind: 'workflow', label: 'Receipt scanner', updated: '2026-11-24',
     title: 'AI Receipt Scanner for Photos & PDFs | ReceiptNest',
     description: 'Turn receipt photos and PDFs into merchant, date, amount, and category records. Review the details, keep the original, and export to CSV.'
   },
   {
-    path: '/receipt-management-software', kind: 'workflow', label: 'Receipt management', updated: '2026-11-10',
-    title: 'Receipt Management Software — Scan & Export | ReceiptNest',
-    description: 'Scan, organize, and find small-business receipts in one place. Keep originals, review AI categories, and export monthly CSV records. Start with 50 receipts free.'
+    path: '/receipt-management-software', kind: 'workflow', label: 'Receipt management', updated: '2026-11-24',
+    title: 'Receipt Management Software for Small Business | ReceiptNest',
+    description: 'Manage small-business receipts from photos, PDFs, and email. Review AI-extracted details, keep originals, and export a monthly CSV. Start with 50 receipts free.'
   },
   {
     path: '/expense-tracker', kind: 'workflow', label: 'Receipt-based expenses', updated: '2026-10-10',

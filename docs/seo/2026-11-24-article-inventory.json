@@ -1,0 +1,533 @@
+[
+  {
+    "slug": "chatgpt-claude-receipt-scanning",
+    "category": "Comparisons",
+    "published": "2026-11-24",
+    "modified": "2026-11-24",
+    "seoTitle": "ChatGPT and Claude for Receipts: Prompt and Checklist",
+    "descriptionLength": 151,
+    "readTime": "6 min read",
+    "sections": [
+      "What ChatGPT and Claude can do with a receipt image",
+      "A receipt extraction prompt you can copy",
+      "Check the subtotal, tax, currency, and final total",
+      "Chat assistant, spreadsheet, or dedicated receipt app?",
+      "Check what you are sharing before uploading",
+      "Evaluate the workflow with five representative receipts"
+    ],
+    "related": [
+      "scan-receipts-automatically",
+      "receipt-folder-system",
+      "organize-receipts-for-accountant"
+    ],
+    "sources": [
+      "https://help.openai.com/en/articles/8555545-uploading-files-and-audio-to-chatgpt",
+      "https://help.openai.com/en/articles/8400551-chatgpt-image-inputs-faq",
+      "https://support.claude.com/en/articles/8241126-upload-files-to-claude"
+    ]
+  },
+  {
+    "slug": "receipt-folder-system",
+    "category": "How-To",
+    "published": "2026-11-24",
+    "modified": "2026-11-24",
+    "seoTitle": "Receipt Folder System: Paper, Digital, and App Options",
+    "descriptionLength": 142,
+    "readTime": "5 min read",
+    "sections": [
+      "Choose paper folders, digital folders, or a receipt app",
+      "Use a year and month structure with a review queue",
+      "Give digital files a name you can search",
+      "File three purchases without doubling a shared expense",
+      "Use a weekly filing and monthly review routine",
+      "Test the system before you put the paper away"
+    ],
+    "related": [
+      "track-business-receipts-by-project",
+      "how-to-sort-a-shoebox-of-receipts",
+      "organize-receipts-for-accountant"
+    ],
+    "sources": []
+  },
+  {
+    "slug": "track-business-receipts-by-project",
+    "category": "How-To",
+    "published": "2026-11-16",
+    "modified": "2026-11-16",
+    "seoTitle": "Track Business Receipts by Client or Project",
+    "descriptionLength": 153,
+    "readTime": "4 min read",
+    "sections": [
+      "Use the same project name every time",
+      "Sort three purchases from a freelance workweek",
+      "Create a project collection in ReceiptNest",
+      "Review the collection before you hand it off"
+    ],
+    "related": [
+      "how-to-keep-track-of-receipts",
+      "organize-receipts-for-accountant",
+      "organize-receipts-taxes-freelancer-guide"
+    ],
+    "sources": [
+      "https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep"
+    ]
+  },
+  {
+    "slug": "how-to-scan-receipts-for-taxes",
+    "category": "Tax Guides",
+    "published": "2026-11-11",
+    "modified": "2026-11-11",
+    "seoTitle": "How to Scan Receipts for Taxes and Keep Digital Copies",
+    "descriptionLength": 158,
+    "readTime": "4 min read",
+    "sections": [
+      "Take one clear photo of the entire receipt",
+      "Check what the scan shows and add the business purpose",
+      "Save the scan and make sure you can find it again",
+      "Try the workflow with one receipt in ReceiptNest"
+    ],
+    "related": [
+      "how-long-to-keep-receipts",
+      "itemized-receipt-vs-credit-card-slip",
+      "organize-receipts-for-accountant"
+    ],
+    "sources": [
+      "https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep",
+      "https://www.irs.gov/publications/p583"
+    ]
+  },
+  {
+    "slug": "do-you-need-receipts-for-taxes",
+    "category": "Tax Guides",
+    "published": "2026-10-24",
+    "modified": "2026-10-24",
+    "seoTitle": "Do You Need Receipts for Taxes? 8 Myths, Busted",
+    "descriptionLength": 181,
+    "readTime": "9 min read",
+    "sections": [
+      "The short answer: the 8 myths at a glance",
+      "Myth 1: “My bank statement is enough”",
+      "Myth 2: “Receipts last forever”",
+      "Myth 3: “I’ll remember what it was for”",
+      "Myth 4: “Photos don’t count”",
+      "Myth 5: “Toss them after a year”",
+      "Myth 6: “The card slip is my receipt”",
+      "Myth 7: “Under $75, I don’t need anything”",
+      "Myth 8: “No receipt means no deduction”",
+      "What a good receipt record shows",
+      "How many did you believe? The fix takes seconds"
+    ],
+    "related": [
+      "can-bank-statements-replace-receipts",
+      "how-long-to-keep-receipts",
+      "itemized-receipt-vs-credit-card-slip"
+    ],
+    "sources": [
+      "https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep",
+      "https://www.irs.gov/publications/p583",
+      "https://www.irs.gov/publications/p463",
+      "https://www.irs.gov/businesses/small-businesses-self-employed/how-long-should-i-keep-records",
+      "https://www.irs.gov/newsroom/reconstructing-records-after-a-natural-disaster-or-casualty-loss"
+    ]
+  },
+  {
+    "slug": "how-long-to-keep-receipts",
+    "category": "Tax Guides",
+    "published": "2026-10-22",
+    "modified": "2026-11-10",
+    "seoTitle": "How Long to Keep Receipts for Taxes: IRS Rules Explained",
+    "descriptionLength": 142,
+    "readTime": "10 min read",
+    "sections": [
+      "The short answer: how long to keep receipts, by situation",
+      "The clock starts when you file, not when you buy",
+      "When you need to keep receipts longer than 3 years",
+      "Receipts for equipment and property: keep them until after you sell",
+      "How long to keep each kind of receipt",
+      "Reasons to keep records longer than the IRS requires",
+      "Do digital copies count? What the IRS says about photos and scans",
+      "Before you shred: a 5-step checklist",
+      "How to make keeping receipts for years painless"
+    ],
+    "related": [
+      "organize-receipts-taxes-freelancer-guide",
+      "why-do-receipts-fade",
+      "how-to-sort-a-shoebox-of-receipts"
+    ],
+    "sources": [
+      "https://www.irs.gov/businesses/small-businesses-self-employed/how-long-should-i-keep-records",
+      "https://www.irs.gov/taxtopics/tc305",
+      "https://www.irs.gov/publications/p583",
+      "https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep"
+    ]
+  },
+  {
+    "slug": "how-to-sort-a-shoebox-of-receipts",
+    "category": "How-To",
+    "published": "2026-10-21",
+    "modified": "2026-11-24",
+    "seoTitle": "How to Sort a Shoebox of Receipts (Step-by-Step)",
+    "descriptionLength": 165,
+    "readTime": "10 min read",
+    "sections": [
+      "The short answer: five steps from shoebox to clean records",
+      "Before you start: set up in 15 minutes",
+      "Step 1: Triage into business, personal and unsure",
+      "Step 2: Sort the business pile by month",
+      "Step 3: Photograph every business receipt, month by month",
+      "Step 4: Match each month to your statements",
+      "Step 5: Fill the gaps and add notes",
+      "What to hand your bookkeeper instead of a box",
+      "After the sort: what to keep and what to shred",
+      "How to never fill another shoebox"
+    ],
+    "related": [
+      "organize-receipts-for-accountant",
+      "how-to-keep-track-of-receipts",
+      "why-do-receipts-fade"
+    ],
+    "sources": [
+      "https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep",
+      "https://www.irs.gov/businesses/small-businesses-self-employed/how-long-should-i-keep-records",
+      "https://www.irs.gov/newsroom/reconstructing-records-after-a-natural-disaster-or-casualty-loss"
+    ]
+  },
+  {
+    "slug": "how-to-keep-track-of-receipts",
+    "category": "How-To",
+    "published": "2026-10-20",
+    "modified": "2026-10-20",
+    "seoTitle": "How to Keep Track of Receipts All Year (Simple System)",
+    "descriptionLength": 166,
+    "readTime": "9 min read",
+    "sections": [
+      "The short answer: a receipt system in four habits",
+      "Why \"I’ll sort it out later\" never works",
+      "Step 1: Capture every receipt the day you get it",
+      "Step 2: Keep every receipt in one place, by month",
+      "Step 3: Add a word about why",
+      "Step 4: The 2-minute monthly check",
+      "The math: about an hour a year",
+      "At tax time: export, hand off, keep",
+      "Which tool should you use to track receipts?"
+    ],
+    "related": [
+      "why-do-receipts-fade",
+      "itemized-receipt-vs-credit-card-slip",
+      "organize-receipts-taxes-freelancer-guide"
+    ],
+    "sources": [
+      "https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep",
+      "https://www.irs.gov/businesses/small-businesses-self-employed/how-long-should-i-keep-records"
+    ]
+  },
+  {
+    "slug": "itemized-receipt-vs-credit-card-slip",
+    "category": "Tax Guides",
+    "published": "2026-10-19",
+    "modified": "2026-11-10",
+    "seoTitle": "Itemized Receipt vs. Credit Card Slip: What Counts?",
+    "descriptionLength": 157,
+    "readTime": "8 min read",
+    "sections": [
+      "The short answer: the slip proves payment, the itemized receipt proves the purchase",
+      "What is an itemized receipt?",
+      "What IRS guidance says about receipts, slips and statements",
+      "When an itemized receipt matters most",
+      "How to get an itemized receipt (even after the fact)",
+      "What to keep for every business purchase"
+    ],
+    "related": [
+      "can-bank-statements-replace-receipts",
+      "why-do-receipts-fade",
+      "organize-receipts-for-accountant"
+    ],
+    "sources": [
+      "https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep",
+      "https://www.irs.gov/publications/p583",
+      "https://www.irs.gov/publications/p463"
+    ]
+  },
+  {
+    "slug": "why-do-receipts-fade",
+    "category": "How-To",
+    "published": "2026-10-18",
+    "modified": "2026-10-18",
+    "seoTitle": "Why Do Receipts Fade? How to Keep Them Readable",
+    "descriptionLength": 159,
+    "readTime": "9 min read",
+    "sections": [
+      "The short answer: receipts are printed with heat, not ink",
+      "How thermal paper works, and why it is fragile",
+      "What makes receipts fade (or turn black)",
+      "How long does a thermal receipt last?",
+      "How to keep receipts from fading",
+      "Your receipt is already blank. Now what?",
+      "Why a photo is the copy that lasts"
+    ],
+    "related": [
+      "can-bank-statements-replace-receipts",
+      "scan-receipts-automatically",
+      "organize-receipts-taxes-freelancer-guide"
+    ],
+    "sources": [
+      "https://19january2021snapshot.epa.gov/sites/static/files/2015-09/documents/bpa_ch3.pdf",
+      "https://prodc-www.zebra.com/content/dam/zebra_dam/en/spec-sheets/z-perform-1000d-2-1-receipt-paper-spec-sheet-en-us.pdf",
+      "https://www.naa.gov.au/information-management/store-and-preserve-information/preserving-information/managing-records-thermal-papers",
+      "https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep",
+      "https://www.irs.gov/newsroom/reconstructing-records-after-a-natural-disaster-or-casualty-loss"
+    ]
+  },
+  {
+    "slug": "organize-receipts-for-accountant",
+    "category": "Tax Guides",
+    "published": "2026-10-12",
+    "modified": "2026-11-24",
+    "seoTitle": "How to Organize Receipts for Your Accountant",
+    "descriptionLength": 149,
+    "readTime": "6 min read",
+    "sections": [
+      "The short answer: four things your accountant needs from you",
+      "The handoff checklist you can copy",
+      "Step 1: Ask what they need before you export",
+      "Step 2: Gather paper, email, and PDF receipts in one place",
+      "Step 3: Review the details before you send them",
+      "Step 4: Export a summary and check it in a spreadsheet",
+      "Step 5: Provide the originals the way they asked",
+      "Step 6: Send a list of unresolved records instead of guessing"
+    ],
+    "related": [
+      "organize-receipts-taxes-freelancer-guide",
+      "can-bank-statements-replace-receipts",
+      "scan-receipts-automatically"
+    ],
+    "sources": [
+      "https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep"
+    ]
+  },
+  {
+    "slug": "the-last-mile",
+    "category": "Money Clarity",
+    "published": "2026-09-22",
+    "modified": "2026-09-22",
+    "seoTitle": "The Last Mile: Why Most People Never Become Great",
+    "descriptionLength": 141,
+    "readTime": "6 min read",
+    "sections": [
+      "The upside gathers at the limit",
+      "Greatness begins with desire, not method",
+      "Technique stops being the differentiator",
+      "Devotion cannot be copied",
+      "The same gap exists in how we look at money",
+      "That is the mile we built ReceiptNest for"
+    ],
+    "related": [
+      "digitization-business-clarity-compounds",
+      "where-does-my-money-go",
+      "scan-receipts-automatically"
+    ],
+    "sources": [
+      "https://www.federalreserve.gov/releases/z1/dataviz/dfa/distribute/chart/index.html",
+      "https://cosmicopia.gsfc.nasa.gov/qa_gp_sl.html"
+    ]
+  },
+  {
+    "slug": "digitization-business-clarity-compounds",
+    "category": "Money Clarity",
+    "published": "2026-09-19",
+    "modified": "2026-09-19",
+    "seoTitle": "Why Digitization Is Really About Business Clarity",
+    "descriptionLength": 144,
+    "readTime": "5 min read",
+    "sections": [
+      "From faster counting to a business you can actually see",
+      "Legibility is the advantage that compounds",
+      "The same problem exists at a smaller scale",
+      "Visibility matters more than speed",
+      "Clarity at the individual and small-business level"
+    ],
+    "related": [
+      "where-does-my-money-go",
+      "scan-receipts-automatically",
+      "organize-receipts-taxes-freelancer-guide"
+    ],
+    "sources": []
+  },
+  {
+    "slug": "can-bank-statements-replace-receipts",
+    "category": "Tax Guides",
+    "published": "2026-07-16",
+    "modified": "2026-11-10",
+    "seoTitle": "Can Bank Statements Replace Receipts? U.S. Tax Guide",
+    "descriptionLength": 152,
+    "readTime": "8 min read",
+    "sections": [
+      "Lost a business receipt? Get a copy and document what is missing",
+      "Bank statements vs. receipts: what each record tells you",
+      "The $86.40 example: from mystery charge to useful record",
+      "What the IRS says about proof of a business expense",
+      "When you need more than the statement line",
+      "The small receipt habit that prevents the mystery",
+      "Digital receipts and how long to keep them",
+      "When someone points at a line, point at the receipt"
+    ],
+    "related": [
+      "organize-receipts-for-accountant",
+      "organize-receipts-taxes-freelancer-guide",
+      "scan-receipts-automatically"
+    ],
+    "sources": [
+      "https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep",
+      "https://www.irs.gov/publications/p583",
+      "https://www.irs.gov/businesses/small-businesses-self-employed/how-long-should-i-keep-records"
+    ]
+  },
+  {
+    "slug": "receipt-tracking-delivery-drivers",
+    "category": "By Profession",
+    "published": "2026-07-16",
+    "modified": "2026-11-10",
+    "seoTitle": "Receipt Tracking for DoorDash and Uber Eats Drivers",
+    "descriptionLength": 140,
+    "readTime": "7 min read",
+    "sections": [
+      "Your delivery app is not your complete business record",
+      "Receipts and records worth preserving",
+      "Mileage method vs actual vehicle expenses",
+      "How to handle expenses that are both personal and business",
+      "The five-minute end-of-shift receipt routine",
+      "Monthly and quarterly review checklist",
+      "What to prepare for a tax-professional handoff"
+    ],
+    "related": [
+      "organize-receipts-taxes-freelancer-guide",
+      "can-bank-statements-replace-receipts",
+      "scan-receipts-automatically"
+    ],
+    "sources": [
+      "https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep",
+      "https://www.irs.gov/businesses/gig-economy-tax-center",
+      "https://www.irs.gov/taxtopics/tc510",
+      "https://www.irs.gov/tax-professionals/standard-mileage-rates"
+    ]
+  },
+  {
+    "slug": "receiptnest-vs-expensify",
+    "category": "Comparisons",
+    "published": "2026-06-09",
+    "modified": "2026-09-13",
+    "seoTitle": "ReceiptNest vs Expensify for Freelancers",
+    "descriptionLength": 148,
+    "readTime": "4 min read",
+    "sections": [
+      "ReceiptNest vs Expensify: the quick comparison",
+      "When Expensify is the better choice",
+      "When ReceiptNest is the better Expensify alternative",
+      "Price matters, but simplicity matters more",
+      "What to read next"
+    ],
+    "related": [
+      "organize-receipts-taxes-freelancer-guide",
+      "scan-receipts-automatically",
+      "where-does-my-money-go"
+    ],
+    "sources": [
+      "https://help.expensify.com/articles/new-expensify/getting-started/Free-Features-in-Expensify"
+    ]
+  },
+  {
+    "slug": "organize-receipts-taxes-freelancer-guide",
+    "category": "Tax Guides",
+    "published": "2026-06-09",
+    "modified": "2026-11-10",
+    "seoTitle": "How to Organize Receipts for Taxes as a Freelancer",
+    "descriptionLength": 150,
+    "readTime": "4 min read",
+    "sections": [
+      "What receipts self-employed freelancers should keep",
+      "How long to keep tax receipts: periods and exceptions",
+      "Digital receipts vs paper receipts",
+      "The simple Schedule C category system",
+      "Three ways to organize receipts for taxes",
+      "A monthly receipt checklist for freelancers"
+    ],
+    "related": [
+      "organize-receipts-for-accountant",
+      "receipt-tracking-etsy-sellers",
+      "scan-receipts-automatically"
+    ],
+    "sources": [
+      "https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep",
+      "https://www.irs.gov/businesses/small-businesses-self-employed/how-long-should-i-keep-records"
+    ]
+  },
+  {
+    "slug": "receipt-tracking-etsy-sellers",
+    "category": "By Profession",
+    "published": "2026-06-09",
+    "modified": "2026-09-13",
+    "seoTitle": "Receipt Tracking for Etsy Sellers",
+    "descriptionLength": 150,
+    "readTime": "3 min read",
+    "sections": [
+      "What Etsy sellers should keep",
+      "Why Etsy reports are not enough for taxes",
+      "A monthly receipt flow for Etsy sellers",
+      "Common Etsy seller receipt categories people miss",
+      "Quarterly tax prep checklist for sellers"
+    ],
+    "related": [
+      "organize-receipts-taxes-freelancer-guide",
+      "scan-receipts-automatically",
+      "where-does-my-money-go"
+    ],
+    "sources": [
+      "https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep"
+    ]
+  },
+  {
+    "slug": "scan-receipts-automatically",
+    "category": "How-To",
+    "published": "2026-06-09",
+    "modified": "2026-11-24",
+    "seoTitle": "How to Scan Receipts Automatically",
+    "descriptionLength": 141,
+    "readTime": "4 min read",
+    "sections": [
+      "Why manual receipt entry fails",
+      "What OCR and AI extraction actually do",
+      "Three automatic receipt capture methods compared",
+      "What to look for in a receipt scanning app",
+      "Step-by-step setup for automatic receipt scanning",
+      "Common scanning problems and fixes"
+    ],
+    "related": [
+      "organize-receipts-taxes-freelancer-guide",
+      "receiptnest-vs-expensify",
+      "receipt-tracking-etsy-sellers"
+    ],
+    "sources": []
+  },
+  {
+    "slug": "where-does-my-money-go",
+    "category": "Money Clarity",
+    "published": "2026-06-09",
+    "modified": "2026-09-13",
+    "seoTitle": "Where Does My Money Go Every Month?",
+    "descriptionLength": 136,
+    "readTime": "3 min read",
+    "sections": [
+      "Why budgets fail before visibility exists",
+      "The psychology of money avoidance",
+      "The 10-second daily habit that compounds",
+      "What people discover in the first month",
+      "From seeing to deciding"
+    ],
+    "related": [
+      "scan-receipts-automatically",
+      "organize-receipts-taxes-freelancer-guide",
+      "receiptnest-vs-expensify"
+    ],
+    "sources": []
+  }
+]

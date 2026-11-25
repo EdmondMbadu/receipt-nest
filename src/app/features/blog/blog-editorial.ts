@@ -28,6 +28,82 @@ const scanner = { href: '/receipt-scanner', label: 'See the receipt-scanning wor
 const email = { href: '/email-receipt-organizer', label: 'Set up email-receipt forwarding' };
 
 const editorial: Readonly<Record<string, BlogEditorial>> = {
+  "chatgpt-claude-receipt-scanning": {
+    "note": "Published by ReceiptNest, the receipt app discussed here. This is a documented workflow comparison, not an independent ranking or a hands-on accuracy benchmark. The prompt and purchase example are illustrative; model features and upload limits can change.",
+    "sources": [
+      {
+        "href": "https://help.openai.com/en/articles/8555545-uploading-files-and-audio-to-chatgpt",
+        "label": "OpenAI: file and image uploads"
+      },
+      {
+        "href": "https://help.openai.com/en/articles/8400551-chatgpt-image-inputs-faq",
+        "label": "OpenAI: image inputs and limitations"
+      },
+      {
+        "href": "https://support.claude.com/en/articles/8241126-upload-files-to-claude",
+        "label": "Anthropic: file and image uploads"
+      }
+    ],
+    "workflows": [
+      {
+        "href": "/receipt-scanner",
+        "label": "Scan and review a receipt"
+      },
+      {
+        "href": "/receipt-to-csv",
+        "label": "Inspect the ReceiptNest CSV format"
+      },
+      {
+        "href": "/security",
+        "label": "Review receipt data handling"
+      }
+    ],
+    "quickLinks": [
+      {
+        "href": "/blog/chatgpt-claude-receipt-scanning",
+        "fragment": "copyable-prompt",
+        "label": "Copy the receipt extraction prompt"
+      }
+    ],
+    "cta": {
+      "label": "Try the receipt workflow with one document",
+      "body": "Upload a representative receipt, check the extracted fields, and find the saved original before deciding whether the app fits."
+    }
+  },
+  "receipt-folder-system": {
+    "note": "Published by ReceiptNest. The folder names, merchants, projects, and amounts are fictional examples. This guide explains organization; retention requirements depend on the records and your circumstances.",
+    "sources": [],
+    "workflows": [
+      {
+        "href": "/receipt-organizer",
+        "label": "Compare folders with a receipt organizer"
+      },
+      {
+        "href": "/receipt-tracker",
+        "label": "Review receipt records by month"
+      },
+      {
+        "href": "/receipt-to-csv",
+        "label": "Inspect a sample receipt summary"
+      }
+    ],
+    "quickLinks": [
+      {
+        "href": "/blog/receipt-folder-system",
+        "fragment": "folder-structure",
+        "label": "See the folder structure"
+      },
+      {
+        "href": "/blog/receipt-folder-system",
+        "fragment": "worked-example",
+        "label": "Check the shared purchase example"
+      }
+    ],
+    "cta": {
+      "label": "Organize your first receipt",
+      "body": "Start with one purchase. Check the merchant, date, and amount, then open its original to make sure you can find it again."
+    }
+  },
   'track-business-receipts-by-project': {
     note: 'Published by ReceiptNest. The projects and amounts in this example are fictional. Check extracted receipt details against the original before sharing a summary.',
     sources: [records],
@@ -73,7 +149,7 @@ const editorial: Readonly<Record<string, BlogEditorial>> = {
   'how-to-sort-a-shoebox-of-receipts': {
     note: taxNote,
     sources: [records, retention, { href: 'https://www.irs.gov/newsroom/reconstructing-records-after-a-natural-disaster-or-casualty-loss', label: 'IRS: reconstructing records' }],
-    workflows: [scanner, csv, tax],
+    workflows: [scanner, csv, tax, { href: '/blog/receipt-folder-system', label: 'Choose a folder structure for the sorted receipts' }],
     cta: { label: 'Digitize the first stack', body: 'Pick one month from your shoebox and upload the first receipt. Review the details before moving on to the next stack.' }
   },
   'how-to-keep-track-of-receipts': {
@@ -111,7 +187,7 @@ const editorial: Readonly<Record<string, BlogEditorial>> = {
   },
   'organize-receipts-for-accountant': {
     note: taxNote, sources: [records],
-    workflows: [tax, { href: '/blog/organize-receipts-taxes-freelancer-guide', label: 'Organize a full year of freelance tax receipts' }, email],
+    workflows: [tax, { href: '/receipt-management-software', label: 'Build a repeatable month-end receipt handoff' }, { href: '/blog/organize-receipts-taxes-freelancer-guide', label: 'Organize a full year of freelance tax receipts' }, email],
     quickLinks: [
       { href: '/blog/organize-receipts-for-accountant', fragment: 'checklist', label: 'Jump to the handoff checklist' },
       { href: '/receipt-to-csv', label: 'See and download a sample CSV' }
@@ -180,7 +256,7 @@ const editorial: Readonly<Record<string, BlogEditorial>> = {
     cta: { label: 'Try ReceiptNest with a real receipt', body: 'Use a representative receipt, check what it extracts, and open the export before deciding whether the workflow fits.' }
   },
   'scan-receipts-automatically': {
-    note: productNote, sources: [], workflows: [scanner, email, csv],
+    note: productNote, sources: [], workflows: [scanner, email, csv, { href: '/blog/chatgpt-claude-receipt-scanning', label: 'Compare a ChatGPT or Claude receipt prompt with a dedicated app' }],
     cta: { label: 'Scan and review your first receipt', body: 'Upload one readable photo or PDF and compare the extracted fields with the original.' }
   },
   'where-does-my-money-go': {

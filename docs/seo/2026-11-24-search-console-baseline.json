@@ -1,0 +1,64 @@
+{
+  "reviewDatePacific": "2026-11-24",
+  "property": "sc-domain:receipt-nest.com",
+  "performancePeriod": {
+    "start": "2026-08-24",
+    "end": "2026-11-23"
+  },
+  "method": "Search Console UI values; displayed rounding retained.",
+  "web": {
+    "clicks": 62,
+    "impressionsDisplayed": "13.9K",
+    "ctrDisplayed": "0.4%",
+    "averagePosition": 22.8
+  },
+  "googleGenerativeAi": {
+    "impressions": 800,
+    "scope": "Google generative AI features; not ChatGPT or Claude"
+  },
+  "indexing": {
+    "reportUpdated": "2026-11-15",
+    "indexed": 43,
+    "excluded": 13,
+    "reasons": {
+      "redirect": 8,
+      "noindex": 2,
+      "alternateCanonical": 1,
+      "crawledNotIndexed": 2
+    }
+  },
+  "sitemap": {
+    "lastRead": "2026-11-18",
+    "status": "Success",
+    "discoveredPages": 46,
+    "discoveredVideos": 1
+  },
+  "links": {
+    "externalTotal": 393,
+    "topDomains": {
+      "apple.com": 205,
+      "google.com": 172,
+      "producthunt.com": 5,
+      "x.com": 3,
+      "reddit.com": 2
+    },
+    "topTargets": {
+      "/": 211,
+      "/terms": 181,
+      "/blog/can-bank-statements-replace-receipts": 1
+    },
+    "note": "Reported links, not referring domains; not a complete backlink inventory."
+  },
+  "indexingRequests": [
+    {
+      "path": "/blog/receipt-tracking-delivery-drivers",
+      "lastCrawl": "2026-09-18",
+      "result": "Indexing requested; priority crawl queue confirmation observed"
+    },
+    {
+      "path": "/blog/organize-receipts-taxes-freelancer-guide",
+      "lastCrawl": "2026-09-09",
+      "result": "Indexing requested; priority crawl queue confirmation observed"
+    }
+  ]
+}

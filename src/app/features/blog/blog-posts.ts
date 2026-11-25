@@ -73,6 +73,509 @@ export const blogCategories: readonly BlogCategory[] = [
 
 export const blogPosts: readonly BlogPost[] = [
   {
+    "slug": "chatgpt-claude-receipt-scanning",
+    "path": "/blog/chatgpt-claude-receipt-scanning",
+    "category": "Comparisons",
+    "title": "Can ChatGPT or Claude Scan Receipts? A Workflow You Can Check",
+    "seoTitle": "ChatGPT and Claude for Receipts: Prompt and Checklist",
+    "description": "Use ChatGPT or Claude to read a receipt with a copyable prompt, a checked example, and a comparison of chat, spreadsheets, and a dedicated receipt app.",
+    "excerpt": "A chat assistant can help turn a receipt image into a draft row. Keep the original, ask it to mark uncertainty, and check the result before adding it to your records.",
+    "datePublished": "2026-11-24",
+    "dateModified": "2026-11-24",
+    "readTime": "6 min read",
+    "image": "/assets/images/blog/how-to-scan-receipts-for-taxes.webp",
+    "imageWidth": 1672,
+    "imageHeight": 941,
+    "imageAlt": "A phone held above a flattened receipt showing the original purchase details",
+    "keywords": [
+      "ChatGPT receipt scanning",
+      "Claude receipt scanning",
+      "receipt extraction prompt",
+      "AI receipts to spreadsheet"
+    ],
+    "intro": [
+      "Yes. ChatGPT and Claude can analyze uploaded images, so you can ask either assistant to read a receipt and draft a table of purchase details. Start with one clear image, request explicit handling of unreadable fields, and compare the answer with the original. A plausible table still needs checking.",
+      "For occasional transcription, that can be a useful workflow. For an ongoing receipt collection, also decide where the original documents live, how you will find them later, and how you will avoid counting a purchase twice. This guide includes a prompt and a fictional example you can use to evaluate the approach."
+    ],
+    "sections": [
+      {
+        "id": "what-the-assistants-can-do",
+        "title": "What ChatGPT and Claude can do with a receipt image",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "OpenAI documents image uploads and image analysis in ChatGPT. A readable receipt photo can be supplied as an image for a question about its contents. Availability and upload allowances depend on the account and settings; check the current documentation rather than planning a recurring workload around a fixed free allowance.",
+            "source": {
+              "href": "https://help.openai.com/en/articles/8555545-uploading-files-and-audio-to-chatgpt",
+              "label": "OpenAI: file and image uploads in ChatGPT"
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "Anthropic documents image and PDF uploads in Claude. Its file guide explains supported formats and differences in how files are processed. If a PDF fails to expose the receipt details you need, try a clear image of that receipt and verify the response against the source.",
+            "source": {
+              "href": "https://support.claude.com/en/articles/8241126-upload-files-to-claude",
+              "label": "Anthropic: supported files and image uploads"
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "Neither capability establishes which assistant reads your receipts more accurately. We have not run a comparative accuracy benchmark. Try the same representative documents in the tools you are considering and count the fields that need correction."
+          }
+        ]
+      },
+      {
+        "id": "copyable-prompt",
+        "title": "A receipt extraction prompt you can copy",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "Attach one receipt image and use the following prompt. Assign the source identifier yourself so the output can be linked back to the right document."
+          },
+          {
+            "kind": "callout",
+            "tone": "note",
+            "title": "Copy this prompt with your receipt image",
+            "text": "Read the attached receipt and produce one row for this purchase. Use these columns: Source ID, Merchant, Purchase date, Total paid, Currency, Tax shown, Uncertain fields. Use Source ID r001. Copy only values supported by the receipt. Use YYYY-MM-DD only when the date is unambiguous; otherwise preserve the printed date and flag it. Use the final paid total, not the subtotal. Keep tax separate and do not add it again to the final total. If a value is missing or unreadable, write UNKNOWN and explain why in Uncertain fields. Do not infer currency from the dollar symbol alone. Do not decide whether this purchase is tax deductible. Below the row, list anything I should verify against the image. Do not include a grand total row."
+          },
+          {
+            "kind": "paragraph",
+            "text": "This prompt is a proposed workflow, not a guarantee that an assistant will follow every instruction. If you request CSV, check that commas in merchant names are quoted and that amounts open as numbers in your spreadsheet. Add your business purpose or project yourself; the receipt cannot tell the assistant why you bought something."
+          }
+        ]
+      },
+      {
+        "id": "worked-example",
+        "title": "Check the subtotal, tax, currency, and final total",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "Suppose a fictional receipt says Example Office Supply, November 3, 2026, subtotal USD 40.00, tax USD 3.20, total paid USD 43.20. It should produce the following reviewed values. This is an illustrative target, not output from a live model test."
+          },
+          {
+            "kind": "table",
+            "table": {
+              "columns": [
+                "Field",
+                "Reviewed value",
+                "Common error to catch"
+              ],
+              "rows": [
+                [
+                  "Merchant",
+                  "Example Office Supply",
+                  "A guessed or shortened seller name."
+                ],
+                [
+                  "Purchase date",
+                  "2026-11-03",
+                  "Using the upload date or reversing month and day."
+                ],
+                [
+                  "Total paid",
+                  "43.20",
+                  "Taking 40.00 from the subtotal line."
+                ],
+                [
+                  "Currency",
+                  "USD",
+                  "Guessing a currency when the document only shows $."
+                ],
+                [
+                  "Tax shown",
+                  "3.20",
+                  "Adding tax to 43.20 a second time."
+                ],
+                [
+                  "Source ID",
+                  "r001",
+                  "Losing the connection to the original image."
+                ]
+              ]
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "If the receipt instead prints 03/11/26 with no context to resolve the order, retain that printed value in your working record and check it before assigning a normalized date. If the paper is cropped or faded, ask for a better source rather than filling the gap with a confident guess."
+          },
+          {
+            "kind": "paragraph",
+            "text": "OpenAI identifies unclear images and image interpretation errors among the limitations of image inputs. Reviewing the answer against the document remains part of the workflow.",
+            "source": {
+              "href": "https://help.openai.com/en/articles/8400551-chatgpt-image-inputs-faq",
+              "label": "OpenAI: image input limitations"
+            }
+          }
+        ]
+      },
+      {
+        "id": "choose-a-workflow",
+        "title": "Chat assistant, spreadsheet, or dedicated receipt app?",
+        "blocks": [
+          {
+            "kind": "table",
+            "table": {
+              "columns": [
+                "Approach",
+                "Useful for",
+                "What you maintain"
+              ],
+              "rows": [
+                [
+                  "ChatGPT or Claude plus a folder",
+                  "Occasional extraction or questions about a small set of documents.",
+                  "The prompt, field review, original-file archive, duplicate checks, and transfer to your working sheet."
+                ],
+                [
+                  "Spreadsheet plus original files",
+                  "Custom columns and calculations you want to control.",
+                  "Data entry or import, source links, consistent dates and currencies, and formulas."
+                ],
+                [
+                  "ReceiptNest",
+                  "Repeated capture of photos, PDFs, and deliberately forwarded email receipts.",
+                  "Review of AI-extracted details, missing purchases, project notes, and exported summaries."
+                ]
+              ]
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "Use a chat assistant when the immediate task is reading or discussing a document. Consider a dedicated organizer when the recurring task is collecting receipts and retrieving their originals by merchant or month. If you already maintain a reliable folder and spreadsheet, test whether another tool actually saves you work.",
+            "source": {
+              "href": "/receipt-organizer",
+              "label": "See what a dedicated receipt organizer adds"
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "ReceiptNest’s monthly and collection CSVs contain merchant, date, and amount, with a final Total row. They do not include every custom field in the prompt above. Keep extra notes separately, review currency before combining records, and remove the summary row before calculating another total.",
+            "source": {
+              "href": "/receipt-to-csv",
+              "label": "Download the sample export before choosing a workflow"
+            }
+          }
+        ]
+      },
+      {
+        "id": "review-before-upload",
+        "title": "Check what you are sharing before uploading",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "Use only documents you are permitted to share with the service you choose. Check the current account’s data-use and retention settings, especially when a receipt includes customer details or other private information. Keep a redacted working copy separate from the retained original when redaction is appropriate."
+          },
+          {
+            "kind": "paragraph",
+            "text": "A dedicated receipt app also processes data. Review ReceiptNest’s cloud storage and AI processing explanation before choosing where to keep your records.",
+            "source": {
+              "href": "/security",
+              "label": "Read how ReceiptNest handles receipt data"
+            }
+          }
+        ]
+      },
+      {
+        "id": "five-receipt-trial",
+        "title": "Evaluate the workflow with five representative receipts",
+        "blocks": [
+          {
+            "kind": "ordered",
+            "items": [
+              "Choose a clear photo, a long receipt, an emailed purchase, a PDF, and a receipt with a difficult date or currency.",
+              "Give each document a stable source identifier and preserve its original.",
+              "Run the same extraction request in each tool you are evaluating. Record the tool and date of your trial.",
+              "Check merchant, date, final total, and currency field by field. Record unreadable values separately from wrong answers.",
+              "Time the corrections and the filing step. Try finding one original again the next day.",
+              "Open the final spreadsheet and check that each row represents one purchase and that no summary row is counted as another receipt."
+            ]
+          },
+          {
+            "kind": "paragraph",
+            "text": "Five receipts will not establish a general accuracy rate. They can reveal whether a workflow handles the documents you actually receive and how much review you need. Choose on that basis before importing a backlog.",
+            "source": {
+              "href": "/getting-started",
+              "label": "Watch the ReceiptNest upload and review walkthrough"
+            }
+          }
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "question": "Can ChatGPT turn receipts into a spreadsheet?",
+        "answer": "You can ask ChatGPT to read an uploaded receipt image and draft table or CSV text. Check every field, preserve the original, and verify the imported column types before using the sheet. File creation features and limits depend on the account."
+      },
+      {
+        "question": "Can Claude read receipt photos and PDFs?",
+        "answer": "Claude supports image and PDF uploads. Check the current file guide for supported formats and processing limits. Try a clear receipt image when a document’s visual details are not available in the response."
+      },
+      {
+        "question": "Which is more accurate for receipt scanning, ChatGPT or Claude?",
+        "answer": "This guide does not establish an accuracy winner. Test both with the same receipts and count field corrections, unresolved values, and filing time. Model, document quality, and workflow can affect your result."
+      },
+      {
+        "question": "Does ReceiptNest integrate directly with ChatGPT or Claude?",
+        "answer": "The workflow described here does not include a native ChatGPT or Claude integration. ReceiptNest captures and organizes receipts in its own app; inspect its CSV format if you want to use a summary in another tool."
+      }
+    ],
+    "relatedSlugs": [
+      "scan-receipts-automatically",
+      "receipt-folder-system",
+      "organize-receipts-for-accountant"
+    ]
+  },
+  {
+    "slug": "receipt-folder-system",
+    "path": "/blog/receipt-folder-system",
+    "category": "How-To",
+    "title": "A Receipt Folder System You Can Find Things In",
+    "seoTitle": "Receipt Folder System: Paper, Digital, and App Options",
+    "description": "Set up a receipt folder system by year and month, name digital files consistently, and keep shared project purchases from being counted twice.",
+    "excerpt": "A folder is useful only if you can retrieve the receipt. Here is a simple structure for paper slips, PDFs, and email purchases, with a worked example.",
+    "datePublished": "2026-11-24",
+    "dateModified": "2026-11-24",
+    "readTime": "5 min read",
+    "image": "/assets/images/blog/track-business-receipts-by-project.jpg",
+    "imageWidth": 1440,
+    "imageHeight": 810,
+    "imageAlt": "Paper receipts sorted beside green and ochre folders on a desk",
+    "keywords": [
+      "receipt folder system",
+      "digital receipt folder",
+      "organize receipts by month",
+      "receipt filing system"
+    ],
+    "intro": [
+      "Start with a year folder, put one folder inside it for each month, and separate business receipts from personal purchases. Give digital receipts a date, merchant, and short identifier. Keep a small review queue for receipts you have not checked yet. The test is simple: can you find the original for a purchase without opening every file?",
+      "You can use this system with paper envelopes, a cloud drive, or a receipt organizer. Choose one main home for the records. A camera roll, inbox, Downloads folder, and desk drawer are four places to search when someone asks for the same receipt."
+    ],
+    "sections": [
+      {
+        "id": "choose-a-home",
+        "title": "Choose paper folders, digital folders, or a receipt app",
+        "blocks": [
+          {
+            "kind": "table",
+            "table": {
+              "columns": [
+                "System",
+                "Works well when",
+                "Upkeep"
+              ],
+              "rows": [
+                [
+                  "Paper envelopes or an expanding folder",
+                  "You receive mostly paper receipts and have a manageable volume.",
+                  "File each slip by month and check that it remains readable. Save a digital copy of important fading receipts."
+                ],
+                [
+                  "Digital folders and a spreadsheet",
+                  "You want your own structure and can maintain filenames and links.",
+                  "Save the original files, enter the purchase details, and link each spreadsheet row to its document."
+                ],
+                [
+                  "Receipt organizer app",
+                  "You regularly receive a mix of receipt photos, PDFs, and emails.",
+                  "Review extracted fields, check missing records, and understand how to retrieve originals and export summaries."
+                ]
+              ]
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "Start with what you already use. If you only need to retrieve five receipts a month, a well-kept folder may be enough. If you repeatedly type merchant names and amounts into a sheet, try a receipt organizer with a few representative purchases.",
+            "source": {
+              "href": "/receipt-organizer",
+              "label": "See the ReceiptNest receipt organizer workflow"
+            }
+          }
+        ]
+      },
+      {
+        "id": "folder-structure",
+        "title": "Use a year and month structure with a review queue",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "This example uses the purchase date for filing. Use numbered months so they sort in calendar order. Keep personal purchases outside the business folder, and make a separate place for documents that need clarification."
+          },
+          {
+            "kind": "table",
+            "table": {
+              "columns": [
+                "Folder",
+                "Put here",
+                "When to clear it"
+              ],
+              "rows": [
+                [
+                  "Business receipts / 2026 / 01 January",
+                  "Checked January receipt photos, PDFs, and saved itemized emails.",
+                  "Keep the records according to the retention requirements that apply to you."
+                ],
+                [
+                  "Business receipts / 2026 / 11 November",
+                  "Checked November purchases, even if the email arrived later.",
+                  "Review at month-end and resolve missing details."
+                ],
+                [
+                  "Business receipts / To review",
+                  "Unclear dates, missing originals, or purchases whose purpose you need to confirm.",
+                  "Check weekly; move completed records into their purchase month."
+                ],
+                [
+                  "Personal receipts / 2026",
+                  "Personal purchase records you want for your own reference.",
+                  "Use a separate review routine."
+                ]
+              ]
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "For paper, use the same month labels on envelopes. Photograph a slip before it becomes difficult to read, then check the saved image at full size. Decide how long to retain each kind of record separately from deciding where to file it.",
+            "source": {
+              "href": "/blog/how-long-to-keep-receipts",
+              "label": "Read the U.S. receipt retention guide and its exceptions"
+            }
+          }
+        ]
+      },
+      {
+        "id": "name-files",
+        "title": "Give digital files a name you can search",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "Use a pattern such as YYYY-MM-DD_merchant_total-currency_reference.ext. For example, 2026-11-03_elm-print_28-00-USD_r001.pdf tells you the date, seller, amount, and record identifier before you open it. The amount is a hint for finding the file; the original receipt is what you check."
+          },
+          {
+            "kind": "list",
+            "items": [
+              "Use the purchase date, rather than the date you downloaded the file.",
+              "Keep a recognizable merchant name. Put a project name in a spreadsheet column or note if you need it.",
+              "Use a unique reference such as r001 when two receipts have the same date, merchant, and total.",
+              "Preserve the original file extension. Renaming a file does not convert it to another format.",
+              "Keep an untouched original if you make a marked-up copy for your working notes."
+            ]
+          },
+          {
+            "kind": "paragraph",
+            "text": "ReceiptNest organizes records using reviewed purchase details, so you do not need to rename every uploaded file. Check the merchant and date after extraction; those fields are useful only when they match the receipt."
+          }
+        ]
+      },
+      {
+        "id": "worked-example",
+        "title": "File three purchases without doubling a shared expense",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "Consider these fictional purchases. The month folder holds the original once. A project spreadsheet can link to that same file wherever the project needs it."
+          },
+          {
+            "kind": "table",
+            "table": {
+              "columns": [
+                "Purchase",
+                "Original location",
+                "Working note"
+              ],
+              "rows": [
+                [
+                  "November 3: $28 of prints for Elm",
+                  "2026 / 11 November / 2026-11-03_elm-print_28-00-USD_r001.pdf",
+                  "Project: Elm brochure; proof prints."
+                ],
+                [
+                  "November 8: $46 of display cards for Harbor",
+                  "2026 / 11 November / 2026-11-08_elm-print_46-00-USD_r002.pdf",
+                  "Project: Harbor launch; display cards."
+                ],
+                [
+                  "November 9: $60 of shared supplies",
+                  "2026 / 11 November / 2026-11-09_office-shop_60-00-USD_r003.jpg",
+                  "Working allocation: $40 Elm, $20 Harbor. Link both notes to the same original."
+                ]
+              ]
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "The purchase records total $134. The two project summaries can show $68 for Elm and $66 for Harbor using the illustrated allocation. Copying the full $60 into both summaries would instead produce $194. Verify the split against the itemized purchase and any agreement with the client.",
+            "source": {
+              "href": "/blog/track-business-receipts-by-project",
+              "label": "See how to group receipts by client or project"
+            }
+          }
+        ]
+      },
+      {
+        "id": "weekly-review",
+        "title": "Use a weekly filing and monthly review routine",
+        "blocks": [
+          {
+            "kind": "ordered",
+            "items": [
+              "Bring receipt photos, downloaded PDFs, and itemized email receipts into the review queue.",
+              "Open each original and check its merchant, purchase date, amount, and currency.",
+              "Add the purpose or project while you remember it. Flag unclear records for follow-up.",
+              "File checked records in the purchase month. Check for the same receipt saved twice.",
+              "At month-end, compare the folder with your payment records and investigate purchases with missing documents.",
+              "Before handing records over, ask which summary columns and originals the recipient needs. Test one link or exported file as the recipient would."
+            ]
+          },
+          {
+            "kind": "paragraph",
+            "text": "In ReceiptNest, upload a photo or PDF, or deliberately forward an email receipt. On the web, Collections can group receipts for a project. A monthly or collection CSV provides merchant, date, and amount; keep allocation notes and the source documents available separately.",
+            "source": {
+              "href": "/receipt-to-csv",
+              "label": "Inspect the actual CSV columns and sample"
+            }
+          }
+        ]
+      },
+      {
+        "id": "test-retrieval",
+        "title": "Test the system before you put the paper away",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "Pick an older purchase and try to find its original using only the month, merchant, or project. Open the document and zoom in on the itemized details and final total. If a shared folder is involved, check the recipient’s access with a harmless example before sending business records."
+          },
+          {
+            "kind": "paragraph",
+            "text": "Keep any backups your recordkeeping process requires. A spreadsheet total and a folder of originals serve different jobs: the sheet helps you review purchases, and the documents let you check what each row represents.",
+            "source": {
+              "href": "/blog/organize-receipts-for-accountant",
+              "label": "Use the accountant handoff checklist"
+            }
+          }
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "question": "Should I organize receipts by month or by category?",
+        "answer": "Month folders give each original a predictable home. Use spreadsheet columns, tags, or receipt-app categories for a second view without creating several competing copies of the same purchase."
+      },
+      {
+        "question": "Can I use Google Drive or another cloud folder for receipts?",
+        "answer": "Yes. Save readable originals, keep filenames consistent, and link working spreadsheet rows to the documents. Check that links and access still work before a handoff."
+      },
+      {
+        "question": "Is a digital receipt folder the same as a receipt organizer?",
+        "answer": "A folder stores files in a structure you maintain. A receipt organizer adds purchase fields and receipt-focused views. ReceiptNest can extract details from photos and PDFs for review, retain the source document, and export a summary."
+      }
+    ],
+    "relatedSlugs": [
+      "track-business-receipts-by-project",
+      "how-to-sort-a-shoebox-of-receipts",
+      "organize-receipts-for-accountant"
+    ]
+  },
+  {
     slug: 'track-business-receipts-by-project',
     path: '/blog/track-business-receipts-by-project',
     category: 'How-To',
@@ -949,7 +1452,7 @@ export const blogPosts: readonly BlogPost[] = [
     excerpt:
       'The most expensive thing you can hand your bookkeeper is a shoebox. Here is how to turn one into a clean, month-by-month record yourself, without tossing anything you might need.',
     datePublished: '2026-10-21',
-    dateModified: '2026-10-21',
+    dateModified: '2026-11-24',
     readTime: '10 min read',
     image: '/assets/images/blog/how-to-sort-a-shoebox-of-receipts.webp',
     imageWidth: 1672,
@@ -2057,7 +2560,7 @@ export const blogPosts: readonly BlogPost[] = [
     excerpt:
       `Your accountant asked for receipts. Send four things: the period, readable originals, a reviewed summary, and a short list of what you could not resolve.`,
     datePublished: '2026-10-12',
-    dateModified: '2026-11-10',
+    dateModified: '2026-11-24',
     readTime: '6 min read',
     image: '/assets/images/blog/organize-receipts-for-accountant.webp',
     imageAlt: 'A receipt handoff checklist beside a spreadsheet summary and a small stack of receipts',
@@ -2958,7 +3461,7 @@ export const blogPosts: readonly BlogPost[] = [
       'Your delivery app tracks orders, not every cost of doing the work. Learn which records to preserve and how to build a five-minute end-of-shift routine.',
     datePublished: '2026-07-16',
     dateModified: '2026-11-10',
-    readTime: '11 min read',
+    readTime: '7 min read',
     image: '/assets/images/blog/delivery-driver-receipts.webp',
     imageWidth: 1672,
     imageHeight: 941,
@@ -3204,7 +3707,7 @@ export const blogPosts: readonly BlogPost[] = [
       'A fair comparison of ReceiptNest and Expensify for solo freelancers, small teams, and people who want receipt clarity without corporate expense complexity.',
     datePublished: '2026-06-09',
     dateModified: '2026-09-13',
-    readTime: '9 min read',
+    readTime: '4 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Freceiptnest-expensify.png?alt=media&token=4592bdb9-22e6-438c-8644-9b20ec9810d6',
     imageWidth: 1672,
     imageHeight: 941,
@@ -3352,7 +3855,7 @@ export const blogPosts: readonly BlogPost[] = [
       'A practical receipt organization system for 1099 freelancers, with retention rules, Schedule C categories, audit prep, and a month-by-month workflow.',
     datePublished: '2026-06-09',
     dateModified: '2026-11-10',
-    readTime: '12 min read',
+    readTime: '4 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Forganizing-chaos.png?alt=media&token=a4ddd1e9-0056-4011-bf78-fe1e297f89ef',
     imageWidth: 1672,
     imageHeight: 941,
@@ -3534,7 +4037,7 @@ export const blogPosts: readonly BlogPost[] = [
       'A receipt workflow for Etsy sellers that covers supplies, shipping, fees, photos, home office support, and quarterly tax prep.',
     datePublished: '2026-06-09',
     dateModified: '2026-09-13',
-    readTime: '10 min read',
+    readTime: '3 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Fetsy-more.png?alt=media&token=1ceeee19-d74e-4947-a240-4cb95dac0d4b',
     imageWidth: 1672,
     imageHeight: 941,
@@ -3678,8 +4181,8 @@ export const blogPosts: readonly BlogPost[] = [
     excerpt:
       'A practical guide to automatic receipt scanning, OCR, capture methods, app selection, setup, and common scanning fixes.',
     datePublished: '2026-06-09',
-    dateModified: '2026-09-13',
-    readTime: '11 min read',
+    dateModified: '2026-11-24',
+    readTime: '4 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Fdigital.png?alt=media&token=2debc0bf-3d6b-44b0-a804-8f9dcd2d6a41',
     imageWidth: 1672,
     imageHeight: 941,
@@ -3841,7 +4344,7 @@ export const blogPosts: readonly BlogPost[] = [
       'A calm, visibility-first approach to money clarity: see spending first, reduce avoidance, and make better decisions without beginning with a budget.',
     datePublished: '2026-06-09',
     dateModified: '2026-09-13',
-    readTime: '10 min read',
+    readTime: '3 min read',
     image: 'https://firebasestorage.googleapis.com/v0/b/receipt-nest.firebasestorage.app/o/blogs%2Fnavigating-expenses.png?alt=media&token=6b293452-73ef-419f-a223-3ff660082cd1',
     imageWidth: 1672,
     imageHeight: 941,
