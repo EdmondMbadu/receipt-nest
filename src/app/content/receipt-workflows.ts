@@ -35,7 +35,7 @@ export interface ReceiptWorkflow {
 
 export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
   "receipt-tracker": {
-    "h1": "A receipt tracker app for your freelance business",
+    "h1": "A receipt tracker for photos, PDFs, and email",
     "intro": "A receipt tracker keeps a purchase record with its original photo, PDF, or email receipt. Use ReceiptNest to review purchases by month, find a merchant, and export a CSV without connecting your bank account.",
     "benefit": "Capture now. Review by month. Export when you need to.",
     "ctaLabel": "Track your first receipt",
@@ -107,8 +107,8 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
         "body": "Start with the current month, even if older receipts are still scattered. Add a small backlog in each review session. Capturing a few receipts consistently is more useful than creating an elaborate filing system you never revisit."
       },
       {
-        "title": "Know what the totals include",
-        "body": "ReceiptNest totals reflect the records you have added, not every transaction in your bank account. Missing receipts, refunds, or duplicate uploads can change the picture. Review your records before relying on an export."
+        "title": "Check receipts against your statement each month",
+        "body": "Compare the saved merchant, final amount, currency, and purchase date with posted purchases on one bank or card statement. Record timing differences, refunds, and missing documents in a separate review sheet. A duplicate upload can inflate the receipt total even when the statement has only one purchase. ReceiptNest stores and exports the receipt side of this review; matching remains part of your own bookkeeping process."
       }
     ],
     "faq": [
@@ -138,6 +138,10 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       }
     ],
     "related": [
+      {
+        "path": "/blog/match-receipts-to-bank-statements",
+        "label": "Match receipts to your bank or credit card statement"
+      },
       {
         "path": "/blog/track-business-receipts-by-project",
         "label": "How to track business receipts by client or project"
@@ -243,6 +247,10 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
     ],
     "faq": [
       {
+        "question": "How do I avoid counting the same receipt twice?",
+        "answer": "A paper photo, emailed receipt, and PDF can describe the same purchase. Compare the merchant, date, amount, and receipt or order number before counting them as separate purchases. Keep a reference to the supporting originals and check the purchase against the statement. Do not assume that matching amounts alone prove a duplicate."
+      },
+      {
         "question": "Can I organize receipts on my phone?",
         "answer": "Yes. ReceiptNest is available on iPhone and Android, and you can also use the web app. Start with a readable photo or PDF, check the extracted purchase details, and open the saved original to confirm that the full receipt is available."
       },
@@ -264,6 +272,10 @@ export const receiptWorkflows: Readonly<Record<string, ReceiptWorkflow>> = {
       }
     ],
     "related": [
+      {
+        "path": "/blog/match-receipts-to-bank-statements",
+        "label": "Check missing receipts, refunds, and duplicate records"
+      },
       {
         "path": "/blog/receipt-folder-system",
         "label": "Set up a paper or digital receipt folder system"

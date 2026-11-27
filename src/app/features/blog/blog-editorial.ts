@@ -28,6 +28,53 @@ const scanner = { href: '/receipt-scanner', label: 'See the receipt-scanning wor
 const email = { href: '/email-receipt-organizer', label: 'Set up email-receipt forwarding' };
 
 const editorial: Readonly<Record<string, BlogEditorial>> = {
+  "match-receipts-to-bank-statements": {
+    "note": "Published by ReceiptNest, the receipt app discussed here. Purchases, amounts, and review statuses are illustrative. Matching is a manual spreadsheet workflow, not automatic bank reconciliation. The matching sheet has columns beyond the current monthly export. General U.S. recordkeeping references do not determine individual tax treatment.",
+    "sources": [
+      {
+        "href": "https://www.irs.gov/businesses/small-businesses-self-employed/what-kind-of-records-should-i-keep",
+        "label": "IRS: documents supporting business purchases and expenses"
+      },
+      {
+        "href": "https://www.irs.gov/publications/p583",
+        "label": "IRS Publication 583: recordkeeping and proof of payment"
+      }
+    ],
+    "workflows": [
+      {
+        "href": "/receipt-tracker",
+        "label": "Keep receipt records ready for the monthly review"
+      },
+      {
+        "href": "/receipt-organizer",
+        "label": "Bring paper, PDF, and email receipts together"
+      },
+      {
+        "href": "/receipt-to-csv",
+        "label": "Inspect the monthly CSV and download a sample"
+      },
+      {
+        "href": "/blog/can-bank-statements-replace-receipts",
+        "label": "Recover a receipt missing from a statement purchase"
+      }
+    ],
+    "quickLinks": [
+      {
+        "href": "/blog/match-receipts-to-bank-statements",
+        "fragment": "worked-example",
+        "label": "See the duplicate-and-refund example"
+      },
+      {
+        "href": "/blog/match-receipts-to-bank-statements",
+        "fragment": "matching-sheet",
+        "label": "Copy the matching-sheet columns"
+      }
+    ],
+    "cta": {
+      "label": "Prepare your first receipt for review",
+      "body": "Upload one receipt, check the original and purchase details, then try the monthly CSV before adding it to your statement review."
+    }
+  },
   "organize-receipts-in-gmail": {
     "note": "Published by ReceiptNest, the receipt app discussed here. The supplier, purchase, and label examples are illustrative. Gmail instructions follow Google’s documentation; this guide uses selected-message forwarding, not an automatic inbox integration. Hero image is an editorial illustration generated with AI.",
     "sources": [
@@ -336,7 +383,7 @@ const editorial: Readonly<Record<string, BlogEditorial>> = {
   'can-bank-statements-replace-receipts': {
     note: taxNote + ' The $86.40 purchase is a fictional illustration from our Paper Trail video, not a customer record.',
     sources: [records, { href: 'https://www.irs.gov/publications/p583', label: 'IRS Publication 583: payment evidence and electronic records' }, retention],
-    workflows: [scanner, tax, { href: '/blog/organize-receipts-for-accountant', label: 'See how to flag an unresolved purchase for your accountant' }],
+    workflows: [scanner, tax, { href: '/blog/organize-receipts-for-accountant', label: 'See how to flag an unresolved purchase for your accountant' }, { href: '/blog/match-receipts-to-bank-statements', label: 'Match a month of receipts to posted statement purchases' }],
     quickLinks: [{ href: '/blog/can-bank-statements-replace-receipts', fragment: 'missing-receipt', label: 'Lost a business receipt? Jump to the recovery steps' }],
     cta: { label: 'Save the receipt you recovered', body: 'Upload the duplicate or forward the confirmation email. Check it against the payment and keep the original with the receipt record.' }
   },

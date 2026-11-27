@@ -73,6 +73,265 @@ export const blogCategories: readonly BlogCategory[] = [
 
 export const blogPosts: readonly BlogPost[] = [
   {
+    "slug": "match-receipts-to-bank-statements",
+    "path": "/blog/match-receipts-to-bank-statements",
+    "category": "How-To",
+    "title": "How to Match Receipts to Bank and Credit Card Statements",
+    "seoTitle": "Match Receipts to Bank Statements: A Monthly Checklist",
+    "description": "Match receipts to bank and credit card statements with a worked example. Check missing receipts, refunds, duplicates, posting dates, and your monthly CSV.",
+    "excerpt": "A receipt total and a card statement rarely tell the whole story alone. Use a small comparison sheet to find missing documents and explain the differences.",
+    "datePublished": "2026-11-27",
+    "dateModified": "2026-11-27",
+    "readTime": "6 min read",
+    "image": "/assets/images/blog/bank-statements-vs-receipts.webp",
+    "imageWidth": 1897,
+    "imageHeight": 829,
+    "imageAlt": "An itemized receipt beside a bank statement, green notebook, and pen on a cream desk",
+    "keywords": [
+      "match receipts to bank statements",
+      "credit card receipt matching",
+      "monthly receipt review",
+      "missing receipts and refunds"
+    ],
+    "intro": [
+      "To match receipts to a bank or credit card statement, compare each purchase’s merchant, final amount, currency, and date with a posted transaction. Keep a link or reference to the original receipt, then list anything you cannot match. Check the other direction too: every relevant statement purchase should have a receipt or a clear note explaining what is missing.",
+      "A month-end review can explain why your saved receipts total more or less than your statement purchases. A duplicated upload, a refund, or a purchase that posted in the next month may account for the difference. This guide walks through a fictional example and a checklist you can use with a spreadsheet or a receipt app."
+    ],
+    "sections": [
+      {
+        "id": "gather-records",
+        "title": "Start with one account, one currency, and one period",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "Choose one bank or credit card account and a finished statement period. Gather its posted transactions, the receipts for those purchases, and any return or credit documents. Keep the source files unchanged and work from a copy of your receipt summary."
+          },
+          {
+            "kind": "paragraph",
+            "text": "A calendar month and a statement cycle may end on different days. Write the exact dates at the top of the sheet. Also keep both the purchase date from the receipt and the posting date from the statement when they differ. Look just outside the period for a purchase that crossed the boundary."
+          },
+          {
+            "kind": "callout",
+            "tone": "note",
+            "title": "Compare purchase activity, not the card balance",
+            "text": "A card balance may include earlier debt, payments, interest, and fees. Compare the purchase and refund entries relevant to your review. A payment from your bank to your card is a transfer between accounts, not another receipt purchase."
+          }
+        ]
+      },
+      {
+        "id": "matching-sheet",
+        "title": "Use a small matching sheet alongside your originals",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "Start with the columns below. The status is a review note you maintain yourself, not an automated verdict from ReceiptNest. A receipt app can supply the purchase record; your statement supplies the payment entry."
+          },
+          {
+            "kind": "table",
+            "table": {
+              "columns": [
+                "Column",
+                "What to record"
+              ],
+              "rows": [
+                [
+                  "Receipt reference",
+                  "A filename, document link, or other reference that lets you reopen the original."
+                ],
+                [
+                  "Merchant and final amount",
+                  "The seller and final total, including any tax or tip shown on the completed receipt."
+                ],
+                [
+                  "Currency",
+                  "Keep USD, EUR, and other currencies explicit; do not add them together as though they were the same unit."
+                ],
+                [
+                  "Purchase and posting dates",
+                  "The receipt date and the date the transaction appears as posted on the statement."
+                ],
+                [
+                  "Statement reference",
+                  "A transaction reference or a page and row you can find again."
+                ],
+                [
+                  "Review status and next action",
+                  "Matched, receipt missing, refund to check, possible duplicate, or timing difference."
+                ]
+              ]
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "Use merchant, amount, currency, date, and any order or transaction reference together. Two purchases of the same amount at the same shop can still be separate purchases. A merchant’s statement descriptor can differ from its trading name; check the order history or supplier document before marking it matched."
+          }
+        ]
+      },
+      {
+        "id": "worked-example",
+        "title": "A worked example: why $145 in receipts is not $145 in net purchases",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "All amounts in this fictional example are USD, and every transaction has posted during the chosen period. The receipt folder initially contains these four files:"
+          },
+          {
+            "kind": "table",
+            "table": {
+              "columns": [
+                "Saved document",
+                "Amount",
+                "What the statement shows"
+              ],
+              "rows": [
+                [
+                  "Office supplies receipt",
+                  "$60.00",
+                  "One $60.00 purchase."
+                ],
+                [
+                  "Software subscription receipt",
+                  "$25.00",
+                  "One $25.00 purchase."
+                ],
+                [
+                  "A second copy of the same supplies receipt",
+                  "$60.00",
+                  "No second purchase; confirm the receipt or order reference."
+                ],
+                [
+                  "Return confirmation",
+                  "Not yet entered in the receipt summary",
+                  "A $15.00 credit against the supplies purchase."
+                ]
+              ]
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "The three receipt-summary rows total $145.00: $60.00 + $25.00 + $60.00. After confirming that the second supplies file is the same purchase, count the purchase once. The unique purchase total is $85.00. Keep the $15.00 return record connected to the original purchase; net purchase activity for this example is $70.00."
+          },
+          {
+            "kind": "paragraph",
+            "text": "Your comparison notes should explain both differences: $60.00 from a duplicate summary entry and $15.00 from a refund. Preserve the source documents and make any corrections through your normal recordkeeping process. Do not alter a genuine receipt to make its amount equal the net result."
+          },
+          {
+            "kind": "callout",
+            "tone": "tip",
+            "title": "A matching total is only the first check",
+            "text": "Two missing or incorrect entries can offset each other. Match the individual transactions and document the exceptions even if the totals happen to agree."
+          }
+        ]
+      },
+      {
+        "id": "exceptions",
+        "title": "Check missing receipts, refunds, and date differences",
+        "blocks": [
+          {
+            "kind": "table",
+            "table": {
+              "columns": [
+                "What does not match",
+                "What to check next"
+              ],
+              "rows": [
+                [
+                  "Posted charge with no receipt",
+                  "Search the supplier account and inbox using the merchant, amount, and nearby dates. Ask for an itemized copy if necessary. Record the unresolved gap."
+                ],
+                [
+                  "Receipt with no posted charge",
+                  "Check another payment method, split payments, an unpaid order, or the next statement period. Do not assume the receipt proves the payment posted to this account."
+                ],
+                [
+                  "Amount differs",
+                  "Compare the final total, tip, discount, delivery fee, and currency. Use the completed receipt rather than a preliminary order message."
+                ],
+                [
+                  "Refund or partial return",
+                  "Keep the purchase receipt and refund document. Match the posted credit separately, including a later statement period when applicable."
+                ],
+                [
+                  "Possible duplicate",
+                  "Compare the receipt number, order reference, items, and date. Two files can represent one purchase; two identical amounts can also be real separate purchases."
+                ],
+                [
+                  "Foreign-currency purchase",
+                  "Keep the original currency and the posted account-currency amount separate. Check conversion details and any separate fee rather than comparing unlike amounts."
+                ]
+              ]
+            }
+          },
+          {
+            "kind": "paragraph",
+            "text": "If a receipt is still missing, give the reviewer the statement entry, whatever supporting documents you found, and a plain description of the gap. Do not invent an itemized record. For U.S. business records, IRS guidance explains that several documents may be needed together to support a purchase; a payment entry alone does not establish a tax deduction."
+          },
+          {
+            "kind": "paragraph",
+            "text": "The IRS describes the supporting information for business purchases and expenses, while Publication 583 explains the limits of proof of payment. Use these sources when deciding which documents to retain for your business.",
+            "source": {
+              "href": "https://www.irs.gov/publications/p583",
+              "label": "IRS Publication 583: supporting documents and proof of payment"
+            }
+          }
+        ]
+      },
+      {
+        "id": "receiptnest-workflow",
+        "title": "Use ReceiptNest for the receipt side of the review",
+        "blocks": [
+          {
+            "kind": "ordered",
+            "items": [
+              "Upload a receipt photo or PDF, or forward a selected receipt email to your ReceiptNest address.",
+              "Open the original and verify the merchant, purchase date, final amount, and currency. Correct extraction mistakes and add useful context in a note.",
+              "Download the monthly CSV. Its purchase columns are Merchant, Date, and Amount, followed by a Total row. Remove the summary row from the working copy before calculating your own totals.",
+              "Add your matching columns in a separate spreadsheet. The monthly CSV does not include currency, original-file links, or your review statuses; obtain those from the original records and maintain the comparison yourself.",
+              "Compare the rows with the chosen account’s posted purchase activity. Keep an exception list and the relevant original documents for your accountant or bookkeeper."
+            ]
+          },
+          {
+            "kind": "paragraph",
+            "text": "ReceiptNest does not connect this workflow to your bank or automatically reconcile the statement. Its monthly grouping also follows the saved receipt dates, so a statement cycle that spans two calendar months may require rows from two exports. Keep refunds and other adjustments explicit in your working sheet instead of assuming the app’s total includes them."
+          }
+        ]
+      },
+      {
+        "id": "finish-review",
+        "title": "Finish with a short exception list",
+        "blocks": [
+          {
+            "kind": "paragraph",
+            "text": "Before sharing the review, state the account, period, and currency. Give each unresolved row an owner and a next step: request a supplier copy, check next month’s posting, or ask the bookkeeper how to treat an adjustment. Keep matched records and supporting documents available so someone else can follow your work."
+          },
+          {
+            "kind": "paragraph",
+            "text": "This purchase-document check is only part of full account reconciliation. It does not establish the correct tax treatment, reconcile an opening and closing balance, or replace your accounting records. Use the completed sheet to make the next review easier, then capture new receipts as purchases happen."
+          }
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "question": "Can a bank statement replace a missing receipt?",
+        "answer": "A statement can help identify a payment and locate a replacement receipt. It may not describe the items or business purpose. Keep the supporting documents you can recover and flag unresolved information for your accountant."
+      },
+      {
+        "question": "Why do the purchase date and posting date differ?",
+        "answer": "The receipt records the purchase event; the statement records when the transaction posted to the account. Keep both dates in your matching sheet and check the neighboring period before treating a difference as a missing purchase."
+      },
+      {
+        "question": "Does ReceiptNest automatically match my receipts to my bank?",
+        "answer": "No. This workflow uses ReceiptNest to capture, review, and export receipt details. Match those records to your statement in your own spreadsheet or accounting process."
+      }
+    ],
+    "relatedSlugs": [
+      "can-bank-statements-replace-receipts",
+      "receipt-pdfs-to-excel",
+      "organize-receipts-for-accountant"
+    ]
+  },
+  {
     "slug": "organize-receipts-in-gmail",
     "path": "/blog/organize-receipts-in-gmail",
     "category": "How-To",

@@ -1,0 +1,208 @@
+{
+  "reviewDatePacific": "2026-11-27",
+  "property": "sc-domain:receipt-nest.com",
+  "method": "Search Console UI observations. Displayed rounding retained. Three-month and 28-day windows must not be compared as equivalent periods.",
+  "webThreeMonths": {
+    "start": "2026-08-26",
+    "end": "2026-11-25",
+    "clicks": 63,
+    "impressionsDisplayed": "14K",
+    "ctrDisplayed": "0.4%",
+    "averagePosition": 22.3
+  },
+  "web28Days": {
+    "start": "2026-10-29",
+    "end": "2026-11-25",
+    "clicks": 39,
+    "impressionsDisplayed": "6.28K",
+    "ctrDisplayed": "0.6%",
+    "averagePosition": 18.4
+  },
+  "selectedLandingPages28Days": [
+    {
+      "path": "/receipt-organizer",
+      "clicks": 13,
+      "impressions": 1366,
+      "position": 12.5
+    },
+    {
+      "path": "/receipt-management-software",
+      "clicks": 0,
+      "impressions": 1815,
+      "position": 34.8
+    },
+    {
+      "path": "/receipt-tracker",
+      "clicks": 1,
+      "impressions": 534,
+      "position": 25.2
+    },
+    {
+      "path": "/blog/how-long-to-keep-receipts",
+      "clicks": 3,
+      "impressions": 635,
+      "position": 7.7
+    },
+    {
+      "path": "/blog/can-bank-statements-replace-receipts",
+      "clicks": 0,
+      "impressions": 268,
+      "position": 6.4
+    },
+    {
+      "path": "/blog/organize-receipts-for-accountant",
+      "clicks": 1,
+      "impressions": 194,
+      "position": 12.2
+    },
+    {
+      "path": "/blog/why-do-receipts-fade",
+      "clicks": 4,
+      "impressions": 208,
+      "position": 6.6
+    },
+    {
+      "path": "/receipt-to-csv",
+      "clicks": 4,
+      "impressions": 97,
+      "position": 6.2
+    }
+  ],
+  "selectedQueries28Days": [
+    {
+      "query": "receipt tracker",
+      "clicks": 0,
+      "impressions": 294,
+      "position": 27.1
+    },
+    {
+      "query": "receipt organizer",
+      "clicks": 0,
+      "impressions": 275,
+      "position": 15.3
+    },
+    {
+      "query": "receipt management software",
+      "clicks": 0,
+      "impressions": 243,
+      "position": 25.7
+    },
+    {
+      "query": "receipt folder",
+      "clicks": 0,
+      "impressions": 61,
+      "position": 7.1
+    },
+    {
+      "query": "receipt filing system",
+      "clicks": 0,
+      "impressions": 21,
+      "position": 9.4
+    },
+    {
+      "query": "how to prepare receipts for accountant",
+      "clicks": 0,
+      "impressions": 15,
+      "position": 16.7
+    }
+  ],
+  "indexing": {
+    "reportUpdated": "2026-11-22",
+    "indexed": 44,
+    "excluded": 14,
+    "reasons": {
+      "redirect": 8,
+      "noindex": 2,
+      "alternateCanonical": 2,
+      "crawledNotIndexed": 2
+    },
+    "redirectErrors": 0,
+    "discoveredNotIndexed": 0,
+    "crawledNotIndexedExamples": [
+      {
+        "path": "/blog/receipt-tracking-delivery-drivers",
+        "lastCrawl": "2026-09-18"
+      },
+      {
+        "path": "/blog/organize-receipts-taxes-freelancer-guide",
+        "lastCrawl": "2026-09-09"
+      }
+    ],
+    "action": "Did not repeat the indexing requests accepted November 24; report still shows old crawl dates."
+  },
+  "sitemapAtInitialInspection": {
+    "lastSubmitted": "2026-11-18",
+    "lastRead": "2026-11-18",
+    "status": "Success",
+    "discoveredPages": 46,
+    "discoveredVideos": 1
+  },
+  "enhancements": {
+    "validBreadcrumbs": 14,
+    "invalidBreadcrumbs": 0,
+    "validVideos": 2,
+    "invalidVideos": 0
+  },
+  "coreWebVitals": "Insufficient field data for desktop and mobile; not a pass.",
+  "priorities": [
+    "Improve the existing receipt organizer and tracker paths; receipt organizer averages position 12.5 across its page impressions.",
+    "Add one distinct supporting guide about matching receipts to statements rather than repeating the folder, scanning, Gmail, or Excel guides published recently.",
+    "The new guide is a supporting-workflow hypothesis; an exact matching-receipts query was not observed in the inspected query shortlist.",
+    "Retain useful existing retention and bank-statement answers. The overview impression-drop alert needs comparable-window and query-mix investigation before inferring a ranking loss."
+  ],
+  "localChanges": {
+    "articlePath": "/blog/match-receipts-to-bank-statements",
+    "primaryPhrase": "match receipts to bank statements",
+    "hero": "src/assets/images/blog/bank-statements-vs-receipts.webp",
+    "heroDecision": "Reused a closely matching existing image of an itemized receipt alongside a bank statement. No new generated asset.",
+    "updatedPaths": [
+      "/receipt-tracker",
+      "/receipt-organizer",
+      "/blog/can-bank-statements-replace-receipts"
+    ],
+    "deployment": "Not deployed; no production deployment requested."
+  },
+  "validation": {
+    "productionBuild": "Passed with NG_BUILD_MAX_WORKERS=2 outside the sandbox after sandboxed Angular aborted.",
+    "publicPages": 51,
+    "accountPages": 3,
+    "localLinks": 1914,
+    "videos": 3,
+    "liveSitemapUrls": 50,
+    "liveBasicSeoIssues": 0,
+    "browserViewports": [
+      {
+        "width": 1440,
+        "height": 1000
+      },
+      {
+        "width": 390,
+        "height": 844
+      }
+    ],
+    "browserChecks": [
+      "New article H1 and canonical",
+      "Hero loads with expected intrinsic dimensions",
+      "Article and workflow pages have no horizontal page overflow",
+      "Tables stay within mobile containers",
+      "Table of contents and worked-example anchor arrival",
+      "Light and dark article presentation",
+      "Related links and blog-index discovery",
+      "Signup CTA reaches create-account screen with receipt entry intent; no account created"
+    ],
+    "preExistingBuildWarnings": [
+      "CSS component budgets for folder detail and landing",
+      "CommonJS dependencies",
+      "Stale baseline-browser-mapping dataset",
+      "Typeless-package Node warning"
+    ]
+  },
+  "nextReview": "After deployment and sufficient new Search Console data, compare equivalent windows for these landing pages and queries. Keep click, impression, CTR, and position changes separate; do not attribute differences to this change without evidence.",
+  "sitemapResubmission": {
+    "datePacific": "2026-11-27",
+    "url": "https://receipt-nest.com/sitemap.xml",
+    "result": "Sitemap submitted successfully dialog observed; submitted date changed to November 27 and status remained Success.",
+    "discoveryAfterSubmission": "Last read still November 18; 46 discovered pages and one video still displayed. Processing has not yet caught up to the 50-URL live sitemap.",
+    "scope": "Only the already-live sitemap was submitted. The new locally built article was not submitted as a live URL."
+  }
+}

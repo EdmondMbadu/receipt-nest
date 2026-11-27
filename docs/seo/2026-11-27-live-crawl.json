@@ -1,0 +1,957 @@
+{
+  "reviewDatePacific": "2026-11-27",
+  "scope": "All URLs in the production sitemap; public HTML only. This does not measure ranking changes or field performance.",
+  "sitemapCount": 50,
+  "pages": [
+    {
+      "url": "https://receipt-nest.com/getting-started",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/getting-started",
+      "title": "Getting Started with ReceiptNest \u2014 Upload & Download Receipts",
+      "description": [
+        "Watch the 85-second ReceiptNest walkthrough. Learn to scan or upload a receipt, let AI organize the details, and find and download your receipts."
+      ],
+      "h1": [
+        "Snap. Organize.Download."
+      ],
+      "canonical": [
+        "https://receipt-nest.com/getting-started"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/",
+      "title": "ReceiptNest \u2014 Receipt App for Freelancers. No Accounting Software.",
+      "description": [
+        "Capture receipt photos, PDFs, and forwarded emails. Review purchases, keep originals, and export a CSV for your accountant. No bank connection required."
+      ],
+      "h1": [
+        "Just your receipts. None of the accounting."
+      ],
+      "canonical": [
+        "https://receipt-nest.com/"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/receipt-tracker",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/receipt-tracker",
+      "title": "Receipt Tracker App for Freelancers | ReceiptNest",
+      "description": [
+        "Track receipts from photos, PDFs, and email. Review purchases by month, keep original documents, and export a CSV. Available on iPhone, Android, and web."
+      ],
+      "h1": [
+        "A receipt tracker app for your freelance business"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/receipt-tracker"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/receipt-organizer",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/receipt-organizer",
+      "title": "Receipt Organizer App for Photos, PDFs & Email | ReceiptNest",
+      "description": [
+        "Organize paper, PDF, and email receipts in one searchable place. Find purchases by merchant or month, keep originals, and export records when you need them."
+      ],
+      "h1": [
+        "A receipt organizer for paper, PDFs, and email"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/receipt-organizer"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/receipt-scanner",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/receipt-scanner",
+      "title": "AI Receipt Scanner for Photos & PDFs | ReceiptNest",
+      "description": [
+        "Turn receipt photos and PDFs into merchant, date, amount, and category records. Review the details, keep the original, and export to CSV."
+      ],
+      "h1": [
+        "Scan receipts from photos and PDFs."
+      ],
+      "canonical": [
+        "https://receipt-nest.com/receipt-scanner"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/receipt-management-software",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/receipt-management-software",
+      "title": "Receipt Management Software for Small Business | ReceiptNest",
+      "description": [
+        "Manage small-business receipts from photos, PDFs, and email. Review AI-extracted details, keep originals, and export a monthly CSV. Start with 50 receipts free."
+      ],
+      "h1": [
+        "Receipt management software for small businesses."
+      ],
+      "canonical": [
+        "https://receipt-nest.com/receipt-management-software"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/expense-tracker",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/expense-tracker",
+      "title": "Receipt-Based Expense Tracker & Monthly Spending | ReceiptNest",
+      "description": [
+        "See the spending behind your receipts. Review merchants, categories, and monthly totals, with original documents available when you need them."
+      ],
+      "h1": [
+        "See your receipt-backed expenses, one month at a time."
+      ],
+      "canonical": [
+        "https://receipt-nest.com/expense-tracker"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/tax-receipt-organizer",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/tax-receipt-organizer",
+      "title": "Tax Receipt Organizer for Freelancers | ReceiptNest",
+      "description": [
+        "Organize tax receipts for your accountant. Save readable originals, review purchases, and see a sample monthly CSV and missing-receipt handoff."
+      ],
+      "h1": [
+        "Organize tax receipts for your accountant."
+      ],
+      "canonical": [
+        "https://receipt-nest.com/tax-receipt-organizer"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/receipt-to-csv",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/receipt-to-csv",
+      "title": "Receipt to CSV: Export Receipts for Excel | ReceiptNest",
+      "description": [
+        "Download a free sample receipt CSV for Excel or Google Sheets, see its columns, and learn how to export your own receipt records with ReceiptNest."
+      ],
+      "h1": [
+        "Turn receipt records into a CSV you can actually inspect."
+      ],
+      "canonical": [
+        "https://receipt-nest.com/receipt-to-csv"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/email-receipt-organizer",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/email-receipt-organizer",
+      "title": "Email Receipt Organizer & Receipt Forwarding | ReceiptNest",
+      "description": [
+        "Forward email receipts to your ReceiptNest address. Keep email purchases, PDF attachments, and photo receipts together in one searchable record."
+      ],
+      "h1": [
+        "Keep email receipts out of the inbox search spiral."
+      ],
+      "canonical": [
+        "https://receipt-nest.com/email-receipt-organizer"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/pricing",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/pricing",
+      "title": "ReceiptNest Pricing \u2014 Free & Pro Receipt Plans",
+      "description": [
+        "Compare ReceiptNest plans: start with up to 50 receipts and CSV export, or choose Pro for unlimited receipts and additional export and insight features."
+      ],
+      "h1": [
+        "Start with a few receipts. Choose more when you need it."
+      ],
+      "canonical": [
+        "https://receipt-nest.com/pricing"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/security",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/security",
+      "title": "How ReceiptNest Handles Your Receipt Data",
+      "description": [
+        "Understand receipt storage, cloud AI processing, account access, exports, and deletion requests before choosing ReceiptNest."
+      ],
+      "h1": [
+        "Understand how your receipt data is handled."
+      ],
+      "canonical": [
+        "https://receipt-nest.com/security"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/about",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/about",
+      "title": "About ReceiptNest \u2014 The Receipt-First Workspace",
+      "description": [
+        "Meet ReceiptNest at receipt-nest.com. Learn what the product does, where it stops, and how to find its official web, iOS, and Android apps."
+      ],
+      "h1": [
+        "ReceiptNest is a receipt-first workspace."
+      ],
+      "canonical": [
+        "https://receipt-nest.com/about"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog",
+      "title": "Receipt Tracking & Organization Guides | ReceiptNest",
+      "description": [
+        "Practical receipt workflows for freelancers: scanning, CSV exports, tax record organization, and clear comparisons of receipt-management approaches."
+      ],
+      "h1": [
+        "Practical guides for your receipts."
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/support",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/support",
+      "title": "ReceiptNest Support \u2014 Receipt Uploads, Exports & Accounts",
+      "description": [
+        "Find help with receipt uploads, email forwarding, CSV exports, and your ReceiptNest account. Contact the support team when you need assistance."
+      ],
+      "h1": [
+        "Support"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/support"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/terms",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/terms",
+      "title": "Terms and Conditions | ReceiptNest",
+      "description": [
+        "Read the Terms and Conditions for using ReceiptNest to capture, organize, review, and export receipt records."
+      ],
+      "h1": [
+        "Terms and Conditions"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/terms"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/organize-receipts-in-gmail",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/organize-receipts-in-gmail",
+      "title": "Organize Receipts in Gmail: Search, Label, and Save | ReceiptNest",
+      "description": [
+        "Find receipt emails in Gmail with copyable searches, label the records you need, keep the originals, and forward selected receipts into one organized place."
+      ],
+      "h1": [
+        "How to Find and Organize Receipt Emails in Gmail"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/organize-receipts-in-gmail"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/receipt-pdfs-to-excel",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/receipt-pdfs-to-excel",
+      "title": "Receipt PDFs to Excel: Build a Monthly Expense Sheet | ReceiptNest",
+      "description": [
+        "Turn receipt PDFs into a checked monthly spreadsheet. Follow a worked example, import the CSV into Excel, avoid double totals, and keep the originals."
+      ],
+      "h1": [
+        "How to Turn Receipt PDFs into a Monthly Excel Expense Sheet"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/receipt-pdfs-to-excel"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/chatgpt-claude-receipt-scanning",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/chatgpt-claude-receipt-scanning",
+      "title": "ChatGPT and Claude for Receipts: Prompt and Checklist | ReceiptNest",
+      "description": [
+        "Use ChatGPT or Claude to read a receipt with a copyable prompt, a checked example, and a comparison of chat, spreadsheets, and a dedicated receipt app."
+      ],
+      "h1": [
+        "Can ChatGPT or Claude Scan Receipts? A Workflow You Can Check"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/chatgpt-claude-receipt-scanning"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/receipt-folder-system",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/receipt-folder-system",
+      "title": "Receipt Folder System: Paper, Digital, and App Options | ReceiptNest",
+      "description": [
+        "Set up a receipt folder system by year and month, name digital files consistently, and keep shared project purchases from being counted twice."
+      ],
+      "h1": [
+        "A Receipt Folder System You Can Find Things In"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/receipt-folder-system"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/track-business-receipts-by-project",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/track-business-receipts-by-project",
+      "title": "Track Business Receipts by Client or Project | ReceiptNest",
+      "description": [
+        "Track business receipts by client or project. Save originals, handle shared purchases, and export one project\u2019s receipt summary when someone asks for it."
+      ],
+      "h1": [
+        "How to Track Business Receipts by Client or Project"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/track-business-receipts-by-project"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/how-to-scan-receipts-for-taxes",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/how-to-scan-receipts-for-taxes",
+      "title": "How to Scan Receipts for Taxes and Keep Digital Copies | ReceiptNest",
+      "description": [
+        "Scan business receipts for taxes with your phone. Use this checklist to capture readable copies, check the details, and keep records your accountant can find."
+      ],
+      "h1": [
+        "How to Scan Receipts for Taxes With Your Phone"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/how-to-scan-receipts-for-taxes"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/do-you-need-receipts-for-taxes",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/do-you-need-receipts-for-taxes",
+      "title": "Do You Need Receipts for Taxes? 8 Myths, Busted | ReceiptNest",
+      "description": [
+        "Do you need receipts for taxes? Eight common receipt myths, checked against IRS guidance: bank statements, card slips, photos, the $75 rule, lost receipts and how long to keep them."
+      ],
+      "h1": [
+        "Do You Need Receipts for Taxes? 8 Receipt Myths, Busted"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/do-you-need-receipts-for-taxes"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/how-long-to-keep-receipts",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/how-long-to-keep-receipts",
+      "title": "How Long to Keep Receipts for Taxes: IRS Rules Explained | ReceiptNest",
+      "description": [
+        "See how long to keep U.S. tax receipts, when the IRS retention clock starts, and which exceptions to check before discarding business records."
+      ],
+      "h1": [
+        "How Long to Keep Receipts for Taxes: The 3-Year Rule, the Exceptions, and When You Can Shred"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/how-long-to-keep-receipts"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/how-to-sort-a-shoebox-of-receipts",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/how-to-sort-a-shoebox-of-receipts",
+      "title": "How to Sort a Shoebox of Receipts (Step-by-Step) | ReceiptNest",
+      "description": [
+        "Behind on receipts? Sort a shoebox or a year-long pile in five steps: triage, sort by month, photograph, match to your statements, and fill the gaps before tax time."
+      ],
+      "h1": [
+        "How to Sort a Shoebox of Receipts: A Step-by-Step Catch-Up Plan"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/how-to-sort-a-shoebox-of-receipts"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/how-to-keep-track-of-receipts",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/how-to-keep-track-of-receipts",
+      "title": "How to Keep Track of Receipts All Year (Simple System) | ReceiptNest",
+      "description": [
+        "A simple system to keep track of receipts all year: capture each one in 10 seconds, keep them in one place, review for 2 minutes a month, and skip the April scramble."
+      ],
+      "h1": [
+        "How to Keep Track of Receipts All Year: The 10-Second, 2-Minutes-a-Month System"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/how-to-keep-track-of-receipts"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/itemized-receipt-vs-credit-card-slip",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/itemized-receipt-vs-credit-card-slip",
+      "title": "Itemized Receipt vs. Credit Card Slip: What Counts? | ReceiptNest",
+      "description": [
+        "A card slip proves you paid; an itemized receipt shows what you bought. See what each one shows, what the IRS expects, and how to get an itemized copy later."
+      ],
+      "h1": [
+        "Itemized Receipt vs. Credit Card Slip: Which One Proves a Business Expense?"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/itemized-receipt-vs-credit-card-slip"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/why-do-receipts-fade",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/why-do-receipts-fade",
+      "title": "Why Do Receipts Fade? How to Keep Them Readable | ReceiptNest",
+      "description": [
+        "Most receipts are thermal paper with no ink. Learn what makes them fade, how long they last, how to store them, and what to do when a receipt is already blank."
+      ],
+      "h1": [
+        "Why Do Receipts Fade? How to Keep Thermal Receipts Readable (and What to Do When One Is Already Blank)"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/why-do-receipts-fade"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/organize-receipts-for-accountant",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/organize-receipts-for-accountant",
+      "title": "How to Organize Receipts for Your Accountant | ReceiptNest",
+      "description": [
+        "What to send when your accountant asks for receipts: a six-step freelancer handoff checklist, a sample CSV, and a simple way to flag missing records."
+      ],
+      "h1": [
+        "How to Organize Receipts for Your Accountant: A Freelancer's Handoff Checklist"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/organize-receipts-for-accountant"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/the-last-mile",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/the-last-mile",
+      "title": "The Last Mile: Why Most People Never Become Great | ReceiptNest",
+      "description": [
+        "Why do a select few capture nearly all the upside? The last mile between competence and greatness begins with devotion\u2014and ends with clarity."
+      ],
+      "h1": [
+        "The Last Mile: Why Most People Never Become Great"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/the-last-mile"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/digitization-business-clarity-compounds",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/digitization-business-clarity-compounds",
+      "title": "Why Digitization Is Really About Business Clarity | ReceiptNest",
+      "description": [
+        "Digitization does more than save time. It makes business spending visible, traceable, and easier to act on\u2014and that financial clarity compounds."
+      ],
+      "h1": [
+        "Digitization Was Never Just About Speed. It Was About Clarity. And Clarity Compounds."
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/digitization-business-clarity-compounds"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/can-bank-statements-replace-receipts",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/can-bank-statements-replace-receipts",
+      "title": "Can Bank Statements Replace Receipts? U.S. Tax Guide | ReceiptNest",
+      "description": [
+        "A bank statement can show payment. Learn how to recover a lost business receipt, document what is missing, and prepare your records for your accountant."
+      ],
+      "h1": [
+        "Can Bank Statements Replace Receipts for Taxes?"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/can-bank-statements-replace-receipts"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/receipt-tracking-delivery-drivers",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/receipt-tracking-delivery-drivers",
+      "title": "Receipt Tracking for DoorDash and Uber Eats Drivers | ReceiptNest",
+      "description": [
+        "Learn what receipts, payout statements, and mileage records to save for DoorDash, Uber Eats, Instacart, and other independent delivery work."
+      ],
+      "h1": [
+        "Receipt Tracking for Delivery Drivers: What to Save for Taxes"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/receipt-tracking-delivery-drivers"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/receiptnest-vs-expensify",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/receiptnest-vs-expensify",
+      "title": "ReceiptNest vs Expensify for Freelancers | ReceiptNest",
+      "description": [
+        "Compare ReceiptNest and Expensify for freelancers, including free receipt scanning, CSV exports, plan limits, and when a team expense platform fits."
+      ],
+      "h1": [
+        "ReceiptNest vs Expensify: Which Receipt App Is Right for Freelancers in 2026?"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/receiptnest-vs-expensify"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/organize-receipts-taxes-freelancer-guide",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/organize-receipts-taxes-freelancer-guide",
+      "title": "How to Organize Receipts for Taxes as a Freelancer | ReceiptNest",
+      "description": [
+        "Learn how to organize receipts for taxes as a self-employed freelancer, including retention rules, categories, digital receipts, and a monthly system."
+      ],
+      "h1": [
+        "How to Organize Receipts for Taxes as a 1099 Freelancer"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/organize-receipts-taxes-freelancer-guide"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/receipt-tracking-etsy-sellers",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/receipt-tracking-etsy-sellers",
+      "title": "Receipt Tracking for Etsy Sellers | ReceiptNest",
+      "description": [
+        "A receipt routine for Etsy sellers: preserve supply and shipping records, reconcile marketplace reports, and prepare organized records for tax review."
+      ],
+      "h1": [
+        "Receipt Tracking for Etsy Sellers: Records to Keep and a Monthly Routine"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/receipt-tracking-etsy-sellers"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/scan-receipts-automatically",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/scan-receipts-automatically",
+      "title": "How to Scan Receipts Automatically | ReceiptNest",
+      "description": [
+        "Learn how to scan receipts automatically with photos, email forwarding, PDF upload, OCR, AI extraction, categories, and export-ready records."
+      ],
+      "h1": [
+        "How to Scan and Digitize Receipts: Capture, Review, and Export"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/scan-receipts-automatically"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/blog/where-does-my-money-go",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/blog/where-does-my-money-go",
+      "title": "Where Does My Money Go Every Month? | ReceiptNest",
+      "description": [
+        "Wondering where your money goes every month? Learn a visibility-first system for spending clarity without starting with a strict budget."
+      ],
+      "h1": [
+        "Where Does My Money Go? How to Finally See Your Spending Clearly (Without a Budget)"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/blog/where-does-my-money-go"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/games",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/games",
+      "title": "Receipt Games: Free Browser Games About Receipts | ReceiptNest",
+      "description": [
+        "Quick, free browser games about receipts from ReceiptNest. Decode cryptic bank charges, file a shoebox of receipts by month, or read a total before it fades."
+      ],
+      "h1": [
+        "Receipt games"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/games"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/games/pile-3d",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/games/pile-3d",
+      "title": "The Pile in 3D: How Many Receipts Before the Glass Breaks? | ReceiptNest",
+      "description": [
+        "A ball of receipts bounces inside a glass sphere, one more receipt every bounce. Tap to snap each one before the glass gives out. Then learn to take receipt photos that hold up."
+      ],
+      "h1": [
+        "The pile"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/games/pile-3d"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/games/escape-3d",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/games/escape-3d",
+      "title": "Escape the Year in 3D: Can the Receipt Break 365 Spheres? | ReceiptNest",
+      "description": [
+        "365 glass spheres, one for every day of the year. Watch a receipt break through them before the tax-day clock runs out, or help it. Then plan the last 100 days before tax day."
+      ],
+      "h1": [
+        "Escape the year"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/games/escape-3d"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/games/sorted-by-luck",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/games/sorted-by-luck",
+      "title": "Sorted by Luck: Which Month Wins the Receipt Plinko? | ReceiptNest",
+      "description": [
+        "365 receipts drop through a Plinko board into 12 month bins. Call the month with the most and the fewest. Then learn how to sort receipts by month for real."
+      ],
+      "h1": [
+        "Sorted by luck"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/games/sorted-by-luck"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/games/fade-out",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/games/fade-out",
+      "title": "Fade Out: Save the Receipt Before the Ink Fades | ReceiptNest",
+      "description": [
+        "Every receipt has 4 seconds before its print fades. Nudge it out of the ring in time, set to The Entertainer. Then learn why receipts fade and how to keep them."
+      ],
+      "h1": [
+        "Fade out"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/games/fade-out"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/games/snap-vs-pile",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/games/snap-vs-pile",
+      "title": "Snap vs Pile: Can the Phone Clear the Box? | ReceiptNest",
+      "description": [
+        "Yellow snaps receipts, red adds them, and whoever leads grows. Watch the duel or take control of yellow, set to the Turkish March. Then learn to beat a backlog."
+      ],
+      "h1": [
+        "Snap vs pile"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/games/snap-vs-pile"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/games/pile",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/games/pile",
+      "title": "The Pile: How Many Receipts Before the Box Bursts? | ReceiptNest",
+      "description": [
+        "Every bounce adds a receipt to the pile. Tap to snap each one before the box gives out, all set to the Can-Can. Then learn how to stop receipts piling up."
+      ],
+      "h1": [
+        "The pile"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/games/pile"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/games/escape",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/games/escape",
+      "title": "Escape the Year: Can the Receipt Beat Tax Day? | ReceiptNest",
+      "description": [
+        "365 rings, one for every day of the year. Watch a receipt bounce through them before the tax-day clock runs out, or help it escape. Then learn how to keep a year of receipts."
+      ],
+      "h1": [
+        "Escape the year"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/games/escape"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/games/charge",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/games/charge",
+      "title": "What Is This Charge on My Statement? Guess the Charge | ReceiptNest",
+      "description": [
+        "SQ*, TST*, AMZN Mktp, APPLE.COM/BILL: decode cryptic bank statement charges in a fast, free game. Then learn how to identify any unknown charge."
+      ],
+      "h1": [
+        "Guess the charge"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/games/charge"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/games/shoebox",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/games/shoebox",
+      "title": "Shoebox Sort: The Receipt Sorting Game | ReceiptNest",
+      "description": [
+        "Receipts are raining. File each one in the right month before the shoebox fills up. Then learn a simple system for sorting receipts by month for taxes."
+      ],
+      "h1": [
+        "Shoebox sort"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/games/shoebox"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/games/fade",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/games/fade",
+      "title": "Why Do Receipts Fade? Play Before It Fades | ReceiptNest",
+      "description": [
+        "Read the total before the receipt fades. Every round gets faster. Then learn why thermal receipts fade, how long they last, and how to keep them readable."
+      ],
+      "h1": [
+        "Before it fades"
+      ],
+      "canonical": [
+        "https://receipt-nest.com/games/fade"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    },
+    {
+      "url": "https://receipt-nest.com/statement-decoder",
+      "status": 200,
+      "finalUrl": "https://receipt-nest.com/statement-decoder",
+      "title": "Bank Statement Decoder: Find Missing Receipts | ReceiptNest",
+      "description": [
+        "Coming soon from ReceiptNest: upload a bank statement, see who charged you and the likely category, and which charges have no receipt saved yet."
+      ],
+      "h1": [
+        "Your bank statement, decoded."
+      ],
+      "canonical": [
+        "https://receipt-nest.com/statement-decoder"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "issues": []
+    }
+  ]
+}
